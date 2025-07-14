@@ -63,7 +63,7 @@ class sqlite_utils
     {
         if (name.size() > 0)
         {
-            const char first = name[0];
+            char const first = name[0];
             if (is_quote_char(first))
             {
                 return false;
@@ -76,7 +76,7 @@ class sqlite_utils
         return false;
     }
 
-    static bool is_quote_char(const char z)
+    static bool is_quote_char(char const z)
     {
         if (z == '"' || z == '\'' || z == '[' || z == '`')
         {
@@ -158,16 +158,16 @@ class sqlite_utils
             << " ORDER BY 1";
         // clang-format on
         sqlite3_stmt* stmt = 0;
-        const int rc = sqlite3_prepare_v2(*(*ds), sql.str().c_str(), -1, &stmt, 0);
+        int const rc = sqlite3_prepare_v2(*(*ds), sql.str().c_str(), -1, &stmt, 0);
         if (rc == SQLITE_OK)
         {
             std::shared_ptr<sqlite_resultset> rs = std::make_shared<sqlite_resultset>(stmt);
             while (rs->is_valid() && rs->step_next())
             {
-                const int type_oid = rs->column_type(0);
+                int const type_oid = rs->column_type(0);
                 if (type_oid == SQLITE_TEXT)
                 {
-                    const char* data = rs->column_text(0);
+                    char const* data = rs->column_text(0);
                     if (data)
                     {
                         tables.push_back(std::string(data));
@@ -183,7 +183,7 @@ class sqlite_utils
         while (rs->is_valid() && rs->step_next())
         {
             int size;
-            const char* data = static_cast<const char*>(rs->column_blob(0, size));
+            char const* data = static_cast<char const*>(rs->column_blob(0, size));
             if (data)
             {
                 mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
@@ -262,7 +262,7 @@ class sqlite_utils
             while (rs->is_valid() && rs->step_next())
             {
                 int size;
-                const char* data = (const char*)rs->column_blob(0, size);
+                char const* data = (char const*)rs->column_blob(0, size);
                 if (data)
                 {
                     mapnik::geometry::geometry<double> geom =
@@ -273,7 +273,7 @@ class sqlite_utils
                         if (bbox.valid())
                         {
                             ps.bind(bbox);
-                            const int type_oid = rs->column_type(1);
+                            int const type_oid = rs->column_type(1);
                             if (type_oid != SQLITE_INTEGER)
                             {
                                 std::ostringstream error_msg;
@@ -282,7 +282,7 @@ class sqlite_utils
                                           << "";
                                 throw mapnik::datasource_exception(error_msg.str());
                             }
-                            const sqlite_int64 pkid = rs->column_integer64(1);
+                            sqlite_int64 const pkid = rs->column_integer64(1);
                             ps.bind(pkid);
                         }
                         else
@@ -340,7 +340,7 @@ class sqlite_utils
         while (rs->is_valid() && rs->step_next())
         {
             int size;
-            const char* data = static_cast<const char*>(rs->column_blob(0, size));
+            char const* data = static_cast<char const*>(rs->column_blob(0, size));
             if (data)
             {
                 mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_wkb(data, size, mapnik::wkbAuto);
@@ -349,7 +349,7 @@ class sqlite_utils
                     mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
                     if (bbox.valid())
                     {
-                        const int type_oid = rs->column_type(1);
+                        int const type_oid = rs->column_type(1);
                         if (type_oid != SQLITE_INTEGER)
                         {
                             std::ostringstream error_msg;
@@ -357,7 +357,7 @@ class sqlite_utils
                                       << "' when creating index " << "type was: " << type_oid << "";
                             throw mapnik::datasource_exception(error_msg.str());
                         }
-                        const sqlite_int64 pkid = rs->column_integer64(1);
+                        sqlite_int64 const pkid = rs->column_integer64(1);
                         rtree_type entry = rtree_type();
                         entry.pkid = pkid;
                         entry.bbox = bbox;
@@ -545,8 +545,8 @@ class sqlite_utils
             for (int i = 0; i < rs->column_count(); ++i)
             {
                 found = true;
-                const int type_oid = rs->column_type(i);
-                const char* fld_name = rs->column_name(i);
+                int const type_oid = rs->column_type(i);
+                char const* fld_name = rs->column_name(i);
                 switch (type_oid)
                 {
                     case SQLITE_INTEGER:
@@ -607,7 +607,7 @@ class sqlite_utils
         while (rs->is_valid() && rs->step_next())
         {
             found_table = true;
-            const char* fld_name = rs->column_text(1);
+            char const* fld_name = rs->column_text(1);
             std::string fld_type(rs->column_text(2));
             sqlite_int64 fld_pk = rs->column_integer64(5);
             std::transform(fld_type.begin(), fld_type.end(), fld_type.begin(), ::tolower);

@@ -66,9 +66,9 @@ class sqlite_connection
             mode |= SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
         }
 #endif
-        const int rc = sqlite3_open_v2(file_.c_str(), &db_, mode, 0);
+        int const rc = sqlite3_open_v2(file_.c_str(), &db_, mode, 0);
 #else
-        const int rc = sqlite3_open(file_.c_str(), &db_);
+        int const rc = sqlite3_open(file_.c_str(), &db_);
 #endif
         if (rc != SQLITE_OK)
         {
@@ -86,9 +86,9 @@ class sqlite_connection
           file_(file)
     {
 #if SQLITE_VERSION_NUMBER >= 3005000
-        const int rc = sqlite3_open_v2(file_.c_str(), &db_, flags, 0);
+        int const rc = sqlite3_open_v2(file_.c_str(), &db_, flags, 0);
 #else
-        const int rc = sqlite3_open(file_.c_str(), &db_);
+        int const rc = sqlite3_open(file_.c_str(), &db_);
 #endif
         if (rc != SQLITE_OK)
         {
@@ -127,7 +127,7 @@ class sqlite_connection
 #endif
         sqlite3_stmt* stmt = 0;
 
-        const int rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, 0);
+        int const rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, 0);
         if (rc != SQLITE_OK)
         {
             throw_sqlite_error(sql);
@@ -142,7 +142,7 @@ class sqlite_connection
         mapnik::progress_timer __stats__(std::clog, std::string("sqlite_resultset::execute ") + sql);
 #endif
 
-        const int rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
+        int const rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
         if (rc != SQLITE_OK)
         {
             throw_sqlite_error(sql);
@@ -155,7 +155,7 @@ class sqlite_connection
         mapnik::progress_timer __stats__(std::clog, std::string("sqlite_resultset::execute_with_code ") + sql);
 #endif
 
-        const int rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
+        int const rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
         return rc;
     }
 

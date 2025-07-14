@@ -70,7 +70,7 @@ class mbtiles_source : public tiles_source
         result = dataset_->execute_query("SELECT value FROM metadata WHERE name = 'bounds';");
         if (result->is_valid() && result->step_next() && result->column_type(0) == SQLITE_TEXT)
         {
-            const std::string extent_str = result->column_text(0);
+            std::string const extent_str = result->column_text(0);
             if (extent_str.empty())
             {
                 throw mapnik::datasource_exception("MBTiles Plugin: " + database_path_ + " has invalid extent.");

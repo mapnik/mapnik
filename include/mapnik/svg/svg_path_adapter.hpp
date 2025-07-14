@@ -101,7 +101,7 @@ class path_adapter : util::noncopyable
 
     // Accessors
     //--------------------------------------------------------------------
-    const container_type& vertices() const { return vertices_; }
+    container_type const& vertices() const { return vertices_; }
     container_type& vertices() { return vertices_; }
 
     std::size_t total_vertices() const;
@@ -208,7 +208,7 @@ class path_adapter : util::noncopyable
 
     //--------------------------------------------------------------------
     template<class Trans>
-    void transform(const Trans& trans, unsigned path_id = 0)
+    void transform(Trans const& trans, unsigned path_id = 0)
     {
         unsigned num_ver = vertices_.total_vertices();
         for (; path_id < num_ver; path_id++)
@@ -227,7 +227,7 @@ class path_adapter : util::noncopyable
 
     //--------------------------------------------------------------------
     template<class Trans>
-    void transform_all_paths(const Trans& trans)
+    void transform_all_paths(Trans const& trans)
     {
         unsigned idx;
         unsigned num_ver = vertices_.total_vertices();
@@ -355,7 +355,7 @@ void path_adapter<VC>::arc_to(double rx,
 {
     if (vertices_.total_vertices() && is_vertex(vertices_.last_command()))
     {
-        const double epsilon = 1e-30;
+        double const epsilon = 1e-30;
         double x0 = 0.0;
         double y0 = 0.0;
         vertices_.last_vertex(&x0, &y0);
@@ -899,7 +899,7 @@ class vertex_stl_adapter : util::noncopyable
 
     unsigned vertex(unsigned idx, double* x, double* y) const
     {
-        const vertex_type& v = vertices_[idx];
+        vertex_type const& v = vertices_[idx];
         *x = v.x;
         *y = v.y;
         return v.cmd;

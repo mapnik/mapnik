@@ -86,7 +86,7 @@ inline bool read_data_internal(Ignored*, FILE* fp, void* data, size_t length)
 }
 
 template<typename Ignored>
-inline bool write_data_internal(Ignored*, FILE* fp, const void* data, size_t length)
+inline bool write_data_internal(Ignored*, FILE* fp, void const* data, size_t length)
 {
     return fwrite(data, length, 1, fp) == 1;
 }
@@ -109,12 +109,12 @@ inline bool read_data_internal(Ignored*, std::istream* fp, void* data, size_t le
 }
 
 template<typename OSTREAM>
-inline bool write_data_internal_for_ostream(OSTREAM* fp, const void* data, size_t length)
+inline bool write_data_internal_for_ostream(OSTREAM* fp, void const* data, size_t length)
 {
-    return fp->write(reinterpret_cast<const char*>(data), length).good();
+    return fp->write(reinterpret_cast<char const*>(data), length).good();
 }
 template<typename Ignored>
-inline bool write_data_internal(Ignored*, std::ostream* fp, const void* data, size_t length)
+inline bool write_data_internal(Ignored*, std::ostream* fp, void const* data, size_t length)
 {
     return write_data_internal_for_ostream(fp, data, length);
 }
@@ -132,7 +132,7 @@ inline bool read_data_internal(INPUT* fp, void*, void* data, size_t length)
 // The OUTPUT type needs to support a Write() operation that takes
 // a buffer and a length and returns the number of bytes written.
 template<typename OUTPUT>
-inline bool write_data_internal(OUTPUT* fp, void*, const void* data, size_t length)
+inline bool write_data_internal(OUTPUT* fp, void*, void const* data, size_t length)
 {
     return static_cast<size_t>(fp->Write(data, length)) == length;
 }
@@ -146,7 +146,7 @@ inline bool read_data(INPUT* fp, void* data, size_t length)
 }
 
 template<typename OUTPUT>
-inline bool write_data(OUTPUT* fp, const void* data, size_t length)
+inline bool write_data(OUTPUT* fp, void const* data, size_t length)
 {
     return write_data_internal(fp, fp, data, length);
 }
@@ -199,7 +199,7 @@ struct pod_serializer
     }
 
     template<typename OUTPUT>
-    bool operator()(OUTPUT* fp, const value_type& value) const
+    bool operator()(OUTPUT* fp, value_type const& value) const
     {
         return write_data(fp, &value, sizeof(value));
     }
@@ -226,7 +226,7 @@ class sh_hashtable_settings : public HashFunc
     typedef SizeType size_type;
 
   public:
-    sh_hashtable_settings(const hasher& hf, const float ht_occupancy_flt, const float ht_empty_flt)
+    sh_hashtable_settings(hasher const& hf, float const ht_occupancy_flt, float const ht_empty_flt)
         : hasher(hf),
           enlarge_threshold_(0),
           shrink_threshold_(0),
@@ -239,7 +239,7 @@ class sh_hashtable_settings : public HashFunc
         set_shrink_factor(ht_empty_flt);
     }
 
-    size_type hash(const key_type& v) const
+    size_type hash(key_type const& v) const
     {
         // We munge the hash value when we don't trust hasher::operator().
         return hash_munger<Key>::MungedHash(hasher::operator()(v));

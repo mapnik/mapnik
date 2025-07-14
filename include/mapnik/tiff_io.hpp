@@ -56,7 +56,7 @@ static inline tsize_t tiff_write_proc(thandle_t fd, tdata_t buf, tsize_t size)
     std::streamsize request_size = size;
     if (static_cast<tsize_t>(request_size) != size)
         return static_cast<tsize_t>(-1);
-    out->write(reinterpret_cast<const char*>(buf), size);
+    out->write(reinterpret_cast<char const*>(buf), size);
 
     if (static_cast<std::streamsize>(pos) == -1)
     {
@@ -376,8 +376,8 @@ void save_as_tiff(T1& file, T2 const& image, tiff_config const& config)
 {
     using pixel_type = typename T2::pixel_type;
 
-    const int width = image.width();
-    const int height = image.height();
+    int const width = image.width();
+    int const height = image.height();
 
     TIFF* output = RealTIFFOpen("mapnik_tiff_stream",
                                 "wm",

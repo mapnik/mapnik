@@ -33,77 +33,77 @@ namespace mapnik {
 namespace tags {
 struct negate
 {
-    static const char* str() { return "-"; }
+    static char const* str() { return "-"; }
 };
 
 struct plus
 {
-    static const char* str() { return "+"; }
+    static char const* str() { return "+"; }
 };
 
 struct minus
 {
-    static const char* str() { return "-"; }
+    static char const* str() { return "-"; }
 };
 
 struct mult
 {
-    static const char* str() { return "*"; }
+    static char const* str() { return "*"; }
 };
 
 struct div
 {
-    static const char* str() { return "/"; }
+    static char const* str() { return "/"; }
 };
 
 struct mod
 {
-    static const char* str() { return "%"; }
+    static char const* str() { return "%"; }
 };
 
 struct less
 {
-    static const char* str() { return "<"; }
+    static char const* str() { return "<"; }
 };
 
 struct less_equal
 {
-    static const char* str() { return "<="; }
+    static char const* str() { return "<="; }
 };
 
 struct greater
 {
-    static const char* str() { return ">"; }
+    static char const* str() { return ">"; }
 };
 
 struct greater_equal
 {
-    static const char* str() { return ">="; }
+    static char const* str() { return ">="; }
 };
 
 struct equal_to
 {
-    static const char* str() { return "="; }
+    static char const* str() { return "="; }
 };
 
 struct not_equal_to
 {
-    static const char* str() { return "!="; }
+    static char const* str() { return "!="; }
 };
 
 struct logical_not
 {
-    static const char* str() { return "not "; }
+    static char const* str() { return "not "; }
 };
 
 struct logical_and
 {
-    static const char* str() { return " and "; }
+    static char const* str() { return " and "; }
 };
 
 struct logical_or
 {
-    static const char* str() { return " or "; }
+    static char const* str() { return " or "; }
 };
 
 } // namespace tags

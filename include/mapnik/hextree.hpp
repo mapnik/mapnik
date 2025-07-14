@@ -38,9 +38,9 @@ namespace mapnik {
 
 struct RGBAPolicy
 {
-    const static unsigned MAX_LEVELS = 6;
-    const static unsigned MIN_ALPHA = 5;
-    const static unsigned MAX_ALPHA = 250;
+    static unsigned const MAX_LEVELS = 6;
+    static unsigned const MIN_ALPHA = 5;
+    static unsigned const MAX_ALPHA = 250;
     inline static unsigned index_from_level(unsigned level, rgba const& c)
     {
         unsigned shift = 7 - level;
@@ -99,7 +99,7 @@ class hextree : private util::noncopyable
     // highest reduce_cost first
     struct node_rev_cmp
     {
-        bool operator()(const node* lhs, const node* rhs) const
+        bool operator()(node const* lhs, node const* rhs) const
         {
             if (lhs->reduce_cost != rhs->reduce_cost)
             {
@@ -113,7 +113,7 @@ class hextree : private util::noncopyable
     unsigned colors_;
     // flag indicating existance of invisible pixels (a < InsertPolicy::MIN_ALPHA)
     bool has_holes_;
-    const std::unique_ptr<node> root_;
+    std::unique_ptr<node> const root_;
     // working palette for quantization, sorted on mean(r,g,b,a) for easier searching NN
     std::vector<rgba> sorted_pal_;
     // index remaping of sorted_pal_ indexes to indexes of returned image palette

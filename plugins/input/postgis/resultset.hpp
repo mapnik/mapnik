@@ -35,14 +35,14 @@ class IResultSet
     virtual void close() = 0;
     virtual int getNumFields() const = 0;
     virtual bool next() = 0;
-    virtual const char* getFieldName(int index) const = 0;
+    virtual char const* getFieldName(int index) const = 0;
     virtual int getFieldLength(int index) const = 0;
-    virtual int getFieldLength(const char* name) const = 0;
+    virtual int getFieldLength(char const* name) const = 0;
     virtual int getTypeOID(int index) const = 0;
-    virtual int getTypeOID(const char* name) const = 0;
+    virtual int getTypeOID(char const* name) const = 0;
     virtual bool isNull(int index) const = 0;
-    virtual const char* getValue(int index) const = 0;
-    virtual const char* getValue(const char* name) const = 0;
+    virtual char const* getValue(int index) const = 0;
+    virtual char const* getValue(char const* name) const = 0;
 };
 
 class ResultSet : public IResultSet,
@@ -72,11 +72,11 @@ class ResultSet : public IResultSet,
 
     virtual bool next() { return (++pos_ < numTuples_); }
 
-    virtual const char* getFieldName(int index) const { return PQfname(res_, index); }
+    virtual char const* getFieldName(int index) const { return PQfname(res_, index); }
 
     virtual int getFieldLength(int index) const { return PQgetlength(res_, pos_, index); }
 
-    virtual int getFieldLength(const char* name) const
+    virtual int getFieldLength(char const* name) const
     {
         int col = PQfnumber(res_, name);
         if (col >= 0)
@@ -88,7 +88,7 @@ class ResultSet : public IResultSet,
 
     virtual int getTypeOID(int index) const { return PQftype(res_, index); }
 
-    virtual int getTypeOID(const char* name) const
+    virtual int getTypeOID(char const* name) const
     {
         int col = PQfnumber(res_, name);
         if (col >= 0)
@@ -100,9 +100,9 @@ class ResultSet : public IResultSet,
 
     virtual bool isNull(int index) const { return static_cast<bool>(PQgetisnull(res_, pos_, index)); }
 
-    virtual const char* getValue(int index) const { return PQgetvalue(res_, pos_, index); }
+    virtual char const* getValue(int index) const { return PQgetvalue(res_, pos_, index); }
 
-    virtual const char* getValue(const char* name) const
+    virtual char const* getValue(char const* name) const
     {
         int col = PQfnumber(res_, name);
         if (col >= 0)

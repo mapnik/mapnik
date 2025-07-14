@@ -20,7 +20,7 @@ mapped_memory_file::mapped_memory_file(std::string const& file_name)
 #endif
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    const auto memory = mapnik::mapped_memory_cache::instance().find(file_name, true);
+    auto const memory = mapnik::mapped_memory_cache::instance().find(file_name, true);
 
     if (memory.has_value())
     {

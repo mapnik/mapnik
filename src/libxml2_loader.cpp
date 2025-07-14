@@ -55,7 +55,7 @@ namespace mapnik {
 class libxml2_loader : util::noncopyable
 {
   public:
-    libxml2_loader(const char* encoding = nullptr, int options = DEFAULT_OPTIONS, const char* url = nullptr)
+    libxml2_loader(char const* encoding = nullptr, int options = DEFAULT_OPTIONS, char const* url = nullptr)
         : ctx_(0),
           encoding_(encoding),
           options_(options),
@@ -88,7 +88,7 @@ class libxml2_loader : util::noncopyable
 
         if (!doc)
         {
-            const xmlError* error = xmlCtxtGetLastError(ctx_);
+            xmlError const* error = xmlCtxtGetLastError(ctx_);
             if (error)
             {
                 std::string msg("XML document not well formed:\n");
@@ -101,7 +101,7 @@ class libxml2_loader : util::noncopyable
         load(doc, node);
     }
 
-    void load(const int fd, xml_node& node)
+    void load(int const fd, xml_node& node)
     {
         xmlDocPtr doc = xmlCtxtReadFd(ctx_, fd, url_, encoding_, options_);
         load(doc, node);
@@ -123,12 +123,12 @@ class libxml2_loader : util::noncopyable
         load(doc, node);
     }
 
-    void load(const xmlDocPtr doc, xml_node& node)
+    void load(xmlDocPtr const doc, xml_node& node)
     {
         if (!doc)
         {
             std::string msg("XML document not well formed");
-            const xmlError* error = xmlCtxtGetLastError(ctx_);
+            xmlError const* error = xmlCtxtGetLastError(ctx_);
             if (error)
             {
                 msg += ":\n";
@@ -165,8 +165,8 @@ class libxml2_loader : util::noncopyable
     {
         for (; attributes; attributes = attributes->next)
         {
-            node.add_attribute(reinterpret_cast<const char*>(attributes->name),
-                               reinterpret_cast<const char*>(attributes->children->content));
+            node.add_attribute(reinterpret_cast<char const*>(attributes->name),
+                               reinterpret_cast<char const*>(attributes->children->content));
         }
     }
 
@@ -178,13 +178,13 @@ class libxml2_loader : util::noncopyable
             {
                 case XML_ELEMENT_NODE: {
                     xml_node& new_node =
-                      node.add_child(reinterpret_cast<const char*>(cur_node->name), cur_node->line, false);
+                      node.add_child(reinterpret_cast<char const*>(cur_node->name), cur_node->line, false);
                     append_attributes(cur_node->properties, new_node);
                     populate_tree(cur_node->children, new_node);
                 }
                 break;
                 case XML_TEXT_NODE: {
-                    std::string trimmed(reinterpret_cast<const char*>(cur_node->content));
+                    std::string trimmed(reinterpret_cast<char const*>(cur_node->content));
                     mapnik::util::trim(trimmed);
                     if (trimmed.empty())
                         break; // Don't add empty text nodes
@@ -200,9 +200,9 @@ class libxml2_loader : util::noncopyable
     }
 
     xmlParserCtxtPtr ctx_;
-    const char* encoding_;
+    char const* encoding_;
     int options_;
-    const char* url_;
+    char const* url_;
 };
 
 void read_xml(std::string const& filename, xml_node& node)

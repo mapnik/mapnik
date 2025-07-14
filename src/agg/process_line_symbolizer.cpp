@@ -56,7 +56,7 @@ namespace mapnik {
 template<typename Symbolizer, typename Rasterizer, typename Feature>
 void set_join_caps_aa(Symbolizer const& sym, Rasterizer& ras, Feature& feature, attributes const& vars)
 {
-    const line_join_enum join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, vars);
+    line_join_enum const join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, vars);
     switch (join)
     {
         case line_join_enum::MITER_JOIN:
@@ -72,7 +72,7 @@ void set_join_caps_aa(Symbolizer const& sym, Rasterizer& ras, Feature& feature, 
             ras.line_join(agg::outline_no_join);
     }
 
-    const line_cap_enum cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, vars);
+    line_cap_enum const cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, vars);
     switch (cap)
     {
         case line_cap_enum::BUTT_CAP:
@@ -93,10 +93,10 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
 
 {
     color const& col = get<color, keys::stroke>(sym, feature, common_.vars_);
-    const unsigned r = col.red();
-    const unsigned g = col.green();
-    const unsigned b = col.blue();
-    const unsigned a = col.alpha();
+    unsigned const r = col.red();
+    unsigned const g = col.green();
+    unsigned const b = col.blue();
+    unsigned const a = col.alpha();
 
     double gamma = get<value_double, keys::stroke_gamma>(sym, feature, common_.vars_);
     gamma_method_enum gamma_method = get<gamma_method_enum, keys::stroke_gamma_method>(sym, feature, common_.vars_);
@@ -132,13 +132,13 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
 
     box2d<double> clip_box = clipping_extent(common_);
 
-    const value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
-    const value_double width = get<value_double, keys::stroke_width>(sym, feature, common_.vars_);
-    const value_double opacity = get<value_double, keys::stroke_opacity>(sym, feature, common_.vars_);
-    const value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
-    const value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
-    const value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
-    const line_rasterizer_enum rasterizer_e =
+    value_bool const clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
+    value_double const width = get<value_double, keys::stroke_width>(sym, feature, common_.vars_);
+    value_double const opacity = get<value_double, keys::stroke_opacity>(sym, feature, common_.vars_);
+    value_double const offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
+    value_double const simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
+    value_double const smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
+    line_rasterizer_enum const rasterizer_e =
       get<line_rasterizer_enum, keys::line_rasterizer>(sym, feature, common_.vars_);
     if (clip)
     {

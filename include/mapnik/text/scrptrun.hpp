@@ -49,15 +49,15 @@ class MAPNIK_DECL ScriptRun : public icu::UObject
   public:
     ScriptRun();
 
-    ScriptRun(const UChar chars[], int32_t length);
+    ScriptRun(UChar const chars[], int32_t length);
 
-    ScriptRun(const UChar chars[], int32_t start, int32_t length);
+    ScriptRun(UChar const chars[], int32_t start, int32_t length);
 
     void reset();
 
     void reset(int32_t start, int32_t count);
 
-    void reset(const UChar chars[], int32_t start, int32_t length);
+    void reset(UChar const chars[], int32_t start, int32_t length);
 
     int32_t getScriptStart();
 
@@ -87,7 +87,7 @@ class MAPNIK_DECL ScriptRun : public icu::UObject
 
     int32_t charStart;
     int32_t charLimit;
-    const UChar* charArray;
+    UChar const* charArray;
 
     int32_t scriptStart;
     int32_t scriptEnd;
@@ -100,17 +100,17 @@ class MAPNIK_DECL ScriptRun : public icu::UObject
     static int32_t getPairIndex(UChar32 ch);
 
     static UChar32 pairedChars[];
-    static const int32_t pairedCharCount;
-    static const int32_t pairedCharPower;
-    static const int32_t pairedCharExtra;
+    static int32_t const pairedCharCount;
+    static int32_t const pairedCharPower;
+    static int32_t const pairedCharExtra;
 
     /**
      * The address of this static class variable serves as this class's ID
      * for ICU "poor man's RTTI".
      */
-    static const char fgClassID;
+    static char const fgClassID;
     // initial stack size
-    const unsigned int STACK_SIZE = 1 << 4; // 2^n
+    unsigned int const STACK_SIZE = 1 << 4; // 2^n
 };
 
 inline ScriptRun::ScriptRun()
@@ -119,13 +119,13 @@ inline ScriptRun::ScriptRun()
     reset(nullptr, 0, 0);
 }
 
-inline ScriptRun::ScriptRun(const UChar chars[], int32_t length)
+inline ScriptRun::ScriptRun(UChar const chars[], int32_t length)
 {
     parenStack.reserve(STACK_SIZE);
     reset(chars, 0, length);
 }
 
-inline ScriptRun::ScriptRun(const UChar chars[], int32_t start, int32_t length)
+inline ScriptRun::ScriptRun(UChar const chars[], int32_t start, int32_t length)
 {
     parenStack.reserve(STACK_SIZE);
     reset(chars, start, length);
@@ -162,7 +162,7 @@ inline void ScriptRun::reset(int32_t start, int32_t length)
     reset();
 }
 
-inline void ScriptRun::reset(const UChar chars[], int32_t start, int32_t length)
+inline void ScriptRun::reset(UChar const chars[], int32_t start, int32_t length)
 {
     charArray = chars;
 

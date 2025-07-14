@@ -158,10 +158,10 @@ struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
 
 namespace {
 
-const auto assign_name = [](auto const& ctx) {
+auto const assign_name = [](auto const& ctx) {
     std::get<0>(_val(ctx)) = std::move(_attr(ctx));
 };
-const auto assign_value = [](auto const& ctx) {
+auto const assign_value = [](auto const& ctx) {
     std::get<1>(_val(ctx)) = std::move(_attr(ctx));
 };
 
@@ -207,7 +207,7 @@ auto const assign_collection = [](auto const& ctx) {
     std::get<2>(_val(ctx)) = std::move(_attr(ctx));
 };
 
-const auto assign_property = [](auto const& ctx) {
+auto const assign_property = [](auto const& ctx) {
     mapnik::feature_impl& feature = x3::get<grammar::feature_tag>(ctx);
     mapnik::transcoder const& tr = x3::get<grammar::transcoder_tag>(ctx);
     feature.put_new(std::get<0>(_attr(ctx)),

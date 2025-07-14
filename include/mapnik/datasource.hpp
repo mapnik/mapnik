@@ -51,7 +51,7 @@ class MAPNIK_DECL datasource_exception : public std::exception
 
     ~datasource_exception() {}
 
-    virtual const char* what() const noexcept { return message_.c_str(); }
+    virtual char const* what() const noexcept { return message_.c_str(); }
 
   private:
     std::string message_;
@@ -103,7 +103,7 @@ class MAPNIK_DECL datasource : private util::noncopyable
     parameters params_;
 };
 
-using datasource_name = const char* (*)();
+using datasource_name = char const* (*)();
 using create_ds = datasource* (*)(parameters const&);
 using destroy_ds = void (*)(datasource*);
 

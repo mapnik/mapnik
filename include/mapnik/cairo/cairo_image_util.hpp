@@ -47,8 +47,8 @@ static inline void cairo_image_to_rgba8(mapnik::image_rgba8& data, cairo_surface
 
     int stride = cairo_image_surface_get_stride(&*surface) / 4;
 
-    const std::unique_ptr<unsigned int[]> out_row(new unsigned int[data.width()]);
-    const unsigned int* in_row = (const unsigned int*)cairo_image_surface_get_data(&*surface);
+    std::unique_ptr<unsigned int[]> const out_row(new unsigned int[data.width()]);
+    unsigned int const* in_row = (unsigned int const*)cairo_image_surface_get_data(&*surface);
 
     for (unsigned int row = 0; row < data.height(); row++, in_row += stride)
     {

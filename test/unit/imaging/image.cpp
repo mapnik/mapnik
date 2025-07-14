@@ -12,7 +12,7 @@ TEST_CASE("image class")
 {
     SECTION("test gray16")
     {
-        const mapnik::image_gray16 im(4, 4);
+        mapnik::image_gray16 const im(4, 4);
         mapnik::image_gray16 im2(im);
         mapnik::image_gray16 im3(5, 5);
 
@@ -147,7 +147,7 @@ TEST_CASE("image class")
     SECTION("image_null")
     {
         mapnik::image_null im_null;
-        const mapnik::image_null im_null2(2, 2); // Actually doesn't really set any size
+        mapnik::image_null const im_null2(2, 2); // Actually doesn't really set any size
         mapnik::image_null im_null3(im_null2);
         mapnik::image_null im_null4(std::move(im_null3));
 
@@ -193,7 +193,7 @@ TEST_CASE("image class")
     SECTION("image any")
     {
         mapnik::image_null null_im;
-        const mapnik::image_any im_any_null(null_im);
+        mapnik::image_any const im_any_null(null_im);
         CHECK(im_any_null.get_dtype() == mapnik::image_dtype_null);
         CHECK(im_any_null.bytes() == nullptr);
 
@@ -282,7 +282,7 @@ TEST_CASE("image class")
         CHECK_FALSE(!buf);
         unsigned char* d = buf.data();
         *d = 9;
-        const mapnik::detail::buffer buf2 = buf;
+        mapnik::detail::buffer const buf2 = buf;
         CHECK(buf2.size() == 10);
         unsigned char const* d2 = buf2.data();
         CHECK(*d2 == 9);

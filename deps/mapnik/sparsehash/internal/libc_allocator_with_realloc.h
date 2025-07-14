@@ -48,12 +48,12 @@ class libc_allocator_with_realloc
     typedef ptrdiff_t difference_type;
 
     typedef T* pointer;
-    typedef const T* const_pointer;
+    typedef T const* const_pointer;
     typedef T& reference;
-    typedef const T& const_reference;
+    typedef T const& const_reference;
 
     libc_allocator_with_realloc() {}
-    libc_allocator_with_realloc(const libc_allocator_with_realloc&) {}
+    libc_allocator_with_realloc(libc_allocator_with_realloc const&) {}
     ~libc_allocator_with_realloc() {}
 
     pointer address(reference r) const { return &r; }
@@ -65,11 +65,11 @@ class libc_allocator_with_realloc
 
     size_type max_size() const { return static_cast<size_type>(-1) / sizeof(value_type); }
 
-    void construct(pointer p, const value_type& val) { new (p) value_type(val); }
+    void construct(pointer p, value_type const& val) { new (p) value_type(val); }
     void destroy(pointer p) { p->~value_type(); }
 
     template<class U>
-    libc_allocator_with_realloc(const libc_allocator_with_realloc<U>&)
+    libc_allocator_with_realloc(libc_allocator_with_realloc<U> const&)
     {}
 
     template<class U>
@@ -88,7 +88,7 @@ class libc_allocator_with_realloc<void>
     typedef size_t size_type;
     typedef ptrdiff_t difference_type;
     typedef void* pointer;
-    typedef const void* const_pointer;
+    typedef void const* const_pointer;
 
     template<class U>
     struct rebind
@@ -98,13 +98,13 @@ class libc_allocator_with_realloc<void>
 };
 
 template<class T>
-inline bool operator==(const libc_allocator_with_realloc<T>&, const libc_allocator_with_realloc<T>&)
+inline bool operator==(libc_allocator_with_realloc<T> const&, libc_allocator_with_realloc<T> const&)
 {
     return true;
 }
 
 template<class T>
-inline bool operator!=(const libc_allocator_with_realloc<T>&, const libc_allocator_with_realloc<T>&)
+inline bool operator!=(libc_allocator_with_realloc<T> const&, libc_allocator_with_realloc<T> const&)
 {
     return false;
 }

@@ -49,8 +49,8 @@ class ogr_index_featureset : public mapnik::Featureset
     filterT filter_;
     std::vector<int> ids_;
     std::vector<int>::iterator itr_;
-    const std::unique_ptr<mapnik::transcoder> tr_;
-    const char* fidcolumn_;
+    std::unique_ptr<mapnik::transcoder> const tr_;
+    char const* fidcolumn_;
     OGREnvelope feature_envelope_;
 };
 

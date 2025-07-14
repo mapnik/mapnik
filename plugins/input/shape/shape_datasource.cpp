@@ -72,11 +72,11 @@ shape_datasource::shape_datasource(parameters const& params)
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::init");
 #endif
-    const auto file = params.get<std::string>("file");
+    auto const file = params.get<std::string>("file");
     if (!file.has_value())
         throw datasource_exception("Shape Plugin: missing <file> parameter");
 
-    const auto base = params.get<std::string>("base");
+    auto const base = params.get<std::string>("base");
     if (base.has_value())
         shape_name_ = *base + "/" + *file;
     else
@@ -150,7 +150,7 @@ shape_datasource::shape_datasource(parameters const& params)
         MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes, " << ex.what();
         throw;
     }
-    catch (const std::exception& ex)
+    catch (std::exception const& ex)
     {
         MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes, " << ex.what();
         throw;
@@ -194,17 +194,17 @@ void shape_datasource::init(shape_io& shape)
     if (shape_type_ == shape_io::shape_multipatch)
         throw datasource_exception("Shape Plugin: shapefile multipatch type is not supported");
 
-    const double lox = header.read_double();
-    const double loy = header.read_double();
-    const double hix = header.read_double();
-    const double hiy = header.read_double();
+    double const lox = header.read_double();
+    double const loy = header.read_double();
+    double const hix = header.read_double();
+    double const hiy = header.read_double();
     extent_.init(lox, loy, hix, hiy);
 
 #ifdef MAPNIK_LOG
-    const double zmin = header.read_double();
-    const double zmax = header.read_double();
-    const double mmin = header.read_double();
-    const double mmax = header.read_double();
+    double const zmin = header.read_double();
+    double const zmax = header.read_double();
+    double const mmin = header.read_double();
+    double const mmax = header.read_double();
 
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Z min/max=" << zmin << "," << zmax;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: M min/max=" << mmin << "," << mmax;
@@ -219,7 +219,7 @@ void shape_datasource::init(shape_io& shape)
 
 shape_datasource::~shape_datasource() {}
 
-const char* shape_datasource::name()
+char const* shape_datasource::name()
 {
     return "shape";
 }

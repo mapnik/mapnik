@@ -61,7 +61,7 @@ using x3::no_case;
 using x3::no_skip;
 x3::uint_parser<char, 16, 2, 2> const hex2{};
 
-const auto escaped_unicode = json::grammar::escaped_unicode;
+auto const escaped_unicode = json::grammar::escaped_unicode;
 
 template<typename Context>
 inline mapnik::transcoder const& extract_transcoder(Context const& ctx)
@@ -69,19 +69,19 @@ inline mapnik::transcoder const& extract_transcoder(Context const& ctx)
     return x3::get<transcoder_tag>(ctx);
 }
 
-const auto append = [](auto const& ctx) {
+auto const append = [](auto const& ctx) {
     _val(ctx) += _attr(ctx);
 };
 
-const auto do_assign = [](auto const& ctx) {
+auto const do_assign = [](auto const& ctx) {
     _val(ctx) = std::move(_attr(ctx));
 };
 
-const auto do_negate = [](auto const& ctx) {
+auto const do_negate = [](auto const& ctx) {
     _val(ctx) = std::move(unary_node<mapnik::tags::negate>(_attr(ctx)));
 };
 
-const auto do_attribute = [](auto const& ctx) {
+auto const do_attribute = [](auto const& ctx) {
     auto const& attr = _attr(ctx);
     if (attr == "mapnik::geometry_type")
     {
@@ -93,84 +93,84 @@ const auto do_attribute = [](auto const& ctx) {
     }
 };
 
-const auto do_global_attribute = [](auto const& ctx) {
+auto const do_global_attribute = [](auto const& ctx) {
     _val(ctx) = std::move(global_attribute(_attr(ctx)));
 };
 
-const auto do_add = [](auto const& ctx) {
+auto const do_add = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::plus>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_subt = [](auto const& ctx) {
+auto const do_subt = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::minus>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_mult = [](auto const& ctx) {
+auto const do_mult = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::mult>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_div = [](auto const& ctx) {
+auto const do_div = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::div>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_mod = [](auto const& ctx) {
+auto const do_mod = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::mod>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_unicode = [](auto const& ctx) {
+auto const do_unicode = [](auto const& ctx) {
     auto const& tr = extract_transcoder(ctx);
     _val(ctx) = std::move(tr.transcode(_attr(ctx).c_str()));
 };
 
-const auto do_null = [](auto const& ctx) {
+auto const do_null = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::value_null());
 };
 
-const auto do_not = [](auto const& ctx) {
+auto const do_not = [](auto const& ctx) {
     mapnik::unary_node<mapnik::tags::logical_not> node(_attr(ctx));
     _val(ctx) = std::move(node);
 };
 
-const auto do_and = [](auto const& ctx) {
+auto const do_and = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::logical_and>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_or = [](auto const& ctx) {
+auto const do_or = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::logical_or>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_equal = [](auto const& ctx) {
+auto const do_equal = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::equal_to>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_not_equal = [](auto const& ctx) {
+auto const do_not_equal = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::not_equal_to>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_less = [](auto const& ctx) {
+auto const do_less = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::less>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_less_equal = [](auto const& ctx) {
+auto const do_less_equal = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::less_equal>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_greater = [](auto const& ctx) {
+auto const do_greater = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::greater>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_greater_equal = [](auto const& ctx) {
+auto const do_greater_equal = [](auto const& ctx) {
     _val(ctx) =
       std::move(mapnik::binary_node<mapnik::tags::greater_equal>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
 // regex
-const auto do_regex_match = [](auto const& ctx) {
+auto const do_regex_match = [](auto const& ctx) {
     auto const& tr = extract_transcoder(ctx);
     _val(ctx) = std::move(mapnik::regex_match_node(tr, std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-const auto do_regex_replace = [](auto const& ctx) {
+auto const do_regex_replace = [](auto const& ctx) {
     auto const& tr = extract_transcoder(ctx);
     auto const& pair = _attr(ctx);
     auto const& pattern = std::get<0>(pair);

@@ -122,8 +122,8 @@ image_reader* create_webp_reader2(std::string const& filename)
 
 void register_webp_reader()
 {
-    [[maybe_unused]] const bool registered = register_image_reader("webp", create_webp_reader);
-    [[maybe_unused]] const bool registered2 = register_image_reader("webp", create_webp_reader2);
+    [[maybe_unused]] bool const registered = register_image_reader("webp", create_webp_reader);
+    [[maybe_unused]] bool const registered2 = register_image_reader("webp", create_webp_reader2);
 }
 
 // ctor

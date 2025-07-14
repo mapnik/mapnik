@@ -73,13 +73,13 @@ bool string2bool(std::string const& value, bool& result)
     return false;
 }
 
-bool string2bool(const char* iter, const char* end, bool& result)
+bool string2bool(char const* iter, char const* end, bool& result)
 {
     std::string val(iter, end);
     return string2bool(val, result);
 }
 
-bool string2int(const char* iter, const char* end, int& result)
+bool string2int(char const* iter, char const* end, int& result)
 {
     x3::ascii::space_type space;
     bool r = x3::phrase_parse(iter, end, INTEGER, space, result);
@@ -96,7 +96,7 @@ bool string2int(std::string const& value, int& result)
 }
 
 #ifdef BIGINT
-bool string2int(const char* iter, const char* end, mapnik::value_integer& result)
+bool string2int(char const* iter, char const* end, mapnik::value_integer& result)
 {
     x3::ascii::space_type space;
     bool r = x3::phrase_parse(iter, end, x3::long_long, space, result);
@@ -122,7 +122,7 @@ bool string2double(std::string const& value, double& result)
     return r && (str_beg == str_end);
 }
 
-bool string2double(const char* iter, const char* end, double& result)
+bool string2double(char const* iter, char const* end, double& result)
 {
     x3::ascii::space_type space;
     bool r = x3::phrase_parse(iter, end, DOUBLE, space, result);
@@ -138,7 +138,7 @@ bool string2float(std::string const& value, float& result)
     return r && (str_beg == str_end);
 }
 
-bool string2float(const char* iter, const char* end, float& result)
+bool string2float(char const* iter, char const* end, float& result)
 {
     x3::ascii::space_type space;
     bool r = x3::phrase_parse(iter, end, FLOAT, space, result);

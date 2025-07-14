@@ -233,11 +233,11 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     // loop through overviews -- snap up in resolution to closest overview
     // if necessary we find an image size that most resembles
     // the resolution of our output image.
-    const double width_res = std::get<0>(q.resolution());
-    const double height_res = std::get<1>(q.resolution());
-    const int ideal_raster_width =
+    double const width_res = std::get<0>(q.resolution());
+    double const height_res = std::get<1>(q.resolution());
+    int const ideal_raster_width =
       static_cast<int>(std::floor(raster_extent_.width() * width_res * filter_factor) + .5);
-    const int ideal_raster_height =
+    int const ideal_raster_height =
       static_cast<int>(std::floor(raster_extent_.height() * height_res * filter_factor) + .5);
 
     if (band_ > 0 && band_ < nbands_)
@@ -521,7 +521,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
                             for (int j = 0; j < count; j++)
                             {
-                                const GDALColorEntry* ce = color_table->GetColorEntry(j);
+                                GDALColorEntry const* ce = color_table->GetColorEntry(j);
                                 if (!ce)
                                     continue;
                                 MAPNIK_LOG_DEBUG(gdal)
@@ -794,7 +794,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         for (unsigned x = 0; x < image.width(); ++x)
                         {
                             unsigned value = row[x] & 0xff;
-                            const GDALColorEntry* ce = color_table->GetColorEntry(value);
+                            GDALColorEntry const* ce = color_table->GetColorEntry(value);
                             if (ce)
                             {
                                 row[x] = (ce->c4 << 24) | (ce->c3 << 16) | (ce->c2 << 8) | (ce->c1);

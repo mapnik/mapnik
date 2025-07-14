@@ -29,12 +29,12 @@
 
 namespace mapnik {
 
-group_rule::group_rule(const expression_ptr& filter, const expression_ptr& repeat_key)
+group_rule::group_rule(expression_ptr const& filter, expression_ptr const& repeat_key)
     : filter_(filter),
       repeat_key_(repeat_key)
 {}
 
-group_rule& group_rule::operator=(const group_rule& rhs)
+group_rule& group_rule::operator=(group_rule const& rhs)
 {
     group_rule tmp(rhs);
     filter_.swap(tmp.filter_);
@@ -42,12 +42,12 @@ group_rule& group_rule::operator=(const group_rule& rhs)
     return *this;
 }
 
-bool group_rule::operator==(const group_rule& rhs) const
+bool group_rule::operator==(group_rule const& rhs) const
 {
     return (this == &rhs);
 }
 
-void group_rule::append(const mapnik::symbolizer& sym)
+void group_rule::append(mapnik::symbolizer const& sym)
 {
     symbolizers_.push_back(sym);
 }

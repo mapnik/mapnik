@@ -100,7 +100,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     mapnik::progress_timer __stats__(std::clog, "ogr_datasource::init");
 #endif
 
-    const auto file = params.get<std::string>("file");
+    auto const file = params.get<std::string>("file");
     auto string = params.get<std::string>("string");
     if (!string)
         string = params.get<std::string>("inline");
@@ -115,7 +115,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
     else
     {
-        const auto base = params.get<std::string>("base");
+        auto const base = params.get<std::string>("base");
         if (base)
         {
             dataset_name_ = *base + "/" + *file;
@@ -134,7 +134,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     if (!driver.empty())
     {
         unsigned int nOpenFlags = GDAL_OF_READONLY | GDAL_OF_VECTOR;
-        const char* papszAllowedDrivers[] = {driver.c_str(), nullptr};
+        char const* papszAllowedDrivers[] = {driver.c_str(), nullptr};
 
         dataset_ = reinterpret_cast<gdal_dataset_type>(
           GDALOpenEx(dataset_name_.c_str(), nOpenFlags, papszAllowedDrivers, open_options, nullptr));
@@ -151,7 +151,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     if (!dataset_)
     {
-        const std::string err = CPLGetLastErrorMsg();
+        std::string const err = CPLGetLastErrorMsg();
         if (err.size() == 0)
         {
             throw datasource_exception("OGR Plugin: connection failed: " + dataset_name_ +
@@ -164,9 +164,9 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
 
     // initialize layer
-    const auto layer_by_name = params.get<std::string>("layer");
-    const auto layer_by_index = params.get<mapnik::value_integer>("layer_by_index");
-    const auto layer_by_sql = params.get<std::string>("layer_by_sql");
+    auto const layer_by_name = params.get<std::string>("layer");
+    auto const layer_by_index = params.get<mapnik::value_integer>("layer_by_index");
+    auto const layer_by_sql = params.get<std::string>("layer_by_sql");
 
     int passed_parameters = 0;
     passed_parameters += layer_by_name.has_value() ? 1 : 0;
@@ -267,7 +267,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     OGRLayer* layer = layer_.layer();
 
     // initialize envelope
-    const auto ext = params.get<std::string>("extent");
+    auto const ext = params.get<std::string>("extent");
     if (ext.has_value() && !ext->empty())
     {
         extent_.from_string(*ext);
@@ -333,13 +333,13 @@ void ogr_datasource::init(mapnik::parameters const& params)
     OGRFeatureDefn* def = layer->GetLayerDefn();
     if (def != 0)
     {
-        const int fld_count = def->GetFieldCount();
+        int const fld_count = def->GetFieldCount();
         for (int i = 0; i < fld_count; i++)
         {
             OGRFieldDefn* fld = def->GetFieldDefn(i);
 
-            const std::string fld_name = fld->GetNameRef();
-            const OGRFieldType type_oid = fld->GetType();
+            std::string const fld_name = fld->GetNameRef();
+            OGRFieldType const type_oid = fld->GetType();
             switch (type_oid)
             {
                 case OFTInteger:
@@ -387,7 +387,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     CPLFree(srs_output);
 }
 
-const char* ogr_datasource::name()
+char const* ogr_datasource::name()
 {
     return "ogr";
 }

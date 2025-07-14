@@ -29,7 +29,7 @@
 #include <memory>
 #include <algorithm>
 
-static inline std::string numeric2string(const char* buf)
+static inline std::string numeric2string(char const* buf)
 {
     std::int16_t ndigits = int2net(buf);
     std::int16_t weight = int2net(buf + 2);

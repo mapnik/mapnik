@@ -92,8 +92,8 @@ image_reader* create_png_reader2(char const* data, std::size_t size)
 
 void register_png_reader()
 {
-    [[maybe_unused]] const bool registered = register_image_reader("png", create_png_reader);
-    [[maybe_unused]] const bool registered2 = register_image_reader("png", create_png_reader2);
+    [[maybe_unused]] bool const registered = register_image_reader("png", create_png_reader);
+    [[maybe_unused]] bool const registered2 = register_image_reader("png", create_png_reader2);
 }
 
 void user_error_fn(png_structp /*png_ptr*/, png_const_charp error_msg)
@@ -271,7 +271,7 @@ void png_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
         png_read_update_info(png_ptr, info_ptr);
         // we can read whole image at once
         // alloc row pointers
-        const std::unique_ptr<png_bytep[]> rows(new png_bytep[height_]);
+        std::unique_ptr<png_bytep[]> const rows(new png_bytep[height_]);
         for (unsigned i = 0; i < height_; ++i)
             rows[i] = (png_bytep)image.get_row(i);
         png_read_image(png_ptr, rows.get());
@@ -282,7 +282,7 @@ void png_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
         unsigned w = std::min(unsigned(image.width()), width_ - x0);
         unsigned h = std::min(unsigned(image.height()), height_ - y0);
         unsigned rowbytes = png_get_rowbytes(png_ptr, info_ptr);
-        const std::unique_ptr<png_byte[]> row(new png_byte[rowbytes]);
+        std::unique_ptr<png_byte[]> const row(new png_byte[rowbytes]);
         // START read image rows
         for (unsigned i = 0; i < height_; ++i)
         {

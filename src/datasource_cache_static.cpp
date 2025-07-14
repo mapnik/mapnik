@@ -154,7 +154,7 @@ void init_datasource_cache_static()
 
 datasource_ptr create_static_datasource(parameters const& params)
 {
-    const auto type = params.get<std::string>("type");
+    auto const type = params.get<std::string>("type");
     datasource_map::iterator it = ds_map.find(*type);
     if (it != ds_map.end())
     {

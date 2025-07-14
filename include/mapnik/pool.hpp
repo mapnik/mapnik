@@ -52,7 +52,7 @@ class Pool : private util::noncopyable
 #endif
   public:
 
-    Pool(const Creator<T>& creator, unsigned initialSize, unsigned maxSize)
+    Pool(Creator<T> const& creator, unsigned initialSize, unsigned maxSize)
         : creator_(creator),
           initialSize_(initialSize),
           maxSize_(maxSize)

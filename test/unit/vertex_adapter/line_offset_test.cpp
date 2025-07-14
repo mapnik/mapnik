@@ -17,7 +17,7 @@ double dist(mapnik::pixel_position const& a, mapnik::pixel_position const& b)
 
 void test_simple_segment(double const& offset)
 {
-    const double dx = 0.01;
+    double const dx = 0.01;
     fake_path path = {0, 0, 1, 0}, off_path = {0, offset, 1, offset};
     mapnik::vertex_cache vc(path), off_vc(off_path);
 
@@ -36,7 +36,7 @@ void test_simple_segment(double const& offset)
 
 void test_straight_line(double const& offset)
 {
-    const double dx = 0.01;
+    double const dx = 0.01;
     fake_path path = {0, 0, 0.1, 0, 0.9, 0, 1, 0}, off_path = {0, offset, 0.4, offset, 0.6, offset, 1, offset};
     mapnik::vertex_cache vc(path), off_vc(off_path);
 
@@ -55,11 +55,11 @@ void test_straight_line(double const& offset)
 
 void test_offset_curve(double const& offset)
 {
-    const double dx = 0.01;
-    const double r = (1.0 + offset);
+    double const dx = 0.01;
+    double const r = (1.0 + offset);
 
     std::vector<double> pos, off_pos;
-    const size_t max_i = 1000;
+    size_t const max_i = 1000;
     for (size_t i = 0; i <= max_i; ++i)
     {
         double x = mapnik::util::pi * double(i) / max_i;
@@ -94,12 +94,12 @@ void test_offset_curve(double const& offset)
 
 void test_s_shaped_curve(double const& offset)
 {
-    const double dx = 0.01;
-    const double r = (1.0 + offset);
-    const double r2 = (1.0 - offset);
+    double const dx = 0.01;
+    double const r = (1.0 + offset);
+    double const r2 = (1.0 - offset);
 
     std::vector<double> pos, off_pos;
-    const size_t max_i = 1000;
+    size_t const max_i = 1000;
     for (size_t i = 0; i <= max_i; ++i)
     {
         double x = mapnik::util::pi * double(i) / max_i;

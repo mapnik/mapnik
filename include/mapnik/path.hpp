@@ -35,7 +35,7 @@ template<typename T, template<typename> class Container = vertex_vector>
 class path : private util::noncopyable
 {
   public:
-    static const std::uint8_t geometry_bits = 7;
+    static std::uint8_t const geometry_bits = 7;
     enum types : std::uint8_t {
         Unknown = 0x00,
         Point = 0x01,

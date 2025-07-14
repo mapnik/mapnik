@@ -35,7 +35,7 @@ mvt_io::mvt_layer::mvt_layer(mvt_io& io)
       io_(io)
 {}
 
-void mvt_io::mvt_layer::add_feature(const protozero::data_view& feature)
+void mvt_io::mvt_layer::add_feature(protozero::data_view const& feature)
 {
     features_.emplace_back(feature);
 }
@@ -81,7 +81,7 @@ mapnik::feature_ptr mvt_io::mvt_layer::next_feature()
 {
     while (feature_index_ < features_.size())
     {
-        const protozero::data_view d(features_.at(feature_index_));
+        protozero::data_view const d(features_.at(feature_index_));
         protozero::pbf_reader f(d);
         mapnik::feature_ptr feature = mapnik::feature_factory::create(io_.context_, feature_index_);
         ++feature_index_;
@@ -217,7 +217,7 @@ bool mvt_io::read_layer(protozero::pbf_message<mvt_message::layer>& pbf_layer)
                 layer_->add_key(pbf_layer.get_string());
                 break;
             case mvt_message::layer::values: {
-                const auto data_view(pbf_layer.get_view());
+                auto const data_view(pbf_layer.get_view());
                 protozero::pbf_reader val_msg(data_view);
                 while (val_msg.next())
                 {
@@ -254,7 +254,7 @@ bool mvt_io::read_layer(protozero::pbf_message<mvt_message::layer>& pbf_layer)
                 break;
             }
             case mvt_message::layer::features: {
-                const auto data_view(pbf_layer.get_view());
+                auto const data_view(pbf_layer.get_view());
                 layer_->add_feature(data_view);
                 break;
             }
@@ -288,9 +288,9 @@ mapnik::feature_ptr mvt_io::next()
 
 mvt_io::mvt_io(std::string&& data,
                mapnik::context_ptr const& ctx,
-               const uint32_t x,
-               const uint32_t y,
-               const uint32_t zoom,
+               uint32_t const x,
+               uint32_t const y,
+               uint32_t const zoom,
                std::string layer_name)
     : reader_(data),
       context_(ctx),
@@ -303,7 +303,7 @@ mvt_io::mvt_io(std::string&& data,
 
     while (reader_.next(static_cast<uint32_t>(mvt_message::tile::layer)))
     {
-        const auto data_view(reader_.get_view());
+        auto const data_view(reader_.get_view());
         protozero::pbf_message<mvt_message::layer> msg_layer(data_view);
         if (read_layer(msg_layer))
         {

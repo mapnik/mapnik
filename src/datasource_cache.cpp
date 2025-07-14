@@ -59,7 +59,7 @@ datasource_cache::~datasource_cache() {}
 
 datasource_ptr datasource_cache::create(parameters const& params)
 {
-    const auto type = params.get<std::string>("type");
+    auto const type = params.get<std::string>("type");
     if (!type.has_value())
     {
         throw config_error(std::string("Could not create datasource. Required ") + "parameter 'type' is missing");
@@ -127,8 +127,8 @@ std::string datasource_cache::plugin_directories()
 bool datasource_cache::plugin_registered(std::string const& plugin_name) const
 {
 #ifdef MAPNIK_STATIC_PLUGINS
-    const auto static_names = get_static_datasource_names();
-    const auto static_it = std::find(static_names.begin(), static_names.end(), plugin_name);
+    auto const static_names = get_static_datasource_names();
+    auto const static_it = std::find(static_names.begin(), static_names.end(), plugin_name);
     if (static_it != static_names.end())
         return true;
 #endif

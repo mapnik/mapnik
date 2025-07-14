@@ -55,12 +55,12 @@ static inline hb_script_t _icu_script_to_script(UScriptCode script)
     return hb_script_from_string(uscript_getShortName(script), -1);
 }
 
-static inline const uint16_t* uchar_to_utf16(const UChar* src)
+static inline uint16_t const* uchar_to_utf16(UChar const* src)
 {
     static_assert(sizeof(UChar) == sizeof(uint16_t), "UChar is eq size to uint16_t");
 #if defined(_MSC_VER) || (U_ICU_VERSION_MAJOR_NUM >= 59)
     // ^^ http://site.icu-project.org/download/59#TOC-ICU4C-char16_t1
-    return reinterpret_cast<const uint16_t*>(src);
+    return reinterpret_cast<uint16_t const*>(src);
 #else
     return src;
 #endif
@@ -241,7 +241,7 @@ struct harfbuzz_shaper
         auto hb_buffer_deleter = [](hb_buffer_t* buffer) {
             hb_buffer_destroy(buffer);
         };
-        const std::unique_ptr<hb_buffer_t, decltype(hb_buffer_deleter)> buffer(hb_buffer_create(), hb_buffer_deleter);
+        std::unique_ptr<hb_buffer_t, decltype(hb_buffer_deleter)> const buffer(hb_buffer_create(), hb_buffer_deleter);
         hb_buffer_pre_allocate(buffer.get(), safe_cast<int>(length));
         mapnik::value_unicode_string const& text = itemizer.text();
         for (auto const& text_item : list)

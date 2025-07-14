@@ -79,11 +79,11 @@ geobuf_datasource::geobuf_datasource(parameters const& params)
       features_(),
       tree_(nullptr)
 {
-    const auto file = params.get<std::string>("file");
+    auto const file = params.get<std::string>("file");
     if (!file.has_value())
         throw mapnik::datasource_exception("Geobuf Plugin: missing <file> parameter");
 
-    const auto base = params.get<std::string>("base");
+    auto const base = params.get<std::string>("base");
     if (base.has_value())
         filename_ = *base + "/" + *file;
     else
@@ -154,7 +154,7 @@ void geobuf_datasource::parse_geobuf(char const* data, std::size_t size)
 
 geobuf_datasource::~geobuf_datasource() {}
 
-const char* geobuf_datasource::name()
+char const* geobuf_datasource::name()
 {
     return "geobuf";
 }

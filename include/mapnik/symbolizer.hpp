@@ -383,8 +383,8 @@ struct extract_raw_value
     }
 };
 
-using property_meta_type = std::tuple<const char*, std::function<std::string(enumeration_wrapper)>, property_types>;
-MAPNIK_DECL property_meta_type const& get_meta(mapnik::keys key);
+using property_meta_type = std::tuple<char const*, std::function<std::string(enumeration_wrapper)>, property_types>;
+MAPNIK_DECL const property_meta_type& get_meta(mapnik::keys key);
 MAPNIK_DECL mapnik::keys get_key(std::string const& name);
 
 template<typename T>

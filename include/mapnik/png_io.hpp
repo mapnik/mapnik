@@ -129,10 +129,10 @@ void save_as_png(T1& file, T2 const& image, png_options const& opts)
                  PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT,
                  PNG_FILTER_TYPE_DEFAULT);
-    const std::unique_ptr<png_bytep[]> row_pointers(new png_bytep[image.height()]);
+    std::unique_ptr<png_bytep[]> const row_pointers(new png_bytep[image.height()]);
     for (unsigned int i = 0; i < image.height(); ++i)
     {
-        row_pointers[i] = const_cast<png_bytep>(reinterpret_cast<const unsigned char*>(image.get_row(i)));
+        row_pointers[i] = const_cast<png_bytep>(reinterpret_cast<unsigned char const*>(image.get_row(i)));
     }
     png_set_rows(png_ptr, info_ptr, row_pointers.get());
     png_write_png(png_ptr,
@@ -313,7 +313,7 @@ void save_as_png(T& file,
                  PNG_COMPRESSION_TYPE_DEFAULT,
                  PNG_FILTER_TYPE_DEFAULT);
 
-    png_color* pal = const_cast<png_color*>(reinterpret_cast<const png_color*>(&palette[0]));
+    png_color* pal = const_cast<png_color*>(reinterpret_cast<png_color const*>(&palette[0]));
     png_set_PLTE(png_ptr, info_ptr, pal, static_cast<unsigned>(palette.size()));
 
     // make transparent lowest indexes, so tRNS is small
@@ -350,7 +350,7 @@ void save_as_png8_oct(T1& file, T2 const& image, png_options const& opts)
 {
     // number of alpha ranges in png8 format; 2 results in smallest image with binary transparency
     // 3 is minimum for semitransparency, 4 is recommended, anything else is worse
-    const unsigned TRANSPARENCY_LEVELS = (opts.trans_mode == 2 || opts.trans_mode < 0) ? MAX_OCTREE_LEVELS : 2;
+    unsigned const TRANSPARENCY_LEVELS = (opts.trans_mode == 2 || opts.trans_mode < 0) ? MAX_OCTREE_LEVELS : 2;
     unsigned width = image.width();
     unsigned height = image.height();
     unsigned alphaHist[256]; // transparency histogram

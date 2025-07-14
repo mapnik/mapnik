@@ -38,11 +38,11 @@ DATASOURCE_PLUGIN_DEF(raster_datasource_plugin, raster);
 class raster_datasource : public mapnik::datasource
 {
   public:
-    raster_datasource(const mapnik::parameters& params);
+    raster_datasource(mapnik::parameters const& params);
     virtual ~raster_datasource();
     datasource::datasource_t type() const override;
-    static const char* name();
-    mapnik::featureset_ptr features(const mapnik::query& q) const override;
+    static char const* name();
+    mapnik::featureset_ptr features(mapnik::query const& q) const override;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const override;
     mapnik::box2d<double> envelope() const override;
     std::optional<mapnik::datasource_geometry_t> get_geometry_type() const override;

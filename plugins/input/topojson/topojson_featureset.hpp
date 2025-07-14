@@ -43,7 +43,7 @@ class topojson_featureset : public mapnik::Featureset
     mapnik::box2d<double> box_;
     mapnik::topojson::topology const& topo_;
     mapnik::transcoder const& tr_;
-    const array_type index_array_;
+    array_type const index_array_;
     array_type::const_iterator index_itr_;
     array_type::const_iterator index_end_;
     std::size_t feature_id_;

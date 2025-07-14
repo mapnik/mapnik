@@ -98,7 +98,7 @@ std::string dbf_file::string_value(int col) const
     return "";
 }
 
-const field_descriptor& dbf_file::descriptor(int col) const
+field_descriptor const& dbf_file::descriptor(int col) const
 {
     assert(col >= 0 && col < num_fields_);
     return fields_[col];
@@ -149,8 +149,8 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
                 if (fields_[col].dec_ > 0)
                 {
                     double val = 0.0;
-                    const char* itr = record_ + fields_[col].offset_;
-                    const char* end = itr + fields_[col].length_;
+                    char const* itr = record_ + fields_[col].offset_;
+                    char const* end = itr + fields_[col].length_;
                     x3::ascii::space_type space;
                     static x3::double_type double_;
                     if (x3::phrase_parse(itr, end, double_, space, val))
@@ -161,8 +161,8 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
                 else
                 {
                     mapnik::value_integer val = 0;
-                    const char* itr = record_ + fields_[col].offset_;
-                    const char* end = itr + fields_[col].length_;
+                    char const* itr = record_ + fields_[col].offset_;
+                    char const* end = itr + fields_[col].length_;
                     x3::ascii::space_type space;
                     static x3::int_parser<mapnik::value_integer, 10, 1, -1> numeric_parser;
                     if (x3::phrase_parse(itr, end, numeric_parser, space, val))

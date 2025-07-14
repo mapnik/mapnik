@@ -294,7 +294,7 @@ class serialize_group_layout
     bool explicit_defaults_;
 };
 
-void serialize_group_rule(ptree& parent_node, const group_rule& r, bool explicit_defaults)
+void serialize_group_rule(ptree& parent_node, group_rule const& r, bool explicit_defaults)
 {
     ptree& rule_node = parent_node.push_back(ptree::value_type("GroupRule", ptree()))->second;
 

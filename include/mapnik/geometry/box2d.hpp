@@ -137,7 +137,7 @@ class MAPNIK_DECL box2d : boost::equality_comparable<
 };
 
 template<class charT, class traits, class T>
-inline std::basic_ostream<charT, traits>& operator<<(std::basic_ostream<charT, traits>& out, const box2d<T>& e)
+inline std::basic_ostream<charT, traits>& operator<<(std::basic_ostream<charT, traits>& out, box2d<T> const& e)
 {
     out << e.to_string();
     return out;

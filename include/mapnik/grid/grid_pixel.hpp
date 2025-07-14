@@ -49,7 +49,7 @@ struct gray16
     {}
 
     //--------------------------------------------------------------------
-    gray16(const self_type& c, unsigned a_)
+    gray16(self_type const& c, unsigned a_)
         : v(c.v),
           a(value_type(a_))
     {}
@@ -58,14 +58,14 @@ struct gray16
     void clear() { v = a = 0; }
 
     //--------------------------------------------------------------------
-    const self_type& transparent()
+    self_type const& transparent()
     {
         a = 0;
         return *this;
     }
 
     //--------------------------------------------------------------------
-    const self_type& premultiply()
+    self_type const& premultiply()
     {
         if (a == base_mask)
             return *this;
@@ -79,7 +79,7 @@ struct gray16
     }
 
     //--------------------------------------------------------------------
-    const self_type& premultiply(unsigned a_)
+    self_type const& premultiply(unsigned a_)
     {
         if (a == base_mask && a_ >= base_mask)
             return *this;
@@ -95,7 +95,7 @@ struct gray16
     }
 
     //--------------------------------------------------------------------
-    const self_type& demultiply()
+    self_type const& demultiply()
     {
         if (a == base_mask)
             return *this;
@@ -120,7 +120,7 @@ struct gray16
     }
 
     //--------------------------------------------------------------------
-    AGG_INLINE void add(const self_type& c, unsigned cover)
+    AGG_INLINE void add(self_type const& c, unsigned cover)
     {
         calc_type cv, ca;
         if (cover == agg::cover_mask)
@@ -177,7 +177,7 @@ struct gray32
     {}
 
     //--------------------------------------------------------------------
-    gray32(const self_type& c, unsigned a_)
+    gray32(self_type const& c, unsigned a_)
         : v(c.v),
           a(value_type(a_))
     {}
@@ -186,14 +186,14 @@ struct gray32
     void clear() { v = a = 0; }
 
     //--------------------------------------------------------------------
-    const self_type& transparent()
+    self_type const& transparent()
     {
         a = 0;
         return *this;
     }
 
     //--------------------------------------------------------------------
-    const self_type& premultiply()
+    self_type const& premultiply()
     {
         if (a == base_mask)
             return *this;
@@ -207,7 +207,7 @@ struct gray32
     }
 
     //--------------------------------------------------------------------
-    const self_type& premultiply(unsigned a_)
+    self_type const& premultiply(unsigned a_)
     {
         if (a == base_mask && a_ >= base_mask)
             return *this;
@@ -223,7 +223,7 @@ struct gray32
     }
 
     //--------------------------------------------------------------------
-    const self_type& demultiply()
+    self_type const& demultiply()
     {
         if (a == base_mask)
             return *this;
@@ -248,7 +248,7 @@ struct gray32
     }
 
     //--------------------------------------------------------------------
-    AGG_INLINE void add(const self_type& c, unsigned cover)
+    AGG_INLINE void add(self_type const& c, unsigned cover)
     {
         calc_type cv, ca;
         if (cover == agg::cover_mask)
@@ -305,7 +305,7 @@ struct gray64
     {}
 
     //--------------------------------------------------------------------
-    gray64(const self_type& c, unsigned a_)
+    gray64(self_type const& c, unsigned a_)
         : v(c.v),
           a(value_type(a_))
     {}
@@ -314,14 +314,14 @@ struct gray64
     void clear() { v = a = 0; }
 
     //--------------------------------------------------------------------
-    const self_type& transparent()
+    self_type const& transparent()
     {
         a = 0;
         return *this;
     }
 
     //--------------------------------------------------------------------
-    const self_type& premultiply()
+    self_type const& premultiply()
     {
         if (a == base_mask)
             return *this;
@@ -335,7 +335,7 @@ struct gray64
     }
 
     //--------------------------------------------------------------------
-    const self_type& premultiply(unsigned a_)
+    self_type const& premultiply(unsigned a_)
     {
         if (a == base_mask && a_ >= base_mask)
             return *this;
@@ -351,7 +351,7 @@ struct gray64
     }
 
     //--------------------------------------------------------------------
-    const self_type& demultiply()
+    self_type const& demultiply()
     {
         if (a == base_mask)
             return *this;
@@ -376,7 +376,7 @@ struct gray64
     }
 
     //--------------------------------------------------------------------
-    AGG_INLINE void add(const self_type& c, unsigned cover)
+    AGG_INLINE void add(self_type const& c, unsigned cover)
     {
         calc_type cv, ca;
         if (cover == agg::cover_mask)

@@ -76,13 +76,13 @@ struct identity_
 template<class T, T v>
 struct integral_constant
 {
-    static const T value = v;
+    static T const value = v;
     typedef T value_type;
     typedef integral_constant<T, v> type;
 };
 
 template<class T, T v>
-const T integral_constant<T, v>::value;
+T const integral_constant<T, v>::value;
 
 // Abbreviations: true_type and false_type are structs that represent boolean
 // true and false values. Also define the boost::mpl versions of those names,

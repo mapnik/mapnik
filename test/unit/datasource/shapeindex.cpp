@@ -98,7 +98,7 @@ int create_shapefile_index(std::string const& filename, bool index_parts, bool s
 
 TEST_CASE("invalid shapeindex")
 {
-    const bool have_shape_plugin = mapnik::datasource_cache::instance().plugin_registered("shape");
+    bool const have_shape_plugin = mapnik::datasource_cache::instance().plugin_registered("shape");
     if (have_shape_plugin)
     {
         SECTION("Invalid index")
@@ -141,7 +141,7 @@ TEST_CASE("invalid shapeindex")
 
 TEST_CASE("shapeindex")
 {
-    const bool have_shape_plugin = mapnik::datasource_cache::instance().plugin_registered("shape");
+    bool const have_shape_plugin = mapnik::datasource_cache::instance().plugin_registered("shape");
     if (have_shape_plugin)
     {
         SECTION("Index")

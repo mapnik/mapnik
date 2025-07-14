@@ -159,8 +159,8 @@ class cairo_pattern : private util::noncopyable
     explicit cairo_pattern(image_rgba8 const& data, double opacity = 1.0)
     {
         std::size_t pixels = data.width() * data.height();
-        const unsigned int* in_ptr = data.data();
-        const unsigned int* in_end = in_ptr + pixels;
+        unsigned int const* in_ptr = data.data();
+        unsigned int const* in_end = in_ptr + pixels;
         unsigned int* out_ptr;
 
         surface_ = cairo_surface_ptr(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,

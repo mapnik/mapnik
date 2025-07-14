@@ -69,7 +69,7 @@ struct accumulate_extent
     bool first_;
 };
 
-const char* memory_datasource::name()
+char const* memory_datasource::name()
 {
     return mapnik::memory_datasource_plugin::kName;
 }
@@ -121,7 +121,7 @@ datasource::datasource_t memory_datasource::type() const
     return type_;
 }
 
-featureset_ptr memory_datasource::features(const query& q) const
+featureset_ptr memory_datasource::features(query const& q) const
 {
     if (features_.empty())
     {

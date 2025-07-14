@@ -46,7 +46,7 @@ struct weighted_vertex : private util::noncopyable
 
     struct ascending_sort
     {
-        bool operator()(const weighted_vertex* a, const weighted_vertex* b) const { return b->weight > a->weight; }
+        bool operator()(weighted_vertex const* a, weighted_vertex const* b) const { return b->weight > a->weight; }
     };
 };
 
@@ -477,7 +477,7 @@ struct simplify_converter
         return status_ = process;
     }
 
-    void RDP(std::vector<vertex2d>& vertices, const size_t first, const size_t last)
+    void RDP(std::vector<vertex2d>& vertices, size_t const first, size_t const last)
     {
         // Squared length of a vector
         auto sqlen = [](vertex2d const& vec) {

@@ -54,7 +54,7 @@ mapnik::datasource::datasource_t tiles_datasource::type() const
     return datasource::Vector;
 }
 
-const char* tiles_datasource::name()
+char const* tiles_datasource::name()
 {
     return "tiles";
 }

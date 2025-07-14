@@ -38,34 +38,34 @@ template<typename filterT, typename IStream = std::ifstream>
 class ogr_index
 {
   public:
-    static void query(const filterT& filter, IStream& file, std::vector<int>& pos);
+    static void query(filterT const& filter, IStream& file, std::vector<int>& pos);
 
   private:
     ogr_index();
     ~ogr_index();
-    ogr_index(const ogr_index&);
-    ogr_index& operator=(const ogr_index&);
+    ogr_index(ogr_index const&);
+    ogr_index& operator=(ogr_index const&);
     static int read_ndr_integer(IStream& in);
     static void read_envelope(IStream& in, box2d<double>& envelope);
-    static void query_node(const filterT& filter, IStream& in, std::vector<int>& pos);
+    static void query_node(filterT const& filter, IStream& in, std::vector<int>& pos);
 };
 
 template<typename filterT, typename IStream>
-void ogr_index<filterT, IStream>::query(const filterT& filter, IStream& file, std::vector<int>& pos)
+void ogr_index<filterT, IStream>::query(filterT const& filter, IStream& file, std::vector<int>& pos)
 {
     file.seekg(16, std::ios::beg);
     query_node(filter, file, pos);
 }
 
 template<typename filterT, typename IStream>
-void ogr_index<filterT, IStream>::query_node(const filterT& filter, IStream& file, std::vector<int>& ids)
+void ogr_index<filterT, IStream>::query_node(filterT const& filter, IStream& file, std::vector<int>& ids)
 {
-    const int offset = read_ndr_integer(file);
+    int const offset = read_ndr_integer(file);
 
     box2d<double> node_ext;
     read_envelope(file, node_ext);
 
-    const int num_shapes = read_ndr_integer(file);
+    int const num_shapes = read_ndr_integer(file);
 
     if (!filter.pass(node_ext))
     {
@@ -75,11 +75,11 @@ void ogr_index<filterT, IStream>::query_node(const filterT& filter, IStream& fil
 
     for (int i = 0; i < num_shapes; ++i)
     {
-        const int id = read_ndr_integer(file);
+        int const id = read_ndr_integer(file);
         ids.push_back(id);
     }
 
-    const int children = read_ndr_integer(file);
+    int const children = read_ndr_integer(file);
 
     for (int j = 0; j < children; ++j)
     {

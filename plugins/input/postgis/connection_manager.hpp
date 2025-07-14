@@ -153,15 +153,15 @@ class ConnectionManager : public singleton<ConnectionManager, CreateStatic>
         {
             return itr->second;
         }
-        static const std::shared_ptr<PoolType> emptyPool;
+        static std::shared_ptr<PoolType> const emptyPool;
         return emptyPool;
     }
 
     ConnectionManager() {}
 
   private:
-    ConnectionManager(const ConnectionManager&);
-    ConnectionManager& operator=(const ConnectionManager);
+    ConnectionManager(ConnectionManager const&);
+    ConnectionManager& operator=(ConnectionManager const);
 };
 
 #endif // POSTGIS_CONNECTION_MANAGER_HPP

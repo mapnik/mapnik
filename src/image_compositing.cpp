@@ -49,7 +49,7 @@ MAPNIK_DISABLE_WARNING_POP
 namespace mapnik {
 
 using comp_op_lookup_type = boost::bimap<composite_mode_e, std::string>;
-static const comp_op_lookup_type comp_lookup =
+static comp_op_lookup_type const comp_lookup =
   boost::assign::list_of<comp_op_lookup_type::relation>(clear, "clear")(src, "src")(dst, "dst")(src_over, "src-over")(
     dst_over,
     "dst-over")(src_in, "src-in")(dst_in, "dst-in")(src_out, "src-out")(dst_out, "dst-out")(src_atop, "src-atop")(

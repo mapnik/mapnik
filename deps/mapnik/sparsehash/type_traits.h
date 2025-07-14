@@ -163,13 +163,13 @@ struct is_integral<unsigned long long> : true_type
 {};
 #endif
 template<class T>
-struct is_integral<const T> : is_integral<T>
+struct is_integral<T const> : is_integral<T>
 {};
 template<class T>
-struct is_integral<volatile T> : is_integral<T>
+struct is_integral<T volatile> : is_integral<T>
 {};
 template<class T>
-struct is_integral<const volatile T> : is_integral<T>
+struct is_integral<T const volatile> : is_integral<T>
 {};
 
 // is_floating_point is false except for the built-in floating-point types.
@@ -187,13 +187,13 @@ template<>
 struct is_floating_point<long double> : true_type
 {};
 template<class T>
-struct is_floating_point<const T> : is_floating_point<T>
+struct is_floating_point<T const> : is_floating_point<T>
 {};
 template<class T>
-struct is_floating_point<volatile T> : is_floating_point<T>
+struct is_floating_point<T volatile> : is_floating_point<T>
 {};
 template<class T>
-struct is_floating_point<const volatile T> : is_floating_point<T>
+struct is_floating_point<T const volatile> : is_floating_point<T>
 {};
 
 // is_pointer is false except for pointer types. A cv-qualified type (e.g.
@@ -206,13 +206,13 @@ template<class T>
 struct is_pointer<T*> : true_type
 {};
 template<class T>
-struct is_pointer<const T> : is_pointer<T>
+struct is_pointer<T const> : is_pointer<T>
 {};
 template<class T>
-struct is_pointer<volatile T> : is_pointer<T>
+struct is_pointer<T volatile> : is_pointer<T>
 {};
 template<class T>
-struct is_pointer<const volatile T> : is_pointer<T>
+struct is_pointer<T const volatile> : is_pointer<T>
 {};
 
 #if !defined(_MSC_VER) && !(defined(__GNUC__) && __GNUC__ <= 3)
@@ -226,7 +226,7 @@ struct is_class_or_union
     static small_ tester(void (U::*)());
     template<class U>
     static big_ tester(...);
-    static const bool value = sizeof(tester<T>(0)) == sizeof(small_);
+    static bool const value = sizeof(tester<T>(0)) == sizeof(small_);
 };
 
 // is_convertible chokes if the first argument is an array. That's why
@@ -264,13 +264,13 @@ struct is_enum
 {};
 
 template<class T>
-struct is_enum<const T> : is_enum<T>
+struct is_enum<T const> : is_enum<T>
 {};
 template<class T>
-struct is_enum<volatile T> : is_enum<T>
+struct is_enum<T volatile> : is_enum<T>
 {};
 template<class T>
-struct is_enum<const volatile T> : is_enum<T>
+struct is_enum<T const volatile> : is_enum<T>
 {};
 
 #endif
@@ -297,13 +297,13 @@ struct is_pod : integral_constant<bool,
                                    is_pointer<T>::value)>
 {};
 template<class T>
-struct is_pod<const T> : is_pod<T>
+struct is_pod<T const> : is_pod<T>
 {};
 template<class T>
-struct is_pod<volatile T> : is_pod<T>
+struct is_pod<T volatile> : is_pod<T>
 {};
 template<class T>
-struct is_pod<const volatile T> : is_pod<T>
+struct is_pod<T const volatile> : is_pod<T>
 {};
 
 // We can't get has_trivial_constructor right without compiler help, so
@@ -322,7 +322,7 @@ template<class A, int N>
 struct has_trivial_constructor<A[N]> : has_trivial_constructor<A>
 {};
 template<class T>
-struct has_trivial_constructor<const T> : has_trivial_constructor<T>
+struct has_trivial_constructor<T const> : has_trivial_constructor<T>
 {};
 
 // We can't get has_trivial_copy right without compiler help, so fail
@@ -341,7 +341,7 @@ template<class A, int N>
 struct has_trivial_copy<A[N]> : has_trivial_copy<A>
 {};
 template<class T>
-struct has_trivial_copy<const T> : has_trivial_copy<T>
+struct has_trivial_copy<T const> : has_trivial_copy<T>
 {};
 
 // We can't get has_trivial_assign right without compiler help, so fail
@@ -375,7 +375,7 @@ template<class A, int N>
 struct has_trivial_destructor<A[N]> : has_trivial_destructor<A>
 {};
 template<class T>
-struct has_trivial_destructor<const T> : has_trivial_destructor<T>
+struct has_trivial_destructor<T const> : has_trivial_destructor<T>
 {};
 
 // Specified by TR1 [4.7.1]

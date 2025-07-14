@@ -24,12 +24,12 @@ MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/text/scrptrun.hpp>
 
 template<class T, std::size_t N>
-constexpr std::size_t ARRAY_SIZE(const T (&array)[N]) noexcept
+constexpr std::size_t ARRAY_SIZE(T const (&array)[N]) noexcept
 {
     return N;
 }
 
-const char ScriptRun::fgClassID = 0;
+char const ScriptRun::fgClassID = 0;
 
 UChar32 ScriptRun::pairedChars[] = {0x0028, 0x0029, // ascii paired punctuation
                                     0x003c, 0x003e, 0x005b, 0x005d, 0x007b, 0x007d, 0x00ab,
@@ -41,9 +41,9 @@ UChar32 ScriptRun::pairedChars[] = {0x0028, 0x0029, // ascii paired punctuation
                                     0x300a, 0x300b, 0x300c, 0x300d, 0x300e, 0x300f, 0x3010, 0x3011,
                                     0x3014, 0x3015, 0x3016, 0x3017, 0x3018, 0x3019, 0x301a, 0x301b};
 
-const int32_t ScriptRun::pairedCharCount = ARRAY_SIZE(pairedChars);
-const int32_t ScriptRun::pairedCharPower = 1 << highBit(pairedCharCount);
-const int32_t ScriptRun::pairedCharExtra = pairedCharCount - pairedCharPower;
+int32_t const ScriptRun::pairedCharCount = ARRAY_SIZE(pairedChars);
+int32_t const ScriptRun::pairedCharPower = 1 << highBit(pairedCharCount);
+int32_t const ScriptRun::pairedCharExtra = pairedCharCount - pairedCharPower;
 
 int8_t ScriptRun::highBit(int32_t value)
 {

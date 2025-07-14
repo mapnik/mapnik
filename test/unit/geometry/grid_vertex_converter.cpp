@@ -7,10 +7,10 @@ TEST_CASE("spiral_iterator")
     SECTION("sprial 3x3")
     {
         mapnik::geometry::spiral_iterator si(3);
-        const mapnik::geometry::point<int> points[] =
+        mapnik::geometry::point<int> const points[] =
           {{0, 0}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}};
 
-        const std::size_t points_size = std::extent<decltype(points)>::value;
+        std::size_t const points_size = std::extent<decltype(points)>::value;
 
         int x, y;
         std::size_t index = 0;
@@ -77,13 +77,13 @@ TEST_CASE("grid_vertex_converter")
         using converter_type = mapnik::geometry::grid_vertex_converter<path_type, double>;
         converter_type gvc(path, 3.0, 3.0, 1.0);
 
-        const mapnik::geometry::point<double> points[] = {
+        mapnik::geometry::point<double> const points[] = {
           {0, 0},   {3, 0},   {3, 3},   {0, 3},   {-3, 3},  {-3, 0}, {-3, -3}, {0, -3}, {3, -3}, {6, -3},
           {6, 0},   {6, 3},   {6, 6},   {3, 6},   {0, 6},   {-3, 6}, {-6, 6},  {-6, 3}, {-6, 0}, {-6, -3},
           {-6, -6}, {-3, -6}, {0, -6},  {3, -6},  {6, -6},  {9, -6}, {9, -3},  {9, 0},  {9, 3},  {9, 6},
           {9, 9},   {6, 9},   {3, 9},   {0, 9},   {-3, 9},  {-6, 9}, {-9, 9},  {-9, 6}, {-9, 3}, {-9, 0},
           {-9, -3}, {-9, -6}, {-9, -9}, {-6, -9}, {-3, -9}, {0, -9}, {3, -9},  {6, -9}, {9, -9}};
-        const std::size_t points_size = std::extent<decltype(points)>::value;
+        std::size_t const points_size = std::extent<decltype(points)>::value;
 
         double x, y;
         unsigned cmd = mapnik::SEG_END;

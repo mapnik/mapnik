@@ -372,10 +372,10 @@ void format_properties::from_xml(xml_node const& node, fontset_map const& fontse
     set_property_from_xml<text_transform_e>(text_transform, "text-transform", node);
     set_property_from_xml<font_feature_settings>(ff_settings, "font-feature-settings", node);
 
-    const auto face_name_ = node.get_opt_attr<std::string>("face-name");
+    auto const face_name_ = node.get_opt_attr<std::string>("face-name");
     if (face_name_.has_value())
         face_name = *face_name_;
-    const auto fontset_name_ = node.get_opt_attr<std::string>("fontset-name");
+    auto const fontset_name_ = node.get_opt_attr<std::string>("fontset-name");
     if (fontset_name_.has_value())
     {
         std::map<std::string, font_set>::const_iterator itr = fontsets.find(*fontset_name_);

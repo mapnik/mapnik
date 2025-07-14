@@ -34,7 +34,7 @@ raster_info::raster_info(std::string const& file,
       height_(height)
 {}
 
-raster_info::raster_info(const raster_info& rhs)
+raster_info::raster_info(raster_info const& rhs)
     : file_(rhs.file_),
       format_(rhs.format_),
       extent_(rhs.extent_),
@@ -51,7 +51,7 @@ void raster_info::swap(raster_info& other)
     std::swap(height_, other.height_);
 }
 
-raster_info& raster_info::operator=(const raster_info& rhs)
+raster_info& raster_info::operator=(raster_info const& rhs)
 {
     raster_info tmp(rhs);
     swap(tmp);

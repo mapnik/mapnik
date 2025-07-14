@@ -92,7 +92,7 @@ class node : private mapnik::util::noncopyable
     ~node() { qDeleteAll(children_); }
 
   private:
-    const std::unique_ptr<node_base> impl_;
+    std::unique_ptr<node_base> const impl_;
     QList<node*> children_;
     node* parent_;
 };
@@ -360,7 +360,7 @@ int StyleModel::columnCount(QModelIndex const&) const
     return 1;
 }
 
-QVariant StyleModel::data(const QModelIndex& index, int role) const
+QVariant StyleModel::data(QModelIndex const& index, int role) const
 {
     // qDebug("data index::internalId() = %lld", index.internalId());
     if (!index.isValid())

@@ -43,7 +43,7 @@ class value_error : public std::exception
 
     virtual ~value_error() {}
 
-    virtual const char* what() const noexcept { return what_.c_str(); }
+    virtual char const* what() const noexcept { return what_.c_str(); }
 
     void append_context(std::string const& ctx) const { what_ += " " + ctx; }
 

@@ -33,7 +33,7 @@
 namespace mapnik {
 
 template<typename T>
-const typename hit_grid<T>::value_type hit_grid<T>::base_mask = std::numeric_limits<typename T::type>::min();
+typename hit_grid<T>::value_type const hit_grid<T>::base_mask = std::numeric_limits<typename T::type>::min();
 
 template<typename T>
 hit_grid<T>::hit_grid(std::size_t width, std::size_t height, std::string const& key)

@@ -136,10 +136,10 @@ void test_straight_line(double const& offset)
 
 void test_offset_curve(double const& offset)
 {
-    const double r = (1.0 + offset);
+    double const r = (1.0 + offset);
 
     std::vector<double> pos, off_pos;
-    const size_t max_i = 1000;
+    size_t const max_i = 1000;
     for (size_t i = 0; i <= max_i; ++i)
     {
         double x = mapnik::util::pi * double(i) / max_i;
@@ -193,11 +193,11 @@ void test_offset_curve(double const& offset)
 
 void test_s_shaped_curve(double const& offset)
 {
-    const double r = (1.0 + offset);
-    const double r2 = (1.0 - offset);
+    double const r = (1.0 + offset);
+    double const r2 = (1.0 - offset);
 
     std::vector<double> pos, off_pos;
-    const size_t max_i = 1000;
+    size_t const max_i = 1000;
     for (size_t i = 0; i <= max_i; ++i)
     {
         double x = mapnik::util::pi * double(i) / max_i;
@@ -372,7 +372,7 @@ TEST_CASE("offset converter")
 
     SECTION("offsect converter does not skip SEG_MOVETO or SEG_CLOSE vertices")
     {
-        const double offset = 0.2;
+        double const offset = 0.2;
 
         fake_path path = {};
         path.vertices_.emplace_back(-2, -2, mapnik::SEG_MOVETO);

@@ -67,7 +67,7 @@ class csv_featureset : public mapnik::Featureset
     char separator_;
     char quote_;
     std::vector<std::string> const& headers_;
-    const array_type index_array_;
+    array_type const index_array_;
     array_type::const_iterator index_itr_;
     array_type::const_iterator index_end_;
     mapnik::context_ptr ctx_;

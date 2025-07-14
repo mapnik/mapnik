@@ -60,13 +60,13 @@ struct set_property_from_xml_impl
     {
         try
         {
-            const auto val_ = node.get_opt_attr<target_type>(name);
+            auto const val_ = node.get_opt_attr<target_type>(name);
             if (val_)
                 val = *val_;
         }
         catch (config_error const& ex)
         {
-            const auto val_ = node.get_opt_attr<expression_ptr>(name);
+            auto const val_ = node.get_opt_attr<expression_ptr>(name);
             if (val_)
                 val = *val_;
             else
@@ -86,14 +86,14 @@ struct set_property_from_xml_impl<std::string, false>
     {
         try
         {
-            const auto val_ = node.get_opt_attr<expression_ptr>(name);
+            auto const val_ = node.get_opt_attr<expression_ptr>(name);
             if (!val_)
                 throw config_error("Failed to extract property");
             val = *val_;
         }
         catch (config_error const& ex)
         {
-            const auto val_ = node.get_opt_attr<target_type>(name);
+            auto const val_ = node.get_opt_attr<target_type>(name);
             if (val_)
             {
                 val = *val_;
@@ -115,7 +115,7 @@ struct set_property_from_xml_impl<T0, true>
     {
         try
         {
-            const auto enum_str = node.get_opt_attr<std::string>(name);
+            auto const enum_str = node.get_opt_attr<std::string>(name);
             if (enum_str)
             {
                 target_enum_type e;
@@ -125,7 +125,7 @@ struct set_property_from_xml_impl<T0, true>
         }
         catch (...)
         {
-            const auto expr = node.get_opt_attr<expression_ptr>(name);
+            auto const expr = node.get_opt_attr<expression_ptr>(name);
             if (expr)
                 val = *expr;
             else

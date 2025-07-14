@@ -114,21 +114,21 @@ class AsyncResultSet : public IResultSet,
         return next_res;
     }
 
-    virtual const char* getFieldName(int index) const { return rs_->getFieldName(index); }
+    virtual char const* getFieldName(int index) const { return rs_->getFieldName(index); }
 
     virtual int getFieldLength(int index) const { return rs_->getFieldLength(index); }
 
-    virtual int getFieldLength(const char* name) const { return rs_->getFieldLength(name); }
+    virtual int getFieldLength(char const* name) const { return rs_->getFieldLength(name); }
 
     virtual int getTypeOID(int index) const { return rs_->getTypeOID(index); }
 
-    virtual int getTypeOID(const char* name) const { return rs_->getTypeOID(name); }
+    virtual int getTypeOID(char const* name) const { return rs_->getTypeOID(name); }
 
     virtual bool isNull(int index) const { return rs_->isNull(index); }
 
-    virtual const char* getValue(int index) const { return rs_->getValue(index); }
+    virtual char const* getValue(int index) const { return rs_->getValue(index); }
 
-    virtual const char* getValue(const char* name) const { return rs_->getValue(name); }
+    virtual char const* getValue(char const* name) const { return rs_->getValue(name); }
 
   private:
     postgis_processor_context_ptr ctx_;

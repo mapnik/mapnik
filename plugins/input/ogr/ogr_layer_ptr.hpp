@@ -118,7 +118,7 @@ class ogr_layer_ptr
         // http://trac.osgeo.org/gdal/wiki/rfc28_sqlfunc
 
         OGRGeometry* spatial_filter = nullptr;
-        const char* sql_dialect = nullptr;
+        char const* sql_dialect = nullptr;
         OGRLayer* ogr_layer = datasource_->ExecuteSQL(layer_sql.c_str(), spatial_filter, sql_dialect);
 
         if (ogr_layer)
@@ -152,7 +152,7 @@ class ogr_layer_ptr
     {
         if (!is_valid_)
         {
-            const std::string err = CPLGetLastErrorMsg();
+            std::string const err = CPLGetLastErrorMsg();
             if (err.size() == 0)
             {
                 MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: Error getting layer";

@@ -32,7 +32,7 @@ namespace ogr_utils {
 
 using option_ptr = std::unique_ptr<char[], std::function<void(char*)>>;
 
-std::vector<option_ptr> split_open_options(const std::string& options);
+std::vector<option_ptr> split_open_options(std::string const& options);
 
 char** open_options_for_ogr(std::vector<ogr_utils::option_ptr>& options);
 

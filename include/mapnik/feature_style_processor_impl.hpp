@@ -248,7 +248,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
     box2d<double> buffered_query_ext(query_ext); // buffered
 
     double buffer_padding = 2.0 * scale * p.scale_factor();
-    const auto layer_buffer_size = lay.buffer_size();
+    auto const layer_buffer_size = lay.buffer_size();
     if (layer_buffer_size) // if layer overrides buffer size, use this value to compute buffered extent
     {
         buffer_padding *= *layer_buffer_size;
@@ -268,7 +268,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
     }
 
     box2d<double> layer_ext = lay.envelope();
-    const box2d<double> buffered_query_ext_map_srs = buffered_query_ext;
+    box2d<double> const buffered_query_ext_map_srs = buffered_query_ext;
     bool fw_success = false;
     bool early_return = false;
 

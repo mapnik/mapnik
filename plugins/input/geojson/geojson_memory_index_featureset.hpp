@@ -42,7 +42,7 @@ class geojson_memory_index_featureset : public mapnik::Featureset
   private:
     file_ptr file_;
     mapnik::value_integer feature_id_ = 1;
-    const array_type index_array_;
+    array_type const index_array_;
     array_type::const_iterator index_itr_;
     array_type::const_iterator index_end_;
     mapnik::context_ptr ctx_;

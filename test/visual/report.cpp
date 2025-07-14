@@ -212,7 +212,7 @@ void html_report::report(result const& r, mapnik::fs::path const& output_dir)
     }
 }
 
-constexpr const char* html_header = R"template(<!DOCTYPE html>
+constexpr char const* html_header = R"template(<!DOCTYPE html>
 <html>
 <head>
   <style>
@@ -233,7 +233,7 @@ constexpr const char* html_header = R"template(<!DOCTYPE html>
 <body>
 )template";
 
-constexpr const char* html_footer = R"template(</div>
+constexpr char const* html_footer = R"template(</div>
 </body>
 </html>)template";
 

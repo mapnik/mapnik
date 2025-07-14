@@ -47,7 +47,7 @@ transcoder::transcoder(std::string const& encoding)
     }
 }
 
-mapnik::value_unicode_string transcoder::transcode(const char* data, std::int32_t length) const
+mapnik::value_unicode_string transcoder::transcode(char const* data, std::int32_t length) const
 {
     UErrorCode err = U_ZERO_ERROR;
 

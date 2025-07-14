@@ -89,7 +89,7 @@ class rapidxml_loader : util::noncopyable
             // Parse using appropriate flags
             // https://github.com/mapnik/mapnik/issues/1856
             // const int f_tws = rapidxml::parse_normalize_whitespace;
-            const int f_tws = rapidxml::parse_trim_whitespace | rapidxml::parse_validate_closing_tags;
+            int const f_tws = rapidxml::parse_trim_whitespace | rapidxml::parse_validate_closing_tags;
             rapidxml::xml_document<> doc;
             doc.parse<f_tws>(&array.front());
 

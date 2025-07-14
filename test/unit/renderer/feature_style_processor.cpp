@@ -152,7 +152,7 @@ TEST_CASE("feature_style_processor")
         REQUIRE(result.end_style_processing == 1);
 
         REQUIRE(result.layer_query_extents.size() == 1);
-        const mapnik::box2d<double> reference_query_extent(-10, 0, 15, 20);
+        mapnik::box2d<double> const reference_query_extent(-10, 0, 15, 20);
         REQUIRE(result.layer_query_extents.front() == reference_query_extent);
 
         REQUIRE(result.geometries.size() == 2);
@@ -178,7 +178,7 @@ TEST_CASE("feature_style_processor")
         REQUIRE(result.end_style_processing == 1);
 
         REQUIRE(result.layer_query_extents.size() == 1);
-        const mapnik::box2d<double> reference_query_extent(-10, 0, 15, 20);
+        mapnik::box2d<double> const reference_query_extent(-10, 0, 15, 20);
         REQUIRE(result.layer_query_extents.front() == reference_query_extent);
 
         REQUIRE(result.geometries.size() == 2);
@@ -214,7 +214,7 @@ TEST_CASE("feature_style_processor")
         REQUIRE(result.end_style_processing == 1);
 
         REQUIRE(result.layer_query_extents.size() == 1);
-        const mapnik::box2d<double> reference_query_extent(-10, 0, 15, 20);
+        mapnik::box2d<double> const reference_query_extent(-10, 0, 15, 20);
         REQUIRE(result.layer_query_extents.front() == reference_query_extent);
 
         REQUIRE(result.geometries.size() == 2);

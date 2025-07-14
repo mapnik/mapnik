@@ -39,7 +39,7 @@ class geojson_featureset : public mapnik::Featureset
 
   private:
     std::vector<mapnik::feature_ptr> const& features_;
-    const array_type index_array_;
+    array_type const index_array_;
     array_type::const_iterator index_itr_;
     array_type::const_iterator index_end_;
 };

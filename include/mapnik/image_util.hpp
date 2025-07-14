@@ -63,7 +63,7 @@ class image_writer_exception : public std::exception
 
     ~image_writer_exception() {}
 
-    virtual const char* what() const noexcept { return message_.c_str(); }
+    virtual char const* what() const noexcept { return message_.c_str(); }
 };
 
 template<typename T>

@@ -69,8 +69,8 @@ class MAPNIK_DECL projection
     ~projection();
 
     projection& operator=(projection const& rhs);
-    bool operator==(const projection& other) const;
-    bool operator!=(const projection& other) const;
+    bool operator==(projection const& other) const;
+    bool operator!=(projection const& other) const;
     bool is_initialized() const;
     bool is_geographic() const;
     std::optional<well_known_srs_e> well_known() const;

@@ -115,7 +115,7 @@ class hit_grid_view
 
     inline T const& data() const { return data_; }
 
-    inline const unsigned char* raw_data() const { return data_.bytes(); }
+    inline unsigned char const* raw_data() const { return data_.bytes(); }
 
     inline std::set<std::string> const& get_fields() const { return names_; }
 

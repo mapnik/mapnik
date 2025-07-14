@@ -52,7 +52,7 @@ class tiles_datasource : public mapnik::datasource
     tiles_datasource(mapnik::parameters const& params);
     virtual ~tiles_datasource();
     mapnik::datasource::datasource_t type() const;
-    static const char* name();
+    static char const* name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;

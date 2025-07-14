@@ -35,7 +35,7 @@ class MAPNIK_DECL image_view<image_null>
 {
   public:
     using pixel_type = image_null::pixel_type;
-    static const image_dtype dtype = image_null::dtype;
+    static image_dtype const dtype = image_null::dtype;
 
     image_view() {}
     ~image_view(){};
@@ -55,8 +55,8 @@ class MAPNIK_DECL image_view<image_null>
     }
     std::size_t size() const { return 0; }
     std::size_t row_size() const { return 0; }
-    const pixel_type* get_row(std::size_t) const { return nullptr; }
-    const pixel_type* get_row(std::size_t, std::size_t) const { return nullptr; }
+    pixel_type const* get_row(std::size_t) const { return nullptr; }
+    pixel_type const* get_row(std::size_t, std::size_t) const { return nullptr; }
     bool get_premultiplied() const { return false; }
     double get_offset() const { return 0.0; }
     double get_scaling() const { return 1.0; }

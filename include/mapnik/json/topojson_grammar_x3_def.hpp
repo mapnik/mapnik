@@ -169,7 +169,7 @@ struct create_multi_polygon
     }
 };
 
-const auto create_geometry = [](auto const& ctx) {
+auto const create_geometry = [](auto const& ctx) {
     auto const geom_type = std::get<0>(_attr(ctx));
     auto const& coord = std::get<1>(_attr(ctx));
     auto const& arcs = std::get<2>(_attr(ctx));
@@ -199,27 +199,27 @@ const auto create_geometry = [](auto const& ctx) {
     _val(ctx) = std::move(geom);
 };
 
-const auto assign_bbox = [](auto const& ctx) {
+auto const assign_bbox = [](auto const& ctx) {
     _val(ctx).bbox = std::move(_attr(ctx));
 };
 
-const auto assign_transform = [](auto const& ctx) {
+auto const assign_transform = [](auto const& ctx) {
     _val(ctx).tr = std::move(_attr(ctx));
 };
 
-const auto assign_arcs = [](auto const& ctx) {
+auto const assign_arcs = [](auto const& ctx) {
     _val(ctx).arcs = std::move(_attr(ctx));
 };
 
-const auto assign_objects = [](auto const& ctx) {
+auto const assign_objects = [](auto const& ctx) {
     _val(ctx).geometries = std::move(_attr(ctx));
 };
 
-const auto push_geometry = [](auto const& ctx) {
+auto const push_geometry = [](auto const& ctx) {
     _val(ctx).push_back(std::move(_attr(ctx)));
 };
 
-const auto push_collection = [](auto const& ctx) {
+auto const push_collection = [](auto const& ctx) {
     auto& dest = _val(ctx);
     auto& src = _attr(ctx);
     if (dest.empty())
@@ -231,27 +231,27 @@ const auto push_collection = [](auto const& ctx) {
     }
 };
 
-const auto assign_geometry_type = [](auto const& ctx) {
+auto const assign_geometry_type = [](auto const& ctx) {
     std::get<0>(_val(ctx)) = _attr(ctx);
 };
 
-const auto assign_coordinates = [](auto const& ctx) {
+auto const assign_coordinates = [](auto const& ctx) {
     std::get<1>(_val(ctx)) = std::move(_attr(ctx));
 };
 
-const auto assign_rings = [](auto const& ctx) {
+auto const assign_rings = [](auto const& ctx) {
     std::get<2>(_val(ctx)) = std::move(_attr(ctx));
 };
 
-const auto assign_properties = [](auto const& ctx) {
+auto const assign_properties = [](auto const& ctx) {
     std::get<3>(_val(ctx)) = std::move(_attr(ctx));
 };
 
-const auto assign_prop_name = [](auto const& ctx) {
+auto const assign_prop_name = [](auto const& ctx) {
     std::get<0>(_val(ctx)) = std::move(_attr(ctx));
 };
 
-const auto assign_prop_value = [](auto const& ctx) {
+auto const assign_prop_value = [](auto const& ctx) {
     std::get<1>(_val(ctx)) = std::move(_attr(ctx));
 };
 
@@ -263,9 +263,9 @@ using x3::lit;
 using x3::omit;
 
 // import unicode string rule
-const auto json_string = json::grammar::unicode_string;
+auto const json_string = json::grammar::unicode_string;
 // json value
-const auto json_value = json::grammar::value;
+auto const json_value = json::grammar::value;
 
 using coordinates_type = util::variant<topojson::coordinate, std::vector<topojson::coordinate>>;
 using arcs_type = util::variant<std::vector<index_type>,

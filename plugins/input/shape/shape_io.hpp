@@ -100,10 +100,10 @@ struct shape_io : mapnik::util::noncopyable
     int id_;
     box2d<double> cur_extent_;
 
-    static const std::string SHP;
-    static const std::string SHX;
-    static const std::string DBF;
-    static const std::string INDEX;
+    static std::string const SHP;
+    static std::string const SHX;
+    static std::string const DBF;
+    static std::string const INDEX;
 };
 
 #endif // SHAPE_IO_HPP

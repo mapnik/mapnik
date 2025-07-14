@@ -68,7 +68,7 @@ class MAPNIK_DECL mapped_memory_file : public noncopyable
     static void deleteFile(std::string const& file_name);
 
   protected:
-    const std::string file_name_;
+    std::string const file_name_;
 #ifdef MAPNIK_MEMORY_MAPPED_FILE
     mapnik::mapped_region_ptr mapped_region_;
 #endif

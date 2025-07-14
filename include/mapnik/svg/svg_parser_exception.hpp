@@ -42,7 +42,7 @@ class MAPNIK_DECL svg_parser_exception : public std::exception
 
     ~svg_parser_exception() {}
 
-    virtual const char* what() const noexcept { return message_.c_str(); }
+    virtual char const* what() const noexcept { return message_.c_str(); }
 
   private:
     std::string message_;

@@ -37,7 +37,7 @@ rgb::rgb(rgba const& c)
 {}
 
 // ordering by mean(a,r,g,b), a, r, g, b
-bool rgba::mean_sort_cmp::operator()(const rgba& x, const rgba& y) const
+bool rgba::mean_sort_cmp::operator()(rgba const& x, rgba const& y) const
 {
     int t1 = x.a + x.r + x.g + x.b;
     int t2 = y.a + y.r + y.g + y.b;

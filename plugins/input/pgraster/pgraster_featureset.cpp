@@ -83,7 +83,7 @@ feature_ptr pgraster_featureset::next()
             }
             // create feature with user driven id from attribute
             int oid = rs_->getTypeOID(pos);
-            const char* buf = rs_->getValue(pos);
+            char const* buf = rs_->getValue(pos);
 
             // validation happens of this type at initialization
             mapnik::value_integer val;
@@ -128,7 +128,7 @@ feature_ptr pgraster_featureset::next()
 
         // parse geometry
         int size = rs_->getFieldLength(0);
-        const uint8_t* data = (const uint8_t*)rs_->getValue(0);
+        uint8_t const* data = (uint8_t const*)rs_->getValue(0);
 
         mapnik::raster_ptr raster = pgraster_wkb_reader::read(data, size, band_);
         if (!raster)
@@ -150,8 +150,8 @@ feature_ptr pgraster_featureset::next()
             // since it is equivalent to the attribute not existing
             if (!rs_->isNull(pos))
             {
-                const char* buf = rs_->getValue(pos);
-                const int oid = rs_->getTypeOID(pos);
+                char const* buf = rs_->getValue(pos);
+                int const oid = rs_->getTypeOID(pos);
                 switch (oid)
                 {
                     case 16: // bool

@@ -21,8 +21,8 @@ bool compare_images(std::string const& src_fn, std::string const& dest_fn)
         throw mapnik::image_reader_exception("Failed to load: " + src_fn);
     }
 
-    const mapnik::image_any desc_any = reader1->read(0, 0, reader1->width(), reader1->height());
-    const mapnik::image_any src_any = reader2->read(0, 0, reader2->width(), reader2->height());
+    mapnik::image_any const desc_any = reader1->read(0, 0, reader1->width(), reader1->height());
+    mapnik::image_any const src_any = reader2->read(0, 0, reader2->width(), reader2->height());
 
     mapnik::image_rgba8 const& dest = mapnik::util::get<mapnik::image_rgba8>(desc_any);
     mapnik::image_rgba8 const& src = mapnik::util::get<mapnik::image_rgba8>(src_any);

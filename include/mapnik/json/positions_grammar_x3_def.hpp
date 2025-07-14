@@ -35,7 +35,7 @@ using x3::double_;
 using x3::lit;
 using x3::omit;
 
-const auto assign_helper = [](auto const& ctx) {
+auto const assign_helper = [](auto const& ctx) {
     _val(ctx) = std::move(_attr(ctx));
 };
 

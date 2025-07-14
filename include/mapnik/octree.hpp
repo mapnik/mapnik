@@ -37,8 +37,8 @@ namespace mapnik {
 
 struct RGBPolicy
 {
-    const static unsigned MAX_LEVELS = 6;
-    const static unsigned MIN_LEVELS = 2;
+    static unsigned const MAX_LEVELS = 6;
+    static unsigned const MIN_LEVELS = 2;
     inline static unsigned index_from_level(unsigned level, rgb const& c)
     {
         unsigned shift = 7 - level;
@@ -88,7 +88,7 @@ class octree : private util::noncopyable
     };
     struct node_cmp
     {
-        bool operator()(const node* lhs, const node* rhs) const { return lhs->reduce_cost < rhs->reduce_cost; }
+        bool operator()(node const* lhs, node const* rhs) const { return lhs->reduce_cost < rhs->reduce_cost; }
     };
 
     std::deque<node*> reducible_[InsertPolicy::MAX_LEVELS];

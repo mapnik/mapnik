@@ -71,12 +71,12 @@ struct null_type
 {};
 struct blob
 {
-    blob(const char* buf, unsigned size)
+    blob(char const* buf, unsigned size)
         : buf_(buf),
           size_(size)
     {}
 
-    const char* buf_;
+    char const* buf_;
     unsigned size_;
 };
 
@@ -151,7 +151,7 @@ class prepared_statement : util::noncopyable
         : db_(db.db_.get()),
           stmt_(0)
     {
-        const char* tail;
+        char const* tail;
         // char * err_msg;
         int res = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt_, &tail);
         if (res != SQLITE_OK)

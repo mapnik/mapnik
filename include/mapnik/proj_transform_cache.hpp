@@ -31,7 +31,7 @@ class proj_transform; // fwd decl
 namespace proj_transform_cache {
 
 MAPNIK_DECL void init(std::string const& source, std::string const& dest);
-MAPNIK_DECL proj_transform const* get(std::string const& source, std::string const& dest);
+MAPNIK_DECL const proj_transform* get(std::string const& source, std::string const& dest);
 
 } // namespace proj_transform_cache
 } // namespace mapnik

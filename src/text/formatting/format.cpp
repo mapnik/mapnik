@@ -94,12 +94,12 @@ node_ptr format_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     set_property_from_xml<text_transform_e>(n->text_transform, "text-transform", xml);
     set_property_from_xml<font_feature_settings>(n->ff_settings, "font-feature-settings", xml);
 
-    const auto face_name = xml.get_opt_attr<std::string>("face-name");
+    auto const face_name = xml.get_opt_attr<std::string>("face-name");
     if (face_name.has_value())
     {
         n->face_name = *face_name;
     }
-    const auto fontset_name = xml.get_opt_attr<std::string>("fontset-name");
+    auto const fontset_name = xml.get_opt_attr<std::string>("fontset-name");
     if (fontset_name.has_value())
     {
         std::map<std::string, font_set>::const_iterator itr = fontsets.find(*fontset_name);

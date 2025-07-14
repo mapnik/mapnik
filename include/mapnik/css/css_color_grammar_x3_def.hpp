@@ -214,9 +214,9 @@ struct named_colors_ : x3::symbols<color>
     }
 } const named_colors;
 
-const x3::uint_parser<std::uint8_t, 16, 2, 2> hex2;
-const x3::uint_parser<std::uint8_t, 16, 1, 1> hex1;
-const x3::uint_parser<std::uint16_t, 10, 1, 3> dec3;
+x3::uint_parser<std::uint8_t, 16, 2, 2> const hex2;
+x3::uint_parser<std::uint8_t, 16, 1, 1> const hex1;
+x3::uint_parser<std::uint16_t, 10, 1, 3> const dec3;
 
 // rules
 x3::rule<class hex2_color, color> const hex2_color("hex2_color");
@@ -243,67 +243,67 @@ struct percent_converter
     static std::uint8_t call(double val) { return safe_cast<std::uint8_t>(std::lround((255.0 * val) / 100.0)); }
 };
 
-const auto dec_red = [](auto& ctx) {
+auto const dec_red = [](auto& ctx) {
     _val(ctx).red_ = _attr(ctx);
 };
 
-const auto dec_green = [](auto& ctx) {
+auto const dec_green = [](auto& ctx) {
     _val(ctx).green_ = _attr(ctx);
 };
 
-const auto dec_blue = [](auto& ctx) {
+auto const dec_blue = [](auto& ctx) {
     _val(ctx).blue_ = _attr(ctx);
 };
 
-const auto opacity = [](auto& ctx) {
+auto const opacity = [](auto& ctx) {
     _val(ctx).alpha_ = uint8_t((255.0 * clip_opacity::call(_attr(ctx))) + 0.5);
 };
 
-const auto percent_red = [](auto& ctx) {
+auto const percent_red = [](auto& ctx) {
     _val(ctx).red_ = percent_converter::call(_attr(ctx));
 };
 
-const auto percent_green = [](auto& ctx) {
+auto const percent_green = [](auto& ctx) {
     _val(ctx).green_ = percent_converter::call(_attr(ctx));
 };
 
-const auto percent_blue = [](auto& ctx) {
+auto const percent_blue = [](auto& ctx) {
     _val(ctx).blue_ = percent_converter::call(_attr(ctx));
 };
 
-const auto hex1_red = [](auto& ctx) {
+auto const hex1_red = [](auto& ctx) {
     _val(ctx).red_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
-const auto hex1_green = [](auto& ctx) {
+auto const hex1_green = [](auto& ctx) {
     _val(ctx).green_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
-const auto hex1_blue = [](auto& ctx) {
+auto const hex1_blue = [](auto& ctx) {
     _val(ctx).blue_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
-const auto hex1_opacity = [](auto& ctx) {
+auto const hex1_opacity = [](auto& ctx) {
     _val(ctx).alpha_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
-const auto hex2_red = [](auto& ctx) {
+auto const hex2_red = [](auto& ctx) {
     _val(ctx).red_ = _attr(ctx);
 };
 
-const auto hex2_green = [](auto& ctx) {
+auto const hex2_green = [](auto& ctx) {
     _val(ctx).green_ = _attr(ctx);
 };
 
-const auto hex2_blue = [](auto& ctx) {
+auto const hex2_blue = [](auto& ctx) {
     _val(ctx).blue_ = _attr(ctx);
 };
 
-const auto hex2_opacity = [](auto& ctx) {
+auto const hex2_opacity = [](auto& ctx) {
     _val(ctx).alpha_ = _attr(ctx);
 };
 
-const auto hsl_to_rgba = [](auto& ctx) {
+auto const hsl_to_rgba = [](auto& ctx) {
     double h = std::get<0>(_attr(ctx));
     double s = std::get<1>(_attr(ctx));
     double l = std::get<2>(_attr(ctx));
@@ -323,10 +323,10 @@ const auto hsl_to_rgba = [](auto& ctx) {
     }
     m1 = l * 2 - m2;
 
-    const double r = hue_to_rgb(m1, m2, h + 1.0 / 3.0);
-    const double g = hue_to_rgb(m1, m2, h);
-    const double b = hue_to_rgb(m1, m2, h - 1.0 / 3.0);
-    const uint8_t alpha = uint8_t((255.0 * clip_opacity::call(std::get<3>(_attr(ctx)))) + 0.5);
+    double const r = hue_to_rgb(m1, m2, h + 1.0 / 3.0);
+    double const g = hue_to_rgb(m1, m2, h);
+    double const b = hue_to_rgb(m1, m2, h - 1.0 / 3.0);
+    uint8_t const alpha = uint8_t((255.0 * clip_opacity::call(std::get<3>(_attr(ctx)))) + 0.5);
     _val(ctx) = color(safe_cast<uint8_t>(std::lround(255.0 * r)),
                       safe_cast<uint8_t>(std::lround(255.0 * g)),
                       safe_cast<uint8_t>(std::lround(255.0 * b)),

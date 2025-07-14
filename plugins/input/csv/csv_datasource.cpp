@@ -96,23 +96,23 @@ csv_datasource::csv_datasource(parameters const& params)
             separator_ = val.front();
     }
 
-    const auto ext = params.get<std::string>("extent");
+    auto const ext = params.get<std::string>("extent");
     if (ext && !ext->empty())
     {
         extent_initialized_ = extent_.from_string(*ext);
     }
 
-    const auto inline_string = params.get<std::string>("inline");
+    auto const inline_string = params.get<std::string>("inline");
     if (inline_string)
     {
         inline_string_ = *inline_string;
     }
     else
     {
-        const auto file = params.get<std::string>("file");
+        auto const file = params.get<std::string>("file");
         if (!file)
             throw mapnik::datasource_exception("CSV Plugin: missing <file> parameter");
-        const auto base = params.get<std::string>("base");
+        auto const base = params.get<std::string>("base");
         if (base)
             filename_ = *base + "/" + *file;
         else
@@ -234,7 +234,7 @@ void csv_datasource::add_feature(mapnik::value_integer index, mapnik::csv_line c
     }
 }
 
-const char* csv_datasource::name()
+char const* csv_datasource::name()
 {
     return "csv";
 }

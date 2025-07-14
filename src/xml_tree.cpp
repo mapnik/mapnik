@@ -80,7 +80,7 @@ DEFINE_NAME_TRAIT(font_feature_settings, "font-feature-settings")
 
 template<typename ENUM,
          char const* (*F_TO_STRING)(ENUM),
-         ENUM (*F_FROM_STRING)(const char*),
+         ENUM (*F_FROM_STRING)(char const*),
          std::map<ENUM, std::string> (*F_LOOKUP)()>
 struct name_trait<mapnik::enumeration<ENUM, F_TO_STRING, F_FROM_STRING, F_LOOKUP>>
 {
@@ -88,7 +88,7 @@ struct name_trait<mapnik::enumeration<ENUM, F_TO_STRING, F_FROM_STRING, F_LOOKUP
     static std::string name()
     {
         std::string value_list("one of [");
-        const auto lookup{Enum::lookupMap()};
+        auto const lookup{Enum::lookupMap()};
         for (auto it = lookup.cbegin(); it != lookup.cend(); it++)
         {
             value_list += it->second;
@@ -124,12 +124,12 @@ xml_node& xml_tree::root()
     return node_;
 }
 
-const xml_node& xml_tree::root() const
+xml_node const& xml_tree::root() const
 {
     return node_;
 }
 
-xml_attribute::xml_attribute(const char* value_)
+xml_attribute::xml_attribute(char const* value_)
     : value(value_),
       processed(false)
 {}
@@ -139,7 +139,7 @@ node_not_found::node_not_found(std::string const& node_name)
       msg_()
 {}
 
-const char* node_not_found::what() const noexcept
+char const* node_not_found::what() const noexcept
 {
     msg_ = std::string("Node " + node_name_ + "not found");
     return msg_.c_str();
@@ -153,7 +153,7 @@ attribute_not_found::attribute_not_found(std::string const& node_name, std::stri
       msg_()
 {}
 
-const char* attribute_not_found::what() const noexcept
+char const* attribute_not_found::what() const noexcept
 {
     msg_ = std::string("Attribute '" + attribute_name_ + "' not found in node '" + node_name_ + "'");
     return msg_.c_str();
@@ -166,7 +166,7 @@ more_than_one_child::more_than_one_child(std::string const& node_name)
       msg_()
 {}
 
-const char* more_than_one_child::what() const noexcept
+char const* more_than_one_child::what() const noexcept
 {
     msg_ = std::string("More than one child node in node '" + node_name_ + "'");
     return msg_.c_str();
@@ -230,13 +230,13 @@ bool xml_node::is(std::string const& name) const
     return false;
 }
 
-xml_node& xml_node::add_child(const char* name, unsigned line, bool is_text)
+xml_node& xml_node::add_child(char const* name, unsigned line, bool is_text)
 {
     children_.emplace_back(tree_, name, line, is_text);
     return children_.back();
 }
 
-void xml_node::add_attribute(const char* name, const char* value_)
+void xml_node::add_attribute(char const* name, char const* value_)
 {
     auto result = attributes_.emplace(name, xml_attribute(value_));
     if (!result.second)
@@ -364,7 +364,7 @@ T xml_node::get_attr(std::string const& name, T const& default_opt_value) const
 template<typename T>
 T xml_node::get_attr(std::string const& name) const
 {
-    const auto val = get_opt_attr<T>(name);
+    auto const val = get_opt_attr<T>(name);
     if (val)
         return *val;
     throw attribute_not_found(name_, name);
@@ -381,7 +381,7 @@ std::string const& xml_node::get_text() const
         }
         else
         {
-            const static std::string empty;
+            static std::string const empty;
             return empty;
         }
     }

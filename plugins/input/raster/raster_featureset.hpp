@@ -45,10 +45,10 @@ class single_file_policy
     {
         enum iterator_e { start, end };
         bool status_;
-        const single_file_policy* p_;
+        single_file_policy const* p_;
 
       public:
-        explicit const_iterator(const single_file_policy* p)
+        explicit const_iterator(single_file_policy const* p)
             : status_(start),
               p_(p)
         {}
@@ -57,7 +57,7 @@ class single_file_policy
             : status_(end)
         {}
 
-        const_iterator(const const_iterator& other)
+        const_iterator(const_iterator const& other)
             : status_(other.status_),
               p_(other.p_)
         {}
@@ -68,20 +68,20 @@ class single_file_policy
             return *this;
         }
 
-        const raster_info& operator*() const { return p_->info_; }
+        raster_info const& operator*() const { return p_->info_; }
 
-        const raster_info* operator->() const { return &(p_->info_); }
+        raster_info const* operator->() const { return &(p_->info_); }
 
-        bool operator!=(const const_iterator& itr) { return status_ != itr.status_; }
+        bool operator!=(const_iterator const& itr) { return status_ != itr.status_; }
     };
 
-    explicit single_file_policy(const raster_info& info)
+    explicit single_file_policy(raster_info const& info)
         : info_(info)
     {}
 
     const_iterator begin() { return const_iterator(this); }
 
-    const_iterator query(const box2d<double>& box)
+    const_iterator query(box2d<double> const& box)
     {
         if (box.intersects(info_.envelope()))
         {
@@ -196,10 +196,10 @@ class tiled_multi_file_policy
         // intersection of query with extent => new query
         box2d<double> e = bbox.intersect(extent);
 
-        const int x_min = int(std::floor((e.minx() - lox) / (tile_size * pixel_x)));
-        const int y_min = int(std::floor((e.miny() - loy) / (tile_size * pixel_y)));
-        const int x_max = int(std::ceil((e.maxx() - lox) / (tile_size * pixel_x)));
-        const int y_max = int(std::ceil((e.maxy() - loy) / (tile_size * pixel_y)));
+        int const x_min = int(std::floor((e.minx() - lox) / (tile_size * pixel_x)));
+        int const y_min = int(std::floor((e.miny() - loy) / (tile_size * pixel_y)));
+        int const x_max = int(std::ceil((e.maxx() - lox) / (tile_size * pixel_x)));
+        int const y_max = int(std::ceil((e.maxy() - loy) / (tile_size * pixel_y)));
 
         for (int x = x_min; x < x_max; ++x)
         {

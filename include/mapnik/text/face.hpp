@@ -70,7 +70,7 @@ class MAPNIK_DECL font_face : util::noncopyable
     bool init_color_font();
 
     FT_Face face_;
-    const bool color_font_;
+    bool const color_font_;
 };
 using face_ptr = std::shared_ptr<font_face>;
 

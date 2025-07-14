@@ -69,7 +69,7 @@ feature_ptr sqlite_featureset::next()
     while (rs_->is_valid() && rs_->step_next())
     {
         int size;
-        const char* data = (const char*)rs_->column_blob(0, size);
+        char const* data = (char const*)rs_->column_blob(0, size);
         if (data == 0)
         {
             return feature_ptr();
@@ -104,8 +104,8 @@ feature_ptr sqlite_featureset::next()
 
         for (int i = 2; i < rs_->column_count(); ++i)
         {
-            const int type_oid = rs_->column_type(i);
-            const char* fld_name = rs_->column_name(i);
+            int const type_oid = rs_->column_type(i);
+            char const* fld_name = rs_->column_name(i);
 
             if (!fld_name)
                 continue;
@@ -132,7 +132,7 @@ feature_ptr sqlite_featureset::next()
 
                 case SQLITE_TEXT: {
                     int text_col_size;
-                    const char* text_data = rs_->column_text(i, text_col_size);
+                    char const* text_data = rs_->column_text(i, text_col_size);
                     feature->put(fld_name_str, tr_->transcode(text_data, text_col_size));
                     break;
                 }

@@ -51,7 +51,7 @@ class sqlite_datasource : public mapnik::datasource
     sqlite_datasource(mapnik::parameters const& params);
     virtual ~sqlite_datasource();
     datasource::datasource_t type() const override;
-    static const char* name();
+    static char const* name();
     mapnik::featureset_ptr features(mapnik::query const& q) const override;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const override;
     mapnik::box2d<double> envelope() const override;
@@ -79,9 +79,9 @@ class sqlite_datasource : public mapnik::datasource
     int row_offset_;
     mapnik::value_integer row_limit_;
     // TODO - also add to postgis.input
-    const std::string intersects_token_;
-    const std::string pixel_width_token_;
-    const std::string pixel_height_token_;
+    std::string const intersects_token_;
+    std::string const pixel_width_token_;
+    std::string const pixel_height_token_;
     mapnik::layer_descriptor desc_;
     mapnik::wkbFormat format_;
     bool twkb_encoding_;

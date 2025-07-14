@@ -40,7 +40,7 @@ inline bool to_svg(std::string& svg, mapnik::geometry_type const& geom)
     using sink_type = std::back_insert_iterator<std::string>;
     sink_type sink(svg);
     mapnik::vertex_adapter va(geom);
-    static const svg::svg_path_generator<sink_type, mapnik::vertex_adapter> generator;
+    static svg::svg_path_generator<sink_type, mapnik::vertex_adapter> const generator;
     bool result = karma::generate(sink, generator, geom);
     return result;
 }

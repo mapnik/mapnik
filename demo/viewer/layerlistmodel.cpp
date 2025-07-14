@@ -87,7 +87,7 @@ QVariant LayerListModel::headerData(int section, Qt::Orientation orientation, in
         return QString("TODO Row %1").arg(section);
 }
 
-bool LayerListModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool LayerListModel::setData(QModelIndex const& index, QVariant const& value, int role)
 {
     if (!map_)
         return false;

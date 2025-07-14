@@ -23,7 +23,7 @@
 #include "ogr_utils.hpp"
 #include <mapnik/datasource.hpp>
 
-std::vector<ogr_utils::option_ptr> ogr_utils::split_open_options(const std::string& options)
+std::vector<ogr_utils::option_ptr> ogr_utils::split_open_options(std::string const& options)
 {
     size_t i;
     bool escaped = false; // if previous character was a backslash to escape a backslash or space

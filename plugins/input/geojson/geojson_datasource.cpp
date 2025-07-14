@@ -101,14 +101,14 @@ geojson_datasource::geojson_datasource(parameters const& params)
       num_features_to_query_(
         std::max(mapnik::value_integer(1), *params.get<mapnik::value_integer>("num_features_to_query", 5)))
 {
-    const auto inline_string = params.get<std::string>("inline");
+    auto const inline_string = params.get<std::string>("inline");
     if (!inline_string)
     {
-        const auto file = params.get<std::string>("file");
+        auto const file = params.get<std::string>("file");
         if (!file)
             throw mapnik::datasource_exception("GeoJSON Plugin: missing <file> parameter");
 
-        const auto base = params.get<std::string>("base");
+        auto const base = params.get<std::string>("base");
         if (base)
             filename_ = *base + "/" + *file;
         else
@@ -143,7 +143,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
         char const* start = file_buffer.c_str();
         char const* end = (count == 1) ? start + file_buffer.length() : start;
 #else
-        const auto mapped_region = mapnik::mapped_memory_cache::instance().find(filename_, false);
+        auto const mapped_region = mapnik::mapped_memory_cache::instance().find(filename_, false);
         if (!mapped_region.has_value())
         {
             throw std::runtime_error("could not get file mapping for " + filename_);
@@ -168,7 +168,7 @@ namespace {
 using box_type = box2d<double>;
 using boxes_type = std::vector<std::pair<box_type, std::pair<std::uint64_t, std::uint64_t>>>;
 using base_iterator_type = char const*;
-const mapnik::transcoder geojson_datasource_static_tr("utf8");
+mapnik::transcoder const geojson_datasource_static_tr("utf8");
 
 } // namespace
 
@@ -419,7 +419,7 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
 
 geojson_datasource::~geojson_datasource() {}
 
-const char* geojson_datasource::name()
+char const* geojson_datasource::name()
 {
     return "geojson";
 }

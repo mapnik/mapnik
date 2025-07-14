@@ -38,11 +38,11 @@ class StyleModel : public QAbstractItemModel
     QModelIndex parent(QModelIndex const& child) const;
     int rowCount(QModelIndex const& parent = QModelIndex()) const;
     int columnCount(QModelIndex const& parent = QModelIndex()) const;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+    QVariant data(QModelIndex const& index, int role = Qt::DisplayRole) const;
 
   private:
     // std::shared_ptr<mapnik::Map> map_;
-    const std::unique_ptr<node> root_;
+    std::unique_ptr<node> const root_;
 };
 
 #endif // STYLE_MODEL_HPP

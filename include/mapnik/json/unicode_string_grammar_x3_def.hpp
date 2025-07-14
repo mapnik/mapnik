@@ -35,7 +35,7 @@ namespace x3 = boost::spirit::x3;
 
 using uchar = std::uint32_t; // a unicode code point
 
-const auto append = [](auto const& ctx) {
+auto const append = [](auto const& ctx) {
     _val(ctx) += _attr(ctx);
 };
 
@@ -50,15 +50,15 @@ static inline void push_utf8_impl(std::string& str, uchar code_point)
 }
 } // namespace detail
 
-const auto push_char = [](auto const& ctx) {
+auto const push_char = [](auto const& ctx) {
     _val(ctx).push_back(_attr(ctx));
 };
 
-const auto push_utf8 = [](auto const& ctx) {
+auto const push_utf8 = [](auto const& ctx) {
     detail::push_utf8_impl(_val(ctx), _attr(ctx));
 };
 
-const auto push_utf16 = [](auto const& ctx) {
+auto const push_utf16 = [](auto const& ctx) {
     using iterator_type = std::vector<std::uint16_t>::const_iterator;
     auto const& utf16 = _attr(ctx);
     try
@@ -76,7 +76,7 @@ const auto push_utf16 = [](auto const& ctx) {
     }
 };
 
-const auto push_esc = [](auto const& ctx) {
+auto const push_esc = [](auto const& ctx) {
     std::string& utf8 = _val(ctx);
     char c = _attr(ctx);
     switch (c)

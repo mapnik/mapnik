@@ -78,7 +78,7 @@ class MAPNIK_DECL color : boost::equality_comparable<color>
     {}
 
     // copy ctor
-    color(const color& rhs)
+    color(color const& rhs)
         : red_(rhs.red_),
           green_(rhs.green_),
           blue_(rhs.blue_),

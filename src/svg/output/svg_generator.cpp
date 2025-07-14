@@ -61,7 +61,7 @@ template<typename OutputIterator>
 void svg_generator<OutputIterator>::generate_opening_root(root_output_attributes const& root_attributes)
 {
     using root_attributes_grammar = svg::svg_root_attributes_grammar<OutputIterator>;
-    static const root_attributes_grammar attributes_grammar;
+    static root_attributes_grammar const attributes_grammar;
     karma::lit_type lit;
     karma::generate(output_iterator_, lit("<svg ") << attributes_grammar << lit(">\n"), root_attributes);
 }
@@ -77,7 +77,7 @@ template<typename OutputIterator>
 void svg_generator<OutputIterator>::generate_rect(rect_output_attributes const& rect_attributes)
 {
     using rect_attributes_grammar = svg::svg_rect_attributes_grammar<OutputIterator>;
-    static const rect_attributes_grammar attributes_grammar;
+    static rect_attributes_grammar const attributes_grammar;
     karma::lit_type lit;
     karma::generate(output_iterator_, lit("<rect ") << attributes_grammar << lit("/>\n"), rect_attributes);
 }

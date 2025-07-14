@@ -33,7 +33,7 @@ struct vertex_equal
     template<typename T>
     bool operator()(T const& lhs, T const& rhs) const
     {
-        static const double eps = 1.0 / std::pow(10, N);
+        static double const eps = 1.0 / std::pow(10, N);
         return (std::fabs(std::get<0>(lhs) - std::get<0>(rhs)) < eps) &&
                (std::fabs(std::get<1>(lhs) - std::get<1>(rhs)) < eps) && std::get<2>(lhs) == std::get<2>(rhs);
     }

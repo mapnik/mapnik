@@ -47,14 +47,14 @@ MAPNIK_DISABLE_WARNING_POP
 #include <fstream>
 #include <memory>
 
-static std::string numeric2string(const char* buf)
+static std::string numeric2string(char const* buf)
 {
     std::int16_t ndigits = int2net(buf);
     std::int16_t weight = int2net(buf + 2);
     std::int16_t sign = int2net(buf + 4);
     std::int16_t dscale = int2net(buf + 6);
 
-    const std::unique_ptr<std::int16_t[]> digits(new std::int16_t[ndigits]);
+    std::unique_ptr<std::int16_t[]> const digits(new std::int16_t[ndigits]);
     for (int n = 0; n < ndigits; ++n)
     {
         digits[n] = int2net(buf + 8 + n * 2);
@@ -267,7 +267,7 @@ void pgsql2sqlite(Connection conn,
 
     for (unsigned pos = 0; pos < num_fields; ++pos)
     {
-        const char* field_name = cursor->getFieldName(pos);
+        char const* field_name = cursor->getFieldName(pos);
         ctx->push(field_name);
 
         if (pos > 0)
@@ -340,7 +340,7 @@ void pgsql2sqlite(Connection conn,
         sqlite::record_type output_rec;
         output_rec.push_back(sqlite::value_type(pkid));
         bool empty_geom = true;
-        const char* buf = 0;
+        char const* buf = 0;
         for (unsigned pos = 0; pos < num_fields; ++pos)
         {
             if (!cursor->isNull(pos))

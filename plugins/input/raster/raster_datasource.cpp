@@ -55,11 +55,11 @@ raster_datasource::raster_datasource(parameters const& params)
 {
     MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Initializing...";
 
-    const auto file = params.get<std::string>("file");
+    auto const file = params.get<std::string>("file");
     if (!file)
         throw datasource_exception("Raster Plugin: missing <file> parameter ");
 
-    const auto base = params.get<std::string>("base");
+    auto const base = params.get<std::string>("base");
     if (base)
         filename_ = *base + "/" + *file;
     else
@@ -69,15 +69,15 @@ raster_datasource::raster_datasource(parameters const& params)
     tile_size_ = *params.get<mapnik::value_integer>("tile_size", 1024);
     tile_stride_ = *params.get<mapnik::value_integer>("tile_stride", 1);
 
-    const auto format_from_filename = mapnik::type_from_filename(*file);
+    auto const format_from_filename = mapnik::type_from_filename(*file);
     format_ = *params.get<std::string>("format", format_from_filename ? (*format_from_filename) : "tiff");
 
-    const auto lox = params.get<mapnik::value_double>("lox");
-    const auto loy = params.get<mapnik::value_double>("loy");
-    const auto hix = params.get<mapnik::value_double>("hix");
-    const auto hiy = params.get<mapnik::value_double>("hiy");
+    auto const lox = params.get<mapnik::value_double>("lox");
+    auto const loy = params.get<mapnik::value_double>("loy");
+    auto const hix = params.get<mapnik::value_double>("hix");
+    auto const hiy = params.get<mapnik::value_double>("hiy");
 
-    const auto ext = params.get<std::string>("extent");
+    auto const ext = params.get<std::string>("extent");
 
     if (lox && loy && hix && hiy)
     {
@@ -108,8 +108,8 @@ raster_datasource::raster_datasource(parameters const& params)
 
     if (multi_tiles_)
     {
-        const auto x_width = params.get<mapnik::value_integer>("x_width");
-        const auto y_width = params.get<mapnik::value_integer>("y_width");
+        auto const x_width = params.get<mapnik::value_integer>("x_width");
+        auto const y_width = params.get<mapnik::value_integer>("y_width");
 
         if (!x_width)
         {
@@ -164,7 +164,7 @@ mapnik::datasource::datasource_t raster_datasource::type() const
     return datasource::Raster;
 }
 
-const char* raster_datasource::name()
+char const* raster_datasource::name()
 {
     return "raster";
 }
@@ -190,8 +190,8 @@ featureset_ptr raster_datasource::features(query const& q) const
     mapnik::box2d<double> intersect = extent_.intersect(q.get_bbox());
     mapnik::box2d<double> ext = t.forward(intersect);
 
-    const int width = int(ext.maxx() + 0.5) - int(ext.minx() + 0.5);
-    const int height = int(ext.maxy() + 0.5) - int(ext.miny() + 0.5);
+    int const width = int(ext.maxx() + 0.5) - int(ext.minx() + 0.5);
+    int const height = int(ext.maxy() + 0.5) - int(ext.miny() + 0.5);
 
     MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Box size=" << width << "," << height;
 

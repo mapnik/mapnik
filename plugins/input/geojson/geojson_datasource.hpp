@@ -95,7 +95,7 @@ class geojson_datasource : public mapnik::datasource
     geojson_datasource(mapnik::parameters const& params);
     virtual ~geojson_datasource();
     mapnik::datasource::datasource_t type() const override;
-    static const char* name();
+    static char const* name();
     mapnik::featureset_ptr features(mapnik::query const& q) const override;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const override;
     mapnik::box2d<double> envelope() const override;
@@ -118,7 +118,7 @@ class geojson_datasource : public mapnik::datasource
     std::unique_ptr<spatial_index_type> tree_;
     bool cache_features_ = true;
     bool has_disk_index_ = false;
-    const std::size_t num_features_to_query_;
+    std::size_t const num_features_to_query_;
 };
 
 #endif // GEOJSON_DATASOURCE_HPP

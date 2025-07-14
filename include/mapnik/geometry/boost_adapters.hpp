@@ -191,7 +191,7 @@ struct tag<mapnik::geometry::polygon<CoordinateType>>
 template<typename CoordinateType>
 struct point_order<mapnik::geometry::linear_ring<CoordinateType>>
 {
-    static const order_selector value = counterclockwise;
+    static order_selector const value = counterclockwise;
 };
 
 template<typename CoordinateType>

@@ -86,11 +86,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     mapnik::progress_timer __stats__(std::clog, "sqlite_datasource::init");
 #endif
 
-    const auto file = params.get<std::string>("file");
+    auto const file = params.get<std::string>("file");
     if (!file)
         throw datasource_exception("Sqlite Plugin: missing <file> parameter");
 
-    const auto base = params.get<std::string>("base");
+    auto const base = params.get<std::string>("base");
     if (base)
         dataset_name_ = *base + "/" + *file;
     else
@@ -106,11 +106,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     // TODO - remove this option once all datasources have an indexing api
     bool auto_index = *params.get<mapnik::boolean_type>("auto_index", true);
 
-    const auto ext = params.get<std::string>("extent");
+    auto const ext = params.get<std::string>("extent");
     if (ext.has_value())
         extent_initialized_ = extent_.from_string(*ext);
 
-    const auto wkb = params.get<std::string>("wkb_format");
+    auto const wkb = params.get<std::string>("wkb_format");
     if (wkb.has_value())
     {
         if (*wkb == "spatialite")
@@ -139,13 +139,13 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     // databases are relative to directory containing dataset_name_.  Sqlite
     // will default to attaching from cwd.  Typicaly usage means that the
     // map loader will produce full paths here.
-    const auto attachdb = params.get<std::string>("attachdb");
+    auto const attachdb = params.get<std::string>("attachdb");
     if (attachdb.has_value())
     {
         parse_attachdb(*attachdb);
     }
 
-    const auto initdb = params.get<std::string>("initdb");
+    auto const initdb = params.get<std::string>("initdb");
     if (initdb.has_value())
     {
         init_statements_.push_back(*initdb);
@@ -154,7 +154,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     // now actually create the connection and start executing setup sql
     dataset_ = std::make_shared<sqlite_connection>(dataset_name_);
 
-    const auto table_by_index = params.get<mapnik::value_integer>("table_by_index");
+    auto const table_by_index = params.get<mapnik::value_integer>("table_by_index");
 
     int passed_parameters = 0;
     passed_parameters += params.get<std::string>("table") ? 1 : 0;
@@ -407,7 +407,7 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
     }
 }
 
-const char* sqlite_datasource::name()
+char const* sqlite_datasource::name()
 {
     return "sqlite";
 }
@@ -447,7 +447,7 @@ std::optional<mapnik::datasource_geometry_t> sqlite_datasource::get_geometry_typ
         while (rs->is_valid() && rs->step_next())
         {
             int size;
-            const char* data = (const char*)rs->column_blob(0, size);
+            char const* data = (char const*)rs->column_blob(0, size);
             if (data)
             {
                 mapnik::geometry::geometry<double> geom;
@@ -495,8 +495,8 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
         std::ostringstream s;
 
-        const double px_gw = 1.0 / std::get<0>(q.resolution());
-        const double px_gh = 1.0 / std::get<1>(q.resolution());
+        double const px_gw = 1.0 / std::get<0>(q.resolution());
+        double const px_gh = 1.0 / std::get<1>(q.resolution());
 
         mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
 

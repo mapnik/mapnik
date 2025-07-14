@@ -129,9 +129,9 @@ struct agg_polygon_pattern : agg_pattern_base
         agg::render_scanlines(ras, sl, rp);
     }
 
-    const bool clip_;
-    const box2d<double> clip_box_;
-    const agg::trans_affine tr_;
+    bool const clip_;
+    box2d<double> const clip_box_;
+    agg::trans_affine const tr_;
     VertexConverter converter_;
 };
 

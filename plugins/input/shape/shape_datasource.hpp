@@ -54,7 +54,7 @@ class shape_datasource : public datasource
     shape_datasource(parameters const& params);
     virtual ~shape_datasource();
     datasource::datasource_t type() const override;
-    static const char* name();
+    static char const* name();
     featureset_ptr features(query const& q) const override;
     featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const override;
     box2d<double> envelope() const override;
@@ -70,7 +70,7 @@ class shape_datasource : public datasource
     long file_length_;
     box2d<double> extent_;
     bool indexed_;
-    const int row_limit_;
+    int const row_limit_;
     layer_descriptor desc_;
 };
 

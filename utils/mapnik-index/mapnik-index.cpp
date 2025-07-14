@@ -40,8 +40,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/program_options.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-const int DEFAULT_DEPTH = 8;
-const double DEFAULT_RATIO = 0.55;
+int const DEFAULT_DEPTH = 8;
+double const DEFAULT_RATIO = 0.55;
 
 namespace mapnik {
 namespace detail {

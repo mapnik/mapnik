@@ -56,9 +56,9 @@ DATASOURCE_PLUGIN_EXPORT(pgraster_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(pgraster_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(pgraster_datasource_plugin);
 
-const std::string pgraster_datasource::RASTER_COLUMNS = "raster_columns";
-const std::string pgraster_datasource::RASTER_OVERVIEWS = "raster_overviews";
-const std::string pgraster_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
+std::string const pgraster_datasource::RASTER_COLUMNS = "raster_columns";
+std::string const pgraster_datasource::RASTER_OVERVIEWS = "raster_overviews";
+std::string const pgraster_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
 using mapnik::attribute_descriptor;
 using mapnik::value_integer;
@@ -102,7 +102,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
         throw mapnik::datasource_exception("Pgraster Plugin: missing <table> parameter");
     }
 
-    const auto ext = params.get<std::string>("extent");
+    auto const ext = params.get<std::string>("extent");
     if (ext.has_value() && !ext->empty())
     {
         extent_initialized_ = extent_.from_string(*ext);
@@ -122,8 +122,8 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
         asynchronous_request_ = true;
     }
 
-    const auto initial_size = params.get<value_integer>("initial_size", 1);
-    const auto autodetect_key_field = params.get<mapnik::boolean_type>("autodetect_key_field", false);
+    auto const initial_size = params.get<value_integer>("initial_size", 1);
+    auto const autodetect_key_field = params.get<mapnik::boolean_type>("autodetect_key_field", false);
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
@@ -232,11 +232,11 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     }
                     if (srid_ == 0)
                     {
-                        const char* srid_c = rs->getValue("srid");
+                        char const* srid_c = rs->getValue("srid");
                         if (srid_c != nullptr)
                         {
                             int result = 0;
-                            const char* end = srid_c + std::strlen(srid_c);
+                            char const* end = srid_c + std::strlen(srid_c);
                             if (mapnik::util::string2int(srid_c, end, result))
                             {
                                 srid_ = result;
@@ -273,11 +273,11 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                 shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                 if (rs->next())
                 {
-                    const char* srid_c = rs->getValue("srid");
+                    char const* srid_c = rs->getValue("srid");
                     if (srid_c != nullptr)
                     {
                         int result = 0;
-                        const char* end = srid_c + std::strlen(srid_c);
+                        char const* end = srid_c + std::strlen(srid_c);
                         if (mapnik::util::string2int(srid_c, end, result))
                         {
                             srid_ = result;
@@ -388,7 +388,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     bool is_int = (std::string(rs_key->getValue(3)) == "t");
                     if (is_int)
                     {
-                        const char* key_field_string = rs_key->getValue(0);
+                        char const* key_field_string = rs_key->getValue(0);
                         if (key_field_string)
                         {
                             key_field_ = std::string(key_field_string);
@@ -573,7 +573,7 @@ pgraster_datasource::~pgraster_datasource()
     }
 }
 
-const char* pgraster_datasource::name()
+char const* pgraster_datasource::name()
 {
     return "pgraster";
 }
@@ -830,8 +830,8 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q, proces
             throw mapnik::datasource_exception(s_error.str());
         }
 
-        const double px_gw = 1.0 / std::get<0>(q.resolution());
-        const double px_gh = 1.0 / std::get<1>(q.resolution());
+        double const px_gw = 1.0 / std::get<0>(q.resolution());
+        double const px_gh = 1.0 / std::get<1>(q.resolution());
 
         MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: px_gw=" << px_gw << " px_gh=" << px_gh;
 
@@ -844,11 +844,11 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q, proces
             std::string sch = overviews_[0].schema;
             std::string tab = overviews_[0].table;
             col = overviews_[0].column;
-            const double scale = std::min(px_gw, px_gh);
+            double const scale = std::min(px_gw, px_gh);
             std::vector<pgraster_overview>::const_reverse_iterator i;
             for (i = overviews_.rbegin(); i != overviews_.rend(); ++i)
             {
-                const pgraster_overview& o = *i;
+                pgraster_overview const& o = *i;
                 if (o.scale < scale)
                 {
                     sch = o.schema;
@@ -895,7 +895,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q, proces
 
         if (prescale_rasters_)
         {
-            const double scale = std::min(px_gw, px_gh);
+            double const scale = std::min(px_gw, px_gh);
             s << ", least(1.0, abs(ST_ScaleX(" << identifier(col) << "))::float8/" << scale
               << "), least(1.0, abs(ST_ScaleY(" << identifier(col) << "))::float8/" << scale << "))";
             // TODO: if band_ is given, we'll interpret as indexed so
@@ -1067,7 +1067,7 @@ box2d<double> pgraster_datasource::envelope() const
             if (!overviews_.empty())
             {
                 // query from highest-factor overview instead
-                const pgraster_overview& o = overviews_.back();
+                pgraster_overview const& o = overviews_.back();
                 sch = o.schema;
                 tab = o.table;
                 col = o.column;

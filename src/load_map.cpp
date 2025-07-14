@@ -552,7 +552,7 @@ void map_parser::parse_style(Map& map, xml_node const& node)
 
         if (!map.insert_style(name, std::move(style)))
         {
-            boost::optional<const feature_type_style&> dupe = map.find_style(name);
+            boost::optional<feature_type_style const&> dupe = map.find_style(name);
             if (strict_)
             {
                 if (dupe)
@@ -848,8 +848,8 @@ void map_parser::parse_layer(Parent& parent, xml_node const& node)
                     }
                 }
 
-                const auto base_param = params.get<std::string>("base");
-                const auto file_param = params.get<std::string>("file");
+                auto const base_param = params.get<std::string>("base");
+                auto const file_param = params.get<std::string>("file");
 
                 if (base_param.has_value())
                 {
@@ -1460,7 +1460,7 @@ void map_parser::parse_raster_symbolizer(rule& rule, xml_node const& node)
             }
             else
             {
-                const auto method = scaling_method_from_string(scaling_method);
+                auto const method = scaling_method_from_string(scaling_method);
                 if (method.has_value())
                 {
                     put(raster_sym, keys::scaling, *method);
@@ -1561,7 +1561,7 @@ void map_parser::parse_group_symbolizer(rule& rule, xml_node const& node)
         put(symbol, keys::group_properties, prop);
         rule.append(std::move(symbol));
     }
-    catch (const config_error& ex)
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1700,7 +1700,7 @@ void map_parser::parse_group_rule(group_symbolizer_properties& prop, xml_node co
 
         prop.add_rule(std::move(rule));
     }
-    catch (const config_error& ex)
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;

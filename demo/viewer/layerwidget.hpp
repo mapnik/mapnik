@@ -37,8 +37,8 @@ class LayerTab : public QListView
     void layerInfo();
     void layerInfo2(QModelIndex const&);
   protected slots:
-    void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles);
-    void selectionChanged(const QItemSelection& selected, const QItemSelection&);
+    void dataChanged(QModelIndex const& topLeft, QModelIndex const& bottomRight, QVector<int> const& roles);
+    void selectionChanged(QItemSelection const& selected, QItemSelection const&);
 };
 
 class StyleTab : public QTreeView

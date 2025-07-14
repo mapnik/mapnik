@@ -159,7 +159,7 @@ struct do_xml_attribute_cast<double>
 // specialization for mapnik::enumeration<...>
 template<typename ENUM,
          char const* (*F_TO_STRING)(ENUM),
-         ENUM (*F_FROM_STRING)(const char*),
+         ENUM (*F_FROM_STRING)(char const*),
          std::map<ENUM, std::string> (*F_LOOKUP)()>
 struct do_xml_attribute_cast<mapnik::enumeration<ENUM, F_TO_STRING, F_FROM_STRING, F_LOOKUP>>
 {

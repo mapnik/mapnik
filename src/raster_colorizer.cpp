@@ -118,8 +118,8 @@ void raster_colorizer::colorize(image_rgba8& out,
     using image_type = T;
     using pixel_type = typename image_type::pixel_type;
 
-    const std::size_t width = std::min(in.width(), out.width());
-    const std::size_t height = std::min(in.height(), out.height());
+    std::size_t const width = std::min(in.width(), out.width());
+    std::size_t const height = std::min(in.height(), out.height());
     auto nodata_color = get_nodata_color<pixel_type>();
     for (std::size_t y = 0; y < height; ++y)
     {

@@ -38,7 +38,7 @@ class MAPNIK_DECL image<null_t>
 {
   public:
     using pixel_type = null_t::type;
-    static const image_dtype dtype = null_t::id;
+    static image_dtype const dtype = null_t::id;
 
   private:
   public:
@@ -65,7 +65,7 @@ class MAPNIK_DECL image<null_t>
     {
         throw std::runtime_error("Can not get or set values for null image");
     }
-    unsigned const char* bytes() const { return nullptr; }
+    unsigned char const* bytes() const { return nullptr; }
     unsigned char* bytes() { return nullptr; }
     double get_offset() const { return 0.0; }
     void set_offset(double) {}

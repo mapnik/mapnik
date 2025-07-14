@@ -58,7 +58,7 @@ class sqlite_resultset
 
     bool step_next()
     {
-        const int status = sqlite3_step(stmt_);
+        int const status = sqlite3_step(stmt_);
         if (status != SQLITE_ROW && status != SQLITE_DONE)
         {
             std::ostringstream s;
@@ -78,7 +78,7 @@ class sqlite_resultset
 
     int column_type(int col) { return sqlite3_column_type(stmt_, col); }
 
-    const char* column_name(int col) { return sqlite3_column_name(stmt_, col); }
+    char const* column_name(int col) { return sqlite3_column_name(stmt_, col); }
 
     bool column_isnull(int col) { return sqlite3_column_type(stmt_, col) == SQLITE_NULL; }
 
@@ -88,18 +88,18 @@ class sqlite_resultset
 
     double column_double(int col) { return sqlite3_column_double(stmt_, col); }
 
-    const char* column_text(int col, int& len)
+    char const* column_text(int col, int& len)
     {
         len = sqlite3_column_bytes(stmt_, col);
-        return (const char*)sqlite3_column_text(stmt_, col);
+        return (char const*)sqlite3_column_text(stmt_, col);
     }
 
-    const char* column_text(int col) { return (const char*)sqlite3_column_text(stmt_, col); }
+    char const* column_text(int col) { return (char const*)sqlite3_column_text(stmt_, col); }
 
-    const char* column_blob(int col, int& bytes)
+    char const* column_blob(int col, int& bytes)
     {
         bytes = sqlite3_column_bytes(stmt_, col);
-        return (const char*)sqlite3_column_blob(stmt_, col);
+        return (char const*)sqlite3_column_blob(stmt_, col);
     }
 
     sqlite3_stmt* get_statement() { return stmt_; }

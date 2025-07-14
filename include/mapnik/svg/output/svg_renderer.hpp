@@ -123,7 +123,7 @@ class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<Out
 
     inline OutputIterator& get_output_iterator() { return output_iterator_; }
 
-    inline const OutputIterator& get_output_iterator() const { return output_iterator_; }
+    inline OutputIterator const& get_output_iterator() const { return output_iterator_; }
 
   private:
     OutputIterator& output_iterator_;

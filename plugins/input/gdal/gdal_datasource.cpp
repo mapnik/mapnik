@@ -118,7 +118,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
 
     double tr[6];
     bool bbox_override = false;
-    const auto bbox_s = params.get<std::string>("extent");
+    auto const bbox_s = params.get<std::string>("extent");
     if (bbox_s.has_value())
     {
         MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: BBox Parameter=" << *bbox_s;
@@ -200,7 +200,7 @@ datasource::datasource_t gdal_datasource::type() const
     return datasource::Raster;
 }
 
-const char* gdal_datasource::name()
+char const* gdal_datasource::name()
 {
     return "gdal";
 }

@@ -42,7 +42,7 @@ namespace detail {
 
 // get squared distance from a point to a segment
 template<class T>
-T segment_dist_sq(const point<T>& p, const point<T>& a, const point<T>& b)
+T segment_dist_sq(point<T> const& p, point<T> const& a, point<T> const& b)
 {
     auto x = a.x;
     auto y = a.y;
@@ -73,17 +73,17 @@ T segment_dist_sq(const point<T>& p, const point<T>& a, const point<T>& b)
 
 // signed distance from point to polygon outline (negative if point is outside)
 template<class T>
-auto point_to_polygon_dist(const point<T>& point, const polygon<T>& polygon)
+auto point_to_polygon_dist(point<T> const& point, polygon<T> const& polygon)
 {
     bool inside = false;
     auto min_dist_sq = std::numeric_limits<double>::infinity();
 
-    for (const auto& ring : polygon)
+    for (auto const& ring : polygon)
     {
         for (std::size_t i = 0, len = ring.size(), j = len - 1; i < len; j = i++)
         {
-            const auto& a = ring[i];
-            const auto& b = ring[j];
+            auto const& a = ring[i];
+            auto const& b = ring[j];
 
             if ((a.y > point.y) != (b.y > point.y) && (point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x))
                 inside = !inside;
@@ -103,7 +103,7 @@ struct fitness_functor
           max_size(std::max(polygon_size.x, polygon_size.y))
     {}
 
-    T operator()(const point<T>& cell_center, T distance_polygon) const
+    T operator()(point<T> const& cell_center, T distance_polygon) const
     {
         if (distance_polygon <= 0)
         {
@@ -122,7 +122,7 @@ template<class T>
 struct cell
 {
     template<class FitnessFunc>
-    cell(const point<T>& c_, T h_, const polygon<T>& polygon, const FitnessFunc& ff)
+    cell(point<T> const& c_, T h_, polygon<T> const& polygon, FitnessFunc const& ff)
         : c(c_),
           h(h_),
           d(point_to_polygon_dist(c, polygon)),
@@ -140,13 +140,13 @@ struct cell
 template<class T>
 point<T> polylabel(polygon<T> const& polygon, box2d<T> const& bbox, T precision = 1)
 {
-    const point<T> size{bbox.width(), bbox.height()};
+    point<T> const size{bbox.width(), bbox.height()};
 
-    const T cell_size = std::min(size.x, size.y);
+    T const cell_size = std::min(size.x, size.y);
     T h = cell_size / 2;
 
     // a priority queue of cells in order of their "potential" (max distance to polygon)
-    auto compare_func = [](const cell<T>& a, const cell<T>& b) {
+    auto compare_func = [](cell<T> const& a, cell<T> const& b) {
         return a.max_fitness < b.max_fitness;
     };
     using Queue = std::priority_queue<cell<T>, std::vector<cell<T>>, decltype(compare_func)>;
@@ -215,7 +215,7 @@ bool interior(polygon<T> const& polygon, double scale_factor, point<T>& pt)
         return false;
     }
 
-    const box2d<T> bbox = envelope(polygon.at(0));
+    box2d<T> const bbox = envelope(polygon.at(0));
 
     // Let the precision be 1% of the polygon size to be independent to map scale.
     double precision = (std::max(bbox.width(), bbox.height()) / 100.0) * scale_factor;

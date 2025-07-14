@@ -53,7 +53,7 @@ void save_to_cairo_file(mapnik::Map const& map,
                         double scale_factor,
                         double scale_denominator)
 {
-    const auto type = type_from_filename(filename);
+    auto const type = type_from_filename(filename);
     if (type.has_value())
     {
         save_to_cairo_file(map, filename, *type, scale_factor, scale_denominator);

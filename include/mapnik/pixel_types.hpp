@@ -46,62 +46,62 @@ enum image_dtype : std::uint8_t {
 struct null_t
 {
     using type = std::uint8_t;
-    static const image_dtype id = image_dtype_null;
+    static image_dtype const id = image_dtype_null;
 };
 struct rgba8_t
 {
     using type = std::uint32_t;
-    static const image_dtype id = image_dtype_rgba8;
+    static image_dtype const id = image_dtype_rgba8;
 };
 struct gray8_t
 {
     using type = std::uint8_t;
-    static const image_dtype id = image_dtype_gray8;
+    static image_dtype const id = image_dtype_gray8;
 };
 struct gray8s_t
 {
     using type = std::int8_t;
-    static const image_dtype id = image_dtype_gray8s;
+    static image_dtype const id = image_dtype_gray8s;
 };
 struct gray16_t
 {
     using type = std::uint16_t;
-    static const image_dtype id = image_dtype_gray16;
+    static image_dtype const id = image_dtype_gray16;
 };
 struct gray16s_t
 {
     using type = std::int16_t;
-    static const image_dtype id = image_dtype_gray16s;
+    static image_dtype const id = image_dtype_gray16s;
 };
 struct gray32_t
 {
     using type = std::uint32_t;
-    static const image_dtype id = image_dtype_gray32;
+    static image_dtype const id = image_dtype_gray32;
 };
 struct gray32s_t
 {
     using type = std::int32_t;
-    static const image_dtype id = image_dtype_gray32s;
+    static image_dtype const id = image_dtype_gray32s;
 };
 struct gray32f_t
 {
     using type = float;
-    static const image_dtype id = image_dtype_gray32f;
+    static image_dtype const id = image_dtype_gray32f;
 };
 struct gray64_t
 {
     using type = std::uint64_t;
-    static const image_dtype id = image_dtype_gray64;
+    static image_dtype const id = image_dtype_gray64;
 };
 struct gray64s_t
 {
     using type = std::int64_t;
-    static const image_dtype id = image_dtype_gray64s;
+    static image_dtype const id = image_dtype_gray64s;
 };
 struct gray64f_t
 {
     using type = double;
-    static const image_dtype id = image_dtype_gray64f;
+    static image_dtype const id = image_dtype_gray64f;
 };
 
 } // namespace mapnik

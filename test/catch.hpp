@@ -623,7 +623,7 @@ class StringRef
 {
   public:
     using size_type = std::size_t;
-    using const_iterator = const char*;
+    using const_iterator = char const*;
 
   private:
     static constexpr char const* const s_empty = "";
@@ -2177,12 +2177,12 @@ inline id performOptionalSelector(id obj, SEL sel)
 namespace Catch {
 namespace Detail {
 
-extern const std::string unprintableString;
+extern std::string const unprintableString;
 
-std::string rawMemoryToString(const void* object, std::size_t size);
+std::string rawMemoryToString(void const* object, std::size_t size);
 
 template<typename T>
-std::string rawMemoryToString(const T& object)
+std::string rawMemoryToString(T const& object)
 {
     return rawMemoryToString(&object, sizeof(object));
 }
@@ -2197,7 +2197,7 @@ class IsStreamInsertable
     static auto test(...) -> std::false_type;
 
   public:
-    static const bool value = decltype(test<std::ostream, const T&>(0))::value;
+    static bool const value = decltype(test<std::ostream, T const&>(0))::value;
 };
 
 template<typename E>
@@ -2243,7 +2243,7 @@ struct StringMaker
 {
     template<typename Fake = T>
     static typename std::enable_if<::Catch::Detail::IsStreamInsertable<Fake>::value, std::string>::type
-      convert(const Fake& value)
+      convert(Fake const& value)
     {
         ReusableStringStream rss;
         // NB: call using the function-like syntax to avoid ambiguity with
@@ -2254,7 +2254,7 @@ struct StringMaker
 
     template<typename Fake = T>
     static typename std::enable_if<!::Catch::Detail::IsStreamInsertable<Fake>::value, std::string>::type
-      convert(const Fake& value)
+      convert(Fake const& value)
     {
 #if !defined(CATCH_CONFIG_FALLBACK_STRINGIFIER)
         return Detail::convertUnstreamable(value);
@@ -2269,7 +2269,7 @@ namespace Detail {
 // This function dispatches all stringification requests inside of Catch.
 // Should be preferably called fully qualified, like ::Catch::Detail::stringify
 template<typename T>
-std::string stringify(const T& e)
+std::string stringify(T const& e)
 {
     return ::Catch::StringMaker<typename std::remove_cv<typename std::remove_reference<T>::type>::type>::convert(e);
 }
@@ -2295,7 +2295,7 @@ std::string stringify(T ^ e)
 template<>
 struct StringMaker<std::string>
 {
-    static std::string convert(const std::string& str);
+    static std::string convert(std::string const& str);
 };
 
 #ifdef CATCH_CONFIG_CPP17_STRING_VIEW
@@ -2321,7 +2321,7 @@ struct StringMaker<char*>
 template<>
 struct StringMaker<std::wstring>
 {
-    static std::string convert(const std::wstring& wstr);
+    static std::string convert(std::wstring const& wstr);
 };
 
 #ifdef CATCH_CONFIG_CPP17_STRING_VIEW
@@ -2552,7 +2552,7 @@ namespace Catch {
 template<typename T1, typename T2>
 struct StringMaker<std::pair<T1, T2>>
 {
-    static std::string convert(const std::pair<T1, T2>& pair)
+    static std::string convert(std::pair<T1, T2> const& pair)
     {
         ReusableStringStream rss;
         rss << "{ " << ::Catch::Detail::stringify(pair.first) << ", " << ::Catch::Detail::stringify(pair.second)
@@ -2569,7 +2569,7 @@ namespace Catch {
 template<typename T>
 struct StringMaker<std::optional<T>>
 {
-    static std::string convert(const std::optional<T>& optional)
+    static std::string convert(std::optional<T> const& optional)
     {
         ReusableStringStream rss;
         if (optional.has_value())
@@ -2594,7 +2594,7 @@ namespace Detail {
 template<typename Tuple, std::size_t N = 0, bool = (N < std::tuple_size<Tuple>::value)>
 struct TupleElementPrinter
 {
-    static void print(const Tuple& tuple, std::ostream& os)
+    static void print(Tuple const& tuple, std::ostream& os)
     {
         os << (N ? ", " : " ") << ::Catch::Detail::stringify(std::get<N>(tuple));
         TupleElementPrinter<Tuple, N + 1>::print(tuple, os);
@@ -2604,7 +2604,7 @@ struct TupleElementPrinter
 template<typename Tuple, std::size_t N>
 struct TupleElementPrinter<Tuple, N, false>
 {
-    static void print(const Tuple&, std::ostream&) {}
+    static void print(Tuple const&, std::ostream&) {}
 };
 
 } // namespace Detail
@@ -2612,7 +2612,7 @@ struct TupleElementPrinter<Tuple, N, false>
 template<typename... Types>
 struct StringMaker<std::tuple<Types...>>
 {
-    static std::string convert(const std::tuple<Types...>& tuple)
+    static std::string convert(std::tuple<Types...> const& tuple)
     {
         ReusableStringStream rss;
         rss << '{';
@@ -2630,13 +2630,13 @@ namespace Catch {
 template<>
 struct StringMaker<std::monostate>
 {
-    static std::string convert(const std::monostate&) { return "{ }"; }
+    static std::string convert(std::monostate const&) { return "{ }"; }
 };
 
 template<typename... Elements>
 struct StringMaker<std::variant<Elements...>>
 {
-    static std::string convert(const std::variant<Elements...>& variant)
+    static std::string convert(std::variant<Elements...> const& variant)
     {
         if (variant.valueless_by_exception())
         {
@@ -2644,7 +2644,7 @@ struct StringMaker<std::variant<Elements...>>
         }
         else
         {
-            return std::visit([](const auto& value) { return ::Catch::Detail::stringify(value); }, variant);
+            return std::visit([](auto const& value) { return ::Catch::Detail::stringify(value); }, variant);
         }
     }
 };
@@ -2680,7 +2680,7 @@ struct is_range : detail::is_range_impl<T>
 template<typename T>
 struct is_range<T ^>
 {
-    static const bool value = false;
+    static bool const value = false;
 };
 #endif
 
@@ -2847,7 +2847,7 @@ struct StringMaker<std::chrono::time_point<std::chrono::system_clock, Duration>>
 
         auto const timeStampSize = sizeof("2017-01-16T17:06:45Z");
         char timeStamp[timeStampSize];
-        const char* const fmt = "%Y-%m-%dT%H:%M:%SZ";
+        char const* const fmt = "%Y-%m-%dT%H:%M:%SZ";
 
 #ifdef _MSC_VER
         std::strftime(timeStamp, timeStampSize, fmt, &timeInfo);
@@ -3244,7 +3244,7 @@ struct IResultCapture
 
     // Deprecated, do not use:
     virtual std::string getCurrentTestName() const = 0;
-    virtual const AssertionResult* getLastResult() const = 0;
+    virtual AssertionResult const* getLastResult() const = 0;
     virtual void exceptionEarlyReported() = 0;
 };
 
@@ -3779,7 +3779,7 @@ struct IMutableRegistryHub
     virtual void registerReporter(std::string const& name, IReporterFactoryPtr const& factory) = 0;
     virtual void registerListener(IReporterFactoryPtr const& factory) = 0;
     virtual void registerTest(TestCase const& testInfo) = 0;
-    virtual void registerTranslator(const IExceptionTranslator* translator) = 0;
+    virtual void registerTranslator(IExceptionTranslator const* translator) = 0;
     virtual void registerTagAlias(std::string const& alias, std::string const& tag, SourceLineInfo const& lineInfo) = 0;
     virtual void registerStartupException() noexcept = 0;
     virtual IMutableEnumValuesRegistry& getMutableEnumValuesRegistry() = 0;
@@ -3923,14 +3923,14 @@ class Approx
     {}
 
     template<typename T, typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
-    friend bool operator==(const T& lhs, Approx const& rhs)
+    friend bool operator==(T const& lhs, Approx const& rhs)
     {
         auto lhs_v = static_cast<double>(lhs);
         return rhs.equalityComparisonImpl(lhs_v);
     }
 
     template<typename T, typename = typename std::enable_if<std::is_constructible<double, T>::value>::type>
-    friend bool operator==(Approx const& lhs, const T& rhs)
+    friend bool operator==(Approx const& lhs, T const& rhs)
     {
         return operator==(rhs, lhs);
     }
@@ -4346,7 +4346,7 @@ namespace Matchers {
 namespace Generic {
 
 namespace Detail {
-std::string finalizeDescription(const std::string& desc);
+std::string finalizeDescription(std::string const& desc);
 }
 
 template<typename T>
@@ -4507,7 +4507,7 @@ struct ContainsMatcher : MatcherBase<std::vector<T, AllocMatch>>
         for (auto const& comparator : m_comparator)
         {
             auto present = false;
-            for (const auto& el : v)
+            for (auto const& el : v)
             {
                 if (el == comparator)
                 {
@@ -4825,14 +4825,14 @@ namespace Catch {
 
 class GeneratorException : public std::exception
 {
-    const char* const m_msg = "";
+    char const* const m_msg = "";
 
   public:
-    GeneratorException(const char* msg)
+    GeneratorException(char const* msg)
         : m_msg(msg)
     {}
 
-    const char* what() const noexcept override final;
+    char const* what() const noexcept override final;
 };
 
 namespace Generators {
@@ -4955,7 +4955,7 @@ class Generators : public IGenerator<T>
         {
             return false;
         }
-        const bool current_status = m_generators[m_current].next();
+        bool const current_status = m_generators[m_current].next();
         if (!current_status)
         {
             ++m_current;
@@ -5072,7 +5072,7 @@ class TakeGenerator : public IGenerator<T>
             return false;
         }
 
-        const auto success = m_generator.next();
+        auto const success = m_generator.next();
         // If the underlying generator does not contain enough values
         // then we cut short as well
         if (!success)
@@ -5175,7 +5175,7 @@ class RepeatGenerator : public IGenerator<T>
         // If it happily moves, we are left in that state, otherwise it is time to start reading from our cache
         if (m_current_repeat == 0)
         {
-            const auto success = m_generator.next();
+            auto const success = m_generator.next();
             if (!success)
             {
                 ++m_current_repeat;
@@ -5220,7 +5220,7 @@ class MapGenerator : public IGenerator<T>
     T const& get() const override { return m_cache; }
     bool next() override
     {
-        const auto success = m_generator.next();
+        auto const success = m_generator.next();
         if (success)
         {
             m_cache = m_function(m_generator.get());
@@ -5404,7 +5404,7 @@ class Option
     T& operator*() { return *nullableValue; }
     T const& operator*() const { return *nullableValue; }
     T* operator->() { return nullableValue; }
-    const T* operator->() const { return nullableValue; }
+    T const* operator->() const { return nullableValue; }
 
     T valueOr(T const& defaultValue) const { return nullableValue ? *nullableValue : defaultValue; }
 
@@ -5535,7 +5535,7 @@ class SimplePcg32
     // is chosen -- we take it as a constant for Catch2, so we only
     // need to deal with seeding the main state.
     // Picked by reading 8 bytes from `/dev/random` :-)
-    static const std::uint64_t s_inc = (0x13ed0cc53f939476ULL << 1ULL) | 1ULL;
+    static std::uint64_t const s_inc = (0x13ed0cc53f939476ULL << 1ULL) | 1ULL;
 };
 
 } // end namespace Catch
@@ -5890,7 +5890,7 @@ inline std::size_t registerTestMethods()
                     std::string testCaseName = methodName.substr(15);
                     std::string name = Detail::getAnnotation(cls, "Name", testCaseName);
                     std::string desc = Detail::getAnnotation(cls, "Description", testCaseName);
-                    const char* className = class_getName(cls);
+                    char const* className = class_getName(cls);
 
                     getMutableRegistryHub().registerTest(makeTestCase(new OcMethod(cls, selector),
                                                                       className,
@@ -6155,7 +6155,7 @@ class TestSpec
     bool hasFilters() const;
     bool matches(TestCaseInfo const& testCase) const;
     Matches matchesByFilter(std::vector<TestCase> const& testCases, IConfig const& config) const;
-    const vectorStrings& getInvalidArgs() const;
+    vectorStrings const& getInvalidArgs() const;
 
   private:
     std::vector<Filter> m_filters;
@@ -7626,7 +7626,7 @@ CompleteType_t<FunctionReturnType<Fun, Args...>> complete_invoke(Fun&& fun, Args
                                                                      std::forward<Args>(args)...);
 }
 
-const std::string benchmarkErrorMsg = "a benchmark failed to run successfully";
+std::string const benchmarkErrorMsg = "a benchmark failed to run successfully";
 } // namespace Detail
 
 template<typename Fun>
@@ -7952,7 +7952,7 @@ using run_for_at_least_argument_t =
 
 struct optimized_away_error : std::exception
 {
-    const char* what() const noexcept override { return "could not measure benchmark, maybe it was optimized away"; }
+    char const* what() const noexcept override { return "could not measure benchmark, maybe it was optimized away"; }
 };
 
 template<typename Clock, typename Fun>
@@ -7998,7 +7998,7 @@ struct ExecutionPlan
     }
 
     template<typename Clock>
-    std::vector<FloatDuration<Clock>> run(const IConfig& cfg, Environment<FloatDuration<Clock>> env) const
+    std::vector<FloatDuration<Clock>> run(IConfig const& cfg, Environment<FloatDuration<Clock>> env) const
     {
         // warmup a bit
         Detail::run_for_at_least<Clock>(std::chrono::duration_cast<ClockDuration<Clock>>(warmup_time),
@@ -8227,15 +8227,15 @@ std::vector<double> resolution(int k)
     return deltas;
 }
 
-const auto warmup_iterations = 10000;
-const auto warmup_time = std::chrono::milliseconds(100);
-const auto minimum_ticks = 1000;
-const auto warmup_seed = 10000;
-const auto clock_resolution_estimation_time = std::chrono::milliseconds(500);
-const auto clock_cost_estimation_time_limit = std::chrono::seconds(1);
-const auto clock_cost_estimation_tick_limit = 100000;
-const auto clock_cost_estimation_time = std::chrono::milliseconds(10);
-const auto clock_cost_estimation_iterations = 10000;
+auto const warmup_iterations = 10000;
+auto const warmup_time = std::chrono::milliseconds(100);
+auto const minimum_ticks = 1000;
+auto const warmup_seed = 10000;
+auto const clock_resolution_estimation_time = std::chrono::milliseconds(500);
+auto const clock_cost_estimation_time_limit = std::chrono::seconds(1);
+auto const clock_cost_estimation_tick_limit = 100000;
+auto const clock_cost_estimation_time = std::chrono::milliseconds(10);
+auto const clock_cost_estimation_iterations = 10000;
 
 template<typename Clock>
 int warmup()
@@ -8266,7 +8266,7 @@ EnvironmentEstimate<FloatDuration<Clock>> estimate_clock_cost(FloatDuration<Cloc
         return Detail::measure<Clock>([k] {
                    for (int i = 0; i < k; ++i)
                    {
-                       volatile auto ignored = Clock::now();
+                       auto volatile ignored = Clock::now();
                        (void)ignored;
                    }
                })
@@ -8363,7 +8363,7 @@ namespace Catch {
 namespace Benchmark {
 namespace Detail {
 template<typename Duration, typename Iterator>
-SampleAnalysis<Duration> analyse(const IConfig& cfg, Environment<Duration>, Iterator first, Iterator last)
+SampleAnalysis<Duration> analyse(IConfig const& cfg, Environment<Duration>, Iterator first, Iterator last)
 {
     if (!cfg.benchmarkNoAnalysis())
     {
@@ -8445,7 +8445,7 @@ struct Benchmark
     {}
 
     template<typename Clock>
-    ExecutionPlan<FloatDuration<Clock>> prepare(const IConfig& cfg, Environment<FloatDuration<Clock>> env) const
+    ExecutionPlan<FloatDuration<Clock>> prepare(IConfig const& cfg, Environment<FloatDuration<Clock>> env) const
     {
         auto min_time = env.clock_resolution.mean * Detail::minimum_ticks;
         auto run_time = std::max(min_time, std::chrono::duration_cast<decltype(min_time)>(cfg.benchmarkWarmupTime()));
@@ -8548,7 +8548,7 @@ struct ObjectStorage
         : data()
     {}
 
-    ObjectStorage(const ObjectStorage& other) { new (&data) T(other.stored_object()); }
+    ObjectStorage(ObjectStorage const& other) { new (&data) T(other.stored_object()); }
 
     ObjectStorage(ObjectStorage&& other) { new (&data) T(std::move(other.stored_object())); }
 
@@ -8917,7 +8917,7 @@ double erfc_inv(double x)
 
 double normal_quantile(double p)
 {
-    static const double ROOT_TWO = std::sqrt(2.0);
+    static double const ROOT_TWO = std::sqrt(2.0);
 
     double result = 0.0;
     assert(p >= 0 && p <= 1);
@@ -9057,7 +9057,7 @@ std::string Approx::toString() const
     return rss.str();
 }
 
-bool Approx::equalityComparisonImpl(const double other) const
+bool Approx::equalityComparisonImpl(double const other) const
 {
     // First try with fixed margin, then compute margin based on epsilon, scale and Approx's value
     // Thanks to Richard Harris for his help refining the scaled margin value
@@ -9293,7 +9293,7 @@ class RunContext : public IResultCapture,
 
     std::string getCurrentTestName() const override;
 
-    const AssertionResult* getLastResult() const override;
+    AssertionResult const* getLastResult() const override;
 
     void exceptionEarlyReported() override;
 
@@ -10055,13 +10055,13 @@ struct UnaryLambdaTraits : UnaryLambdaTraits<decltype(&L::operator())>
 template<typename ClassT, typename ReturnT, typename... Args>
 struct UnaryLambdaTraits<ReturnT (ClassT::*)(Args...) const>
 {
-    static const bool isValid = false;
+    static bool const isValid = false;
 };
 
 template<typename ClassT, typename ReturnT, typename ArgT>
 struct UnaryLambdaTraits<ReturnT (ClassT::*)(ArgT) const>
 {
-    static const bool isValid = true;
+    static bool const isValid = true;
     using ArgType = typename std::remove_const<typename std::remove_reference<ArgT>::type>::type;
     using ReturnType = ReturnT;
 };
@@ -10974,7 +10974,7 @@ struct Parser : ParserBase
             ParserBase const* parser = nullptr;
             size_t count = 0;
         };
-        const size_t totalParsers = m_options.size() + m_args.size();
+        size_t const totalParsers = m_options.size() + m_args.size();
         assert(totalParsers < 512);
         // ParserInfo parseInfos[totalParsers]; // <-- this is what we really want to do
         ParserInfo parseInfos[512];
@@ -11683,7 +11683,7 @@ class PosixColourImpl : public IColourImpl
     }
 
   private:
-    void setColour(const char* _escapeCode) { getCurrentContext().getConfig()->stream() << '\033' << _escapeCode; }
+    void setColour(char const* _escapeCode) { getCurrentContext().getConfig()->stream() << '\033' << _escapeCode; }
 };
 
 bool useColourOnPlatform()
@@ -11952,7 +11952,7 @@ bool isDebuggerActive()
     std::ifstream in("/proc/self/status");
     for (std::string line; std::getline(in, line);)
     {
-        static const int PREFIX_LEN = 11;
+        static int const PREFIX_LEN = 11;
         if (line.compare(0, PREFIX_LEN, "TracerPid:\t") == 0)
         {
             // We're traced if the PID is not 0 and no other PID starts
@@ -12117,7 +12117,7 @@ std::unique_ptr<EnumInfo> makeEnumInfo(StringRef enumName, StringRef allValueNam
     enumInfo->m_name = enumName;
     enumInfo->m_values.reserve(values.size());
 
-    const auto valueNames = Catch::Detail::parseEnums(allValueNames);
+    auto const valueNames = Catch::Detail::parseEnums(allValueNames);
     assert(valueNames.size() == values.size());
     std::size_t i = 0;
     for (auto value : values)
@@ -12165,7 +12165,7 @@ class ExceptionTranslatorRegistry : public IExceptionTranslatorRegistry
 {
   public:
     ~ExceptionTranslatorRegistry();
-    virtual void registerTranslator(const IExceptionTranslator* translator);
+    virtual void registerTranslator(IExceptionTranslator const* translator);
     std::string translateActiveException() const override;
     std::string tryTranslators() const;
 
@@ -12183,9 +12183,9 @@ namespace Catch {
 
 ExceptionTranslatorRegistry::~ExceptionTranslatorRegistry() {}
 
-void ExceptionTranslatorRegistry::registerTranslator(const IExceptionTranslator* translator)
+void ExceptionTranslatorRegistry::registerTranslator(IExceptionTranslator const* translator)
 {
-    m_translators.push_back(std::unique_ptr<const IExceptionTranslator>(translator));
+    m_translators.push_back(std::unique_ptr<IExceptionTranslator const>(translator));
 }
 
 #if !defined(CATCH_CONFIG_DISABLE_EXCEPTIONS)
@@ -12231,7 +12231,7 @@ std::string ExceptionTranslatorRegistry::translateActiveException() const
     {
         return msg;
     }
-    catch (const char* msg)
+    catch (char const* msg)
     {
         return msg;
     }
@@ -12314,7 +12314,7 @@ namespace Catch {
 struct SignalDefs
 {
     DWORD id;
-    const char* name;
+    char const* name;
 };
 
 // There is no 1-1 mapping between signals and windows exceptions.
@@ -12395,7 +12395,7 @@ namespace Catch {
 struct SignalDefs
 {
     int id;
-    const char* name;
+    char const* name;
 };
 
 static SignalDefs signalDefs[] = {{SIGINT, "SIGINT - Terminal interrupt signal"},
@@ -12508,7 +12508,7 @@ namespace Catch {
 
 IGeneratorTracker::~IGeneratorTracker() {}
 
-const char* GeneratorException::what() const noexcept
+char const* GeneratorException::what() const noexcept
 {
     return m_msg;
 }
@@ -13241,7 +13241,7 @@ WithinRelMatcher::WithinRelMatcher(double target, double epsilon)
 
 bool WithinRelMatcher::match(double const& matchee) const
 {
-    const auto relMargin = m_epsilon * (std::max)(std::fabs(matchee), std::fabs(m_target));
+    auto const relMargin = m_epsilon * (std::max)(std::fabs(matchee), std::fabs(m_target));
     return marginComparison(matchee, m_target, std::isinf(relMargin) ? 0 : relMargin);
 }
 
@@ -13294,7 +13294,7 @@ Floating::WithinRelMatcher WithinRel(float target)
 // end catch_matchers_floating.cpp
 // start catch_matchers_generic.cpp
 
-std::string Catch::Matchers::Generic::Detail::finalizeDescription(const std::string& desc)
+std::string Catch::Matchers::Generic::Detail::finalizeDescription(std::string const& desc)
 {
     if (desc.empty())
     {
@@ -13900,7 +13900,7 @@ namespace {
 // Safe rotr implementation thanks to John Regehr
 uint32_t rotate_right(uint32_t val, uint32_t count)
 {
-    const uint32_t mask = 31;
+    uint32_t const mask = 31;
     count &= mask;
     return (val >> count) | (val << (-count & mask));
 }
@@ -13937,8 +13937,8 @@ void SimplePcg32::discard(uint64_t skip)
 SimplePcg32::result_type SimplePcg32::operator()()
 {
     // prepare the output value
-    const uint32_t xorshifted = static_cast<uint32_t>(((m_state >> 18u) ^ m_state) >> 27u);
-    const auto output = rotate_right(xorshifted, m_state >> 59u);
+    uint32_t const xorshifted = static_cast<uint32_t>(((m_state >> 18u) ^ m_state) >> 27u);
+    auto const output = rotate_right(xorshifted, m_state >> 59u);
 
     // advance state
     m_state = m_state * 6364136223846793005ULL + s_inc;
@@ -14167,7 +14167,7 @@ class RegistryHub : public IRegistryHub,
     }
     void registerListener(IReporterFactoryPtr const& factory) override { m_reporterRegistry.registerListener(factory); }
     void registerTest(TestCase const& testInfo) override { m_testCaseRegistry.registerTest(testInfo); }
-    void registerTranslator(const IExceptionTranslator* translator) override
+    void registerTranslator(IExceptionTranslator const* translator) override
     {
         m_exceptionTranslatorRegistry.registerTranslator(translator);
     }
@@ -14355,7 +14355,7 @@ struct GeneratorTracker : TestCaseTracking::TrackerBase,
         // `SECTION`s.
         // **The check for m_children.empty cannot be removed**.
         // doing so would break `GENERATE` _not_ followed by `SECTION`s.
-        const bool should_wait_for_child = [&]() {
+        bool const should_wait_for_child = [&]() {
             // No children -> nobody to wait for
             if (m_children.empty())
             {
@@ -14647,7 +14647,7 @@ std::string RunContext::getCurrentTestName() const
     return m_activeTestCase ? m_activeTestCase->getTestCaseInfo().name : std::string();
 }
 
-const AssertionResult* RunContext::getLastResult() const
+AssertionResult const* RunContext::getLastResult() const
 {
     return &(*m_lastResult);
 }
@@ -15046,7 +15046,7 @@ Version const& libraryVersion();
 namespace Catch {
 
 namespace {
-const int MaxExitCode = 255;
+int const MaxExitCode = 255;
 
 IStreamingReporterPtr createReporter(std::string const& reporterName, IConfigPtr const& config)
 {
@@ -15189,7 +15189,7 @@ Session::Session()
 
     // There cannot be exceptions at startup in no-exception mode.
 #if !defined(CATCH_CONFIG_DISABLE_EXCEPTIONS)
-    const auto& exceptions = getRegistryHub().getStartupExceptionRegistry().getExceptions();
+    auto const& exceptions = getRegistryHub().getStartupExceptionRegistry().getExceptions();
     if (!exceptions.empty())
     {
         config();
@@ -15199,7 +15199,7 @@ Session::Session()
         Colour colourGuard(Colour::Red);
         Catch::cerr() << "Errors occurred during startup!" << '\n';
         // iterate over all exceptions and notify user
-        for (const auto& ex_ptr : exceptions)
+        for (auto const& ex_ptr : exceptions)
         {
             try
             {
@@ -15685,7 +15685,7 @@ std::string trim(std::string const& str)
 
 StringRef trim(StringRef ref)
 {
-    const auto is_ws = [](char c) {
+    auto const is_ws = [](char c) {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     };
     size_t real_begin = 0;
@@ -16031,12 +16031,12 @@ std::string TestCaseInfo::tagsAsString() const
     std::string ret;
     // '[' and ']' per tag
     std::size_t full_size = 2 * tags.size();
-    for (const auto& tag : tags)
+    for (auto const& tag : tags)
     {
         full_size += tag.size();
     }
     ret.reserve(full_size);
-    for (const auto& tag : tags)
+    for (auto const& tag : tags)
     {
         ret.push_back('[');
         ret.append(tag);
@@ -16099,17 +16099,17 @@ struct TestHasher
     uint32_t operator()(TestCase const& t) const
     {
         // FNV-1a hash with multiplication fold.
-        const hash_t prime = 1099511628211u;
+        hash_t const prime = 1099511628211u;
         hash_t hash = 14695981039346656037u;
-        for (const char c : t.name)
+        for (char const c : t.name)
         {
             hash ^= c;
             hash *= prime;
         }
         hash ^= m_hashSuffix;
         hash *= prime;
-        const uint32_t low{static_cast<uint32_t>(hash)};
-        const uint32_t high{static_cast<uint32_t>(hash >> 32)};
+        uint32_t const low{static_cast<uint32_t>(hash)};
+        uint32_t const high{static_cast<uint32_t>(hash >> 32)};
         return low * high;
     }
 
@@ -16665,7 +16665,7 @@ TestSpec::Matches TestSpec::matchesByFilter(std::vector<TestCase> const& testCas
     return matches;
 }
 
-const TestSpec::vectorStrings& TestSpec::getInvalidArgs() const
+TestSpec::vectorStrings const& TestSpec::getInvalidArgs() const
 {
     return (m_invalidArgs);
 }
@@ -16947,7 +16947,7 @@ TestSpec parseTestSpec(std::string const& arg)
 
 #include <chrono>
 
-static const uint64_t nanosecondsInSecond = 1000000000;
+static uint64_t const nanosecondsInSecond = 1000000000;
 
 namespace Catch {
 
@@ -16962,7 +16962,7 @@ namespace {
 auto estimateClockResolution() -> uint64_t
 {
     uint64_t sum = 0;
-    static const uint64_t iterations = 1000000;
+    static uint64_t const iterations = 1000000;
 
     auto startTime = getCurrentNanosecondsSinceEpoch();
 
@@ -17041,10 +17041,10 @@ namespace Catch {
 
 namespace Detail {
 
-const std::string unprintableString = "{?}";
+std::string const unprintableString = "{?}";
 
 namespace {
-const int hexThreshold = 255;
+int const hexThreshold = 255;
 
 struct Endianness
 {
@@ -17061,7 +17061,7 @@ struct Endianness
 };
 } // namespace
 
-std::string rawMemoryToString(const void* object, std::size_t size)
+std::string rawMemoryToString(void const* object, std::size_t size)
 {
     // Reverse order for little endian architectures
     int i = 0, end = static_cast<int>(size), inc = 1;
@@ -17107,7 +17107,7 @@ std::string fpToString(T value, int precision)
 //
 //// ======================================================= ////
 
-std::string StringMaker<std::string>::convert(const std::string& str)
+std::string StringMaker<std::string>::convert(std::string const& str)
 {
     if (!getCurrentContext().getConfig()->showInvisibles())
     {
@@ -17165,7 +17165,7 @@ std::string StringMaker<char*>::convert(char* str)
 }
 
 #ifdef CATCH_CONFIG_WCHAR
-std::string StringMaker<std::wstring>::convert(const std::wstring& wstr)
+std::string StringMaker<std::wstring>::convert(std::wstring const& wstr)
 {
     std::string s;
     s.reserve(wstr.size());
@@ -17936,7 +17936,7 @@ std::string getFormattedDuration(double duration)
     // + 1 for decimal point
     // + 3 for the 3 decimal places
     // + 1 for null terminator
-    const std::size_t maxDoubleSize = DBL_MAX_10_EXP + 1 + 1 + 3 + 1;
+    std::size_t const maxDoubleSize = DBL_MAX_10_EXP + 1 + 1 + 3 + 1;
     char buffer[maxDoubleSize];
 
     // Save previous errno, to prevent sprintf from overwriting it
@@ -17959,7 +17959,7 @@ bool shouldShowDuration(IConfig const& config, double duration)
     {
         return false;
     }
-    const double min = config.minDuration();
+    double const min = config.minDuration();
     return min >= 0 && duration >= min;
 }
 
@@ -18002,20 +18002,20 @@ bool TestEventListenerBase::assertionEnded(AssertionStats const&)
 namespace {
 
 #ifdef CATCH_PLATFORM_MAC
-const char* failedString()
+char const* failedString()
 {
     return "FAILED";
 }
-const char* passedString()
+char const* passedString()
 {
     return "PASSED";
 }
 #else
-const char* failedString()
+char const* failedString()
 {
     return "failed";
 }
-const char* passedString()
+char const* passedString()
 {
     return "passed";
 }
@@ -18042,7 +18042,7 @@ namespace {
 // - white: Passed [both/all] N test cases (no assertions).
 // -   red: Failed N tests cases, failed M assertions.
 // - green: Passed [both/all] N tests cases with M assertions.
-void printTotals(std::ostream& out, const Totals& totals)
+void printTotals(std::ostream& out, Totals const& totals)
 {
     if (totals.testCases.total() == 0)
     {
@@ -18051,7 +18051,7 @@ void printTotals(std::ostream& out, const Totals& totals)
     else if (totals.testCases.failed == totals.testCases.total())
     {
         Colour colour(Colour::ResultError);
-        const std::string qualify_assertions_failed =
+        std::string const qualify_assertions_failed =
           totals.assertions.failed == totals.assertions.total() ? bothOrAll(totals.assertions.failed) : std::string();
         out << "Failed " << bothOrAll(totals.testCases.failed) << pluralise(totals.testCases.failed, "test case")
             << ", "
@@ -18231,8 +18231,8 @@ class AssertionPrinter
         if (itMessage == messages.end())
             return;
 
-        const auto itEnd = messages.cend();
-        const auto N = static_cast<std::size_t>(std::distance(itMessage, itEnd));
+        auto const itEnd = messages.cend();
+        auto const N = static_cast<std::size_t>(std::distance(itMessage, itEnd));
 
         {
             Colour colourGuard(colour);
@@ -18530,10 +18530,10 @@ struct RowBreak
 class Duration
 {
     enum class Unit { Auto, Nanoseconds, Microseconds, Milliseconds, Seconds, Minutes };
-    static const uint64_t s_nanosecondsInAMicrosecond = 1000;
-    static const uint64_t s_nanosecondsInAMillisecond = 1000 * s_nanosecondsInAMicrosecond;
-    static const uint64_t s_nanosecondsInASecond = 1000 * s_nanosecondsInAMillisecond;
-    static const uint64_t s_nanosecondsInAMinute = 60 * s_nanosecondsInASecond;
+    static uint64_t const s_nanosecondsInAMicrosecond = 1000;
+    static uint64_t const s_nanosecondsInAMillisecond = 1000 * s_nanosecondsInAMicrosecond;
+    static uint64_t const s_nanosecondsInASecond = 1000 * s_nanosecondsInAMillisecond;
+    static uint64_t const s_nanosecondsInAMinute = 60 * s_nanosecondsInASecond;
 
     double m_inNanoseconds;
     Unit m_units;
@@ -18654,7 +18654,7 @@ class TablePrinter
     friend TablePrinter& operator<<(TablePrinter& tp, ColumnBreak)
     {
         auto colStr = tp.m_oss.str();
-        const auto strSize = colStr.size();
+        auto const strSize = colStr.size();
         tp.m_oss.str("");
         tp.open();
         if (tp.m_currentColumn == static_cast<int>(tp.m_columnInfos.size() - 1))
@@ -19099,7 +19099,7 @@ std::string getCurrentTimestamp()
 #endif
 
     char timeStamp[timeStampSize];
-    const char* const fmt = "%Y-%m-%dT%H:%M:%SZ";
+    char const* const fmt = "%Y-%m-%dT%H:%M:%SZ";
 
 #ifdef _MSC_VER
     std::strftime(timeStamp, timeStampSize, fmt, &timeInfo);
@@ -19109,7 +19109,7 @@ std::string getCurrentTimestamp()
     return std::string(timeStamp, timeStampSize - 1);
 }
 
-std::string fileNameTag(const std::vector<std::string>& tags)
+std::string fileNameTag(std::vector<std::string> const& tags)
 {
     auto it = std::find_if(begin(tags), end(tags), [](std::string const& tag) { return tag.front() == '#'; });
     if (it != tags.end())

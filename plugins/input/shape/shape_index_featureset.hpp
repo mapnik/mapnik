@@ -81,7 +81,7 @@ class shape_index_featureset : public Featureset
     filterT filter_;
     context_ptr ctx_;
     std::unique_ptr<shape_io> shape_ptr_;
-    const std::unique_ptr<mapnik::transcoder> tr_;
+    std::unique_ptr<mapnik::transcoder> const tr_;
     std::vector<mapnik::detail::node> positions_;
     std::vector<mapnik::detail::node>::iterator itr_;
     std::vector<int> attr_ids_;

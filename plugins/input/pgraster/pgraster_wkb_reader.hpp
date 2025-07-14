@@ -47,7 +47,7 @@ class pgraster_wkb_reader
 {
   public:
 
-    pgraster_wkb_reader(const uint8_t* wkb, int size, int bnd = 0)
+    pgraster_wkb_reader(uint8_t const* wkb, int size, int bnd = 0)
         : ptr_(wkb),
           bandno_(bnd)
     {}
@@ -60,7 +60,7 @@ class pgraster_wkb_reader
     ///            Any other value results in pixel
     ///            values being copied verbatim into the returned raster
     ///            for interpretation by the caller.
-    static mapnik::raster_ptr read(const uint8_t* wkb, int size, int bnd = 0)
+    static mapnik::raster_ptr read(uint8_t const* wkb, int size, int bnd = 0)
     {
         pgraster_wkb_reader reader(wkb, size, bnd);
         return reader.get_raster();
@@ -74,7 +74,7 @@ class pgraster_wkb_reader
     // int wkbsize_;
     // const uint8_t* wkb_;
     // const uint8_t* wkbend_;
-    const uint8_t* ptr_;
+    uint8_t const* ptr_;
     uint8_t endian_;
     int bandno_;
     uint16_t numBands_;

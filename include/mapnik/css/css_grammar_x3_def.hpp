@@ -157,20 +157,20 @@ using x3::raw;
 using x3::standard::space;
 
 // import unicode string rule
-const auto css_string = mapnik::json::grammar::unicode_string;
+auto const css_string = mapnik::json::grammar::unicode_string;
 
-const auto assign_def = [](auto const& ctx) {
+auto const assign_def = [](auto const& ctx) {
     for (auto const& k : std::get<0>(_attr(ctx)))
     {
         _val(ctx).emplace(k, std::get<1>(_attr(ctx)));
     }
 };
 
-const auto assign_key = [](auto const& ctx) {
+auto const assign_key = [](auto const& ctx) {
     _val(ctx).first = std::move(_attr(ctx));
 };
 
-const auto assign_value = [](auto const& ctx) {
+auto const assign_value = [](auto const& ctx) {
     _val(ctx).second = std::move(_attr(ctx));
 };
 

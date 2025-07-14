@@ -41,7 +41,7 @@ namespace mapnik {
 namespace util {
 namespace detail {
 
-std::string to_hex(const char* blob, std::size_t size)
+std::string to_hex(char const* blob, std::size_t size)
 {
     std::string buf;
     buf.reserve(size * 2);

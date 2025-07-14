@@ -100,8 +100,8 @@ class buffer_stack
     T& top() const { return *position_; }
 
   private:
-    const std::size_t width_;
-    const std::size_t height_;
+    std::size_t const width_;
+    std::size_t const height_;
     std::deque<T> buffers_;
     typename std::deque<T>::iterator position_;
 };
@@ -189,7 +189,7 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0>
     std::stack<std::reference_wrapper<buffer_type>> buffers_;
     buffer_stack<buffer_type> internal_buffers_;
     std::unique_ptr<buffer_type> inflated_buffer_;
-    const std::unique_ptr<rasterizer> ras_ptr;
+    std::unique_ptr<rasterizer> const ras_ptr;
     gamma_method_enum gamma_method_;
     double gamma_;
     renderer_common common_;

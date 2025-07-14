@@ -84,7 +84,7 @@ class spiral_iterator
     void rewind() { i_ = x_ = y_ = 0; }
 
   private:
-    const unsigned end_;
+    unsigned const end_;
     unsigned i_;
     int x_, y_;
 };
@@ -162,7 +162,7 @@ struct grid_vertex_converter
             // Polygon with huge area can lead to excessive memory allocation.
             // This is more or less arbitrarily chosen limit for the maximum bitmap resolution.
             // Bitmap bigger than this limit is scaled down to fit into this resolution.
-            const std::size_t max_size = 8192 * 8192;
+            std::size_t const max_size = 8192 * 8192;
             if (size > max_size)
             {
                 return std::sqrt(max_size / size);
@@ -220,11 +220,11 @@ struct grid_vertex_converter
         return vertex_processor.polygon_;
     }
 
-    const double hit_bitmap_scale_;
-    const T dx_, dy_;
-    const view_transform vt_;
-    const image_gray8 hit_bitmap_;
-    const mapnik::geometry::point<T> interior_;
+    double const hit_bitmap_scale_;
+    T const dx_, dy_;
+    view_transform const vt_;
+    image_gray8 const hit_bitmap_;
+    mapnik::geometry::point<T> const interior_;
     spiral_iterator si_;
 };
 

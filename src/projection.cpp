@@ -44,7 +44,7 @@ projection::projection(std::string const& params, bool defer_proj_init)
       proj_(nullptr),
       proj_ctx_(nullptr)
 {
-    const auto is_known = is_known_geographic(params_);
+    auto const is_known = is_known_geographic(params_);
     if (is_known.has_value())
     {
         is_geographic_ = *is_known;
@@ -84,12 +84,12 @@ projection& projection::operator=(projection const& rhs)
     return *this;
 }
 
-bool projection::operator==(const projection& other) const
+bool projection::operator==(projection const& other) const
 {
     return (params_ == other.params_);
 }
 
-bool projection::operator!=(const projection& other) const
+bool projection::operator!=(projection const& other) const
 {
     return !(*this == other);
 }

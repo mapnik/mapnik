@@ -47,7 +47,7 @@ class factory : public singleton<factory<product_type, key_type, Args...>>
         return map_.insert(typename product_map::value_type(key, creator)).second;
     }
 
-    bool unregister_product(const key_type& key) { return map_.erase(key) == 1; }
+    bool unregister_product(key_type const& key) { return map_.erase(key) == 1; }
 
     product_type* create_object(key_type const& key, Args... args)
     {

@@ -40,13 +40,13 @@ void LayerTab::paintEvent(QPaintEvent* e)
     QListView::paintEvent(e);
 }
 
-void LayerTab::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles)
+void LayerTab::dataChanged(QModelIndex const& topLeft, QModelIndex const& bottomRight, QVector<int> const& roles)
 {
     emit update_mapwidget();
     QListView::dataChanged(topLeft, bottomRight, roles);
 }
 
-void LayerTab::selectionChanged(const QItemSelection& selected, const QItemSelection&)
+void LayerTab::selectionChanged(QItemSelection const& selected, QItemSelection const&)
 {
     QModelIndexList list = selected.indexes();
     if (list.size() != 0)

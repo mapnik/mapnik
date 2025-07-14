@@ -68,37 +68,37 @@ namespace mapnik {
     } while (0)
 
 // read int16_t NDR (little endian)
-inline void read_int16_ndr(const char* data, std::int16_t& val)
+inline void read_int16_ndr(char const* data, std::int16_t& val)
 {
     std::memcpy(&val, data, 2);
 }
 
 // read int32_t NDR (little endian)
-inline void read_int32_ndr(const char* data, std::int32_t& val)
+inline void read_int32_ndr(char const* data, std::int32_t& val)
 {
     std::memcpy(&val, data, 4);
 }
 
 // read double NDR (little endian)
-inline void read_double_ndr(const char* data, double& val)
+inline void read_double_ndr(char const* data, double& val)
 {
     std::memcpy(&val, &data[0], 8);
 }
 
 // read int16_t XDR (big endian)
-inline void read_int16_xdr(const char* data, std::int16_t& val)
+inline void read_int16_xdr(char const* data, std::int16_t& val)
 {
     val = static_cast<std::int16_t>((data[3] & 0xff) | ((data[2] & 0xff) << 8));
 }
 
 // read int32_t XDR (big endian)
-inline void read_int32_xdr(const char* data, std::int32_t& val)
+inline void read_int32_xdr(char const* data, std::int32_t& val)
 {
     val = (data[3] & 0xff) | ((data[2] & 0xff) << 8) | ((data[1] & 0xff) << 16) | ((data[0] & 0xff) << 24);
 }
 
 // read double XDR (big endian)
-inline void read_double_xdr(const char* data, double& val)
+inline void read_double_xdr(char const* data, double& val)
 {
     std::int64_t bits =
       (static_cast<std::int64_t>(data[7]) & 0xff) | (static_cast<std::int64_t>(data[6]) & 0xff) << 8 |

@@ -88,7 +88,7 @@ std::string logger::str()
     {
         logger::format_env_check_ = false;
 
-        const char* log_format = std::getenv("MAPNIK_LOG_FORMAT");
+        char const* log_format = std::getenv("MAPNIK_LOG_FORMAT");
         if (log_format != nullptr)
         {
             logger::format_ = log_format;
@@ -97,7 +97,7 @@ std::string logger::str()
 #endif
 
     char buf[256];
-    const time_t tm = time(0);
+    time_t const tm = time(0);
     std::strftime(buf, sizeof(buf), logger::format_.c_str(), localtime(&tm));
     return buf;
 }

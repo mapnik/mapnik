@@ -52,10 +52,10 @@ class illegal_enum_value : public std::exception
     {}
     virtual ~illegal_enum_value() {}
 
-    virtual const char* what() const noexcept { return what_.c_str(); }
+    virtual char const* what() const noexcept { return what_.c_str(); }
 
   protected:
-    const std::string what_;
+    std::string const what_;
 };
 
 namespace detail {
@@ -89,7 +89,7 @@ constexpr EnumT EnumGetKey(EnumMapT<EnumT, N> const& map, char const* value, std
 
 template<typename ENUM,
          char const* (*F_TO_STRING)(ENUM),
-         ENUM (*F_FROM_STRING)(const char*),
+         ENUM (*F_FROM_STRING)(char const*),
          std::map<ENUM, std::string> (*F_LOOKUP)()>
 struct MAPNIK_DECL enumeration
 {
@@ -105,7 +105,7 @@ struct MAPNIK_DECL enumeration
         : value_(v)
     {}
 
-    void from_string(const std::string& str) { value_ = F_FROM_STRING(str.c_str()); }
+    void from_string(std::string const& str) { value_ = F_FROM_STRING(str.c_str()); }
     std::string as_string() const { return F_TO_STRING(value_); }
     static std::map<ENUM, std::string> lookupMap() { return F_LOOKUP(); }
 

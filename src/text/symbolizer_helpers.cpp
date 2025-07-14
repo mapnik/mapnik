@@ -399,11 +399,11 @@ text_symbolizer_helper::text_symbolizer_helper(text_symbolizer const& sym,
 void text_symbolizer_helper::init_converters()
 {
     // setup vertex converter
-    const value_bool clip = mapnik::get<value_bool, keys::clip>(sym_, feature_, vars_);
-    const value_double simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
-    const value_double smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
-    const value_double extend = mapnik::get<value_double, keys::extend>(sym_, feature_, vars_);
-    const auto offset = get_optional<value_double>(sym_, keys::offset, feature_, vars_);
+    value_bool const clip = mapnik::get<value_bool, keys::clip>(sym_, feature_, vars_);
+    value_double const simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
+    value_double const smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
+    value_double const extend = mapnik::get<value_double, keys::extend>(sym_, feature_, vars_);
+    auto const offset = get_optional<value_double>(sym_, keys::offset, feature_, vars_);
 
     if (clip)
     {

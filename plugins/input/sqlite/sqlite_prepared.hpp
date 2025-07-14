@@ -50,7 +50,7 @@ class prepared_index_statement : mapnik::util::noncopyable
         : ds_(ds),
           stmt_(0)
     {
-        const int rc = sqlite3_prepare_v2(*(*ds_), sql.c_str(), -1, &stmt_, 0);
+        int const rc = sqlite3_prepare_v2(*(*ds_), sql.c_str(), -1, &stmt_, 0);
 
         if (rc != SQLITE_OK)
         {
@@ -102,7 +102,7 @@ class prepared_index_statement : mapnik::util::noncopyable
 
     bool step_next()
     {
-        const int status = sqlite3_step(stmt_);
+        int const status = sqlite3_step(stmt_);
         if (status != SQLITE_DONE)
         {
             std::ostringstream s;

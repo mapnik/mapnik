@@ -66,25 +66,25 @@ struct entryv3
 namespace {
 struct varint_too_long_exception : std::exception
 {
-    const char* what() const noexcept override { return "varint too long exception"; }
+    char const* what() const noexcept override { return "varint too long exception"; }
 };
 
 struct end_of_buffer_exception : std::exception
 {
-    const char* what() const noexcept override { return "end of buffer exception"; }
+    char const* what() const noexcept override { return "end of buffer exception"; }
 };
 struct malformed_directory_exception : std::exception
 {
-    const char* what() const noexcept override { return "malformed directory exception"; }
+    char const* what() const noexcept override { return "malformed directory exception"; }
 };
 
-constexpr const int8_t max_varint_length = sizeof(uint64_t) * 8 / 7 + 1;
+constexpr int8_t const max_varint_length = sizeof(uint64_t) * 8 / 7 + 1;
 // from https://github.com/mapbox/protozero/blob/master/include/protozero/varint.hpp
-uint64_t decode_varint_impl(const char** data, const char* end)
+uint64_t decode_varint_impl(char const** data, char const* end)
 {
-    const auto* begin = reinterpret_cast<const int8_t*>(*data);
-    const auto* iend = reinterpret_cast<const int8_t*>(end);
-    const int8_t* p = begin;
+    auto const* begin = reinterpret_cast<int8_t const*>(*data);
+    auto const* iend = reinterpret_cast<int8_t const*>(end);
+    int8_t const* p = begin;
     uint64_t val = 0;
     if (iend - begin >= max_varint_length)
     { // fast path
@@ -168,16 +168,16 @@ uint64_t decode_varint_impl(const char** data, const char* end)
         val |= uint64_t(*p++) << shift;
     }
 
-    *data = reinterpret_cast<const char*>(p);
+    *data = reinterpret_cast<char const*>(p);
     return val;
 }
 
-uint64_t decode_varint(const char** data, const char* end)
+uint64_t decode_varint(char const** data, char const* end)
 {
     // If this is a one-byte varint, decode it here.
     if (end != *data && ((static_cast<uint64_t>(**data) & 0x80U) == 0))
     {
-        const auto val = static_cast<uint64_t>(**data);
+        auto const val = static_cast<uint64_t>(**data);
         ++(*data);
         return val;
     }
@@ -187,17 +187,17 @@ uint64_t decode_varint(const char** data, const char* end)
 
 inline std::vector<entryv3> deserialize_directory(std::string const& decompressed)
 {
-    const char* t = decompressed.data();
-    const char* end = t + decompressed.size();
+    char const* t = decompressed.data();
+    char const* end = t + decompressed.size();
 
-    const uint64_t num_entries_64bit = decode_varint(&t, end);
+    uint64_t const num_entries_64bit = decode_varint(&t, end);
     // Sanity check to avoid excessive memory allocation attempt:
     // each directory entry takes at least 4 bytes
     if (num_entries_64bit / 4U > decompressed.size())
     {
         throw malformed_directory_exception();
     }
-    const size_t num_entries = static_cast<size_t>(num_entries_64bit);
+    size_t const num_entries = static_cast<size_t>(num_entries_64bit);
     // std::cerr << "Decompressed size" << decompressed.size() << std::endl;
     std::vector<entryv3> result;
     result.resize(num_entries);
@@ -205,19 +205,19 @@ inline std::vector<entryv3> deserialize_directory(std::string const& decompresse
     uint64_t last_id = 0;
     for (std::size_t i = 0; i < num_entries; ++i)
     {
-        const uint64_t val = decode_varint(&t, end);
+        uint64_t const val = decode_varint(&t, end);
         if (val > std::numeric_limits<uint64_t>::max() - last_id)
         {
             throw malformed_directory_exception();
         }
-        const uint64_t tile_id = last_id + val;
+        uint64_t const tile_id = last_id + val;
         result[i].tile_id = tile_id;
         last_id = tile_id;
     }
 
     for (std::size_t i = 0; i < num_entries; ++i)
     {
-        const uint64_t val = decode_varint(&t, end);
+        uint64_t const val = decode_varint(&t, end);
         if (val > std::numeric_limits<uint32_t>::max())
         {
             throw malformed_directory_exception();
@@ -227,7 +227,7 @@ inline std::vector<entryv3> deserialize_directory(std::string const& decompresse
 
     for (size_t i = 0; i < num_entries; i++)
     {
-        const uint64_t val = decode_varint(&t, end);
+        uint64_t const val = decode_varint(&t, end);
         if (val > std::numeric_limits<uint32_t>::max())
         {
             throw malformed_directory_exception();

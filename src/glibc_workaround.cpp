@@ -34,8 +34,8 @@
 
 namespace std {
 
-void __throw_out_of_range_fmt(const char*, ...) __attribute__((__noreturn__));
-void __throw_out_of_range_fmt(const char* err, ...)
+void __throw_out_of_range_fmt(char const*, ...) __attribute__((__noreturn__));
+void __throw_out_of_range_fmt(char const* err, ...)
 {
     // Safe and over-simplified version. Ignore the format and print it as-is.
     __throw_out_of_range(err);

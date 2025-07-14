@@ -33,13 +33,13 @@ namespace mapnik {
 class view_transform
 {
   private:
-    const int width_;
-    const int height_;
-    const box2d<double> extent_;
-    const double sx_;
-    const double sy_;
-    const double offset_x_;
-    const double offset_y_;
+    int const width_;
+    int const height_;
+    box2d<double> const extent_;
+    double const sx_;
+    double const sy_;
+    double const offset_x_;
+    double const offset_y_;
     int offset_;
 
   public:

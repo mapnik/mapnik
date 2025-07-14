@@ -45,7 +45,7 @@ void assert_option(std::vector<ogr_utils::option_ptr> const& options, size_t con
 
 TEST_CASE("ogr")
 {
-    const bool have_ogr_plugin = mapnik::datasource_cache::instance().plugin_registered("ogr");
+    bool const have_ogr_plugin = mapnik::datasource_cache::instance().plugin_registered("ogr");
     if (have_ogr_plugin)
     {
         SECTION("ogr point feature")
@@ -73,7 +73,7 @@ TEST_CASE("ogr")
 
 TEST_CASE("ogr open_options")
 {
-    const bool have_ogr_plugin = mapnik::datasource_cache::instance().plugin_registered("ogr");
+    bool const have_ogr_plugin = mapnik::datasource_cache::instance().plugin_registered("ogr");
     if (have_ogr_plugin)
     {
         SECTION("splitting open_options string")

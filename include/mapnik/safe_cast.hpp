@@ -121,16 +121,16 @@ struct numeric_compare<T,
 template<typename T, typename Enable = void>
 struct bounds
 {
-    static const T lowest() { return static_cast<T>(-std::numeric_limits<T>::max()); }
-    static const T highest() { return std::numeric_limits<T>::max(); }
+    static T const lowest() { return static_cast<T>(-std::numeric_limits<T>::max()); }
+    static T const highest() { return std::numeric_limits<T>::max(); }
 };
 
 // integers
 template<typename T>
 struct bounds<T, typename std::enable_if<std::numeric_limits<T>::is_integer>::type>
 {
-    static const T lowest() { return std::numeric_limits<T>::min(); }
-    static const T highest() { return std::numeric_limits<T>::max(); }
+    static T const lowest() { return std::numeric_limits<T>::min(); }
+    static T const highest() { return std::numeric_limits<T>::max(); }
 };
 
 } // namespace detail
@@ -138,8 +138,8 @@ struct bounds<T, typename std::enable_if<std::numeric_limits<T>::is_integer>::ty
 template<typename T, typename S>
 inline T safe_cast(S s)
 {
-    static const auto max_val = detail::bounds<T>::highest();
-    static const auto min_val = detail::bounds<T>::lowest();
+    static auto const max_val = detail::bounds<T>::highest();
+    static auto const min_val = detail::bounds<T>::lowest();
 
     if (detail::numeric_compare<S, T>::greater(s, max_val))
     {

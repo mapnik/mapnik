@@ -122,10 +122,10 @@ struct rect_output_attributes
           fill_color_("#000000")
     {}
 
-    rect_output_attributes(const int x,
-                           const int y,
-                           const unsigned width,
-                           const unsigned height,
+    rect_output_attributes(int const x,
+                           int const y,
+                           unsigned const width,
+                           unsigned const height,
                            color const& _fill_color)
         : x_(x),
           y_(y),
@@ -134,10 +134,10 @@ struct rect_output_attributes
           fill_color_(_fill_color.to_hex_string())
     {}
 
-    void set_x(const int x);
-    void set_y(const int y);
-    void set_width(const unsigned width);
-    void set_height(const unsigned height);
+    void set_x(int const x);
+    void set_y(int const y);
+    void set_width(unsigned const width);
+    void set_height(unsigned const height);
     void set_fill_color(color const& fill_color);
 
     int x() const;
@@ -174,10 +174,10 @@ struct root_output_attributes
 {
     root_output_attributes();
 
-    root_output_attributes(const unsigned width, const unsigned height);
+    root_output_attributes(unsigned const width, unsigned const height);
 
-    void set_width(const unsigned width);
-    void set_height(const unsigned height);
+    void set_width(unsigned const width);
+    void set_height(unsigned const height);
     void set_svg_version(double svg_version);
     void set_svg_namespace_url(std::string const& svg_namespace_url);
 
@@ -192,9 +192,9 @@ struct root_output_attributes
     void reset();
 
     // SVG version to which the generated document will be compliant.
-    static const double SVG_VERSION;
+    static double const SVG_VERSION;
     // SVG XML namespace url.
-    static const std::string SVG_NAMESPACE_URL;
+    static std::string const SVG_NAMESPACE_URL;
 
     // private:
     unsigned width_;

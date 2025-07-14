@@ -70,7 +70,7 @@ class path_iterator : public boost::iterator_facade<path_iterator<T>,
     value_type const& dereference() const { return v_; }
 
     value_type v_;
-    const path_type* vertices_;
+    path_type const* vertices_;
 };
 
 // specialization for mapnik::path_type - vertex interface has been removed
@@ -110,7 +110,7 @@ class path_iterator<path_type> : public boost::iterator_facade<path_iterator<pat
     value_type const& dereference() const { return v_; }
 
     value_type v_;
-    const path_type* vertices_;
+    path_type const* vertices_;
     size_type pos_;
 };
 

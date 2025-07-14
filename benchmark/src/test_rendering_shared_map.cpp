@@ -64,7 +64,7 @@ class test : public benchmark::test_case
           preview_(*params.get<std::string>("preview", "")),
           im_(m_->width(), m_->height())
     {
-        const auto map = params.get<std::string>("map");
+        auto const map = params.get<std::string>("map");
         if (!map)
         {
             throw std::runtime_error("please provide a --map=<path to xml> arg");
@@ -133,8 +133,8 @@ class test : public benchmark::test_case
             mapnik::image_rgba8 const& src = im_;
             for (unsigned int y = 0; y < height_; ++y)
             {
-                const unsigned int* row_from = src.get_row(y);
-                const unsigned int* row_to = dest.get_row(y);
+                unsigned int const* row_from = src.get_row(y);
+                unsigned int const* row_to = dest.get_row(y);
                 for (unsigned int x = 0; x < width_; ++x)
                 {
                     if (row_from[x] != row_to[x])
@@ -156,7 +156,7 @@ int main(int argc, char** argv)
     {
         mapnik::parameters params;
         benchmark::handle_args(argc, argv, params);
-        const auto name = params.get<std::string>("name");
+        auto const name = params.get<std::string>("name");
         if (!name)
         {
             std::clog << "please provide a name for this test\n";

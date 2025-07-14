@@ -111,7 +111,7 @@ void save_as_jpeg(T1& file, int quality, T2 const& image)
     JSAMPLE* row = reinterpret_cast<JSAMPLE*>(::operator new(sizeof(JSAMPLE) * width * 3));
     while (cinfo.next_scanline < cinfo.image_height)
     {
-        const unsigned* imageRow = image.get_row(cinfo.next_scanline);
+        unsigned const* imageRow = image.get_row(cinfo.next_scanline);
         int index = 0;
         for (int i = 0; i < width; ++i)
         {

@@ -48,7 +48,7 @@ class MAPNIK_DECL datasource_cache : public singleton<datasource_cache, CreateSt
     friend class CreateStatic<datasource_cache>;
 
   public:
-    bool plugin_registered(const std::string& plugin_name) const;
+    bool plugin_registered(std::string const& plugin_name) const;
     std::vector<std::string> plugin_names() const;
     std::string plugin_directories();
     bool register_datasources(std::string const& path, bool recurse = false);

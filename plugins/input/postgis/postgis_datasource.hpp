@@ -67,10 +67,10 @@ DATASOURCE_PLUGIN_DEF(postgis_datasource_plugin, postgis);
 class postgis_datasource : public datasource
 {
   public:
-    postgis_datasource(const parameters& params);
+    postgis_datasource(parameters const& params);
     ~postgis_datasource();
     mapnik::datasource::datasource_t type() const override;
-    static const char* name();
+    static char const* name();
     processor_context_ptr get_context(feature_style_context_map&) const override;
     featureset_ptr features_with_context(query const& q, processor_context_ptr ctx) const override;
     featureset_ptr features(query const& q) const override;
@@ -94,15 +94,15 @@ class postgis_datasource : public datasource
                                               std::string const& sql,
                                               CnxPool_ptr const& pool,
                                               processor_context_ptr ctx = processor_context_ptr()) const;
-    static const std::string GEOMETRY_COLUMNS;
-    static const std::string SPATIAL_REF_SYS;
+    static std::string const GEOMETRY_COLUMNS;
+    static std::string const SPATIAL_REF_SYS;
 
-    const std::string uri_;
-    const std::string username_;
-    const std::string password_;
-    const std::string table_;
-    const std::string geometry_table_;
-    const std::string geometry_field_;
+    std::string const uri_;
+    std::string const username_;
+    std::string const password_;
+    std::string const table_;
+    std::string const geometry_table_;
+    std::string const geometry_field_;
     std::string parsed_schema_;
     std::string parsed_table_;
     std::string key_field_;

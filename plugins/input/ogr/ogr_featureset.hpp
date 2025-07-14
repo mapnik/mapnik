@@ -52,8 +52,8 @@ class ogr_featureset : public mapnik::Featureset
     mapnik::context_ptr ctx_;
     OGRLayer& layer_;
     OGRFeatureDefn* layerdef_;
-    const std::unique_ptr<mapnik::transcoder> tr_;
-    const char* fidcolumn_;
+    std::unique_ptr<mapnik::transcoder> const tr_;
+    char const* fidcolumn_;
     mutable int count_;
 };
 

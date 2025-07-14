@@ -59,7 +59,7 @@ class shape_featureset : public Featureset
     shape_io shape_;
     box2d<double> query_ext_;
     mutable box2d<double> feature_bbox_;
-    const std::unique_ptr<transcoder> tr_;
+    std::unique_ptr<transcoder> const tr_;
     long shx_file_length_;
     std::vector<int> attr_ids_;
     mapnik::value_integer row_limit_;

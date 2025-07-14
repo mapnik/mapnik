@@ -42,7 +42,7 @@ void LayerDelegate::paint(QPainter* painter, QStyleOptionViewItem const& option,
         painter->setBrush(QBrush(QColor(255, 120, 0, 127)));
 }
 
-QSize LayerDelegate::sizeHint(const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const
+QSize LayerDelegate::sizeHint(QStyleOptionViewItem const& /* option */, QModelIndex const& /* index */) const
 {
     return QSize(120, 24);
 }

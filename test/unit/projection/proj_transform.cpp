@@ -143,7 +143,7 @@ TEST_CASE("projection transform")
         //
         // wrong = mapnik.Box2d(-177.3145325044, -62.3337481525,
         //                       178.0277836332, -24.5845974912)
-        const mapnik::box2d<double> better(-180.0, -62.3337481525, 180.0, -24.5845974912);
+        mapnik::box2d<double> const better(-180.0, -62.3337481525, 180.0, -24.5845974912);
 
         {
             mapnik::box2d<double> ext(274000, 3087000, 3327000, 7173000);
@@ -177,7 +177,7 @@ TEST_CASE("projection transform")
         //        274000 7173000 # top-most
         //  END
         //
-        const mapnik::box2d<double> normal(148.7639922894, -60.1222810241, 159.9548489296, -24.9771195155);
+        mapnik::box2d<double> const normal(148.7639922894, -60.1222810241, 159.9548489296, -24.9771195155);
 
         {
             // checks for not being snapped (ie. not antimeridian)
@@ -214,7 +214,7 @@ TEST_CASE("projection transform")
         mapnik::proj_transform prj_trans_rev(prj_geog, prj_proj);
 
         // bounds
-        const mapnik::box2d<double> bounds{-180.0, 60.0, 180.0, 90.0};
+        mapnik::box2d<double> const bounds{-180.0, 60.0, 180.0, 90.0};
         {
             // projected bounds
             mapnik::box2d<double> projected_bounds{-3299207.53, -3333134.03, 3299207.53, 3333134.03};

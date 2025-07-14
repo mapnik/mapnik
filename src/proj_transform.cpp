@@ -133,8 +133,8 @@ proj_transform::proj_transform(projection const& source, projection const& dest)
     {
         is_source_longlat_ = source.is_geographic();
         is_dest_longlat_ = dest.is_geographic();
-        const auto src_k = source.well_known();
-        const auto dest_k = dest.well_known();
+        auto const src_k = source.well_known();
+        auto const dest_k = dest.well_known();
         bool known_trans = false;
         if (src_k && dest_k)
         {

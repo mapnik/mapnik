@@ -43,11 +43,11 @@
 
 using mapnik::datasource_exception;
 
-const int MAXDEPTH = 64;
-const int DEFAULT_DEPTH = 8;
-const double MINRATIO = 0.5;
-const double MAXRATIO = 0.8;
-const double DEFAULT_RATIO = 0.55;
+int const MAXDEPTH = 64;
+int const DEFAULT_DEPTH = 8;
+double const MINRATIO = 0.5;
+double const MAXRATIO = 0.8;
+double const DEFAULT_RATIO = 0.55;
 
 int main(int argc, char** argv)
 {
@@ -204,7 +204,7 @@ int main(int argc, char** argv)
             }
         }
         // catch problem at the datasource creation
-        catch (const mapnik::datasource_exception& ex)
+        catch (mapnik::datasource_exception const& ex)
         {
             std::clog << ex.what() << "\n";
             return -1;

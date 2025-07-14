@@ -15,7 +15,7 @@
 #include <iostream>
 
 // geojson box of the world
-const std::string
+std::string const
   geojson("{ \"type\": \"Feature\", \"properties\": { }, \"geometry\": { \"type\": \"Polygon\", \"coordinates\": [ [ [ "
           "-17963313.143242701888084, -6300857.11560364998877 ], [ -17963313.143242701888084, 13071343.332991421222687 "
           "], [ 7396658.353099936619401, 13071343.332991421222687 ], [ 7396658.353099936619401, "

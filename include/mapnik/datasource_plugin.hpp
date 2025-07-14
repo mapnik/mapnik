@@ -12,7 +12,7 @@ class MAPNIK_DECL datasource_plugin
     virtual ~datasource_plugin() = default;
     virtual void after_load() const = 0;
     virtual void before_unload() const = 0;
-    virtual const char* name() const = 0;
+    virtual char const* name() const = 0;
     virtual datasource_ptr create(parameters const& params) const = 0;
 };
 } // namespace mapnik

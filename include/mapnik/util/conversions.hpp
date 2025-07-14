@@ -41,21 +41,21 @@ by many other headers inside mapnik.
 */
 
 MAPNIK_DECL bool string2bool(std::string const& value, bool& result);
-MAPNIK_DECL bool string2bool(const char* iter, const char* end, bool& result);
+MAPNIK_DECL bool string2bool(char const* iter, char const* end, bool& result);
 
 MAPNIK_DECL bool string2int(std::string const& value, int& result);
-MAPNIK_DECL bool string2int(const char* iter, const char* end, int& result);
+MAPNIK_DECL bool string2int(char const* iter, char const* end, int& result);
 
 #ifdef BIGINT
 MAPNIK_DECL bool string2int(std::string const& value, mapnik::value_integer& result);
-MAPNIK_DECL bool string2int(const char* iter, const char* end, mapnik::value_integer& result);
+MAPNIK_DECL bool string2int(char const* iter, char const* end, mapnik::value_integer& result);
 #endif
 
 MAPNIK_DECL bool string2double(std::string const& value, double& result);
-MAPNIK_DECL bool string2double(const char* iter, const char* end, double& result);
+MAPNIK_DECL bool string2double(char const* iter, char const* end, double& result);
 
 MAPNIK_DECL bool string2float(std::string const& value, float& result);
-MAPNIK_DECL bool string2float(const char* iter, const char* end, float& result);
+MAPNIK_DECL bool string2float(char const* iter, char const* end, float& result);
 
 MAPNIK_DECL bool to_string(std::string& str, int value);
 #ifdef BIGINT

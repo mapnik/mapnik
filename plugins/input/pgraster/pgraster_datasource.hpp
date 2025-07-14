@@ -78,10 +78,10 @@ DATASOURCE_PLUGIN_DEF(pgraster_datasource_plugin, pgraster);
 class pgraster_datasource : public datasource
 {
   public:
-    pgraster_datasource(const parameters& params);
+    pgraster_datasource(parameters const& params);
     ~pgraster_datasource();
     mapnik::datasource::datasource_t type() const override;
-    static const char* name();
+    static char const* name();
     processor_context_ptr get_context(feature_style_context_map&) const override;
     featureset_ptr features_with_context(query const& q, processor_context_ptr ctx) const override;
     featureset_ptr features(query const& q) const override;
@@ -104,17 +104,17 @@ class pgraster_datasource : public datasource
                                               std::string const& sql,
                                               CnxPool_ptr const& pool,
                                               processor_context_ptr ctx = processor_context_ptr()) const;
-    static const std::string RASTER_COLUMNS;
-    static const std::string RASTER_OVERVIEWS;
-    static const std::string SPATIAL_REF_SYS;
+    static std::string const RASTER_COLUMNS;
+    static std::string const RASTER_OVERVIEWS;
+    static std::string const SPATIAL_REF_SYS;
 
-    const std::string uri_;
-    const std::string username_;
-    const std::string password_;
+    std::string const uri_;
+    std::string const username_;
+    std::string const password_;
     // table name (schema qualified or not) or subquery
-    const std::string table_;
-    const std::string raster_table_; // possibly schema-qualified
-    const std::string raster_field_;
+    std::string const table_;
+    std::string const raster_table_; // possibly schema-qualified
+    std::string const raster_field_;
     std::string parsed_schema_; // extracted from raster_table_ or table_
     std::string parsed_table_;  // extracted from raster_table_ or table_
     std::string key_field_;

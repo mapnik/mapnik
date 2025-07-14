@@ -40,7 +40,7 @@ class MAPNIK_DECL memory_datasource : public datasource
 
   public:
     memory_datasource(parameters const& params);
-    static const char* name();
+    static char const* name();
     virtual ~memory_datasource();
     virtual datasource::datasource_t type() const;
     virtual featureset_ptr features(query const& q) const;

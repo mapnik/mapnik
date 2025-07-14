@@ -35,30 +35,30 @@ namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
-const auto make_null = [](auto const& ctx) {
+auto const make_null = [](auto const& ctx) {
     _val(ctx) = mapnik::value_null{};
 };
 
-const auto make_true = [](auto const& ctx) {
+auto const make_true = [](auto const& ctx) {
     _val(ctx) = true;
 };
 
-const auto make_false = [](auto const& ctx) {
+auto const make_false = [](auto const& ctx) {
     _val(ctx) = false;
 };
 
-const auto assign = [](auto const& ctx) {
+auto const assign = [](auto const& ctx) {
     _val(ctx) = std::move(_attr(ctx));
 };
 
-const auto assign_key = [](auto const& ctx) {
+auto const assign_key = [](auto const& ctx) {
     std::string const& name = _attr(ctx);
     keys_map& keys = x3::get<keys_tag>(ctx);
     auto result = keys.insert(keys_map::value_type(name, keys.size() + 1));
     std::get<0>(_val(ctx)) = result.first->right;
 };
 
-const auto assign_value = [](auto const& ctx) {
+auto const assign_value = [](auto const& ctx) {
     std::get<1>(_val(ctx)) = std::move(_attr(ctx));
 };
 
@@ -95,9 +95,9 @@ auto const geojson_double = x3::real_parser<value_double, x3::strict_real_polici
 auto const geojson_integer = x3::int_parser<value_integer, 10, 1, -1>();
 
 // import unicode string rule
-const auto geojson_string = unicode_string;
+auto const geojson_string = unicode_string;
 // import positions rule
-const auto positions_rule = positions;
+auto const positions_rule = positions;
 
 // GeoJSON types
 // clang-format off

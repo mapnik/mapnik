@@ -106,7 +106,7 @@ PluginInfo::PluginInfo(std::string const& filename, std::string const& library_n
     }
     else
     {
-        const auto errcode = dlerror();
+        auto const errcode = dlerror();
 #ifdef _WIN32
         module_->error_str = std::system_category().message(errcode);
 #else

@@ -54,7 +54,7 @@ inline int parse_args(int argc, char** argv, mapnik::parameters& params)
 {
     for (int i = 1; i < argc; ++i)
     {
-        const char* opt = argv[i];
+        char const* opt = argv[i];
         if (opt[0] != '-')
         {
             // non-option argument, return its index
@@ -145,14 +145,14 @@ struct big_number_fmt
 {
     int w;
     double v;
-    const char* u;
+    char const* u;
 
     big_number_fmt(int width, double value, int base = 1000)
         : w(width),
           v(value),
           u("")
     {
-        static const char* suffixes = "\0\0k\0M\0G\0T\0P\0E\0Z\0Y\0\0";
+        static char const* suffixes = "\0\0k\0M\0G\0T\0P\0E\0Z\0Y\0\0";
         u = suffixes;
 
         while (v > 1 && std::log10(std::round(v)) >= width && u[2])

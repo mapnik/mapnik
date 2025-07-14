@@ -90,7 +90,7 @@ struct geobuf : util::noncopyable
     protozero::pbf_reader reader_;
     FeatureCallback& callback_;
     context_ptr ctx_;
-    const std::unique_ptr<transcoder> tr_;
+    std::unique_ptr<transcoder> const tr_;
 
   public:
     // ctor

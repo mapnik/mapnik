@@ -66,7 +66,7 @@ class tmp_dir
                 }
             }
         }
-        catch (const std::exception& e)
+        catch (std::exception const& e)
         {
             std::cerr << "Exception caught while trying to remove " << "temporary directory " << m_path << ": "
                       << e.what() << "\n";
@@ -149,7 +149,7 @@ void load_map(mapnik::Map& m, mapnik::fs::path const& path)
 
 } // anonymous namespace
 #ifndef MAPNIK_STATIC_PLUGINS
-const bool registered =
+bool const registered =
   mapnik::datasource_cache::instance().register_datasources((mapnik::fs::path("plugins") / "input").generic_string());
 #endif
 TEST_CASE("map xml I/O")

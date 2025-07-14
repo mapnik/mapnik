@@ -68,7 +68,7 @@ struct MAPNIK_DECL rgb
     {}
     rgb(rgba const& c);
 
-    inline bool operator==(const rgb& y) const { return r == y.r && g == y.g && b == y.b; }
+    inline bool operator==(rgb const& y) const { return r == y.r && g == y.g && b == y.b; }
 };
 
 struct MAPNIK_DECL rgba
@@ -104,7 +104,7 @@ struct MAPNIK_DECL rgba
     // ordering by mean(a,r,g,b), a, r, g, b
     struct MAPNIK_DECL mean_sort_cmp
     {
-        bool operator()(const rgba& x, const rgba& y) const;
+        bool operator()(rgba const& x, rgba const& y) const;
     };
 
     inline bool operator<(rgba const& y) const { return std::tie(r, g, b, a) < std::tie(y.r, y.g, y.b, y.a); }

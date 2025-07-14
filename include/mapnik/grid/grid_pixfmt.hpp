@@ -57,14 +57,14 @@ class apply_gamma_dir_gray
   public:
     using value_type = typename ColorT::value_type;
 
-    apply_gamma_dir_gray(const GammaLut& gamma)
+    apply_gamma_dir_gray(GammaLut const& gamma)
         : m_gamma(gamma)
     {}
 
     AGG_INLINE void operator()(value_type* p) { *p = m_gamma.dir(*p); }
 
   private:
-    const GammaLut& m_gamma;
+    GammaLut const& m_gamma;
 };
 
 //=====================================================apply_gamma_inv_gray
@@ -74,14 +74,14 @@ class apply_gamma_inv_gray
   public:
     using value_type = typename ColorT::value_type;
 
-    apply_gamma_inv_gray(const GammaLut& gamma)
+    apply_gamma_inv_gray(GammaLut const& gamma)
         : m_gamma(gamma)
     {}
 
     AGG_INLINE void operator()(value_type* p) { *p = m_gamma.inv(*p); }
 
   private:
-    const GammaLut& m_gamma;
+    GammaLut const& m_gamma;
 };
 
 //=================================================pixfmt_alpha_blend_gray
@@ -107,7 +107,7 @@ class pixfmt_alpha_blend_gray
 
   private:
     //--------------------------------------------------------------------
-    static AGG_INLINE void copy_or_blend_pix(value_type* p, const color_type& c, unsigned cover)
+    static AGG_INLINE void copy_or_blend_pix(value_type* p, color_type const& c, unsigned cover)
     {
         if (c.a)
         {
@@ -123,7 +123,7 @@ class pixfmt_alpha_blend_gray
         }
     }
 
-    static AGG_INLINE void copy_or_blend_pix(value_type* p, const color_type& c)
+    static AGG_INLINE void copy_or_blend_pix(value_type* p, color_type const& c)
     {
         if (c.a)
         {
@@ -166,15 +166,15 @@ class pixfmt_alpha_blend_gray
 
     //--------------------------------------------------------------------
     agg::int8u* row_ptr(int y) { return m_rbuf->row_ptr(y); }
-    const agg::int8u* row_ptr(int y) const { return m_rbuf->row_ptr(y); }
+    agg::int8u const* row_ptr(int y) const { return m_rbuf->row_ptr(y); }
     row_data row(int y) const { return m_rbuf->row(y); }
 
-    const agg::int8u* pix_ptr(int x, int y) const { return m_rbuf->row_ptr(y) + x * Step + Offset; }
+    agg::int8u const* pix_ptr(int x, int y) const { return m_rbuf->row_ptr(y) + x * Step + Offset; }
 
     agg::int8u* pix_ptr(int x, int y) { return m_rbuf->row_ptr(y) + x * Step + Offset; }
 
     //--------------------------------------------------------------------
-    AGG_INLINE static void make_pix(agg::int8u* p, const color_type& c) { *(value_type*)p = c.v; }
+    AGG_INLINE static void make_pix(agg::int8u* p, color_type const& c) { *(value_type*)p = c.v; }
 
     //--------------------------------------------------------------------
     AGG_INLINE color_type pixel(int x, int y) const
@@ -184,19 +184,19 @@ class pixfmt_alpha_blend_gray
     }
 
     //--------------------------------------------------------------------
-    AGG_INLINE void copy_pixel(int x, int y, const color_type& c)
+    AGG_INLINE void copy_pixel(int x, int y, color_type const& c)
     {
         *((value_type*)m_rbuf->row_ptr(x, y, 1) + x * Step + Offset) = c.v;
     }
 
     //--------------------------------------------------------------------
-    AGG_INLINE void blend_pixel(int x, int y, const color_type& c, agg::int8u cover)
+    AGG_INLINE void blend_pixel(int x, int y, color_type const& c, agg::int8u cover)
     {
         copy_or_blend_pix((value_type*)m_rbuf->row_ptr(x, y, 1) + x * Step + Offset, c, cover);
     }
 
     //--------------------------------------------------------------------
-    AGG_INLINE void copy_hline(int x, int y, unsigned len, const color_type& c)
+    AGG_INLINE void copy_hline(int x, int y, unsigned len, color_type const& c)
     {
         value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
 
@@ -208,7 +208,7 @@ class pixfmt_alpha_blend_gray
     }
 
     //--------------------------------------------------------------------
-    AGG_INLINE void copy_vline(int x, int y, unsigned len, const color_type& c)
+    AGG_INLINE void copy_vline(int x, int y, unsigned len, color_type const& c)
     {
         do
         {
@@ -219,7 +219,7 @@ class pixfmt_alpha_blend_gray
     }
 
     //--------------------------------------------------------------------
-    void blend_hline(int x, int y, unsigned len, const color_type& c, agg::int8u /*cover*/)
+    void blend_hline(int x, int y, unsigned len, color_type const& c, agg::int8u /*cover*/)
     {
         value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
         do
@@ -256,7 +256,7 @@ class pixfmt_alpha_blend_gray
     }
 
     //--------------------------------------------------------------------
-    void blend_vline(int x, int y, unsigned len, const color_type& c, agg::int8u cover)
+    void blend_vline(int x, int y, unsigned len, color_type const& c, agg::int8u cover)
     {
         if (c.a)
         {
@@ -284,7 +284,7 @@ class pixfmt_alpha_blend_gray
     }
 
     //--------------------------------------------------------------------
-    void blend_solid_hspan(int x, int y, unsigned len, const color_type& c, const agg::int8u* covers)
+    void blend_solid_hspan(int x, int y, unsigned len, color_type const& c, agg::int8u const* covers)
     {
         if (c.a)
         {
@@ -308,7 +308,7 @@ class pixfmt_alpha_blend_gray
     }
 
     //--------------------------------------------------------------------
-    void blend_solid_vspan(int x, int y, unsigned len, const color_type& c, const agg::int8u* covers)
+    void blend_solid_vspan(int x, int y, unsigned len, color_type const& c, agg::int8u const* covers)
     {
         if (c.a)
         {
@@ -332,7 +332,7 @@ class pixfmt_alpha_blend_gray
     }
 
     //--------------------------------------------------------------------
-    void copy_color_hspan(int x, int y, unsigned len, const color_type* colors)
+    void copy_color_hspan(int x, int y, unsigned len, color_type const* colors)
     {
         value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
 
@@ -345,7 +345,7 @@ class pixfmt_alpha_blend_gray
     }
 
     //--------------------------------------------------------------------
-    void copy_color_vspan(int x, int y, unsigned len, const color_type* colors)
+    void copy_color_vspan(int x, int y, unsigned len, color_type const* colors)
     {
         do
         {
@@ -359,8 +359,8 @@ class pixfmt_alpha_blend_gray
     void blend_color_hspan(int x,
                            int y,
                            unsigned len,
-                           const color_type* colors,
-                           const agg::int8u* covers,
+                           color_type const* colors,
+                           agg::int8u const* covers,
                            agg::int8u cover)
     {
         value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
@@ -406,8 +406,8 @@ class pixfmt_alpha_blend_gray
     void blend_color_vspan(int x,
                            int y,
                            unsigned len,
-                           const color_type* colors,
-                           const agg::int8u* covers,
+                           color_type const* colors,
+                           agg::int8u const* covers,
                            agg::int8u cover)
     {
         value_type* p;
@@ -475,23 +475,23 @@ class pixfmt_alpha_blend_gray
 
     //--------------------------------------------------------------------
     template<typename GammaLut>
-    void apply_gamma_dir(const GammaLut& g)
+    void apply_gamma_dir(GammaLut const& g)
     {
         for_each_pixel(apply_gamma_dir_gray<color_type, GammaLut>(g));
     }
 
     //--------------------------------------------------------------------
     template<typename GammaLut>
-    void apply_gamma_inv(const GammaLut& g)
+    void apply_gamma_inv(GammaLut const& g)
     {
         for_each_pixel(apply_gamma_inv_gray<color_type, GammaLut>(g));
     }
 
     //--------------------------------------------------------------------
     template<typename RenBuf2>
-    void copy_from(const RenBuf2& from, int xdst, int ydst, int xsrc, int ysrc, unsigned len)
+    void copy_from(RenBuf2 const& from, int xdst, int ydst, int xsrc, int ysrc, unsigned len)
     {
-        const agg::int8u* p = from.row_ptr(ysrc);
+        agg::int8u const* p = from.row_ptr(ysrc);
         if (p)
         {
             memmove(m_rbuf->row_ptr(xdst, ydst, len) + xdst * pix_width, p + xsrc * pix_width, len * pix_width);
@@ -500,8 +500,8 @@ class pixfmt_alpha_blend_gray
 
     //--------------------------------------------------------------------
     template<typename SrcPixelFormatRenderer>
-    void blend_from_color(const SrcPixelFormatRenderer& from,
-                          const color_type& color,
+    void blend_from_color(SrcPixelFormatRenderer const& from,
+                          color_type const& color,
                           int xdst,
                           int ydst,
                           int /*xsrc*/,
@@ -510,7 +510,7 @@ class pixfmt_alpha_blend_gray
                           agg::int8u cover)
     {
         using src_value_type = typename SrcPixelFormatRenderer::value_type;
-        const src_value_type* psrc = (src_value_type*)from.row_ptr(ysrc);
+        src_value_type const* psrc = (src_value_type*)from.row_ptr(ysrc);
         if (psrc)
         {
             value_type* pdst = (value_type*)m_rbuf->row_ptr(xdst, ydst, len) + xdst;
@@ -525,8 +525,8 @@ class pixfmt_alpha_blend_gray
 
     //--------------------------------------------------------------------
     template<typename SrcPixelFormatRenderer>
-    void blend_from_lut(const SrcPixelFormatRenderer& from,
-                        const color_type* color_lut,
+    void blend_from_lut(SrcPixelFormatRenderer const& from,
+                        color_type const* color_lut,
                         int xdst,
                         int ydst,
                         int /*xsrc*/,
@@ -535,7 +535,7 @@ class pixfmt_alpha_blend_gray
                         agg::int8u cover)
     {
         using src_value_type = typename SrcPixelFormatRenderer::value_type;
-        const src_value_type* psrc = (src_value_type*)from.row_ptr(ysrc);
+        src_value_type const* psrc = (src_value_type*)from.row_ptr(ysrc);
         if (psrc)
         {
             value_type* pdst = (value_type*)m_rbuf->row_ptr(xdst, ydst, len) + xdst;

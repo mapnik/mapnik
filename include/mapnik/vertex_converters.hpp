@@ -155,7 +155,7 @@ struct converter_traits<T, mapnik::dash_tag>
 template<typename Symbolizer, typename PathType, typename Feature>
 void set_join_caps(Symbolizer const& sym, PathType& stroke, Feature const& feature, attributes const& vars)
 {
-    const line_join_enum join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, vars);
+    line_join_enum const join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, vars);
     switch (join)
     {
         case line_join_enum::MITER_JOIN:
@@ -171,7 +171,7 @@ void set_join_caps(Symbolizer const& sym, PathType& stroke, Feature const& featu
             stroke.generator().line_join(agg::bevel_join);
     }
 
-    const line_cap_enum cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, vars);
+    line_cap_enum const cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, vars);
     switch (cap)
     {
         case line_cap_enum::BUTT_CAP:

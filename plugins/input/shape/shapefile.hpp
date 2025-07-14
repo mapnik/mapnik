@@ -57,7 +57,7 @@ struct RecordTag
 
 struct MappedRecordTag
 {
-    using data_type = const char*;
+    using data_type = char const*;
     static data_type alloc(unsigned) { return 0; }
     static void dealloc(data_type) {}
 };

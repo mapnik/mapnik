@@ -36,7 +36,7 @@
 
 TEST_CASE("Geobuf")
 {
-    const bool have_geobuf_plugin = mapnik::datasource_cache::instance().plugin_registered("geobuf");
+    bool const have_geobuf_plugin = mapnik::datasource_cache::instance().plugin_registered("geobuf");
     if (have_geobuf_plugin)
     {
         SECTION("Point")

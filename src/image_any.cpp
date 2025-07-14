@@ -162,7 +162,7 @@ image_any::image_any(int width, int height, image_dtype type, bool initialize, b
     : image_base(std::move(create_image_any(width, height, type, initialize, premultiplied, painted)))
 {}
 
-MAPNIK_DECL unsigned char const* image_any::bytes() const
+MAPNIK_DECL const unsigned char* image_any::bytes() const
 {
     return util::apply_visitor(detail::get_bytes_visitor_const(), *this);
 }

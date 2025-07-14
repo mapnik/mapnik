@@ -66,41 +66,41 @@ TEST_CASE("geometry formats")
         {
             // spatialite blob
             mapnik::geometry::geometry<double> geom =
-              mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
+              mapnik::geometry_utils::from_wkb((char const*)sp_valid_blob,
                                                sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
                                                mapnik::wkbSpatiaLite);
             // winding order is not correct per OGC so we'll fix it
             mapnik::geometry::correct(geom);
             REQUIRE(mapnik::geometry::is_valid(geom));
             REQUIRE(mapnik::geometry::is_simple(geom));
-            geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
+            geom = mapnik::geometry_utils::from_wkb((char const*)sp_valid_blob,
                                                     sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
                                                     mapnik::wkbAuto);
             mapnik::geometry::correct(geom);
             REQUIRE(mapnik::geometry::is_valid(geom));
             REQUIRE(mapnik::geometry::is_simple(geom));
 
-            geom = mapnik::geometry_utils::from_wkb((const char*)sp_invalid_blob,
+            geom = mapnik::geometry_utils::from_wkb((char const*)sp_invalid_blob,
                                                     sizeof(sp_invalid_blob) / sizeof(sp_invalid_blob[0]),
                                                     mapnik::wkbAuto);
             REQUIRE(geom.is<mapnik::geometry::geometry_empty>()); // returns geometry_empty
 
             // sqlite generic wkb blob
 
-            geom = mapnik::geometry_utils::from_wkb((const char*)sq_valid_blob,
+            geom = mapnik::geometry_utils::from_wkb((char const*)sq_valid_blob,
                                                     sizeof(sq_valid_blob) / sizeof(sq_valid_blob[0]),
                                                     mapnik::wkbGeneric);
             REQUIRE(mapnik::geometry::is_valid(geom));
             REQUIRE(mapnik::geometry::is_simple(geom));
 
-            geom = mapnik::geometry_utils::from_wkb((const char*)sq_valid_blob,
+            geom = mapnik::geometry_utils::from_wkb((char const*)sq_valid_blob,
                                                     sizeof(sq_valid_blob) / sizeof(sq_valid_blob[0]),
                                                     mapnik::wkbAuto);
 
             REQUIRE(mapnik::geometry::is_valid(geom));
             REQUIRE(mapnik::geometry::is_simple(geom));
 
-            geom = mapnik::geometry_utils::from_wkb((const char*)sq_invalid_blob,
+            geom = mapnik::geometry_utils::from_wkb((char const*)sq_invalid_blob,
                                                     sizeof(sq_invalid_blob) / sizeof(sq_invalid_blob[0]),
                                                     mapnik::wkbGeneric);
             REQUIRE(geom.is<mapnik::geometry::geometry_empty>()); // returns geometry_empty

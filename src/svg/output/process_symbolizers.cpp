@@ -96,9 +96,9 @@ void generate_path_impl(OutputIterator& output_iterator,
 {
     using path_dash_array_grammar = svg::svg_path_dash_array_grammar<OutputIterator>;
     using path_attributes_grammar = svg::svg_path_attributes_grammar<OutputIterator>;
-    static const path_attributes_grammar attributes_grammar;
-    static const path_dash_array_grammar dash_array_grammar;
-    static const svg::svg_path_generator<OutputIterator, PathType> svg_path_grammer;
+    static path_attributes_grammar const attributes_grammar;
+    static path_dash_array_grammar const dash_array_grammar;
+    static svg::svg_path_generator<OutputIterator, PathType> const svg_path_grammer;
     boost::spirit::karma::lit_type lit;
     boost::spirit::karma::generate(output_iterator, lit("<path ") << svg_path_grammer, path);
     boost::spirit::karma::generate(output_iterator, lit(" ") << dash_array_grammar, path_attributes.stroke_dasharray());

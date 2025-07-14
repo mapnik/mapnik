@@ -52,7 +52,7 @@ class postgis_featureset : public mapnik::Featureset
   private:
     std::shared_ptr<IResultSet> rs_;
     context_ptr ctx_;
-    const std::unique_ptr<mapnik::transcoder> tr_;
+    std::unique_ptr<mapnik::transcoder> const tr_;
     unsigned totalGeomSize_;
     mapnik::value_integer feature_id_;
     bool key_field_;

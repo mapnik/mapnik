@@ -84,7 +84,7 @@ void iterate_over_features(mapnik::featureset_ptr features)
 
 TEST_CASE("geojson")
 {
-    const bool have_geojson_plugin = mapnik::datasource_cache::instance().plugin_registered("geojson");
+    bool const have_geojson_plugin = mapnik::datasource_cache::instance().plugin_registered("geojson");
     if (have_geojson_plugin)
     {
         SECTION("GeoJSON I/O errors")

@@ -384,14 +384,14 @@ struct set_symbolizer_property_impl
         using value_type = T;
         try
         {
-            const auto val = node.get_opt_attr<value_type>(name);
+            auto const val = node.get_opt_attr<value_type>(name);
             if (val)
                 put(sym, key, *val);
         }
         catch (config_error const& ex)
         {
             // try parsing as an expression
-            const auto val = node.get_opt_attr<expression_ptr>(name);
+            auto const val = node.get_opt_attr<expression_ptr>(name);
             if (val)
             {
                 // first try pre-evaluate expressions which don't have dynamic properties
@@ -419,7 +419,7 @@ struct set_symbolizer_property_impl<Symbolizer, transform_type, false>
 {
     static void apply(Symbolizer& sym, keys key, std::string const& name, xml_node const& node)
     {
-        const auto transform = node.get_opt_attr<std::string>(name);
+        auto const transform = node.get_opt_attr<std::string>(name);
         if (transform)
             put(sym, key, mapnik::parse_transform(*transform));
     }
@@ -430,7 +430,7 @@ struct set_symbolizer_property_impl<Symbolizer, dash_array, false>
 {
     static void apply(Symbolizer& sym, keys key, std::string const& name, xml_node const& node)
     {
-        const auto str = node.get_opt_attr<std::string>(name);
+        auto const str = node.get_opt_attr<std::string>(name);
         if (str)
         {
             dash_array dash;
@@ -440,11 +440,11 @@ struct set_symbolizer_property_impl<Symbolizer, dash_array, false>
             }
             else
             {
-                const auto val = node.get_opt_attr<expression_ptr>(name);
+                auto const val = node.get_opt_attr<expression_ptr>(name);
                 if (val)
                 {
                     // first try pre-evaluate expressions which don't have dynamic properties
-                    const auto [value, is_evaluated] = pre_evaluate_expression<mapnik::value>(*val);
+                    auto const [value, is_evaluated] = pre_evaluate_expression<mapnik::value>(*val);
                     if (is_evaluated)
                     {
                         set_property_from_value(sym, key, value);
@@ -471,24 +471,24 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
     static void apply(Symbolizer& sym, keys key, std::string const& name, xml_node const& node)
     {
         using value_type = T;
-        const auto enum_str = node.get_opt_attr<std::string>(name);
+        auto const enum_str = node.get_opt_attr<std::string>(name);
         if (enum_str)
         {
-            const auto enum_val = detail::enum_traits<value_type>::from_string(*enum_str);
+            auto const enum_val = detail::enum_traits<value_type>::from_string(*enum_str);
             if (enum_val)
             {
                 put(sym, key, *enum_val);
             }
             else
             {
-                const auto val = node.get_opt_attr<expression_ptr>(name);
+                auto const val = node.get_opt_attr<expression_ptr>(name);
                 if (val)
                 {
                     // first try pre-evaluating expression
-                    const auto [result_value, is_evaluated] = pre_evaluate_expression<value>(*val);
+                    auto const [result_value, is_evaluated] = pre_evaluate_expression<value>(*val);
                     if (is_evaluated)
                     {
-                        const auto enum_val2 = detail::enum_traits<value_type>::from_string(result_value.to_string());
+                        auto const enum_val2 = detail::enum_traits<value_type>::from_string(result_value.to_string());
                         if (enum_val2)
                         {
                             put(sym, key, *enum_val);

@@ -206,7 +206,7 @@ boost::property_tree::detail::rapidxml::xml_attribute<char> const* parse_href(ra
 }
 
 template<typename T>
-mapnik::color parse_color(T& err_handler, const char* str)
+mapnik::color parse_color(T& err_handler, char const* str)
 {
     mapnik::color c(100, 100, 100);
     try
@@ -221,14 +221,14 @@ mapnik::color parse_color(T& err_handler, const char* str)
 }
 
 template<typename T>
-agg::rgba8 parse_color_agg(T& err_handler, const char* str)
+agg::rgba8 parse_color_agg(T& err_handler, char const* str)
 {
     auto c = parse_color(err_handler, str);
     return agg::rgba8(c.red(), c.green(), c.blue(), c.alpha());
 }
 
 template<typename T>
-double parse_double(T& err_handler, const char* str)
+double parse_double(T& err_handler, char const* str)
 {
     using namespace boost::spirit::x3;
     double val = 0.0;
@@ -246,8 +246,8 @@ double parse_svg_value(T& parser, char const* str, bool& is_percent)
     namespace x3 = boost::spirit::x3;
     double val = 0.0;
     css_unit_value units;
-    const char* cur = str; // phrase_parse mutates the first iterator
-    const char* end = str + std::strlen(str);
+    char const* cur = str; // phrase_parse mutates the first iterator
+    char const* end = str + std::strlen(str);
     double font_size = parser.font_sizes_.back();
     bool is_percent_;
     auto apply_value = [&](auto const& ctx) {
@@ -294,8 +294,8 @@ bool parse_font_size(T& parser, char const* str)
 
     std::size_t size = parser.font_sizes_.size();
     double parent_font_size = size > 1 ? parser.font_sizes_[size - 2] : 16.0; // medium/16px
-    const char* cur = str;                                                    // phrase_parse mutates the first iterator
-    const char* end = str + std::strlen(str);
+    char const* cur = str;                                                    // phrase_parse mutates the first iterator
+    char const* end = str + std::strlen(str);
 
     auto apply_value = [&](auto const& ctx) {
         val = _attr(ctx);
@@ -1669,7 +1669,7 @@ void svg_parser::parse(std::string const& filename)
     std::vector<char> buffer(std::istreambuf_iterator<char>(stream.rdbuf()), std::istreambuf_iterator<char>());
     buffer.push_back(0);
 
-    const int flags = rapidxml::parse_trim_whitespace | rapidxml::parse_validate_closing_tags;
+    int const flags = rapidxml::parse_trim_whitespace | rapidxml::parse_validate_closing_tags;
     rapidxml::xml_document<> doc;
     try
     {
@@ -1690,7 +1690,7 @@ void svg_parser::parse(std::string const& filename)
 
 void svg_parser::parse_from_string(std::string const& svg)
 {
-    const int flags = rapidxml::parse_trim_whitespace | rapidxml::parse_validate_closing_tags;
+    int const flags = rapidxml::parse_trim_whitespace | rapidxml::parse_validate_closing_tags;
     rapidxml::xml_document<> doc;
     std::vector<char> buffer(svg.begin(), svg.end());
     buffer.push_back(0);

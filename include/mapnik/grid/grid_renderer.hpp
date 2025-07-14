@@ -118,7 +118,7 @@ class MAPNIK_DECL grid_renderer : public feature_style_processor<grid_renderer<T
 
   private:
     buffer_type& pixmap_;
-    const std::unique_ptr<grid_rasterizer> ras_ptr;
+    std::unique_ptr<grid_rasterizer> const ras_ptr;
     renderer_common common_;
     void setup(Map const& m);
 };

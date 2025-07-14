@@ -66,8 +66,8 @@ struct raster_renderer_base
 {
     using image_type = ImageType;
 
-    static constexpr const char* ext = ".png";
-    static constexpr const bool support_tiles = true;
+    static constexpr char const* ext = ".png";
+    static constexpr bool const support_tiles = true;
 
     unsigned compare(image_type const& actual, mapnik::fs::path const& reference) const
     {
@@ -93,7 +93,7 @@ struct vector_renderer_base
 {
     using image_type = std::string;
 
-    static constexpr const bool support_tiles = false;
+    static constexpr bool const support_tiles = false;
 
     unsigned compare(image_type const& actual, mapnik::fs::path const& reference) const
     {
@@ -119,7 +119,7 @@ struct vector_renderer_base
 
 struct agg_renderer : raster_renderer_base<mapnik::image_rgba8>
 {
-    static constexpr const char* name = "agg";
+    static constexpr char const* name = "agg";
 
     image_type render(mapnik::Map const& map, double scale_factor) const
     {
@@ -133,7 +133,7 @@ struct agg_renderer : raster_renderer_base<mapnik::image_rgba8>
 #if defined(HAVE_CAIRO)
 struct cairo_renderer : raster_renderer_base<mapnik::image_rgba8>
 {
-    static constexpr const char* name = "cairo";
+    static constexpr char const* name = "cairo";
 
     image_type render(mapnik::Map const& map, double scale_factor) const
     {
@@ -154,7 +154,7 @@ using surface_create_type = cairo_surface_t* (&)(cairo_write_func_t, void*, doub
 template<surface_create_type SurfaceCreateFunction>
 struct cairo_vector_renderer : vector_renderer_base
 {
-    static cairo_status_t write(void* closure, const unsigned char* data, unsigned int length)
+    static cairo_status_t write(void* closure, unsigned char const* data, unsigned int length)
     {
         std::ostringstream& ss = *reinterpret_cast<std::ostringstream*>(closure);
         ss.write(reinterpret_cast<char const*>(data), length);
@@ -184,24 +184,24 @@ inline cairo_surface_t* create_svg_1_2(cairo_write_func_t write_func, void* clos
 
 struct cairo_svg_renderer : cairo_vector_renderer<create_svg_1_2>
 {
-    static constexpr const char* name = "cairo-svg";
-    static constexpr const char* ext = ".svg";
+    static constexpr char const* name = "cairo-svg";
+    static constexpr char const* ext = ".svg";
 };
 #endif
 
 #ifdef CAIRO_HAS_PS_SURFACE
 struct cairo_ps_renderer : cairo_vector_renderer<cairo_ps_surface_create_for_stream>
 {
-    static constexpr const char* name = "cairo-ps";
-    static constexpr const char* ext = ".ps";
+    static constexpr char const* name = "cairo-ps";
+    static constexpr char const* ext = ".ps";
 };
 #endif
 
 #ifdef CAIRO_HAS_PDF_SURFACE
 struct cairo_pdf_renderer : cairo_vector_renderer<cairo_pdf_surface_create_for_stream>
 {
-    static constexpr const char* name = "cairo-pdf";
-    static constexpr const char* ext = ".pdf";
+    static constexpr char const* name = "cairo-pdf";
+    static constexpr char const* ext = ".pdf";
 };
 #endif
 #endif
@@ -209,8 +209,8 @@ struct cairo_pdf_renderer : cairo_vector_renderer<cairo_pdf_surface_create_for_s
 #if defined(SVG_RENDERER)
 struct svg_renderer : vector_renderer_base
 {
-    static constexpr const char* name = "svg";
-    static constexpr const char* ext = ".svg";
+    static constexpr char const* name = "svg";
+    static constexpr char const* ext = ".svg";
 
     image_type render(mapnik::Map const& map, double scale_factor) const
     {
@@ -226,7 +226,7 @@ struct svg_renderer : vector_renderer_base
 #if defined(GRID_RENDERER)
 struct grid_renderer : raster_renderer_base<mapnik::image_rgba8>
 {
-    static constexpr const char* name = "grid";
+    static constexpr char const* name = "grid";
 
     void convert(mapnik::grid::data_type const& grid, image_type& image) const
     {
@@ -392,10 +392,10 @@ class renderer
         return s.str();
     }
 
-    const Renderer ren;
-    const mapnik::fs::path output_dir;
-    const mapnik::fs::path reference_dir;
-    const bool overwrite;
+    Renderer const ren;
+    mapnik::fs::path const output_dir;
+    mapnik::fs::path const reference_dir;
+    bool const overwrite;
 };
 
 using renderer_type = mapnik::util::variant<renderer<agg_renderer>

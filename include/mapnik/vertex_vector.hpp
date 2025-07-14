@@ -102,7 +102,7 @@ class vertex_vector : private util::noncopyable
         if (pos >= pos_)
             return SEG_END;
         size_type block = pos >> block_shift;
-        const coordinate_type* vertex = vertices_[block] + ((pos & block_mask) << 1);
+        coordinate_type const* vertex = vertices_[block] + ((pos & block_mask) << 1);
         *x = (*vertex++);
         *y = (*vertex);
         return commands_[block][pos & block_mask];

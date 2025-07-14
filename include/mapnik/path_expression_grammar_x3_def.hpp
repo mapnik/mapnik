@@ -32,10 +32,10 @@ namespace grammar {
 namespace x3 = boost::spirit::x3;
 using x3::lexeme;
 using x3::standard_wide::char_;
-const auto create_string = [](auto& ctx) {
+auto const create_string = [](auto& ctx) {
     _val(ctx).push_back(_attr(ctx));
 };
-const auto create_attribute = [](auto& ctx) {
+auto const create_attribute = [](auto& ctx) {
     _val(ctx).push_back(mapnik::attribute(_attr(ctx)));
 };
 // rules

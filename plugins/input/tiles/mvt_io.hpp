@@ -81,7 +81,7 @@ class mvt_io
 
       public:
         explicit mvt_layer(mvt_io& io);
-        void add_feature(const protozero::data_view& feature);
+        void add_feature(protozero::data_view const& feature);
         bool has_features() const;
         void add_key(std::string&& key);
         void add_value(pbf_attr_value_type value);
@@ -107,9 +107,9 @@ class mvt_io
   public:
     explicit mvt_io(std::string&& data,
                     mapnik::context_ptr const& ctx,
-                    const uint32_t x,
-                    const uint32_t y,
-                    const uint32_t zoom,
+                    uint32_t const x,
+                    uint32_t const y,
+                    uint32_t const zoom,
                     std::string layer_name);
     mapnik::feature_ptr next();
 };

@@ -313,7 +313,7 @@ MAPNIK_DECL void
 template<typename T>
 MAPNIK_DECL void save_to_file(T const& image, std::string const& filename)
 {
-    const auto type = type_from_filename(filename);
+    auto const type = type_from_filename(filename);
     if (type.has_value())
     {
         save_to_file<T>(image, filename, *type);
@@ -325,7 +325,7 @@ MAPNIK_DECL void save_to_file(T const& image, std::string const& filename)
 template<typename T>
 MAPNIK_DECL void save_to_file(T const& image, std::string const& filename, rgba_palette const& palette)
 {
-    const auto type = type_from_filename(filename);
+    auto const type = type_from_filename(filename);
     if (type.has_value())
     {
         save_to_file<T>(image, filename, *type, palette);
@@ -425,7 +425,7 @@ struct is_solid_visitor
         if (image.size() > 0)
         {
             pixel_type const first_p = *image.begin();
-            const auto itr = std::find_if(/*std::execution::par_unseq,*/ // still missing on ubuntu with
+            auto const itr = std::find_if(/*std::execution::par_unseq,*/ // still missing on ubuntu with
                                                                          // clang++10/libc++ (!)
                                           image.begin(),
                                           image.end(),
@@ -2132,7 +2132,7 @@ struct visitor_view_to_stream
     {
         for (std::size_t i = 0; i < view.height(); i++)
         {
-            os_.write(reinterpret_cast<const char*>(view.get_row(i)), safe_cast<std::streamsize>(view.row_size()));
+            os_.write(reinterpret_cast<char const*>(view.get_row(i)), safe_cast<std::streamsize>(view.row_size()));
         }
     }
 
@@ -2199,8 +2199,8 @@ MAPNIK_DECL std::size_t compare(T const& im1, T const& im2, double threshold, bo
     std::size_t difference = 0;
     for (std::size_t y = 0; y < im1.height(); ++y)
     {
-        const pixel_type* row_from = im1.get_row(y);
-        const pixel_type* row_from2 = im2.get_row(y);
+        pixel_type const* row_from = im1.get_row(y);
+        pixel_type const* row_from2 = im2.get_row(y);
         for (std::size_t x = 0; x < im1.width(); ++x)
         {
             double d = std::abs(static_cast<double>(row_from[x]) - static_cast<double>(row_from2[x]));
@@ -2254,8 +2254,8 @@ MAPNIK_DECL std::size_t
     {
         for (unsigned int y = 0; y < im1.height(); ++y)
         {
-            const pixel_type* row_from = im1.get_row(y);
-            const pixel_type* row_from2 = im2.get_row(y);
+            pixel_type const* row_from = im1.get_row(y);
+            pixel_type const* row_from2 = im2.get_row(y);
             int x = 0;
             for (; x < ROUND_DOWN(im1.width(), 4); x += 4)
             {
@@ -2288,8 +2288,8 @@ MAPNIK_DECL std::size_t
         __m128i m_thres = _mm_set1_epi8(thres);
         for (unsigned int y = 0; y < im1.height(); ++y)
         {
-            const pixel_type* row_from = im1.get_row(y);
-            const pixel_type* row_from2 = im2.get_row(y);
+            pixel_type const* row_from = im1.get_row(y);
+            pixel_type const* row_from2 = im2.get_row(y);
             int x = 0;
             for (; x < ROUND_DOWN(im1.width(), 4); x += 4)
             {
@@ -2341,8 +2341,8 @@ MAPNIK_DECL std::size_t
 #else
     for (unsigned int y = 0; y < im1.height(); ++y)
     {
-        const pixel_type* row_from = im1.get_row(y);
-        const pixel_type* row_from2 = im2.get_row(y);
+        pixel_type const* row_from = im1.get_row(y);
+        pixel_type const* row_from2 = im2.get_row(y);
         for (unsigned int x = 0; x < im1.width(); ++x)
         {
             unsigned rgba = row_from[x];

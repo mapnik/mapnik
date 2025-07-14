@@ -64,7 +64,7 @@ inline std::optional<std::string> type_from_bytes(char const* data, size_t size)
 
 image_reader* get_image_reader(char const* data, size_t size)
 {
-    const auto type = type_from_bytes(data, size);
+    auto const type = type_from_bytes(data, size);
     if (type.has_value())
         return factory<image_reader, std::string, char const*, size_t>::instance().create_object(*type, data, size);
     else
@@ -78,7 +78,7 @@ image_reader* get_image_reader(std::string const& filename, std::string const& t
 
 image_reader* get_image_reader(std::string const& filename)
 {
-    const auto type = type_from_filename(filename);
+    auto const type = type_from_filename(filename);
     if (type.has_value())
     {
         return factory<image_reader, std::string, std::string const&>::instance().create_object(*type, filename);

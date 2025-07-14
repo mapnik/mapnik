@@ -170,10 +170,10 @@ struct warp_pattern : cairo_pattern_base
         mapnik::util::apply_visitor(vertex_processor_type(apply), feature_.get_geometry());
     }
 
-    const bool clip_;
-    const double offset_;
-    const box2d<double> clip_box_;
-    const agg::trans_affine tr_;
+    bool const clip_;
+    double const offset_;
+    box2d<double> const clip_box_;
+    agg::trans_affine const tr_;
     vc_type converter_;
 };
 
@@ -216,7 +216,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
         return;
     }
 
-    const line_pattern_enum pattern = get<line_pattern_enum, keys::line_pattern>(sym, feature, common_.vars_);
+    line_pattern_enum const pattern = get<line_pattern_enum, keys::line_pattern>(sym, feature, common_.vars_);
     switch (pattern)
     {
         case line_pattern_enum::LINE_PATTERN_WARP: {

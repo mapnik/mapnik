@@ -101,7 +101,7 @@ struct strict_value : value_base_type
 {
     strict_value() = default;
 
-    strict_value(const char* val) noexcept(false)
+    strict_value(char const* val) noexcept(false)
         : value_base_type(std::string(val))
     {}
 

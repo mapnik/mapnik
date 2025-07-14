@@ -64,16 +64,16 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 LambdaBodyIndentation: Signature
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
-PackConstructorInitializers: Never # only clang-format > 14
+PackConstructorInitializers: Never
 PointerAlignment: Left
-#QualifierAlignment: Left # only clang-format > 14
+QualifierAlignment: Right
 ReferenceAlignment: Left
 ReflowComments: true
 SortIncludes: Never
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: false
 SpaceBeforeInheritanceColon: true
-Standard: c++14
+Standard: c++20
 BinPackParameters: false
 BreakBeforeInheritanceComma: false
 IncludeCategories:

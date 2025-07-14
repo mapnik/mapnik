@@ -309,8 +309,8 @@ class quad_tree : util::noncopyable
         }
     }
 
-    const unsigned int max_depth_;
-    const double ratio_;
+    unsigned int const max_depth_;
+    double const ratio_;
     result_type query_result_;
     nodes_type nodes_;
     node* root_;

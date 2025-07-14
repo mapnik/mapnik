@@ -32,7 +32,7 @@ namespace mapnik {
 static constexpr std::uint8_t const_max_key = static_cast<std::uint8_t>(keys::MAX_SYMBOLIZER_KEY);
 
 // tuple -> name, default value, enumeration to string converter lambda, target property type
-static const property_meta_type key_meta[const_max_key] = {
+static property_meta_type const key_meta[const_max_key] = {
   property_meta_type{"gamma", nullptr, property_types::target_double},
   property_meta_type{"gamma-method", nullptr, property_types::target_gamma_method},
   property_meta_type{"opacity", nullptr, property_types::target_double},

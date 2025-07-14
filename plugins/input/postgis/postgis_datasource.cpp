@@ -53,8 +53,8 @@ DATASOURCE_PLUGIN_EXPORT(postgis_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(postgis_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(postgis_datasource_plugin);
 
-const std::string postgis_datasource::GEOMETRY_COLUMNS = "geometry_columns";
-const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
+std::string const postgis_datasource::GEOMETRY_COLUMNS = "geometry_columns";
+std::string const postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
 using mapnik::attribute_descriptor;
 using mapnik::sql_utils::identifier;
@@ -104,7 +104,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
         throw mapnik::datasource_exception("Postgis Plugin: missing <table> parameter");
     }
 
-    const auto ext = params.get<std::string>("extent");
+    auto const ext = params.get<std::string>("extent");
     if (ext.has_value() && !ext->empty())
     {
         extent_initialized_ = extent_.from_string(*ext);
@@ -124,17 +124,17 @@ postgis_datasource::postgis_datasource(parameters const& params)
         asynchronous_request_ = true;
     }
 
-    const auto initial_size = params.get<mapnik::value_integer>("initial_size", 1);
-    const auto autodetect_key_field = params.get<mapnik::boolean_type>("autodetect_key_field", false);
-    const auto estimate_extent = params.get<mapnik::boolean_type>("estimate_extent", false);
+    auto const initial_size = params.get<mapnik::value_integer>("initial_size", 1);
+    auto const autodetect_key_field = params.get<mapnik::boolean_type>("autodetect_key_field", false);
+    auto const estimate_extent = params.get<mapnik::boolean_type>("estimate_extent", false);
     estimate_extent_ = estimate_extent && *estimate_extent;
-    const auto simplify_opt = params.get<mapnik::boolean_type>("simplify_geometries", false);
+    auto const simplify_opt = params.get<mapnik::boolean_type>("simplify_geometries", false);
     simplify_geometries_ = simplify_opt && *simplify_opt;
 
-    const auto twkb_opt = params.get<mapnik::boolean_type>("twkb_encoding", false);
+    auto const twkb_opt = params.get<mapnik::boolean_type>("twkb_encoding", false);
     twkb_encoding_ = twkb_opt && *twkb_opt;
 
-    const auto simplify_preserve_opt = params.get<mapnik::boolean_type>("simplify_dp_preserve", false);
+    auto const simplify_preserve_opt = params.get<mapnik::boolean_type>("simplify_dp_preserve", false);
     simplify_dp_preserve_ = simplify_preserve_opt && *simplify_preserve_opt;
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
@@ -191,11 +191,11 @@ postgis_datasource::postgis_datasource(parameters const& params)
                         // user has not provided as option
                         if (srid_ == 0)
                         {
-                            const char* srid_c = rs->getValue("srid");
+                            char const* srid_c = rs->getValue("srid");
                             if (srid_c != nullptr)
                             {
                                 int result = 0;
-                                const char* end = srid_c + std::strlen(srid_c);
+                                char const* end = srid_c + std::strlen(srid_c);
                                 if (mapnik::util::string2int(srid_c, end, result))
                                 {
                                     srid_ = result;
@@ -233,11 +233,11 @@ postgis_datasource::postgis_datasource(parameters const& params)
                 shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                 if (rs->next())
                 {
-                    const char* srid_c = rs->getValue("srid");
+                    char const* srid_c = rs->getValue("srid");
                     if (srid_c != nullptr)
                     {
                         int result = 0;
-                        const char* end = srid_c + std::strlen(srid_c);
+                        char const* end = srid_c + std::strlen(srid_c);
                         if (mapnik::util::string2int(srid_c, end, result))
                         {
                             srid_ = result;
@@ -283,7 +283,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                         bool is_int = (std::string(rs_key->getValue(3)) == "t");
                         if (is_int)
                         {
-                            const char* key_field_string = rs_key->getValue(0);
+                            char const* key_field_string = rs_key->getValue(0);
                             if (key_field_string)
                             {
                                 key_field_ = std::string(key_field_string);
@@ -481,7 +481,7 @@ postgis_datasource::~postgis_datasource()
     }
 }
 
-const char* postgis_datasource::name()
+char const* postgis_datasource::name()
 {
     return "postgis";
 }
@@ -752,9 +752,9 @@ featureset_ptr postgis_datasource::features_with_context(query const& q, process
 
         std::ostringstream s;
 
-        const double px_gw = 1.0 / std::get<0>(q.resolution());
-        const double px_gh = 1.0 / std::get<1>(q.resolution());
-        const double px_sz = std::min(px_gw, px_gh);
+        double const px_gw = 1.0 / std::get<0>(q.resolution());
+        double const px_gh = 1.0 / std::get<1>(q.resolution());
+        double const px_sz = std::min(px_gw, px_gh);
 
         if (twkb_encoding_)
         {
@@ -764,9 +764,9 @@ featureset_ptr postgis_datasource::features_with_context(query const& q, process
             // (c) a ST_AsTWKB implementation
 
             // What number of decimals of rounding does the pixel size imply?
-            const int twkb_rounding = -1 * std::lround(log10(px_sz) + twkb_rounding_adjustment_) + 1;
+            int const twkb_rounding = -1 * std::lround(log10(px_sz) + twkb_rounding_adjustment_) + 1;
             // And what's that in map units?
-            const double twkb_tolerance = pow(10.0, -1.0 * twkb_rounding);
+            double const twkb_tolerance = pow(10.0, -1.0 * twkb_rounding);
 
             s << "SELECT ST_AsTWKB(";
             s << "ST_Simplify(";
@@ -813,7 +813,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q, process
             // ! ST_SnapToGrid()
             if (simplify_geometries_ && simplify_snap_ratio_ > 0.0)
             {
-                const double tolerance = px_sz * simplify_snap_ratio_;
+                double const tolerance = px_sz * simplify_snap_ratio_;
                 s << "," << tolerance << ")";
             }
 
@@ -826,7 +826,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q, process
             // ! ST_Simplify()
             if (simplify_geometries_)
             {
-                const double tolerance = px_sz * simplify_dp_ratio_;
+                double const tolerance = px_sz * simplify_dp_ratio_;
                 s << ", " << tolerance;
                 // Add parameter to ST_Simplify to keep collapsed geometries
                 if (simplify_dp_preserve_)
@@ -1139,7 +1139,7 @@ std::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_ty
                 shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                 while (rs->next() && !rs->isNull(0))
                 {
-                    const char* data = rs->getValue(0);
+                    char const* data = rs->getValue(0);
                     if (boost::algorithm::icontains(data, "line"))
                     {
                         g_type = "linestring";

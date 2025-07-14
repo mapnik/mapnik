@@ -36,13 +36,13 @@ TEST_CASE("map")
     {
         mapnik::Map map(256, 256);
         mapnik::image_rgba8 image(map.width(), map.height());
-        const mapnik::color c1(255, 0, 0);
+        mapnik::color const c1(255, 0, 0);
         mapnik::fill(image, c1);
 
         CHECK(image(0, 0) == c1.rgba());
 
         // Fully transparent black should replace red color
-        const mapnik::color c2(0, 0, 0, 0);
+        mapnik::color const c2(0, 0, 0, 0);
         map.set_background(c2);
         mapnik::agg_renderer<mapnik::image_rgba8> ren(map, image);
         ren.apply();
@@ -65,12 +65,12 @@ TEST_CASE("map")
         {
             mapnik::image_rgba8 image(map.width(), map.height());
             mapnik::cairo_image_to_rgba8(image, image_surface);
-            const mapnik::color c1(255, 0, 0);
+            mapnik::color const c1(255, 0, 0);
             CHECK(image(0, 0) == c1.rgba());
         }
 
         // Fully transparent black should replace red color
-        const mapnik::color c2(0, 0, 0, 0);
+        mapnik::color const c2(0, 0, 0, 0);
         map.set_background(c2);
         mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map, image_context, 1.0);
         ren.apply();

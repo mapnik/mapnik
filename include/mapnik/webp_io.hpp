@@ -44,10 +44,10 @@ MAPNIK_DISABLE_WARNING_POP
 namespace mapnik {
 
 template<typename T>
-int webp_stream_write(const uint8_t* data, size_t data_size, const WebPPicture* picture)
+int webp_stream_write(uint8_t const* data, size_t data_size, WebPPicture const* picture)
 {
     T* out = static_cast<T*>(picture->custom_ptr);
-    out->write(reinterpret_cast<const char*>(data), data_size);
+    out->write(reinterpret_cast<char const*>(data), data_size);
     return true;
 }
 
@@ -143,19 +143,19 @@ void save_as_webp(T1& file, T2 const& image, WebPConfig const& config, bool alph
         if (WebPPictureAlloc(&pic))
         {
             ok = 1;
-            const int width = pic.width;
-            const int height = pic.height;
+            int const width = pic.width;
+            int const height = pic.height;
             for (int y = 0; y < height; ++y)
             {
                 typename T2::pixel_type const* row = image.get_row(y);
                 for (int x = 0; x < width; ++x)
                 {
-                    const unsigned rgba = row[x];
+                    unsigned const rgba = row[x];
                     unsigned a = (rgba >> 24) & 0xff;
                     unsigned r = rgba & 0xff;
                     unsigned g = (rgba >> 8) & 0xff;
                     unsigned b = (rgba >> 16) & 0xff;
-                    const uint32_t argb = (a << 24) | (r << 16) | (g << 8) | (b);
+                    uint32_t const argb = (a << 24) | (r << 16) | (g << 8) | (b);
                     pic.argb[x + y * pic.argb_stride] = argb;
                 }
             }

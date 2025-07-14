@@ -127,7 +127,7 @@ struct unary_node
         : expr(a)
     {}
 
-    static const char* type() { return Tag::str(); }
+    static char const* type() { return Tag::str(); }
 
     expr_node expr;
 };
@@ -145,7 +145,7 @@ struct binary_node
           right(b)
     {}
 
-    static const char* type() { return Tag::str(); }
+    static char const* type() { return Tag::str(); }
     expr_node left, right;
 };
 

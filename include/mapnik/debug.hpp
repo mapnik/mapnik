@@ -171,7 +171,7 @@ class base_log : public util::noncopyable
     base_log() {}
 
 #ifdef MAPNIK_LOG
-    base_log(const char* object_name)
+    base_log(char const* object_name)
     {
         if (object_name != nullptr)
         {
@@ -179,7 +179,7 @@ class base_log : public util::noncopyable
         }
     }
 #else
-    base_log(const char* /*object_name*/) {}
+    base_log(char const* /*object_name*/) {}
 #endif
 
     ~base_log()
@@ -230,7 +230,7 @@ class base_log_always : public util::noncopyable
 
     base_log_always() {}
 
-    base_log_always(const char* object_name)
+    base_log_always(char const* object_name)
     {
         if (object_name != nullptr)
         {
@@ -273,7 +273,7 @@ class MAPNIK_DECL warn : public detail::base_log_warn
     warn()
         : detail::base_log_warn()
     {}
-    warn(const char* object_name)
+    warn(char const* object_name)
         : detail::base_log_warn(object_name)
     {}
 };
@@ -284,7 +284,7 @@ class MAPNIK_DECL debug : public detail::base_log_debug
     debug()
         : detail::base_log_debug()
     {}
-    debug(const char* object_name)
+    debug(char const* object_name)
         : detail::base_log_debug(object_name)
     {}
 };
@@ -295,7 +295,7 @@ class MAPNIK_DECL error : public detail::base_log_error
     error()
         : detail::base_log_error()
     {}
-    error(const char* object_name)
+    error(char const* object_name)
         : detail::base_log_error(object_name)
     {}
 };

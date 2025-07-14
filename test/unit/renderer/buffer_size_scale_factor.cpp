@@ -45,7 +45,7 @@ TEST_CASE("feature_style_processor: buffer-size with scale-factor")
 {
     SECTION("query extent with buffer-size should not be affected by scale-factor")
     {
-        const mapnik::box2d<double> expected_query_bbox(-0.5, -0.5, 1.5, 1.5);
+        mapnik::box2d<double> const expected_query_bbox(-0.5, -0.5, 1.5, 1.5);
 
         using datasource_ptr = std::shared_ptr<test_datasource>;
         datasource_ptr datasource = std::make_shared<test_datasource>(expected_query_bbox);
@@ -74,7 +74,7 @@ TEST_CASE("feature_style_processor: buffer-size with scale-factor")
         lyr.add_style("lines");
         map.add_layer(lyr);
 
-        const mapnik::box2d<double> map_extent(0, 0, 1, 1);
+        mapnik::box2d<double> const map_extent(0, 0, 1, 1);
         map.zoom_to_box(map_extent);
 
         {

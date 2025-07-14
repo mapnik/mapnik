@@ -31,7 +31,7 @@ namespace mapnik {
 namespace svg {
 
 template<typename Transform>
-bool parse_svg_transform(const char* wkt, Transform& tr)
+bool parse_svg_transform(char const* wkt, Transform& tr)
 {
     using namespace boost::spirit;
     using iterator_type = char const*;
@@ -61,7 +61,7 @@ bool parse_svg_transform(const char* wkt, Transform& tr)
     return true;
 }
 
-template bool MAPNIK_DECL parse_svg_transform<agg::trans_affine>(const char*, agg::trans_affine&);
+template bool MAPNIK_DECL parse_svg_transform<agg::trans_affine>(char const*, agg::trans_affine&);
 
 } // namespace svg
 } // namespace mapnik

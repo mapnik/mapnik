@@ -81,7 +81,7 @@ feature_ptr postgis_featureset::next()
             }
             // create feature with user driven id from attribute
             int oid = rs_->getTypeOID(pos);
-            const char* buf = rs_->getValue(pos);
+            char const* buf = rs_->getValue(pos);
 
             // validation happens of this type at initialization
             mapnik::value_integer val;
@@ -122,7 +122,7 @@ feature_ptr postgis_featureset::next()
 
         // parse geometry
         int size = rs_->getFieldLength(0);
-        const char* data = rs_->getValue(0);
+        char const* data = rs_->getValue(0);
 
         if (twkb_encoding_)
         {
@@ -147,8 +147,8 @@ feature_ptr postgis_featureset::next()
             // since it is equivalent to the attribute not existing
             if (!rs_->isNull(pos))
             {
-                const char* buf = rs_->getValue(pos);
-                const int oid = rs_->getTypeOID(pos);
+                char const* buf = rs_->getValue(pos);
+                int const oid = rs_->getTypeOID(pos);
                 switch (oid)
                 {
                     case 16: // bool

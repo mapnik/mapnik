@@ -158,7 +158,7 @@ inline typename image<T>::pixel_type& image<T>::operator()(std::size_t i, std::s
 }
 
 template<typename T>
-inline const typename image<T>::pixel_type& image<T>::operator()(std::size_t i, std::size_t j) const
+inline typename image<T>::pixel_type const& image<T>::operator()(std::size_t i, std::size_t j) const
 {
     assert(i < dimensions_.width() && j < dimensions_.height());
     return *get_row(j, i);
@@ -195,9 +195,9 @@ inline void image<T>::set(pixel_type const& t)
 }
 
 template<typename T>
-inline const typename image<T>::pixel_type* image<T>::data() const
+inline typename image<T>::pixel_type const* image<T>::data() const
 {
-    return reinterpret_cast<const pixel_type*>(buffer_.data());
+    return reinterpret_cast<pixel_type const*>(buffer_.data());
 }
 
 template<typename T>
@@ -207,7 +207,7 @@ inline typename image<T>::pixel_type* image<T>::data()
 }
 
 template<typename T>
-inline const unsigned char* image<T>::bytes() const
+inline unsigned char const* image<T>::bytes() const
 {
     return buffer_.data();
 }
@@ -250,7 +250,7 @@ inline typename image<T>::pixel_type const* image<T>::get_row(std::size_t row) c
 }
 
 template<typename T>
-inline const typename image<T>::pixel_type* image<T>::get_row(std::size_t row, std::size_t x0) const
+inline typename image<T>::pixel_type const* image<T>::get_row(std::size_t row, std::size_t x0) const
 {
     return data() + row * dimensions_.width() + x0;
 }

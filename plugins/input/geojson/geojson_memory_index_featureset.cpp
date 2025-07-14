@@ -65,7 +65,7 @@ mapnik::feature_ptr geojson_memory_index_featureset::next()
         using chr_iterator_type = char const*;
         chr_iterator_type start = json.data();
         chr_iterator_type end = (count == 1) ? start + json.size() : start;
-        static const mapnik::transcoder tr("utf8");
+        static mapnik::transcoder const tr("utf8");
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, feature_id_++));
         mapnik::json::parse_feature(start, end, *feature, tr); // throw on failure
         // skip empty geometries

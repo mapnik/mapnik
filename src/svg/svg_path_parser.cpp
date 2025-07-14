@@ -32,7 +32,7 @@ namespace mapnik {
 namespace svg {
 
 template<typename PathType>
-bool parse_path(const char* wkt, PathType& p)
+bool parse_path(char const* wkt, PathType& p)
 {
     using namespace boost::spirit;
     using iterator_type = char const*;
@@ -61,7 +61,7 @@ bool parse_path(const char* wkt, PathType& p)
     return true;
 }
 
-template bool MAPNIK_DECL parse_path<svg_converter_type>(const char*, svg_converter_type&);
+template bool MAPNIK_DECL parse_path<svg_converter_type>(char const*, svg_converter_type&);
 
 } // namespace svg
 } // namespace mapnik

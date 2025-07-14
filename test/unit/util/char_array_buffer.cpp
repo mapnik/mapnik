@@ -7,7 +7,7 @@ TEST_CASE("char_array_buffer")
 {
     SECTION("std::istream seekg, tellg")
     {
-        const std::size_t buffer_size = 66;
+        std::size_t const buffer_size = 66;
         char buffer[buffer_size];
         mapnik::util::char_array_buffer array_buff(buffer, buffer_size);
         std::istream stream(&array_buff);

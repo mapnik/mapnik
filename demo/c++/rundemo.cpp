@@ -49,9 +49,9 @@
 int main(int, char**)
 {
     using namespace mapnik;
-    const std::string srs_lcc =
+    std::string const srs_lcc =
       "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs";
-    const std::string srs_merc = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 "
+    std::string const srs_merc = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 "
                                  "+units=m +nadgrids=@null +wktext +no_defs +over";
     mapnik::setup();
     try

@@ -30,13 +30,13 @@
 #include <optional>
 
 namespace mapnik {
-constexpr const char MAPNIK_GEOGRAPHIC_PROJ_STR[10]{"epsg:4326"};
+constexpr char const MAPNIK_GEOGRAPHIC_PROJ_STR[10]{"epsg:4326"};
 extern std::string const MAPNIK_GEOGRAPHIC_PROJ = MAPNIK_GEOGRAPHIC_PROJ_STR; // wgs84
 
-constexpr const char MAPNIK_WEBMERCATOR_PROJ_STR[10]{"epsg:3857"};
+constexpr char const MAPNIK_WEBMERCATOR_PROJ_STR[10]{"epsg:3857"};
 extern std::string const MAPNIK_WEBMERCATOR_PROJ = MAPNIK_WEBMERCATOR_PROJ_STR; // webmercator
 
-static const char* well_known_srs_strings[] = {MAPNIK_GEOGRAPHIC_PROJ.c_str(), MAPNIK_WEBMERCATOR_PROJ.c_str(), ""};
+static char const* well_known_srs_strings[] = {MAPNIK_GEOGRAPHIC_PROJ.c_str(), MAPNIK_WEBMERCATOR_PROJ.c_str(), ""};
 
 std::optional<well_known_srs_e> is_well_known_srs(std::string const& srs)
 {

@@ -86,7 +86,7 @@ TEST_CASE("csv")
     using mapnik::util::from_u8string;
 
     // check the CSV datasource is loaded
-    const bool have_csv_plugin = mapnik::datasource_cache::instance().plugin_registered("csv");
+    bool const have_csv_plugin = mapnik::datasource_cache::instance().plugin_registered("csv");
     if (have_csv_plugin)
     {
         // make the tests silent since we intentionally test error conditions that are noisy

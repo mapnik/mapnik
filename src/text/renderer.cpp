@@ -221,7 +221,7 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                     {
                         pixel_position render_pos(base_point);
                         image_rgba8 glyph_image(render_glyph_image(glyph, bit->bitmap, transform_, render_pos));
-                        const constexpr std::size_t pixel_size = sizeof(image_rgba8::pixel_type);
+                        constexpr std::size_t const pixel_size = sizeof(image_rgba8::pixel_type);
                         render_halo<pixel_size>(glyph_image.bytes(),
                                                 glyph_image.width(),
                                                 glyph_image.height(),
@@ -256,7 +256,7 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                 {
                     pixel_position render_pos(base_point);
                     image_rgba8 glyph_image(render_glyph_image(glyph, bit->bitmap, transform_, render_pos));
-                    const constexpr std::size_t pixel_size = sizeof(image_rgba8::pixel_type);
+                    constexpr std::size_t const pixel_size = sizeof(image_rgba8::pixel_type);
                     render_halo<pixel_size>(glyph_image.bytes(),
                                             glyph_image.width(),
                                             glyph_image.height(),
@@ -349,7 +349,7 @@ void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer fea
             {
                 pixel_position render_pos(base_point);
                 image_rgba8 glyph_image(render_glyph_image(glyph, bit->bitmap, transform_, render_pos));
-                const constexpr std::size_t pixel_size = sizeof(image_rgba8::pixel_type);
+                constexpr std::size_t const pixel_size = sizeof(image_rgba8::pixel_type);
                 render_halo_id<pixel_size>(glyph_image.bytes(),
                                            glyph_image.width(),
                                            glyph_image.height(),

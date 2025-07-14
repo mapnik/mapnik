@@ -68,7 +68,7 @@ class span_image_resample_gray_affine : public agg::span_image_resample_affine<S
         int radius_y = (diameter * base_type::m_ry) >> 1;
         int len_x_lr = (diameter * base_type::m_rx + agg::image_subpixel_mask) >> agg::image_subpixel_shift;
 
-        const agg::int16* weight_array = base_type::filter().weight_array();
+        agg::int16 const* weight_array = base_type::filter().weight_array();
 
         do
         {
@@ -78,7 +78,7 @@ class span_image_resample_gray_affine : public agg::span_image_resample_affine<S
             {
                 int src_x = x >> agg::image_subpixel_shift;
                 int src_y = y >> agg::image_subpixel_shift;
-                const value_type* pix = reinterpret_cast<const value_type*>(base_type::source().span(src_x, src_y, 1));
+                value_type const* pix = reinterpret_cast<value_type const*>(base_type::source().span(src_x, src_y, 1));
                 if (*nodata_value_ == *pix)
                 {
                     span->v = *nodata_value_;
@@ -103,8 +103,8 @@ class span_image_resample_gray_affine : public agg::span_image_resample_affine<S
                        agg::image_subpixel_shift;
 
             int x_hr2 = x_hr;
-            const value_type* fg_ptr =
-              reinterpret_cast<const value_type*>(base_type::source().span(x_lr, y_lr, len_x_lr));
+            value_type const* fg_ptr =
+              reinterpret_cast<value_type const*>(base_type::source().span(x_lr, y_lr, len_x_lr));
             for (;;)
             {
                 int weight_y = weight_array[y_hr];
@@ -120,12 +120,12 @@ class span_image_resample_gray_affine : public agg::span_image_resample_affine<S
                     x_hr += base_type::m_rx_inv;
                     if (x_hr >= filter_scale)
                         break;
-                    fg_ptr = reinterpret_cast<const value_type*>(base_type::source().next_x());
+                    fg_ptr = reinterpret_cast<value_type const*>(base_type::source().next_x());
                 }
                 y_hr += base_type::m_ry_inv;
                 if (y_hr >= filter_scale)
                     break;
-                fg_ptr = reinterpret_cast<const value_type*>(base_type::source().next_y());
+                fg_ptr = reinterpret_cast<value_type const*>(base_type::source().next_y());
             }
 
             if (total_weight == 0)

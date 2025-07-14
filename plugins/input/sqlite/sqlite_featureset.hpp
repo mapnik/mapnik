@@ -52,7 +52,7 @@ class sqlite_featureset : public mapnik::Featureset
   private:
     std::shared_ptr<sqlite_resultset> rs_;
     mapnik::context_ptr ctx_;
-    const std::unique_ptr<mapnik::transcoder> tr_;
+    std::unique_ptr<mapnik::transcoder> const tr_;
     mapnik::box2d<double> bbox_;
     mapnik::wkbFormat format_;
     bool twkb_encoding_;

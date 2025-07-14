@@ -42,12 +42,12 @@
 
 namespace {
 
-uint8_t read_uint8(const uint8_t** from)
+uint8_t read_uint8(uint8_t const** from)
 {
     return *(*from)++;
 }
 
-uint16_t read_uint16(const uint8_t** from, uint8_t littleEndian)
+uint16_t read_uint16(uint8_t const** from, uint8_t littleEndian)
 {
     uint16_t ret = 0;
 
@@ -73,7 +73,7 @@ read_int16(const uint8_t** from, uint8_t littleEndian) {
 }
 */
 
-double read_float64(const uint8_t** from, uint8_t littleEndian)
+double read_float64(uint8_t const** from, uint8_t littleEndian)
 {
     union {
         double d;
@@ -100,7 +100,7 @@ double read_float64(const uint8_t** from, uint8_t littleEndian)
     return ret.d;
 }
 
-uint32_t read_uint32(const uint8_t** from, uint8_t littleEndian)
+uint32_t read_uint32(uint8_t const** from, uint8_t littleEndian)
 {
     uint32_t ret = 0;
 
@@ -120,12 +120,12 @@ uint32_t read_uint32(const uint8_t** from, uint8_t littleEndian)
     return ret;
 }
 
-int32_t read_int32(const uint8_t** from, uint8_t littleEndian)
+int32_t read_int32(uint8_t const** from, uint8_t littleEndian)
 {
     return read_uint32(from, littleEndian);
 }
 
-float read_float32(const uint8_t** from, uint8_t littleEndian)
+float read_float32(uint8_t const** from, uint8_t littleEndian)
 {
     union {
         float f;

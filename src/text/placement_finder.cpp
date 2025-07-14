@@ -443,8 +443,8 @@ double placement_finder::get_spacing(double path_length, double layout_width) co
     return path_length / num_labels;
 }
 
-bool placement_finder::collision(const box2d<double>& box,
-                                 const value_unicode_string& repeat_key,
+bool placement_finder::collision(box2d<double> const& box,
+                                 value_unicode_string const& repeat_key,
                                  bool line_placement) const
 {
     double margin, repeat_distance;

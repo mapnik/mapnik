@@ -39,8 +39,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/program_options.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-const int DEFAULT_DEPTH = 8;
-const double DEFAULT_RATIO = 0.55;
+int const DEFAULT_DEPTH = 8;
+double const DEFAULT_RATIO = 0.55;
 
 #ifdef _WIN32
 #define NOMINMAX
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
         po::variables_map vm;
 #ifdef _WIN32
         std::vector<std::string> args;
-        const auto wargs = po::split_winmain(GetCommandLineW());
+        auto const wargs = po::split_winmain(GetCommandLineW());
         for (auto it = wargs.begin() + 1; it != wargs.end(); ++it)
             args.push_back(mapnik::utf16_to_utf8(*it));
         po::store(po::command_line_parser(args).options(desc).positional(p).run(), vm);

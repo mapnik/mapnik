@@ -118,13 +118,13 @@ struct setup_marker_visitor
     void operator()(marker_rgba8 const& marker) const
     {
         mapnik::image_rgba8 const& bg_image = marker.get_data();
-        const std::size_t w = bg_image.width();
-        const std::size_t h = bg_image.height();
+        std::size_t const w = bg_image.width();
+        std::size_t const h = bg_image.height();
         if (w > 0 && h > 0)
         {
             // repeat background-image both vertically and horizontally
-            const std::size_t x_steps = std::size_t(std::ceil(common_.width_ / double(w)));
-            const std::size_t y_steps = std::size_t(std::ceil(common_.height_ / double(h)));
+            std::size_t const x_steps = std::size_t(std::ceil(common_.width_ / double(w)));
+            std::size_t const y_steps = std::size_t(std::ceil(common_.height_ / double(h)));
             for (std::size_t x = 0; x < x_steps; ++x)
             {
                 for (std::size_t y = 0; y < y_steps; ++y)
@@ -144,7 +144,7 @@ struct setup_marker_visitor
 template<typename T>
 void cairo_renderer<T>::setup(Map const& map)
 {
-    const auto bg = m_.background();
+    auto const bg = m_.background();
     if (bg.has_value())
     {
         cairo_save_restore guard(context_);
@@ -166,7 +166,7 @@ template<typename T>
 void cairo_renderer<T>::start_map_processing(Map const& map)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer: Start map processing bbox=" << map.get_current_extent();
-    const box2d<double> bounds = common_.t_.forward(common_.t_.extent());
+    box2d<double> const bounds = common_.t_.forward(common_.t_.extent());
     context_.rectangle(bounds.minx(), bounds.miny(), bounds.maxx(), bounds.maxy());
     context_.clip();
 }

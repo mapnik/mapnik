@@ -30,7 +30,7 @@
 
 namespace mapnik {
 
-static const double meters_per_degree = EARTH_CIRCUMFERENCE / 360;
+static double const meters_per_degree = EARTH_CIRCUMFERENCE / 360;
 
 double scale_denominator(double map_scale, bool geographic)
 {

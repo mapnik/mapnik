@@ -39,7 +39,7 @@ class MAPNIK_DECL xml_tree;
 class MAPNIK_DECL xml_attribute
 {
   public:
-    xml_attribute(const char* value_);
+    xml_attribute(char const* value_);
     std::string value;
     mutable bool processed;
 };
@@ -48,7 +48,7 @@ class MAPNIK_DECL node_not_found : public std::exception
 {
   public:
     node_not_found(std::string const& node_name);
-    virtual const char* what() const noexcept;
+    virtual char const* what() const noexcept;
     ~node_not_found();
 
   private:
@@ -62,7 +62,7 @@ class MAPNIK_DECL attribute_not_found : public std::exception
 {
   public:
     attribute_not_found(std::string const& node_name, std::string const& attribute_name);
-    virtual const char* what() const noexcept;
+    virtual char const* what() const noexcept;
     ~attribute_not_found();
 
   private:
@@ -77,7 +77,7 @@ class MAPNIK_DECL more_than_one_child : public std::exception
 {
   public:
     more_than_one_child(std::string const& node_name);
-    virtual const char* what() const noexcept;
+    virtual char const* what() const noexcept;
     ~more_than_one_child();
 
   private:
@@ -100,8 +100,8 @@ class MAPNIK_DECL xml_node
     bool is_text() const;
     bool is(std::string const& name) const;
 
-    xml_node& add_child(const char* name, unsigned line = 0, bool is_text = false);
-    void add_attribute(const char* name, const char* value);
+    xml_node& add_child(char const* name, unsigned line = 0, bool is_text = false);
+    void add_attribute(char const* name, char const* value);
     attribute_map const& get_attributes() const;
 
     bool ignore() const;

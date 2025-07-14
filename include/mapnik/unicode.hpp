@@ -48,7 +48,7 @@ class MAPNIK_DECL transcoder : private util::noncopyable
 {
   public:
     explicit transcoder(std::string const& encoding);
-    mapnik::value_unicode_string transcode(const char* data, std::int32_t length = -1) const;
+    mapnik::value_unicode_string transcode(char const* data, std::int32_t length = -1) const;
     ~transcoder();
 
   private:

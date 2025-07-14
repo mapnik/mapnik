@@ -33,10 +33,10 @@ class LayerListModel : public QAbstractListModel
     Q_OBJECT
   public:
     LayerListModel(std::shared_ptr<mapnik::Map> map, QObject* parent = 0);
-    int rowCount(const QModelIndex& parent = QModelIndex()) const;
-    QVariant data(const QModelIndex& index, int role) const;
+    int rowCount(QModelIndex const& parent = QModelIndex()) const;
+    QVariant data(QModelIndex const& index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
+    bool setData(QModelIndex const& index, QVariant const& value, int role = Qt::EditRole);
     Qt::ItemFlags flags(QModelIndex const& index) const;
     boost::optional<mapnik::layer&> map_layer(int i);
 

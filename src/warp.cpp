@@ -163,11 +163,11 @@ MAPNIK_DECL void warp_image(T& target,
             rasterizer.line_to_d(std::floor(polygon[4]), std::floor(polygon[5]));
             rasterizer.line_to_d(std::floor(polygon[6]), std::floor(polygon[7]));
 
-            const std::size_t x0 = i * mesh_size;
-            const std::size_t y0 = j * mesh_size;
-            const std::size_t x1 = std::min((i + 1) * mesh_size, source.width());
-            const std::size_t y1 = std::min((j + 1) * mesh_size, source.height());
-            const agg::trans_affine tr(polygon, x0, y0, x1, y1);
+            std::size_t const x0 = i * mesh_size;
+            std::size_t const y0 = j * mesh_size;
+            std::size_t const x1 = std::min((i + 1) * mesh_size, source.width());
+            std::size_t const y1 = std::min((j + 1) * mesh_size, source.height());
+            agg::trans_affine const tr(polygon, x0, y0, x1, y1);
             if (tr.is_valid())
             {
                 interpolator_type interpolator(tr);

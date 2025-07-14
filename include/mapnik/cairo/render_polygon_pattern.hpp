@@ -101,7 +101,7 @@ struct cairo_renderer_process_visitor_p
     }
 
     agg::trans_affine const& image_tr_;
-    const double opacity_;
+    double const opacity_;
 };
 
 struct cairo_pattern_base
@@ -193,9 +193,9 @@ struct cairo_polygon_pattern : cairo_pattern_base
         context.fill();
     }
 
-    const bool clip_;
-    const box2d<double> clip_box_;
-    const agg::trans_affine tr_;
+    bool const clip_;
+    box2d<double> const clip_box_;
+    agg::trans_affine const tr_;
     VertexConverter converter_;
 };
 

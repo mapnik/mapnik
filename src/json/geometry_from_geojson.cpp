@@ -35,8 +35,8 @@ bool from_geojson(std::string const& json, mapnik::geometry::geometry<double>& g
     auto grammar = mapnik::json::grammar::geometry_rule;
     try
     {
-        const char* start = json.c_str();
-        const char* end = start + json.length();
+        char const* start = json.c_str();
+        char const* end = start + json.length();
         if (!x3::phrase_parse(start, end, grammar, space_type(), geom))
         {
             throw std::runtime_error("Can't parser GeoJSON Geometry");

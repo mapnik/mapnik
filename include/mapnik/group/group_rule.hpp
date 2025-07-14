@@ -43,25 +43,25 @@ struct MAPNIK_DECL group_rule
 {
     using symbolizers = std::vector<symbolizer>;
 
-    group_rule(const expression_ptr& filter = std::make_shared<mapnik::expr_node>(true),
-               const expression_ptr& repeat_key = expression_ptr());
+    group_rule(expression_ptr const& filter = std::make_shared<mapnik::expr_node>(true),
+               expression_ptr const& repeat_key = expression_ptr());
 
-    group_rule& operator=(const group_rule& rhs);
-    bool operator==(const group_rule& rhs) const;
+    group_rule& operator=(group_rule const& rhs);
+    bool operator==(group_rule const& rhs) const;
 
-    void append(const symbolizer&);
+    void append(symbolizer const&);
 
-    const symbolizers& get_symbolizers() const { return symbolizers_; }
+    symbolizers const& get_symbolizers() const { return symbolizers_; }
 
     inline symbolizers::const_iterator begin() const { return symbolizers_.begin(); }
 
     inline symbolizers::const_iterator end() const { return symbolizers_.end(); }
 
-    inline void set_filter(const expression_ptr& filter) { filter_ = filter; }
+    inline void set_filter(expression_ptr const& filter) { filter_ = filter; }
 
     inline expression_ptr const& get_filter() const { return filter_; }
 
-    inline void set_repeat_key(const expression_ptr& repeat_key) { repeat_key_ = repeat_key; }
+    inline void set_repeat_key(expression_ptr const& repeat_key) { repeat_key_ = repeat_key; }
 
     inline expression_ptr const& get_repeat_key() const { return repeat_key_; }
 

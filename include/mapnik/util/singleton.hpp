@@ -67,7 +67,7 @@ class MAPNIK_DECL CreateStatic
         static storage_type static_memory;
         return new (&static_memory) T;
     }
-    static void destroy(volatile T* obj) { obj->~T(); }
+    static void destroy(T volatile* obj) { obj->~T(); }
 };
 
 #ifdef __GNUC__
@@ -82,8 +82,8 @@ class singleton
     friend class CreatePolicy<T>;
     static std::atomic<T*> pInstance_;
     static std::atomic<bool> destroyed_;
-    singleton(const singleton& rhs);
-    singleton& operator=(const singleton&);
+    singleton(singleton const& rhs);
+    singleton& operator=(singleton const&);
 
     static void onDeadReference() { throw std::runtime_error("dead reference!"); }
 

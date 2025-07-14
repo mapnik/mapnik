@@ -129,18 +129,18 @@ topojson_datasource::topojson_datasource(parameters const& params)
       tr_(new mapnik::transcoder(*params.get<std::string>("encoding", "utf-8"))),
       tree_(nullptr)
 {
-    const auto inline_string = params.get<std::string>("inline");
+    auto const inline_string = params.get<std::string>("inline");
     if (inline_string)
     {
         inline_string_ = *inline_string;
     }
     else
     {
-        const auto file = params.get<std::string>("file");
+        auto const file = params.get<std::string>("file");
         if (!file)
             throw mapnik::datasource_exception("TopoJSON Plugin: missing <file> parameter");
 
-        const auto base = params.get<std::string>("base");
+        auto const base = params.get<std::string>("base");
         if (base)
             filename_ = *base + "/" + *file;
         else
@@ -217,7 +217,7 @@ void topojson_datasource::parse_topojson(T const& buffer)
 
 topojson_datasource::~topojson_datasource() {}
 
-const char* topojson_datasource::name()
+char const* topojson_datasource::name()
 {
     return "topojson";
 }

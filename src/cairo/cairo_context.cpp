@@ -325,7 +325,7 @@ void cairo_context::set_pattern(cairo_pattern const& pattern)
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::set_gradient(cairo_gradient const& pattern, const box2d<double>& bbox)
+void cairo_context::set_gradient(cairo_gradient const& pattern, box2d<double> const& bbox)
 {
     cairo_pattern_t* gradient = pattern.gradient();
     double bx1 = bbox.minx();
@@ -449,8 +449,8 @@ void cairo_context::add_text(glyph_positions const& pos,
 {
     auto off = generate_offset();
     pixel_position const& base_point = pos.get_base_point();
-    const double sx = base_point.x;
-    const double sy = base_point.y;
+    double const sx = base_point.x;
+    double const sy = base_point.y;
     // render halo
     double halo_radius = 0;
     set_operator(halo_comp_op);

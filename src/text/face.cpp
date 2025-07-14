@@ -43,7 +43,7 @@ font_face::font_face(FT_Face face)
 
 bool font_face::init_color_font()
 {
-    static const uint32_t tag = FT_MAKE_TAG('C', 'B', 'D', 'T');
+    static uint32_t const tag = FT_MAKE_TAG('C', 'B', 'D', 'T');
     unsigned long length = 0;
     FT_Load_Sfnt_Table(face_, tag, 0, nullptr, &length);
     return length > 0;

@@ -82,13 +82,13 @@ struct index;
 template<typename T, typename... Types>
 struct index<T, std::tuple<T, Types...>>
 {
-    static const std::size_t value = 0;
+    static std::size_t const value = 0;
 };
 
 template<typename T, typename U, typename... Types>
 struct index<T, std::tuple<U, Types...>>
 {
-    static const std::size_t value = 1 + index<T, std::tuple<Types...>>::value;
+    static std::size_t const value = 1 + index<T, std::tuple<Types...>>::value;
 };
 
 } // namespace detail

@@ -52,11 +52,11 @@ using x3::lit;
 using x3::no_case;
 
 // functors
-const auto make_empty = [](auto const& ctx) {
+auto const make_empty = [](auto const& ctx) {
     _val(ctx) = geometry::geometry_empty();
 };
 
-const auto add_ring = [](auto const& ctx) {
+auto const add_ring = [](auto const& ctx) {
     auto& ring = reinterpret_cast<geometry::linear_ring<double>&>(_attr(ctx));
     _val(ctx).push_back(std::move(ring));
 };

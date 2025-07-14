@@ -56,12 +56,12 @@ class runner
     result_list test_one(path_type const& style_path, report_type& report, std::atomic<std::size_t>& fail_limit) const;
     void parse_params(mapnik::parameters const& params, config& cfg) const;
 
-    const path_type styles_dir_;
-    const config defaults_;
-    const std::size_t jobs_;
-    const std::size_t iterations_;
-    const std::size_t fail_limit_;
-    const renderer_container renderers_;
+    path_type const styles_dir_;
+    config const defaults_;
+    std::size_t const jobs_;
+    std::size_t const iterations_;
+    std::size_t const fail_limit_;
+    renderer_container const renderers_;
 };
 
 } // namespace visual_tests

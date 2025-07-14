@@ -136,10 +136,10 @@ struct warp_pattern : agg_pattern_base
         util::apply_visitor(vertex_processor_type(apply), feature_.get_geometry());
     }
 
-    const bool clip_;
-    const double offset_;
-    const box2d<double> clip_box_;
-    const agg::trans_affine tr_;
+    bool const clip_;
+    double const offset_;
+    box2d<double> const clip_box_;
+    agg::trans_affine const tr_;
     vc_type converter_;
 };
 

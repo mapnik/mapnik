@@ -62,30 +62,30 @@ using x3::lit;
 using x3::symbols;
 using x3::uint_parser;
 
-const auto push_back = [](auto& ctx) {
+auto const push_back = [](auto& ctx) {
     _val(ctx).push_back(_attr(ctx));
 };
 
-const auto set_rx_ry = [](auto& ctx) {
+auto const set_rx_ry = [](auto& ctx) {
     _val(ctx).rx = _val(ctx).ry = _attr(ctx);
 };
 
-const auto set_ry = [](auto& ctx) {
+auto const set_ry = [](auto& ctx) {
     _val(ctx).ry = _attr(ctx);
 };
 
-const auto offset_value = [](auto& ctx) {
+auto const offset_value = [](auto& ctx) {
     _val(ctx) = _attr(ctx);
 };
 
-const auto percent = [](auto& ctx) {
+auto const percent = [](auto& ctx) {
     double val = std::abs(_val(ctx) / 100.0);
     if (val > 1.0)
         val = 1.0;
     _val(ctx) = val;
 };
 
-const x3::uint_parser<unsigned, 10, 1, 3> radius;
+x3::uint_parser<unsigned, 10, 1, 3> const radius;
 
 // Import the expression rule
 namespace {

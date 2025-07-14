@@ -33,7 +33,7 @@ namespace detail {
 struct twkb_reader : mapnik::util::noncopyable
 {
   private:
-    const char* twkb_;
+    char const* twkb_;
     size_t size_;
     unsigned int pos_;
     // Metadata on the geometry we are parsing
@@ -383,7 +383,7 @@ struct twkb_reader : mapnik::util::noncopyable
 
 } // namespace detail
 
-mapnik::geometry::geometry<double> geometry_utils::from_twkb(const char* wkb, std::size_t size)
+mapnik::geometry::geometry<double> geometry_utils::from_twkb(char const* wkb, std::size_t size)
 {
     detail::twkb_reader reader(wkb, size);
     mapnik::geometry::geometry<double> geom(reader.read());

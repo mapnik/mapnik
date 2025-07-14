@@ -198,7 +198,7 @@ class MAPNIK_DECL raster_colorizer
 
     //! \brief Set the epsilon value for exact mode
     //! \param[in] e The epsilon value
-    inline void set_epsilon(const float e)
+    inline void set_epsilon(float const e)
     {
         if (e > 0)
             epsilon_ = e;

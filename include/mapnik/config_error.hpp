@@ -39,7 +39,7 @@ class config_error : public std::exception
     config_error(std::string const& what, xml_node const& node);
     config_error(std::string const& what, unsigned line_number, std::string const& filename);
     virtual ~config_error() {}
-    virtual const char* what() const noexcept;
+    virtual char const* what() const noexcept;
     void append_context(std::string const& ctx) const;
     void append_context(std::string const& ctx, xml_node const& node) const;
     void append_context(xml_node const& node) const;

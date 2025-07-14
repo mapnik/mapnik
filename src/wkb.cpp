@@ -35,7 +35,7 @@ namespace mapnik {
 struct wkb_reader : util::noncopyable
 {
   private:
-    const char* wkb_;
+    char const* wkb_;
     std::size_t size_;
     std::size_t pos_;
     wkbByteOrder byteOrder_;
@@ -78,7 +78,7 @@ struct wkb_reader : util::noncopyable
         wkbGeometryCollectionZM = 3007
     };
 
-    wkb_reader(const char* wkb, std::size_t size, wkbFormat format)
+    wkb_reader(char const* wkb, std::size_t size, wkbFormat format)
         : wkb_(wkb),
           size_(size),
           pos_(0),
@@ -472,7 +472,7 @@ struct wkb_reader : util::noncopyable
     }
 };
 
-mapnik::geometry::geometry<double> geometry_utils::from_wkb(const char* wkb, std::size_t size, wkbFormat format)
+mapnik::geometry::geometry<double> geometry_utils::from_wkb(char const* wkb, std::size_t size, wkbFormat format)
 {
     wkb_reader reader(wkb, size, format);
     mapnik::geometry::geometry<double> geom(reader.read());

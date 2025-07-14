@@ -12,7 +12,7 @@ TEST_CASE("xml parser")
         // simple and non-valid mapnik XML reduced from the empty_parameter2.xml
         // test case. this is to check that the xml parsing routine is trimming
         // whitespace from text nodes as part of the parsing operation.
-        const std::string xml("<Map>"
+        std::string const xml("<Map>"
                               "  <Layer>"
                               "    <Datasource>"
                               "      <Parameter name=\"empty\"><![CDATA[ ]]></Parameter>"

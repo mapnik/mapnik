@@ -54,7 +54,7 @@ class MAPNIK_DECL hit_grid
     // mapping between pixel id and key
     using feature_key_type = std::map<value_type, lookup_type>;
     using feature_type = std::map<lookup_type, mapnik::feature_ptr>;
-    static const value_type base_mask;
+    static value_type const base_mask;
 
   private:
     std::size_t width_;
@@ -117,7 +117,7 @@ class MAPNIK_DECL hit_grid
 
     inline bool checkBounds(std::size_t x, std::size_t y) const { return (x < width_ && y < height_); }
 
-    hit_grid& operator=(const hit_grid&);
+    hit_grid& operator=(hit_grid const&);
 
   public:
     inline void setPixel(std::size_t x, std::size_t y, value_type feature_id)

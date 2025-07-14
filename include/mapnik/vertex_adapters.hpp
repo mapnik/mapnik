@@ -52,7 +52,7 @@ struct line_string_vertex_adapter
     geometry_types type() const;
     line_string<T> const& line_;
     mutable std::size_t current_index_;
-    const std::size_t end_index_;
+    std::size_t const end_index_;
 };
 
 template<typename T>

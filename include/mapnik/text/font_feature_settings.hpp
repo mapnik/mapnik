@@ -62,7 +62,7 @@ class MAPNIK_DECL font_feature_settings
     void append(std::string const& feature);
     void append(font_feature const& feature) { features_.push_back(feature); }
 
-    const font_feature* get_features() const { return features_.data(); }
+    font_feature const* get_features() const { return features_.data(); }
     feature_vector::size_type count() const { return features_.size(); }
     feature_vector const& features() const { return features_; }
 
@@ -84,7 +84,7 @@ inline bool operator==(font_feature_settings const& lhs, font_feature_settings c
 }
 
 constexpr unsigned int font_feature_range_global_start = 0u;
-static const unsigned int font_feature_range_global_end = std::numeric_limits<unsigned int>::max();
+static unsigned int const font_feature_range_global_end = std::numeric_limits<unsigned int>::max();
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH

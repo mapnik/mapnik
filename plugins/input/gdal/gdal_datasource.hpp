@@ -50,7 +50,7 @@ class gdal_datasource : public mapnik::datasource
     gdal_datasource(mapnik::parameters const& params);
     virtual ~gdal_datasource();
     mapnik::datasource::datasource_t type() const override;
-    static const char* name();
+    static char const* name();
     mapnik::featureset_ptr features(mapnik::query const& q) const override;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const override;
     mapnik::box2d<double> envelope() const override;

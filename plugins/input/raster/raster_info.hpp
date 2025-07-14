@@ -35,11 +35,11 @@ class raster_info
   public:
     raster_info(std::string const& file,
                 std::string const& format,
-                const box2d<double>& extent,
+                box2d<double> const& extent,
                 unsigned width,
                 unsigned height);
-    raster_info(const raster_info& rhs);
-    raster_info& operator=(const raster_info& rhs);
+    raster_info(raster_info const& rhs);
+    raster_info& operator=(raster_info const& rhs);
     inline box2d<double> const& envelope() const { return extent_; }
     inline std::string const& file() const { return file_; }
     inline std::string const& format() const { return format_; }

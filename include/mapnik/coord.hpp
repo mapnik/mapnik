@@ -86,7 +86,7 @@ struct coord<T, 2>
     }
 
     template<typename T2>
-    coord<T, 2>& operator=(const coord<T2, 2>& rhs)
+    coord<T, 2>& operator=(coord<T2, 2> const& rhs)
     {
         coord<T, 2> tmp(rhs);
         swap(rhs);

@@ -125,9 +125,9 @@ inline std::string unquote_copy(char quot, std::string const& str)
     s << ",\"" << field << "\"";
 }
 
-const std::regex re_from{"\\bFROM\\b", std::regex::icase};
+std::regex const re_from{"\\bFROM\\b", std::regex::icase};
 
-const std::regex re_table_name{"\\s*(\\w+|(\"[^\"]*\")+)"   // $1 = schema
+std::regex const re_table_name{"\\s*(\\w+|(\"[^\"]*\")+)"   // $1 = schema
                                "(\\.(\\w+|(\"[^\"]*\")+))?" // $4 = table
                                "\\s*"};
 

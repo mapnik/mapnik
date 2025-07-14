@@ -566,7 +566,7 @@ struct to_expression_string_impl
             : quote_(quote)
         {}
 
-        virtual void Append(const char* data, int32_t n)
+        virtual void Append(char const* data, int32_t n)
         {
             // reserve enough room to hold the appended chunk and quotes;
             // if another chunk follows, or any character needs escaping,
@@ -634,7 +634,7 @@ struct to_expression_string_impl
 
     std::string operator()(value_null const&) const { return "null"; }
 
-    const char quote_;
+    char const quote_;
 };
 
 } // namespace detail

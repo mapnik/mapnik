@@ -43,7 +43,7 @@ TEST_CASE("image view")
         mapnik::image_view_rgba8 view_yellow(0, 2, 2, 2, im);
         mapnik::image_view_rgba8 view_red(2, 2, 2, 2, im);
         mapnik::image_view_rgba8 view_bad(99, 99, 99, 99, im);
-        const mapnik::image_view_rgba8 view_all_2(0, 0, 4, 4, im2);
+        mapnik::image_view_rgba8 const view_all_2(0, 0, 4, 4, im2);
 
         // Check that image_views all have the same underlying data
         CHECK(view_all == view_blue);
@@ -227,7 +227,7 @@ TEST_CASE("image view")
     SECTION("image_view_null")
     {
         mapnik::image_view_null view_null;
-        const mapnik::image_view_null view_null2;
+        mapnik::image_view_null const view_null2;
         mapnik::image_view_null view_null3(view_null2);
         mapnik::image_view_null& view_null4 = view_null3;
 

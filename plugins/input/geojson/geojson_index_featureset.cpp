@@ -48,7 +48,7 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename,
       ctx_(std::make_shared<mapnik::context_type>())
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    const auto memory = mapnik::mapped_memory_cache::instance().find(filename, true);
+    auto const memory = mapnik::mapped_memory_cache::instance().find(filename, true);
     if (memory.has_value())
     {
         mapped_region_ = *memory;
@@ -97,7 +97,7 @@ mapnik::feature_ptr geojson_index_featureset::next()
         auto const* start = record.data();
         auto const* end = (count == 1) ? start + record.size() : start;
 #endif
-        static const mapnik::transcoder tr("utf8");
+        static mapnik::transcoder const tr("utf8");
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, feature_id_++));
         using mapnik::json::grammar::iterator_type;
         mapnik::json::parse_feature(start, end, *feature, tr); // throw on failure

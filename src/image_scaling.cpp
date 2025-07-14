@@ -55,7 +55,7 @@ MAPNIK_DISABLE_WARNING_POP
 namespace mapnik {
 
 using scaling_method_lookup_type = boost::bimap<scaling_method_e, std::string>;
-static const scaling_method_lookup_type scaling_lookup =
+static scaling_method_lookup_type const scaling_lookup =
   boost::assign::list_of<scaling_method_lookup_type::relation>(SCALING_NEAR, "near")(SCALING_BILINEAR, "bilinear")(
     SCALING_BICUBIC,
     "bicubic")(SCALING_SPLINE16, "spline16")(SCALING_SPLINE36, "spline36")(SCALING_HANNING, "hanning")(
