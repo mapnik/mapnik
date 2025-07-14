@@ -94,17 +94,17 @@ text_layout::text_layout(face_manager_freetype& font_manager,
                          text_symbolizer_properties const& properties,
                          text_layout_properties const& layout_defaults,
                          formatting::node_ptr tree)
-    : font_manager_(font_manager)
-    , scale_factor_(scale_factor)
-    , itemizer_()
-    , width_map_()
-    , width_(0.0)
-    , height_(0.0)
-    , glyphs_count_(0)
-    , lines_()
-    , layout_properties_(layout_defaults)
-    , properties_(properties)
-    , format_(std::make_unique<detail::evaluated_format_properties>())
+    : font_manager_(font_manager),
+      scale_factor_(scale_factor),
+      itemizer_(),
+      width_map_(),
+      width_(0.0),
+      height_(0.0),
+      glyphs_count_(0),
+      lines_(),
+      layout_properties_(layout_defaults),
+      properties_(properties),
+      format_(std::make_unique<detail::evaluated_format_properties>())
 {
     double dx = util::apply_visitor(extract_value<value_double>(feature, attrs), layout_properties_.dx);
     double dy = util::apply_visitor(extract_value<value_double>(feature, attrs), layout_properties_.dy);
@@ -319,8 +319,8 @@ void text_layout::break_line_icu(std::pair<unsigned, unsigned>&& line_limits)
 struct line_breaker : util::noncopyable
 {
     line_breaker(value_unicode_string const& ustr, char wrap_char)
-        : ustr_(ustr)
-        , wrap_char_(wrap_char)
+        : ustr_(ustr),
+          wrap_char_(wrap_char)
     {}
 
     std::int32_t following(std::int32_t offset)

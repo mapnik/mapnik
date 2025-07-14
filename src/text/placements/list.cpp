@@ -74,8 +74,8 @@ text_placement_info_ptr
 }
 
 text_placements_list::text_placements_list()
-    : text_placements()
-    , list_(0)
+    : text_placements(),
+      list_(0)
 {}
 
 void text_placements_list::add_expressions(expression_set& output) const

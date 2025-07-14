@@ -18,12 +18,12 @@ class test : public benchmark::test_case
          mapnik::box2d<double> const& from,
          mapnik::box2d<double> const& to,
          bool defer_proj)
-        : test_case(params)
-        , src_(src)
-        , dest_(dest)
-        , from_(from)
-        , to_(to)
-        , defer_proj_init_(defer_proj)
+        : test_case(params),
+          src_(src),
+          dest_(dest),
+          from_(from),
+          to_(to),
+          defer_proj_init_(defer_proj)
     {}
     bool validate() const
     {

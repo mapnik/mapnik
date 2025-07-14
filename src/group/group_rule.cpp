@@ -30,8 +30,8 @@
 namespace mapnik {
 
 group_rule::group_rule(const expression_ptr& filter, const expression_ptr& repeat_key)
-    : filter_(filter)
-    , repeat_key_(repeat_key)
+    : filter_(filter),
+      repeat_key_(repeat_key)
 {}
 
 group_rule& group_rule::operator=(const group_rule& rhs)

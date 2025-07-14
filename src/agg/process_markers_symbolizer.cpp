@@ -64,10 +64,10 @@ struct agg_markers_renderer_context : markers_renderer_context
                                  attributes const& vars,
                                  BufferType& buf,
                                  RasterizerType& ras)
-        : buf_(buf)
-        , pixf_(buf_)
-        , renb_(pixf_)
-        , ras_(ras)
+        : buf_(buf),
+          pixf_(buf_),
+          renb_(pixf_),
+          ras_(ras)
     {
         auto comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, vars);
         pixf_.comp_op(static_cast<agg::comp_op_e>(comp_op));

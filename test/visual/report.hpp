@@ -36,8 +36,8 @@ class console_report
 {
   public:
     console_report(bool _show_duration)
-        : s(std::clog)
-        , show_duration(_show_duration)
+        : s(std::clog),
+          show_duration(_show_duration)
     {}
 
     console_report(std::ostream& _s)

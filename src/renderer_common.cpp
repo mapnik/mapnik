@@ -31,16 +31,16 @@ namespace mapnik {
 
 // copy constructor exclusively for virtual_renderer_common
 renderer_common::renderer_common(renderer_common const& other)
-    : width_(other.width_)
-    , height_(other.height_)
-    , scale_factor_(other.scale_factor_)
-    , vars_(other.vars_)
-    , shared_font_library_(other.shared_font_library_)
-    , font_library_(other.font_library_)
-    , font_manager_(other.font_manager_)
-    , query_extent_(other.query_extent_)
-    , t_(other.t_)
-    , detector_(other.detector_)
+    : width_(other.width_),
+      height_(other.height_),
+      scale_factor_(other.scale_factor_),
+      vars_(other.vars_),
+      shared_font_library_(other.shared_font_library_),
+      font_library_(other.font_library_),
+      font_manager_(other.font_manager_),
+      query_extent_(other.query_extent_),
+      t_(other.t_),
+      detector_(other.detector_)
 {}
 
 renderer_common::renderer_common(Map const& map,
@@ -50,16 +50,16 @@ renderer_common::renderer_common(Map const& map,
                                  attributes const& vars,
                                  view_transform&& t,
                                  detector_ptr detector)
-    : width_(width)
-    , height_(height)
-    , scale_factor_(scale_factor)
-    , vars_(vars)
-    , shared_font_library_(std::make_shared<font_library>())
-    , font_library_(*shared_font_library_)
-    , font_manager_(font_library_, map.get_font_file_mapping(), map.get_font_memory_cache())
-    , query_extent_()
-    , t_(t)
-    , detector_(detector)
+    : width_(width),
+      height_(height),
+      scale_factor_(scale_factor),
+      vars_(vars),
+      shared_font_library_(std::make_shared<font_library>()),
+      font_library_(*shared_font_library_),
+      font_manager_(font_library_, map.get_font_file_mapping(), map.get_font_memory_cache()),
+      query_extent_(),
+      t_(t),
+      detector_(detector)
 {}
 
 renderer_common::renderer_common(Map const& m,

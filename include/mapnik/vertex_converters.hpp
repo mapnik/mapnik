@@ -402,14 +402,14 @@ struct arguments : util::noncopyable
               feature_impl const& _feature,
               attributes const& _vars,
               double _scale_factor)
-        : bbox(_bbox)
-        , sym(_sym)
-        , tr(_tr)
-        , prj_trans(_prj_trans)
-        , affine_trans(_affine_trans)
-        , feature(_feature)
-        , vars(_vars)
-        , scale_factor(_scale_factor)
+        : bbox(_bbox),
+          sym(_sym),
+          tr(_tr),
+          prj_trans(_prj_trans),
+          affine_trans(_affine_trans),
+          feature(_feature),
+          vars(_vars),
+          scale_factor(_scale_factor)
     {}
 
     box2d<double> const& bbox;

@@ -36,8 +36,8 @@ class filter_featureset : public Featureset
 
   public:
     filter_featureset(featureset_ptr const& fs, filter_type&& filter)
-        : fs_(fs)
-        , filter_(std::move(filter))
+        : fs_(fs),
+          filter_(std::move(filter))
     {}
 
     feature_ptr next()

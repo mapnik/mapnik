@@ -31,10 +31,10 @@
 namespace mapnik {
 
 text_itemizer::text_itemizer()
-    : text_()
-    , format_runs_()
-    , direction_runs_()
-    , script_runs_()
+    : text_(),
+      format_runs_(),
+      direction_runs_(),
+      script_runs_()
 {
     forced_line_breaks_.push_back(0);
 }

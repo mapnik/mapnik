@@ -10,8 +10,8 @@ class test : public benchmark::test_case
 
   public:
     test(mapnik::parameters const& params)
-        : test_case(params)
-        , expr_("((([mapnik::geometry_type]=2) and ([oneway]=1)) and ([class]='path'))")
+        : test_case(params),
+          expr_("((([mapnik::geometry_type]=2) and ([oneway]=1)) and ([class]='path'))")
     {}
     bool validate() const
     {

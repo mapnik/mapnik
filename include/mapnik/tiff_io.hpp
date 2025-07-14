@@ -169,12 +169,12 @@ static inline int tiff_dummy_map_proc(thandle_t, tdata_t*, toff_t*)
 struct tiff_config
 {
     tiff_config()
-        : compression(COMPRESSION_ADOBE_DEFLATE)
-        , zlevel(4)
-        , tile_width(0)
-        , tile_height(0)
-        , rows_per_strip(0)
-        , method(TIFF_WRITE_STRIPPED)
+        : compression(COMPRESSION_ADOBE_DEFLATE),
+          zlevel(4),
+          tile_width(0),
+          tile_height(0),
+          rows_per_strip(0),
+          method(TIFF_WRITE_STRIPPED)
     {}
 
     int compression;
@@ -188,8 +188,8 @@ struct tiff_config
 struct tag_setter
 {
     tag_setter(TIFF* output, tiff_config const& config)
-        : output_(output)
-        , config_(config)
+        : output_(output),
+          config_(config)
     {}
 
     template<typename T>

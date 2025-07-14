@@ -44,9 +44,9 @@ namespace mapnik {
 struct glyph_position
 {
     glyph_position(glyph_info const& _glyph, pixel_position const& _pos, rotation const& _rot)
-        : glyph(_glyph)
-        , pos(_pos)
-        , rot(_rot)
+        : glyph(_glyph),
+          pos(_pos),
+          rot(_rot)
     {}
     glyph_info const& glyph;
     pixel_position pos;
@@ -57,8 +57,8 @@ struct marker_info
 {
     // marker_info() : marker(), transform() {}
     marker_info(std::shared_ptr<marker const> _marker, agg::trans_affine const& _transform)
-        : marker_(_marker)
-        , transform_(_transform)
+        : marker_(_marker),
+          transform_(_transform)
     {}
     std::shared_ptr<marker const> marker_;
     agg::trans_affine transform_;
@@ -105,9 +105,9 @@ using placements_list = std::list<glyph_positions_ptr>;
 struct scoped_glyph_positions_offset
 {
     scoped_glyph_positions_offset(glyph_positions& glyphs, pixel_position const& offset)
-        : glyphs_(glyphs)
-        , base_point_(glyphs.get_base_point())
-        , marker_pos_(glyphs.marker_pos())
+        : glyphs_(glyphs),
+          base_point_(glyphs.get_base_point()),
+          marker_pos_(glyphs.marker_pos())
     {
         // move the glyphs to the correct offset
         glyphs_.set_base_point(base_point_ + offset);

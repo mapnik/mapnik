@@ -49,9 +49,9 @@ DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(raster_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(raster_datasource_plugin);
 
 raster_datasource::raster_datasource(parameters const& params)
-    : datasource(params)
-    , desc_(raster_datasource::name(), "utf-8")
-    , extent_initialized_(false)
+    : datasource(params),
+      desc_(raster_datasource::name(), "utf-8"),
+      extent_initialized_(false)
 {
     MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Initializing...";
 

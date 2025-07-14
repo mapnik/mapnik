@@ -48,9 +48,9 @@ bool ignore_case_equal(std::string const& s0, std::string const& s1);
 struct geometry_column_locator
 {
     geometry_column_locator()
-        : type(UNKNOWN)
-        , index(-1)
-        , index2(-1)
+        : type(UNKNOWN),
+          index(-1),
+          index2(-1)
     {}
 
     enum { UNKNOWN = 0, WKT, GEOJSON, LON_LAT } type;

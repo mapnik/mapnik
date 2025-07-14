@@ -47,24 +47,24 @@ struct vertex<T, 2>
     unsigned cmd;
 
     vertex()
-        : x(0)
-        , y(0)
-        , cmd(SEG_END)
+        : x(0),
+          y(0),
+          cmd(SEG_END)
     {}
 
     explicit vertex(no_init_t) {}
 
     vertex(coordinate_type x_, coordinate_type y_, unsigned cmd_)
-        : x(x_)
-        , y(y_)
-        , cmd(cmd_)
+        : x(x_),
+          y(y_),
+          cmd(cmd_)
     {}
 
     template<typename T2>
     vertex(vertex<T2, 2> const& rhs)
-        : x(coordinate_type(rhs.x))
-        , y(coordinate_type(rhs.y))
-        , cmd(rhs.cmd)
+        : x(coordinate_type(rhs.x)),
+          y(coordinate_type(rhs.y)),
+          cmd(rhs.cmd)
     {}
 
     template<typename T2>

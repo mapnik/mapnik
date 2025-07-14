@@ -27,27 +27,27 @@
 namespace mapnik {
 
 text_line::text_line(unsigned first_char, unsigned last_char)
-    : glyphs_()
-    , line_height_(0.0)
-    , max_char_height_(0.0)
-    , width_(0.0)
-    , glyphs_width_(0.0)
-    , first_char_(first_char)
-    , last_char_(last_char)
-    , first_line_(false)
-    , space_count_(0)
+    : glyphs_(),
+      line_height_(0.0),
+      max_char_height_(0.0),
+      width_(0.0),
+      glyphs_width_(0.0),
+      first_char_(first_char),
+      last_char_(last_char),
+      first_line_(false),
+      space_count_(0)
 {}
 
 text_line::text_line(text_line&& rhs)
-    : glyphs_(std::move(rhs.glyphs_))
-    , line_height_(std::move(rhs.line_height_))
-    , max_char_height_(std::move(rhs.max_char_height_))
-    , width_(std::move(rhs.width_))
-    , glyphs_width_(std::move(rhs.glyphs_width_))
-    , first_char_(std::move(rhs.first_char_))
-    , last_char_(std::move(rhs.last_char_))
-    , first_line_(std::move(rhs.first_line_))
-    , space_count_(std::move(rhs.space_count_))
+    : glyphs_(std::move(rhs.glyphs_)),
+      line_height_(std::move(rhs.line_height_)),
+      max_char_height_(std::move(rhs.max_char_height_)),
+      width_(std::move(rhs.width_)),
+      glyphs_width_(std::move(rhs.glyphs_width_)),
+      first_char_(std::move(rhs.first_char_)),
+      last_char_(std::move(rhs.last_char_)),
+      first_line_(std::move(rhs.first_line_)),
+      space_count_(std::move(rhs.space_count_))
 {}
 
 void text_line::add_glyph(glyph_info&& glyph, double scale_factor_)

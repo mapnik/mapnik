@@ -66,10 +66,10 @@ struct invert : image_filter_base
 struct color_blind_filter : image_filter_base
 {
     color_blind_filter(double x_, double y_, double m_, double yint_)
-        : x(x_)
-        , y(y_)
-        , m(m_)
-        , yint(yint_)
+        : x(x_),
+          y(y_),
+          m(m_),
+          yint(yint_)
     {}
     double x;
     double y;
@@ -101,16 +101,16 @@ struct color_blind_tritanope : color_blind_filter
 struct agg_stack_blur : image_filter_base
 {
     agg_stack_blur()
-        : rx(1)
-        , ry(1)
+        : rx(1),
+          ry(1)
     {}
     agg_stack_blur(unsigned r)
-        : rx(r)
-        , ry(r)
+        : rx(r),
+          ry(r)
     {}
     agg_stack_blur(unsigned rx_, unsigned ry_)
-        : rx(rx_)
-        , ry(ry_)
+        : rx(rx_),
+          ry(ry_)
     {}
     inline bool operator==(agg_stack_blur const& rhs) const { return rx == rhs.rx && ry == rhs.ry; }
     unsigned rx;
@@ -131,14 +131,14 @@ struct scale_hsla : image_filter_base
 {
     scale_hsla() {}
     scale_hsla(double _h0, double _h1, double _s0, double _s1, double _l0, double _l1, double _a0, double _a1)
-        : h0(_h0)
-        , h1(_h1)
-        , s0(_s0)
-        , s1(_s1)
-        , l0(_l0)
-        , l1(_l1)
-        , a0(_a0)
-        , a1(_a1)
+        : h0(_h0),
+          h1(_h1),
+          s0(_s0),
+          s1(_s1),
+          l0(_l0),
+          l1(_l1),
+          a0(_a0),
+          a1(_a1)
     {}
 
     inline bool is_identity() const { return (h0 == 0 && h1 == 1 && s0 == 0 && s1 == 1 && l0 == 0 && l1 == 1); }
@@ -163,12 +163,12 @@ struct scale_hsla : image_filter_base
 struct color_stop
 {
     color_stop()
-        : color()
-        , offset(0.0)
+        : color(),
+          offset(0.0)
     {}
     color_stop(mapnik::color const& c, double val = 0.0)
-        : color(c)
-        , offset(val)
+        : color(c),
+          offset(val)
     {}
     bool operator==(color_stop const& rhs) const { return color == rhs.color && offset == rhs.offset; }
     mapnik::color color;

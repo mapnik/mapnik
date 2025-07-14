@@ -39,14 +39,14 @@ text_renderer::text_renderer(halo_rasterizer_e rasterizer,
                              composite_mode_e halo_comp_op,
                              double scale_factor,
                              stroker_ptr stroker)
-    : rasterizer_(rasterizer)
-    , comp_op_(comp_op)
-    , halo_comp_op_(halo_comp_op)
-    , scale_factor_(scale_factor)
-    , glyphs_()
-    , stroker_(stroker)
-    , transform_()
-    , halo_transform_()
+    : rasterizer_(rasterizer),
+      comp_op_(comp_op),
+      halo_comp_op_(halo_comp_op),
+      scale_factor_(scale_factor),
+      glyphs_(),
+      stroker_(stroker),
+      transform_(),
+      halo_transform_()
 {}
 
 void text_renderer::set_transform(agg::trans_affine const& transform)
@@ -154,8 +154,8 @@ agg_text_renderer<T>::agg_text_renderer(pixmap_type& pixmap,
                                         composite_mode_e halo_comp_op,
                                         double scale_factor,
                                         stroker_ptr stroker)
-    : text_renderer(rasterizer, comp_op, halo_comp_op, scale_factor, stroker)
-    , pixmap_(pixmap)
+    : text_renderer(rasterizer, comp_op, halo_comp_op, scale_factor, stroker),
+      pixmap_(pixmap)
 {}
 
 template<typename T>
@@ -478,8 +478,8 @@ void grid_text_renderer<T>::render_halo_id(unsigned char* buffer,
 
 template<typename T>
 grid_text_renderer<T>::grid_text_renderer(pixmap_type& pixmap, composite_mode_e comp_op, double scale_factor)
-    : text_renderer(halo_rasterizer_enum::HALO_RASTERIZER_FAST, comp_op, src_over, scale_factor)
-    , pixmap_(pixmap)
+    : text_renderer(halo_rasterizer_enum::HALO_RASTERIZER_FAST, comp_op, src_over, scale_factor),
+      pixmap_(pixmap)
 {}
 
 template class agg_text_renderer<image_rgba8>;

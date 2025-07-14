@@ -27,19 +27,19 @@ raster_info::raster_info(std::string const& file,
                          mapnik::box2d<double> const& extent,
                          unsigned width,
                          unsigned height)
-    : file_(file)
-    , format_(format)
-    , extent_(extent)
-    , width_(width)
-    , height_(height)
+    : file_(file),
+      format_(format),
+      extent_(extent),
+      width_(width),
+      height_(height)
 {}
 
 raster_info::raster_info(const raster_info& rhs)
-    : file_(rhs.file_)
-    , format_(rhs.format_)
-    , extent_(rhs.extent_)
-    , width_(rhs.width_)
-    , height_(rhs.height_)
+    : file_(rhs.file_),
+      format_(rhs.format_),
+      extent_(rhs.extent_),
+      width_(rhs.width_),
+      height_(rhs.height_)
 {}
 
 void raster_info::swap(raster_info& other)

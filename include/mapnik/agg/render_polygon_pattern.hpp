@@ -89,11 +89,11 @@ struct agg_polygon_pattern : agg_pattern_base
                         symbolizer_base const& sym,
                         mapnik::feature_impl const& feature,
                         proj_transform const& prj_trans)
-        : agg_pattern_base{pattern_img, common, sym, feature, prj_trans}
-        , clip_(get<value_bool, keys::clip>(sym_, feature_, common_.vars_))
-        , clip_box_(clipping_extent(common))
-        , tr_(geom_transform())
-        , converter_(clip_box_, sym, common.t_, prj_trans, tr_, feature, common.vars_, common.scale_factor_)
+        : agg_pattern_base{pattern_img, common, sym, feature, prj_trans},
+          clip_(get<value_bool, keys::clip>(sym_, feature_, common_.vars_)),
+          clip_box_(clipping_extent(common)),
+          tr_(geom_transform()),
+          converter_(clip_box_, sym, common.t_, prj_trans, tr_, feature, common.vars_, common.scale_factor_)
     {
         value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym_, feature_, common_.vars_);
         value_double smooth = get<value_double, keys::smooth>(sym_, feature_, common_.vars_);

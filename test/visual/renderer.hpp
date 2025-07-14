@@ -302,10 +302,10 @@ class renderer
     using image_type = typename Renderer::image_type;
 
     renderer(mapnik::fs::path const& _output_dir, mapnik::fs::path const& _reference_dir, bool _overwrite)
-        : ren()
-        , output_dir(_output_dir)
-        , reference_dir(_reference_dir)
-        , overwrite(_overwrite)
+        : ren(),
+          output_dir(_output_dir),
+          reference_dir(_reference_dir),
+          overwrite(_overwrite)
     {}
 
     image_type render(mapnik::Map const& map, double scale_factor) const { return ren.render(map, scale_factor); }

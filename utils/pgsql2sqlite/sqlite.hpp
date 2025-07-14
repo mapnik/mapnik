@@ -72,8 +72,8 @@ struct null_type
 struct blob
 {
     blob(const char* buf, unsigned size)
-        : buf_(buf)
-        , size_(size)
+        : buf_(buf),
+          size_(size)
     {}
 
     const char* buf_;
@@ -88,8 +88,8 @@ class prepared_statement : util::noncopyable
     struct binder
     {
         binder(sqlite3_stmt* stmt, unsigned index)
-            : stmt_(stmt)
-            , index_(index)
+            : stmt_(stmt),
+              index_(index)
         {}
 
         bool operator()(null_type)
@@ -148,8 +148,8 @@ class prepared_statement : util::noncopyable
 
   public:
     prepared_statement(database& db, std::string const& sql)
-        : db_(db.db_.get())
-        , stmt_(0)
+        : db_(db.db_.get()),
+          stmt_(0)
     {
         const char* tail;
         // char * err_msg;

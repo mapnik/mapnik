@@ -37,8 +37,8 @@ struct ScriptRecord
 struct ParenStackEntry
 {
     ParenStackEntry(int32_t pairIndex_, UScriptCode scriptCode_)
-        : pairIndex(pairIndex_)
-        , scriptCode(scriptCode_)
+        : pairIndex(pairIndex_),
+          scriptCode(scriptCode_)
     {}
     int32_t pairIndex = 0;
     UScriptCode scriptCode = USCRIPT_INVALID_CODE;

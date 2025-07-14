@@ -32,8 +32,8 @@ namespace detail {
 struct property_serializer
 {
     property_serializer(std::string const& name, boost::property_tree::ptree& node)
-        : name_(name)
-        , node_(node)
+        : name_(name),
+          node_(node)
     {}
 
     void operator()(expression_ptr const& expr) const

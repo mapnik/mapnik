@@ -75,10 +75,10 @@ class test1 : public benchmark::test_case
   public:
     using conv_clip = agg::conv_clip_polygon<mapnik::geometry::polygon_vertex_adapter<double>>;
     test1(mapnik::parameters const& params, std::string const& wkt_in, mapnik::box2d<double> const& extent)
-        : test_case(params)
-        , wkt_in_(wkt_in)
-        , extent_(extent)
-        , expected_("./benchmark/data/polygon_clipping_agg")
+        : test_case(params),
+          wkt_in_(wkt_in),
+          extent_(extent),
+          expected_("./benchmark/data/polygon_clipping_agg")
     {}
     bool validate() const
     {
@@ -212,10 +212,10 @@ class test3 : public benchmark::test_case
 
   public:
     test3(mapnik::parameters const& params, std::string const& wkt_in, mapnik::box2d<double> const& extent)
-        : test_case(params)
-        , wkt_in_(wkt_in)
-        , extent_(extent)
-        , expected_("./benchmark/data/polygon_clipping_boost")
+        : test_case(params),
+          wkt_in_(wkt_in),
+          extent_(extent),
+          expected_("./benchmark/data/polygon_clipping_boost")
     {}
     bool validate() const
     {

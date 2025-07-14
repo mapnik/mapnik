@@ -102,10 +102,10 @@ struct transform_processor
     struct node_evaluator
     {
         node_evaluator(transform_type& tr, feature_type const& feat, variable_type const& v, double scale_factor)
-            : transform_(tr)
-            , feature_(feat)
-            , vars_(v)
-            , scale_factor_(scale_factor)
+            : transform_(tr),
+              feature_(feat),
+              vars_(v),
+              scale_factor_(scale_factor)
         {}
 
         void operator()(identity_node const&) const {}

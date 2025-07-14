@@ -11,9 +11,9 @@ class test : public benchmark::test_case
 
   public:
     test(mapnik::parameters const& params, std::string const& xml, mapnik::box2d<double> const& extent)
-        : test_case(params)
-        , xml_(xml)
-        , extent_(extent)
+        : test_case(params),
+          xml_(xml),
+          extent_(extent)
     {}
     bool validate() const
     {

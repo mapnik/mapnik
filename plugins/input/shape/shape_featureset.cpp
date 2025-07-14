@@ -42,15 +42,15 @@ shape_featureset<filterT>::shape_featureset(filterT const& filter,
                                             std::set<std::string> const& attribute_names,
                                             std::string const& encoding,
                                             int row_limit)
-    : filter_(filter)
-    , shape_(shape_name, false)
-    , query_ext_()
-    , feature_bbox_()
-    , tr_(new transcoder(encoding))
-    , shx_file_length_(0)
-    , row_limit_(row_limit)
-    , count_(0)
-    , ctx_(std::make_shared<mapnik::context_type>())
+    : filter_(filter),
+      shape_(shape_name, false),
+      query_ext_(),
+      feature_bbox_(),
+      tr_(new transcoder(encoding)),
+      shx_file_length_(0),
+      row_limit_(row_limit),
+      count_(0),
+      ctx_(std::make_shared<mapnik::context_type>())
 {
     if (!shape_.shx().is_open())
     {

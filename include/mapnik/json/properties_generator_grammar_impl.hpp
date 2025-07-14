@@ -60,8 +60,8 @@ escaped_string<OutputIterator>::escaped_string()
 
 template<typename OutputIterator, typename KeyValueStore>
 properties_generator_grammar<OutputIterator, KeyValueStore>::properties_generator_grammar()
-    : properties_generator_grammar::base_type(properties)
-    , quote_("\"")
+    : properties_generator_grammar::base_type(properties),
+      quote_("\"")
 {
     boost::spirit::karma::lit_type lit;
     boost::spirit::karma::_val_type _val;

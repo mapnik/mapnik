@@ -49,9 +49,9 @@ struct process_layout
     process_layout(std::vector<bound_box> const& member_bboxes,
                    std::vector<pixel_position>& member_offsets,
                    pixel_position const& input_origin)
-        : member_boxes_(member_bboxes)
-        , member_offsets_(member_offsets)
-        , input_origin_(input_origin)
+        : member_boxes_(member_bboxes),
+          member_offsets_(member_offsets),
+          input_origin_(input_origin)
     {}
 
     // arrange group members in centered, horizontal row

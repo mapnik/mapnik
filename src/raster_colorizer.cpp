@@ -49,17 +49,17 @@ constexpr detail::EnumMapT<colorizer_mode_enum, 7> colorizer_mode_map{{
 IMPLEMENT_ENUM(colorizer_mode, colorizer_mode_enum)
 
 colorizer_stop::colorizer_stop(float val, colorizer_mode mode, color const& _color, std::string const& label)
-    : value_(val)
-    , mode_(mode)
-    , color_(_color)
-    , label_(label)
+    : value_(val),
+      mode_(mode),
+      color_(_color),
+      label_(label)
 {}
 
 colorizer_stop::colorizer_stop(colorizer_stop const& stop)
-    : value_(stop.value_)
-    , mode_(stop.mode_)
-    , color_(stop.color_)
-    , label_(stop.label_)
+    : value_(stop.value_),
+      mode_(stop.mode_),
+      color_(stop.color_),
+      label_(stop.label_)
 {}
 
 colorizer_stop::~colorizer_stop() {}
@@ -77,9 +77,9 @@ std::string colorizer_stop::to_string() const
 }
 
 raster_colorizer::raster_colorizer(colorizer_mode mode, color const& _color)
-    : default_mode_(mode)
-    , default_color_(_color)
-    , epsilon_(std::numeric_limits<float>::epsilon())
+    : default_mode_(mode),
+      default_color_(_color),
+      epsilon_(std::numeric_limits<float>::epsilon())
 {}
 
 raster_colorizer::~raster_colorizer() {}

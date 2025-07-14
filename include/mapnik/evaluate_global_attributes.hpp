@@ -280,8 +280,8 @@ struct evaluate_global_attributes : util::noncopyable
     struct evaluator
     {
         evaluator(symbolizer_base::cont_type::value_type& prop, Attributes const& attrs)
-            : prop_(prop)
-            , attrs_(attrs)
+            : prop_(prop),
+              attrs_(attrs)
         {}
 
         void operator()(expression_ptr const& expr) const

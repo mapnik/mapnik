@@ -5,13 +5,14 @@
 template<typename T>
 struct bench_func : benchmark::test_case
 {
-    T (*const func_)(T);
+    T(*const func_)
+    (T);
     T const value_;
 
     bench_func(mapnik::parameters const& params, T (*func)(T), T value)
-        : test_case(params)
-        , func_(func)
-        , value_(value)
+        : test_case(params),
+          func_(func),
+          value_(value)
     {}
 
     bool validate() const { return true; }

@@ -70,9 +70,9 @@ struct shape_record
     mutable std::size_t pos;
 
     explicit shape_record(size_t size_)
-        : data(Tag::alloc(size_))
-        , size(size_)
-        , pos(0)
+        : data(Tag::alloc(size_)),
+          size(size_),
+          pos(0)
     {}
 
     ~shape_record() { Tag::dealloc(data); }

@@ -41,18 +41,20 @@ csv_index_featureset::csv_index_featureset(std::string const& filename,
                                            char quote,
                                            std::vector<std::string> const& headers,
                                            mapnik::context_ptr const& ctx)
-    : separator_(separator)
-    , quote_(quote)
-    , headers_(headers)
-    , ctx_(ctx)
-    , locator_(locator)
-    , tr_("utf8")
+    : separator_(separator),
+      quote_(quote),
+      headers_(headers),
+      ctx_(ctx),
+      locator_(locator),
+      tr_("utf8")
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 //
 #elif defined(_WIN32)
-    , file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
+      ,
+      file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
 #else
-    , file_(std::fopen(filename.c_str(), "rb"), std::fclose)
+      ,
+      file_(std::fopen(filename.c_str(), "rb"), std::fclose)
 #endif
 
 {

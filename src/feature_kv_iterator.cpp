@@ -26,8 +26,8 @@
 namespace mapnik {
 
 feature_kv_iterator::feature_kv_iterator(feature_impl const& f, bool begin)
-    : f_(f)
-    , itr_(begin ? f_.ctx_->begin() : f_.ctx_->end())
+    : f_(f),
+      itr_(begin ? f_.ctx_->begin() : f_.ctx_->end())
 {}
 
 void feature_kv_iterator::increment()

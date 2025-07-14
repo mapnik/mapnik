@@ -50,8 +50,8 @@ MAPNIK_DISABLE_WARNING_POP
 namespace mapnik {
 
 marker_cache::marker_cache()
-    : known_svg_prefix_("shape://")
-    , known_image_prefix_("image://")
+    : known_svg_prefix_("shape://"),
+      known_image_prefix_("image://")
 {
     insert_svg("ellipse",
                "<?xml version='1.0' standalone='no'?>"

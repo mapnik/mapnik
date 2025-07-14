@@ -80,13 +80,13 @@ struct grid_markers_renderer_context : markers_renderer_context
     using pixfmt_type = typename renderer_base::pixfmt_type;
 
     grid_markers_renderer_context(feature_impl const& feature, BufferType& buf, RasterizerType& ras, PixMapType& pixmap)
-        : feature_(feature)
-        , buf_(buf)
-        , pixf_(buf_)
-        , renb_(pixf_)
-        , ras_(ras)
-        , pixmap_(pixmap)
-        , placed_(false)
+        : feature_(feature),
+          buf_(buf),
+          pixf_(buf_),
+          renb_(pixf_),
+          ras_(ras),
+          pixmap_(pixmap),
+          placed_(false)
     {}
 
     virtual void render_marker(svg_path_ptr const& src,

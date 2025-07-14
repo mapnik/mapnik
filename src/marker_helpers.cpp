@@ -88,12 +88,12 @@ struct push_explicit_style
                         std::optional<color> const& stroke_color,
                         std::optional<double> const& stroke_width,
                         std::optional<double> const& stroke_opacity)
-        : current_group_(&dst)
-        , fill_color_(fill_color)
-        , fill_opacity_(fill_opacity)
-        , stroke_color_(stroke_color)
-        , stroke_width_(stroke_width)
-        , stroke_opacity_(stroke_opacity)
+        : current_group_(&dst),
+          fill_color_(fill_color),
+          fill_opacity_(fill_opacity),
+          stroke_color_(stroke_color),
+          stroke_width_(stroke_width),
+          stroke_opacity_(stroke_opacity)
     {}
 
     bool operator()(svg::group const& g) const

@@ -36,9 +36,9 @@ class test_case
 
   public:
     test_case(mapnik::parameters const& params)
-        : params_(params)
-        , threads_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("threads", 0)))
-        , iterations_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("iterations", 0)))
+        : params_(params),
+          threads_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("threads", 0))),
+          iterations_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("iterations", 0)))
     {}
     std::size_t threads() const { return threads_; }
     std::size_t iterations() const { return iterations_; }
@@ -148,9 +148,9 @@ struct big_number_fmt
     const char* u;
 
     big_number_fmt(int width, double value, int base = 1000)
-        : w(width)
-        , v(value)
-        , u("")
+        : w(width),
+          v(value),
+          u("")
     {
         static const char* suffixes = "\0\0k\0M\0G\0T\0P\0E\0Z\0Y\0\0";
         u = suffixes;

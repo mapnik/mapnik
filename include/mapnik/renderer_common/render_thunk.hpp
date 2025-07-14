@@ -56,12 +56,12 @@ struct vector_marker_render_thunk : util::movable
                                double opacity,
                                composite_mode_e comp_op,
                                bool snap_to_pixels)
-        : src_(src)
-        , group_attrs_(group_attrs)
-        , tr_(marker_trans)
-        , opacity_(opacity)
-        , comp_op_(comp_op)
-        , snap_to_pixels_(snap_to_pixels)
+        : src_(src),
+          group_attrs_(group_attrs),
+          tr_(marker_trans),
+          opacity_(opacity),
+          comp_op_(comp_op),
+          snap_to_pixels_(snap_to_pixels)
     {}
 };
 
@@ -78,11 +78,11 @@ struct raster_marker_render_thunk : util::movable
                                double opacity,
                                composite_mode_e comp_op,
                                bool snap_to_pixels)
-        : src_(src)
-        , tr_(marker_trans)
-        , opacity_(opacity)
-        , comp_op_(comp_op)
-        , snap_to_pixels_(snap_to_pixels)
+        : src_(src),
+          tr_(marker_trans),
+          opacity_(opacity),
+          comp_op_(comp_op),
+          snap_to_pixels_(snap_to_pixels)
     {}
 };
 
@@ -101,11 +101,11 @@ struct text_render_thunk : util::movable
                       double opacity,
                       composite_mode_e comp_op,
                       halo_rasterizer_enum halo_rasterizer)
-        : helper_(std::move(helper))
-        , placements_(helper_->get())
-        , opacity_(opacity)
-        , comp_op_(comp_op)
-        , halo_rasterizer_(halo_rasterizer)
+        : helper_(std::move(helper)),
+          placements_(helper_->get()),
+          opacity_(opacity),
+          comp_op_(comp_op),
+          halo_rasterizer_(halo_rasterizer)
     {}
 };
 

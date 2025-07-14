@@ -37,8 +37,8 @@ namespace mapnik {
 struct cairo_renderer_process_visitor_p
 {
     cairo_renderer_process_visitor_p(agg::trans_affine const& image_tr, double opacity)
-        : image_tr_(image_tr)
-        , opacity_(opacity)
+        : image_tr_(image_tr),
+          opacity_(opacity)
     {}
 
     cairo_surface_ptr operator()(marker_svg const& marker) const
@@ -132,11 +132,11 @@ struct cairo_polygon_pattern : cairo_pattern_base
                           symbolizer_base const& sym,
                           mapnik::feature_impl const& feature,
                           proj_transform const& prj_trans)
-        : cairo_pattern_base{marker, common, sym, feature, prj_trans}
-        , clip_(get<value_bool, keys::clip>(sym_, feature_, common_.vars_))
-        , clip_box_(clipping_extent(common))
-        , tr_(geom_transform())
-        , converter_(clip_box_, sym, common.t_, prj_trans, tr_, feature, common.vars_, common.scale_factor_)
+        : cairo_pattern_base{marker, common, sym, feature, prj_trans},
+          clip_(get<value_bool, keys::clip>(sym_, feature_, common_.vars_)),
+          clip_box_(clipping_extent(common)),
+          tr_(geom_transform()),
+          converter_(clip_box_, sym, common.t_, prj_trans, tr_, feature, common.vars_, common.scale_factor_)
     {
         value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
         value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);

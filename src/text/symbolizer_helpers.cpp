@@ -85,9 +85,9 @@ template<typename Points>
 struct apply_vertex_placement
 {
     apply_vertex_placement(Points& points, view_transform const& tr, proj_transform const& prj_trans)
-        : points_(points)
-        , tr_(tr)
-        , prj_trans_(prj_trans)
+        : points_(points),
+          tr_(tr),
+          prj_trans_(prj_trans)
     {}
 
     template<typename Adapter>
@@ -114,10 +114,10 @@ template<template<typename, typename> class GridAdapter, typename T, typename Po
 struct grid_placement_finder_adapter
 {
     grid_placement_finder_adapter(T dx, T dy, Points& points, double scale_factor)
-        : dx_(dx)
-        , dy_(dy)
-        , points_(points)
-        , scale_factor_(scale_factor)
+        : dx_(dx),
+          dy_(dy),
+          points_(points),
+          scale_factor_(scale_factor)
     {}
 
     template<typename PathT>
@@ -207,17 +207,17 @@ base_symbolizer_helper::base_symbolizer_helper(symbolizer_base const& sym,
                                                double scale_factor,
                                                view_transform const& t,
                                                box2d<double> const& query_extent)
-    : sym_(sym)
-    , feature_(feature)
-    , vars_(vars)
-    , prj_trans_(prj_trans)
-    , t_(t)
-    , dims_(0, 0, width, height)
-    , query_extent_(query_extent)
-    , scale_factor_(scale_factor)
-    , info_ptr_(mapnik::get<text_placements_ptr>(sym_, keys::text_placements_)
-                  ->get_placement_info(scale_factor, feature_, vars_))
-    , text_props_(evaluate_text_properties(info_ptr_->properties, feature_, vars_))
+    : sym_(sym),
+      feature_(feature),
+      vars_(vars),
+      prj_trans_(prj_trans),
+      t_(t),
+      dims_(0, 0, width, height),
+      query_extent_(query_extent),
+      scale_factor_(scale_factor),
+      info_ptr_(mapnik::get<text_placements_ptr>(sym_, keys::text_placements_)
+                  ->get_placement_info(scale_factor, feature_, vars_)),
+      text_props_(evaluate_text_properties(info_ptr_->properties, feature_, vars_))
 {
     initialize_geometries();
     if (!geometries_to_process_.size())
@@ -382,10 +382,10 @@ text_symbolizer_helper::text_symbolizer_helper(text_symbolizer const& sym,
                                                DetectorT& detector,
                                                box2d<double> const& query_extent,
                                                agg::trans_affine const& affine_trans)
-    : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent)
-    , finder_(feature, vars, detector, dims_, *info_ptr_, font_manager, scale_factor)
-    , adapter_(finder_, false)
-    , converter_(query_extent_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
+    : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
+      finder_(feature, vars, detector, dims_, *info_ptr_, font_manager, scale_factor),
+      adapter_(finder_, false),
+      converter_(query_extent_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
     init_converters();
 
@@ -450,8 +450,8 @@ class apply_line_placement_visitor
   public:
     apply_line_placement_visitor(vertex_converter_type& converter,
                                  placement_finder_adapter<placement_finder> const& adapter)
-        : converter_(converter)
-        , adapter_(adapter)
+        : converter_(converter),
+          adapter_(adapter)
     {}
 
     bool operator()(geometry::line_string<double> const& geo) const
@@ -544,10 +544,10 @@ text_symbolizer_helper::text_symbolizer_helper(shield_symbolizer const& sym,
                                                DetectorT& detector,
                                                box2d<double> const& query_extent,
                                                agg::trans_affine const& affine_trans)
-    : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent)
-    , finder_(feature, vars, detector, dims_, *info_ptr_, font_manager, scale_factor)
-    , adapter_(finder_, true)
-    , converter_(query_extent_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
+    : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
+      finder_(feature, vars, detector, dims_, *info_ptr_, font_manager, scale_factor),
+      adapter_(finder_, true),
+      converter_(query_extent_, sym_, t, prj_trans, affine_trans, feature, vars, scale_factor)
 {
     init_converters();
 

@@ -26,10 +26,10 @@
 namespace mapnik {
 
 request::request(unsigned width, unsigned height, box2d<double> const& extent)
-    : width_(width)
-    , height_(height)
-    , extent_(extent)
-    , buffer_size_(0)
+    : width_(width),
+      height_(height),
+      extent_(extent),
+      buffer_size_(0)
 {}
 
 request::~request() {}

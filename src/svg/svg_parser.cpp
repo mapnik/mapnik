@@ -1639,11 +1639,11 @@ void parse_linear_gradient(svg_parser& parser, rapidxml::xml_node<char> const* n
 }
 
 svg_parser::svg_parser(svg_converter_type& path, bool strict)
-    : path_(path)
-    , is_defs_(false)
-    , ignore_(false)
-    , css_style_(false)
-    , err_handler_(strict)
+    : path_(path),
+      is_defs_(false),
+      ignore_(false),
+      css_style_(false),
+      err_handler_(strict)
 {
     font_sizes_.push_back(16.0); // default medium/16px
     // https://developer.mozilla.org/en-US/docs/Web/CSS/font-size#values

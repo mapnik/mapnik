@@ -227,13 +227,13 @@ class sh_hashtable_settings : public HashFunc
 
   public:
     sh_hashtable_settings(const hasher& hf, const float ht_occupancy_flt, const float ht_empty_flt)
-        : hasher(hf)
-        , enlarge_threshold_(0)
-        , shrink_threshold_(0)
-        , consider_shrink_(false)
-        , use_empty_(false)
-        , use_deleted_(false)
-        , num_ht_copies_(0)
+        : hasher(hf),
+          enlarge_threshold_(0),
+          shrink_threshold_(0),
+          consider_shrink_(false),
+          use_empty_(false),
+          use_deleted_(false),
+          num_ht_copies_(0)
     {
         set_enlarge_factor(ht_occupancy_flt);
         set_shrink_factor(ht_empty_flt);

@@ -99,8 +99,8 @@ template<class T>
 struct fitness_functor
 {
     fitness_functor(point<T> const& centroid, point<T> const& polygon_size)
-        : centroid(centroid)
-        , max_size(std::max(polygon_size.x, polygon_size.y))
+        : centroid(centroid),
+          max_size(std::max(polygon_size.x, polygon_size.y))
     {}
 
     T operator()(const point<T>& cell_center, T distance_polygon) const
@@ -123,11 +123,11 @@ struct cell
 {
     template<class FitnessFunc>
     cell(const point<T>& c_, T h_, const polygon<T>& polygon, const FitnessFunc& ff)
-        : c(c_)
-        , h(h_)
-        , d(point_to_polygon_dist(c, polygon))
-        , fitness(ff(c, d))
-        , max_fitness(ff(c, d + h * std::sqrt(2)))
+        : c(c_),
+          h(h_),
+          d(point_to_polygon_dist(c, polygon)),
+          fitness(ff(c, d)),
+          max_fitness(ff(c, d + h * std::sqrt(2)))
     {}
 
     point<T> c;    // cell center

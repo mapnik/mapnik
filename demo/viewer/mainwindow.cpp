@@ -58,8 +58,8 @@
 #include <boost/algorithm/string.hpp>
 
 MainWindow::MainWindow()
-    : filename_()
-    , default_extent_(-20037508.3428, -20037508.3428, 20037508.3428, 20037508.3428)
+    : filename_(),
+      default_extent_(-20037508.3428, -20037508.3428, 20037508.3428, 20037508.3428)
 {
     mapWidget_ = new MapWidget(this);
     QSplitter* splitter = new QSplitter(this);

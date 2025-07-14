@@ -109,10 +109,10 @@ void register_jpeg_reader()
 // ctors
 template<typename T>
 jpeg_reader<T>::jpeg_reader(std::string const& filename)
-    : source_()
-    , stream_(&source_)
-    , width_(0)
-    , height_(0)
+    : source_(),
+      stream_(&source_),
+      width_(0),
+      height_(0)
 {
     source_.open(filename, std::ios_base::in | std::ios_base::binary);
     if (!stream_)
@@ -122,10 +122,10 @@ jpeg_reader<T>::jpeg_reader(std::string const& filename)
 
 template<typename T>
 jpeg_reader<T>::jpeg_reader(char const* data, size_t size)
-    : source_(data, size)
-    , stream_(&source_)
-    , width_(0)
-    , height_(0)
+    : source_(data, size),
+      stream_(&source_),
+      width_(0),
+      height_(0)
 {
     if (!stream_)
         throw image_reader_exception("cannot open image stream");

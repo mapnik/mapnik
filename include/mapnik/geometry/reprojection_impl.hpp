@@ -167,8 +167,8 @@ template<typename T>
 struct geom_reproj_copy_visitor
 {
     geom_reproj_copy_visitor(proj_transform const& proj_trans, unsigned int& n_err)
-        : proj_trans_(proj_trans)
-        , n_err_(n_err)
+        : proj_trans_(proj_trans),
+          n_err_(n_err)
     {}
 
     geometry<T> operator()(geometry_empty) const { return geometry_empty(); }

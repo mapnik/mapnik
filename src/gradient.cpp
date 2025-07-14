@@ -26,39 +26,39 @@
 namespace mapnik {
 
 gradient::gradient()
-    : transform_()
-    , x1_(0)
-    , y1_(0)
-    , x2_(0)
-    , y2_(0)
-    , r_(0)
-    , stops_()
-    , units_(OBJECT_BOUNDING_BOX)
-    , gradient_type_(NO_GRADIENT)
+    : transform_(),
+      x1_(0),
+      y1_(0),
+      x2_(0),
+      y2_(0),
+      r_(0),
+      stops_(),
+      units_(OBJECT_BOUNDING_BOX),
+      gradient_type_(NO_GRADIENT)
 {}
 
 gradient::gradient(gradient const& other)
-    : transform_(other.transform_)
-    , x1_(other.x1_)
-    , y1_(other.y1_)
-    , x2_(other.x2_)
-    , y2_(other.y2_)
-    , r_(other.r_)
-    , stops_(other.stops_)
-    , units_(other.units_)
-    , gradient_type_(other.gradient_type_)
+    : transform_(other.transform_),
+      x1_(other.x1_),
+      y1_(other.y1_),
+      x2_(other.x2_),
+      y2_(other.y2_),
+      r_(other.r_),
+      stops_(other.stops_),
+      units_(other.units_),
+      gradient_type_(other.gradient_type_)
 {}
 
 gradient::gradient(gradient&& other)
-    : transform_(std::move(other.transform_))
-    , x1_(std::move(other.x1_))
-    , y1_(std::move(other.y1_))
-    , x2_(std::move(other.x2_))
-    , y2_(std::move(other.y2_))
-    , r_(std::move(other.r_))
-    , stops_(std::move(other.stops_))
-    , units_(std::move(other.units_))
-    , gradient_type_(std::move(other.gradient_type_))
+    : transform_(std::move(other.transform_)),
+      x1_(std::move(other.x1_)),
+      y1_(std::move(other.y1_)),
+      x2_(std::move(other.x2_)),
+      y2_(std::move(other.y2_)),
+      r_(std::move(other.r_)),
+      stops_(std::move(other.stops_)),
+      units_(std::move(other.units_)),
+      gradient_type_(std::move(other.gradient_type_))
 {}
 
 gradient& gradient::operator=(gradient rhs)

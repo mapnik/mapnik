@@ -29,20 +29,20 @@
 namespace mapnik {
 
 font_set::font_set(std::string const& name)
-    : name_(name)
-    , face_names_()
+    : name_(name),
+      face_names_()
 {}
 
 // copy
 font_set::font_set(font_set const& rhs)
-    : name_(rhs.name_)
-    , face_names_(rhs.face_names_)
+    : name_(rhs.name_),
+      face_names_(rhs.face_names_)
 {}
 
 // move
 font_set::font_set(font_set&& rhs)
-    : name_(std::move(rhs.name_))
-    , face_names_(std::move(rhs.face_names_))
+    : name_(std::move(rhs.name_)),
+      face_names_(std::move(rhs.face_names_))
 {}
 
 font_set& font_set::operator=(font_set other)

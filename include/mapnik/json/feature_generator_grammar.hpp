@@ -42,8 +42,8 @@ struct kv_store
     using value_type = mapnik::feature_impl::value_type;
     using iterator_type = mapnik::feature_kv_iterator2;
     kv_store(mapnik::feature_impl const& f)
-        : start_(mapnik::value_not_null(), f.begin(), f.end())
-        , end_(mapnik::value_not_null(), f.end(), f.end())
+        : start_(mapnik::value_not_null(), f.begin(), f.end()),
+          end_(mapnik::value_not_null(), f.end(), f.end())
     {}
     iterator_type start_;
     iterator_type end_;

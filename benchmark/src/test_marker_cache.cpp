@@ -7,8 +7,8 @@ class test : public benchmark::test_case
 
   public:
     test(mapnik::parameters const& params)
-        : test_case(params)
-        , images_{"./test/data/images/dummy.jpg",
+        : test_case(params),
+          images_{"./test/data/images/dummy.jpg",
                   "./test/data/images/dummy.jpeg",
                   "./test/data/images/dummy.png",
                   "./test/data/images/dummy.tif",

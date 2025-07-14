@@ -70,9 +70,9 @@ template<typename Processor>
 struct symbolizer_dispatch
 {
     symbolizer_dispatch(Processor& output, mapnik::feature_impl& f, proj_transform const& prj_trans)
-        : output_(output)
-        , f_(f)
-        , prj_trans_(prj_trans)
+        : output_(output),
+          f_(f),
+          prj_trans_(prj_trans)
     {}
 
     template<typename T>

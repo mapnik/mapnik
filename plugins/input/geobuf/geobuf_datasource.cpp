@@ -71,13 +71,13 @@ struct attr_value_converter
 };
 
 geobuf_datasource::geobuf_datasource(parameters const& params)
-    : datasource(params)
-    , type_(datasource::Vector)
-    , desc_(geobuf_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
-    , filename_()
-    , extent_()
-    , features_()
-    , tree_(nullptr)
+    : datasource(params),
+      type_(datasource::Vector),
+      desc_(geobuf_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
+      filename_(),
+      extent_(),
+      features_(),
+      tree_(nullptr)
 {
     const auto file = params.get<std::string>("file");
     if (!file.has_value())

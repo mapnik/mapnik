@@ -55,12 +55,12 @@ pgraster_featureset::pgraster_featureset(std::shared_ptr<IResultSet> const& rs,
                                          std::string const& encoding,
                                          bool key_field,
                                          int bandno)
-    : rs_(rs)
-    , ctx_(ctx)
-    , tr_(new transcoder(encoding))
-    , feature_id_(1)
-    , key_field_(key_field)
-    , band_(bandno)
+    : rs_(rs),
+      ctx_(ctx),
+      tr_(new transcoder(encoding)),
+      feature_id_(1),
+      key_field_(key_field),
+      band_(bandno)
 {}
 
 feature_ptr pgraster_featureset::next()

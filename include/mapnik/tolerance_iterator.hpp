@@ -31,11 +31,11 @@ class tolerance_iterator
 {
   public:
     tolerance_iterator(double label_position_tolerance, double spacing)
-        : tolerance_(label_position_tolerance > 0 ? label_position_tolerance : spacing / 2.0)
-        , linear_position_(1.0)
-        , value_(0)
-        , initialized_(false)
-        , values_tried_(0)
+        : tolerance_(label_position_tolerance > 0 ? label_position_tolerance : spacing / 2.0),
+          linear_position_(1.0),
+          value_(0),
+          initialized_(false),
+          values_tried_(0)
     {}
 
     ~tolerance_iterator()

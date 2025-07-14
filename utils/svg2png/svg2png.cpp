@@ -57,11 +57,11 @@ MAPNIK_DISABLE_WARNING_POP
 struct main_marker_visitor
 {
     main_marker_visitor(std::string const& svg_name, double scale_factor, double opacity, bool verbose, bool auto_open)
-        : svg_name_(svg_name)
-        , scale_factor_(scale_factor)
-        , opacity_(opacity)
-        , verbose_(verbose)
-        , auto_open_(auto_open)
+        : svg_name_(svg_name),
+          scale_factor_(scale_factor),
+          opacity_(opacity),
+          verbose_(verbose),
+          auto_open_(auto_open)
     {}
 
     int operator()(mapnik::marker_svg const& marker) const

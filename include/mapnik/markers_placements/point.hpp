@@ -34,11 +34,11 @@ class markers_point_placement : public markers_basic_placement
 {
   public:
     markers_point_placement(Locator& locator, Detector& detector, markers_placement_params const& params)
-        : markers_basic_placement(params)
-        , locator_(locator)
-        , detector_(detector)
-        , done_(false)
-        , use_angle_(false)
+        : markers_basic_placement(params),
+          locator_(locator),
+          detector_(detector),
+          done_(false),
+          use_angle_(false)
     {
         locator_.rewind(0);
     }

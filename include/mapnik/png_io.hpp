@@ -59,14 +59,14 @@ struct png_options
     bool use_hextree;
 
     png_options()
-        : colors(256)
-        , filters(PNG_FILTER_NONE)
-        , compression(Z_DEFAULT_COMPRESSION)
-        , strategy(Z_DEFAULT_STRATEGY)
-        , trans_mode(-1)
-        , gamma(-1)
-        , paletted(true)
-        , use_hextree(true)
+        : colors(256),
+          filters(PNG_FILTER_NONE),
+          compression(Z_DEFAULT_COMPRESSION),
+          strategy(Z_DEFAULT_STRATEGY),
+          trans_mode(-1),
+          gamma(-1),
+          paletted(true),
+          use_hextree(true)
     {}
 };
 

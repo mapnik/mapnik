@@ -52,10 +52,10 @@ class spiral_iterator
 {
   public:
     spiral_iterator(unsigned size)
-        : end_(size * size)
-        , i_(0)
-        , x_(0)
-        , y_(0)
+        : end_(size * size),
+          i_(0),
+          x_(0),
+          y_(0)
     {}
 
     bool vertex(int* x, int* y)
@@ -141,15 +141,15 @@ struct grid_vertex_converter
     {}
 
     grid_vertex_converter(polygon<T> const& poly, T dx, T dy, double scale_factor, box2d<T> const& envelope)
-        : hit_bitmap_scale_(get_hit_bitmap_scale(envelope))
-        , dx_(dx * hit_bitmap_scale_)
-        , dy_(dy * hit_bitmap_scale_)
-        , vt_(envelope.valid() ? (envelope.width() * hit_bitmap_scale_) : 0,
+        : hit_bitmap_scale_(get_hit_bitmap_scale(envelope)),
+          dx_(dx * hit_bitmap_scale_),
+          dy_(dy * hit_bitmap_scale_),
+          vt_(envelope.valid() ? (envelope.width() * hit_bitmap_scale_) : 0,
               envelope.valid() ? (envelope.height() * hit_bitmap_scale_) : 0,
-              envelope)
-        , hit_bitmap_(create_hit_bitmap(poly))
-        , interior_(interior(poly, envelope, scale_factor))
-        , si_(std::max(
+              envelope),
+          hit_bitmap_(create_hit_bitmap(poly)),
+          interior_(interior(poly, envelope, scale_factor)),
+          si_(std::max(
             std::ceil((hit_bitmap_.width() + std::abs((hit_bitmap_.width() / 2.0) - interior_.x) * 2.0) / dx_),
             std::ceil((hit_bitmap_.height() + std::abs((hit_bitmap_.height() / 2.0) - interior_.y) * 2.0) / dy_)))
     {}

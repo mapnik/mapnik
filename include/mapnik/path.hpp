@@ -88,8 +88,8 @@ struct vertex_adapter : private util::noncopyable
     using types = typename path_type::types;
 
     vertex_adapter(path_type const& path)
-        : path_(path)
-        , itr_(0)
+        : path_(path),
+          itr_(0)
     {}
 
     size_type size() const { return path_.size(); }

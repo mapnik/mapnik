@@ -149,8 +149,8 @@ struct strategy_group_first
 struct scale_strategy
 {
     scale_strategy(double scale, double offset = 0)
-        : scale_(scale)
-        , offset_(offset)
+        : scale_(scale),
+          offset_(offset)
     {}
 
     template<typename P1, typename P2>
@@ -180,8 +180,8 @@ struct scale_strategy
 struct scale_rounding_strategy
 {
     scale_rounding_strategy(double scale, double offset = 0)
-        : scale_(scale)
-        , offset_(offset)
+        : scale_(scale),
+          offset_(offset)
     {}
 
     template<typename P1, typename P2>

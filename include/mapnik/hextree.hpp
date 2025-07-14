@@ -55,14 +55,14 @@ class hextree : private util::noncopyable
     struct node
     {
         node()
-            : reds(0.0)
-            , greens(0.0)
-            , blues(0.0)
-            , alphas(0.0)
-            , count(0)
-            , pixel_count(0)
-            , reduce_cost(0.0)
-            , children_count(0)
+            : reds(0.0),
+              greens(0.0),
+              blues(0.0),
+              alphas(0.0),
+              count(0),
+              pixel_count(0),
+              reduce_cost(0.0),
+              children_count(0)
         {
             std::fill(children_, children_ + 16, nullptr);
         }
@@ -132,17 +132,15 @@ class hextree : private util::noncopyable
 
   public:
     explicit hextree(unsigned max_colors = 256, double g = 2.0)
-        : max_colors_(max_colors)
-        , colors_(0)
-        , has_holes_(false)
-        , root_(new node())
-        ,
+        : max_colors_(max_colors),
+          colors_(0),
+          has_holes_(false),
+          root_(new node()),
 #ifdef USE_DENSE_HASH_MAP
-        // TODO - test for any benefit to initializing at a larger size
-        color_hashmap_()
-        ,
+          // TODO - test for any benefit to initializing at a larger size
+          color_hashmap_(),
 #endif
-        trans_mode_(FULL_TRANSPARENCY)
+          trans_mode_(FULL_TRANSPARENCY)
     {
         setGamma(g);
 #ifdef USE_DENSE_HASH_MAP

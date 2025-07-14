@@ -33,22 +33,22 @@ namespace detail {
 
 // BUFFER
 buffer::buffer(std::size_t size)
-    : size_(size)
-    , data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
-    , owns_(true)
+    : size_(size),
+      data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr)),
+      owns_(true)
 {}
 
 buffer::buffer(unsigned char* data, std::size_t size)
-    : size_(size)
-    , data_(data)
-    , owns_(false)
+    : size_(size),
+      data_(data),
+      owns_(false)
 {}
 
 // move
 buffer::buffer(buffer&& rhs) noexcept
-    : size_(rhs.size_)
-    , data_(rhs.data_)
-    , owns_(rhs.owns_)
+    : size_(rhs.size_),
+      data_(rhs.data_),
+      owns_(rhs.owns_)
 {
     rhs.size_ = 0;
     rhs.data_ = nullptr;
@@ -56,9 +56,9 @@ buffer::buffer(buffer&& rhs) noexcept
 }
 // copy
 buffer::buffer(buffer const& rhs)
-    : size_(rhs.size_)
-    , data_(static_cast<unsigned char*>((rhs.owns_ && size_ != 0) ? ::operator new(size_) : nullptr))
-    , owns_(rhs.owns_)
+    : size_(rhs.size_),
+      data_(static_cast<unsigned char*>((rhs.owns_ && size_ != 0) ? ::operator new(size_) : nullptr)),
+      owns_(rhs.owns_)
 {
     if (data_)
         std::copy(rhs.data_, rhs.data_ + rhs.size_, data_);

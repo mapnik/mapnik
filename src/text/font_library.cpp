@@ -63,8 +63,8 @@ void* _Realloc_Func(FT_Memory, long /*cur_size*/, long new_size, void* block)
 namespace mapnik {
 
 font_library::font_library()
-    : library_(nullptr)
-    , memory_(new FT_MemoryRec_)
+    : library_(nullptr),
+      memory_(new FT_MemoryRec_)
 {
     memory_->alloc = _Alloc_Func;
     memory_->free = _Free_Func;

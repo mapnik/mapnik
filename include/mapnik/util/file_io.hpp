@@ -43,13 +43,11 @@ class file : public util::noncopyable
 
     explicit file(std::string const& filename)
 #ifdef _WIN32
-        : file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
-        ,
+        : file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
 #else
-        : file_(std::fopen(filename.c_str(), "rb"), std::fclose)
-        ,
+        : file_(std::fopen(filename.c_str(), "rb"), std::fclose),
 #endif
-        size_(0)
+          size_(0)
 
     {
         if (file_)

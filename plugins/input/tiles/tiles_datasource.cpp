@@ -41,8 +41,8 @@ DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(tiles_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(tiles_datasource_plugin);
 
 tiles_datasource::tiles_datasource(mapnik::parameters const& params)
-    : datasource(params)
-    , desc_(tiles_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
+    : datasource(params),
+      desc_(tiles_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
 {
     init(params);
 }

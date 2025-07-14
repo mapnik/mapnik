@@ -49,8 +49,8 @@ class single_file_policy
 
       public:
         explicit const_iterator(const single_file_policy* p)
-            : status_(start)
-            , p_(p)
+            : status_(start),
+              p_(p)
         {}
 
         const_iterator()
@@ -58,8 +58,8 @@ class single_file_policy
         {}
 
         const_iterator(const const_iterator& other)
-            : status_(other.status_)
-            , p_(other.p_)
+            : status_(other.status_),
+              p_(other.p_)
         {}
 
         const_iterator& operator++()
@@ -176,10 +176,10 @@ class tiled_multi_file_policy
                             unsigned width,
                             unsigned height,
                             unsigned tile_stride)
-        : image_width_(width)
-        , image_height_(height)
-        , tile_size_(tile_size)
-        , tile_stride_(tile_stride)
+        : image_width_(width),
+          image_height_(height),
+          tile_size_(tile_size),
+          tile_stride_(tile_stride)
     {
         double lox = extent.minx();
         double loy = extent.miny();

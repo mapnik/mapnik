@@ -31,9 +31,9 @@
 namespace mapnik {
 
 rgb::rgb(rgba const& c)
-    : r(c.r)
-    , g(c.g)
-    , b(c.b)
+    : r(c.r),
+      g(c.g),
+      b(c.b)
 {}
 
 // ordering by mean(a,r,g,b), a, r, g, b

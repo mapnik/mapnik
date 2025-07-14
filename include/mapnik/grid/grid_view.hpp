@@ -60,16 +60,16 @@ class hit_grid_view
                   std::set<std::string> const& names,
                   feature_key_type const& f_keys,
                   feature_type const& features)
-        : x_(x)
-        , y_(y)
-        , width_(width)
-        , height_(height)
-        , data_(_data)
-        , key_(key)
-        , id_name_(id_name)
-        , names_(names)
-        , f_keys_(f_keys)
-        , features_(features)
+        : x_(x),
+          y_(y),
+          width_(width),
+          height_(height),
+          data_(_data),
+          key_(key),
+          id_name_(id_name),
+          names_(names),
+          f_keys_(f_keys),
+          features_(features)
 
     {
         if (x_ >= data_.width())
@@ -85,16 +85,16 @@ class hit_grid_view
     ~hit_grid_view() {}
 
     hit_grid_view(hit_grid_view<T> const& rhs)
-        : x_(rhs.x_)
-        , y_(rhs.y_)
-        , width_(rhs.width_)
-        , height_(rhs.height_)
-        , data_(rhs.data_)
-        , key_(rhs.key_)
-        , id_name_(rhs.id_name_)
-        , names_(rhs.names_)
-        , f_keys_(rhs.f_keys_)
-        , features_(rhs.features_)
+        : x_(rhs.x_),
+          y_(rhs.y_),
+          width_(rhs.width_),
+          height_(rhs.height_),
+          data_(rhs.data_),
+          key_(rhs.key_),
+          id_name_(rhs.id_name_),
+          names_(rhs.names_),
+          f_keys_(rhs.f_keys_),
+          features_(rhs.features_)
     {}
 
     hit_grid_view<T>& operator=(hit_grid_view<T> const& rhs) = delete;

@@ -38,10 +38,10 @@ class ogr_layer_ptr
 {
   public:
     ogr_layer_ptr()
-        : datasource_(nullptr)
-        , layer_(nullptr)
-        , owns_layer_(false)
-        , is_valid_(false)
+        : datasource_(nullptr),
+          layer_(nullptr),
+          owns_layer_(false),
+          is_valid_(false)
     {}
 
     ~ogr_layer_ptr() { free_layer(); }

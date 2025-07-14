@@ -68,14 +68,14 @@ struct agg_renderer_process_visitor_p
                                    polygon_pattern_symbolizer const& sym,
                                    mapnik::feature_impl& feature,
                                    proj_transform const& prj_trans)
-        : common_(common)
-        , current_buffer_(current_buffer)
-        , ras_ptr_(ras_ptr)
-        , gamma_method_(gamma_method)
-        , gamma_(gamma)
-        , sym_(sym)
-        , feature_(feature)
-        , prj_trans_(prj_trans)
+        : common_(common),
+          current_buffer_(current_buffer),
+          ras_ptr_(ras_ptr),
+          gamma_method_(gamma_method),
+          gamma_(gamma),
+          sym_(sym),
+          feature_(feature),
+          prj_trans_(prj_trans)
     {}
 
     void operator()(marker_null const&) const {}

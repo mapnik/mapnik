@@ -57,13 +57,13 @@ struct render_dot_symbolizer : util::noncopyable
                           Renderer& ren,
                           Common& common,
                           ProjTransform const& prj_trans)
-        : ras_(ras)
-        , ren_(ren)
-        , common_(common)
-        , prj_trans_(prj_trans)
-        , rx_(rx)
-        , ry_(ry)
-        , el_(0, 0, rx, ry)
+        : ras_(ras),
+          ren_(ren),
+          common_(common),
+          prj_trans_(prj_trans),
+          rx_(rx),
+          ry_(ry),
+          el_(0, 0, rx, ry)
     {}
 
     template<typename Adapter>

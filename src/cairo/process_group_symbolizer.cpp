@@ -55,10 +55,10 @@ struct thunk_renderer : render_thunk_list_dispatch
                    cairo_context& context,
                    cairo_face_manager& face_manager,
                    renderer_common& common)
-        : ren_(ren)
-        , context_(context)
-        , face_manager_(face_manager)
-        , common_(common)
+        : ren_(ren),
+          context_(context),
+          face_manager_(face_manager),
+          common_(common)
     {}
 
     virtual void operator()(vector_marker_render_thunk const& thunk)

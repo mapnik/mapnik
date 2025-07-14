@@ -81,10 +81,10 @@ class MAPNIK_DECL box2d : boost::equality_comparable<
     // converting ctor
     template<typename T1>
     explicit box2d(box2d<T1> other)
-        : minx_(static_cast<value_type>(other.minx()))
-        , miny_(static_cast<value_type>(other.miny()))
-        , maxx_(static_cast<value_type>(other.maxx()))
-        , maxy_(static_cast<value_type>(other.maxy()))
+        : minx_(static_cast<value_type>(other.minx())),
+          miny_(static_cast<value_type>(other.miny())),
+          maxx_(static_cast<value_type>(other.maxx())),
+          maxy_(static_cast<value_type>(other.maxy()))
     {}
     box2d_type& operator=(box2d_type other);
     T minx() const;

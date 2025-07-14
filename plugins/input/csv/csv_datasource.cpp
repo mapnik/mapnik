@@ -71,10 +71,10 @@ DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(csv_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(csv_datasource_plugin);
 
 csv_datasource::csv_datasource(parameters const& params)
-    : datasource(params)
-    , desc_(csv_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
-    , ctx_(std::make_shared<mapnik::context_type>())
-    , tree_(nullptr)
+    : datasource(params),
+      desc_(csv_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
+      ctx_(std::make_shared<mapnik::context_type>()),
+      tree_(nullptr)
 {
     row_limit_ = *params.get<mapnik::value_integer>("row_limit", 0);
     manual_headers_ = mapnik::util::trim_copy(*params.get<std::string>("headers", ""));

@@ -54,15 +54,15 @@ class test : public benchmark::test_case
 
   public:
     test(mapnik::parameters const& params)
-        : test_case(params)
-        , xml_()
-        , extent_()
-        , width_(*params.get<mapnik::value_integer>("width", 256))
-        , height_(*params.get<mapnik::value_integer>("height", 256))
-        , m_(new mapnik::Map(width_, height_))
-        , scale_factor_(*params.get<mapnik::value_double>("scale_factor", 2.0))
-        , preview_(*params.get<std::string>("preview", ""))
-        , im_(m_->width(), m_->height())
+        : test_case(params),
+          xml_(),
+          extent_(),
+          width_(*params.get<mapnik::value_integer>("width", 256)),
+          height_(*params.get<mapnik::value_integer>("height", 256)),
+          m_(new mapnik::Map(width_, height_)),
+          scale_factor_(*params.get<mapnik::value_double>("scale_factor", 2.0)),
+          preview_(*params.get<std::string>("preview", "")),
+          im_(m_->width(), m_->height())
     {
         const auto map = params.get<std::string>("map");
         if (!map)

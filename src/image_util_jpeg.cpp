@@ -38,8 +38,8 @@
 namespace mapnik {
 
 jpeg_saver::jpeg_saver(std::ostream& stream, std::string const& t)
-    : stream_(stream)
-    , t_(t)
+    : stream_(stream),
+      t_(t)
 {}
 
 namespace detail {

@@ -93,8 +93,8 @@ class smooth_converter
 
   public:
     smooth_converter(Geometry& geom)
-        : geom_(geom)
-        , impl_(std::move(init_impl(smooth_algorithm_enum::SMOOTH_ALGORITHM_BASIC, geom)))
+        : geom_(geom),
+          impl_(std::move(init_impl(smooth_algorithm_enum::SMOOTH_ALGORITHM_BASIC, geom)))
     {}
 
     void algorithm(smooth_algorithm_enum algo) { impl_ = init_impl(algo, geom_); }

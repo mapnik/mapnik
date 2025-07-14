@@ -5,27 +5,27 @@
 namespace mapnik {
 
 config_error::config_error(std::string const& what)
-    : what_(what)
-    , line_number_(0)
-    , file_()
-    , node_name_()
-    , msg_()
+    : what_(what),
+      line_number_(0),
+      file_(),
+      node_name_(),
+      msg_()
 {}
 
 config_error::config_error(std::string const& what, xml_node const& node)
-    : what_(what)
-    , line_number_(node.line())
-    , file_(node.filename())
-    , node_name_(node.name())
-    , msg_()
+    : what_(what),
+      line_number_(node.line()),
+      file_(node.filename()),
+      node_name_(node.name()),
+      msg_()
 {}
 
 config_error::config_error(std::string const& what, unsigned line_number, std::string const& filename)
-    : what_(what)
-    , line_number_(line_number)
-    , file_(filename)
-    , node_name_()
-    , msg_()
+    : what_(what),
+      line_number_(line_number),
+      file_(filename),
+      node_name_(),
+      msg_()
 {}
 
 char const* config_error::what() const noexcept

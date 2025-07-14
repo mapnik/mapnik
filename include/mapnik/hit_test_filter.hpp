@@ -40,9 +40,9 @@ inline bool pip(double x0, double y0, double x1, double y1, double x, double y)
 struct hit_test_visitor
 {
     hit_test_visitor(double x, double y, double tol)
-        : x_(x)
-        , y_(y)
-        , tol_(tol)
+        : x_(x),
+          y_(y),
+          tol_(tol)
     {}
 
     bool operator()(geometry::geometry_empty const&) const { return false; }
@@ -163,9 +163,9 @@ class hit_test_filter
 {
   public:
     hit_test_filter(double x, double y, double tol)
-        : x_(x)
-        , y_(y)
-        , tol_(tol)
+        : x_(x),
+          y_(y),
+          tol_(tol)
     {}
 
     bool pass(feature_impl const& feature) { return hit_test(feature.get_geometry(), x_, y_, tol_); }

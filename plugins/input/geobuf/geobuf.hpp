@@ -54,9 +54,9 @@ namespace detail {
 struct value_visitor
 {
     value_visitor(feature_impl& feature, transcoder const& tr, std::string const& name)
-        : feature_(feature)
-        , tr_(tr)
-        , name_(name)
+        : feature_(feature),
+          tr_(tr),
+          name_(name)
     {}
 
     void operator()(std::string const& val) // unicode
@@ -95,10 +95,10 @@ struct geobuf : util::noncopyable
   public:
     // ctor
     geobuf(char const* buf, std::size_t size, FeatureCallback& callback)
-        : reader_(buf, size)
-        , callback_(callback)
-        , ctx_(std::make_shared<context_type>())
-        , tr_(new transcoder("utf8"))
+        : reader_(buf, size),
+          callback_(callback),
+          ctx_(std::make_shared<context_type>()),
+          tr_(new transcoder("utf8"))
     {}
 
     void read()

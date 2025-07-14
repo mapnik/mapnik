@@ -82,22 +82,22 @@ placement_finder::placement_finder(feature_impl const& feature,
                                    text_placement_info const& placement_info,
                                    face_manager_freetype& font_manager,
                                    double scale_factor)
-    : feature_(feature)
-    , attr_(attr)
-    , detector_(detector)
-    , extent_(extent)
-    , info_(placement_info)
-    , text_props_(evaluate_text_properties(info_.properties, feature_, attr_))
-    , scale_factor_(scale_factor)
-    , font_manager_(font_manager)
-    , placements_()
-    , has_marker_(false)
-    , marker_()
-    , marker_box_()
-    , marker_unlocked_(false)
-    , marker_displacement_()
-    , move_dx_(0.0)
-    , horizontal_alignment_(horizontal_alignment_enum::H_LEFT)
+    : feature_(feature),
+      attr_(attr),
+      detector_(detector),
+      extent_(extent),
+      info_(placement_info),
+      text_props_(evaluate_text_properties(info_.properties, feature_, attr_)),
+      scale_factor_(scale_factor),
+      font_manager_(font_manager),
+      placements_(),
+      has_marker_(false),
+      marker_(),
+      marker_box_(),
+      marker_unlocked_(false),
+      marker_displacement_(),
+      move_dx_(0.0),
+      horizontal_alignment_(horizontal_alignment_enum::H_LEFT)
 {}
 
 bool placement_finder::next_position()

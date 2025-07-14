@@ -78,11 +78,11 @@ void ogr_datasource_plugin::before_unload() const
 }
 
 ogr_datasource::ogr_datasource(parameters const& params)
-    : datasource(params)
-    , extent_()
-    , type_(datasource::Vector)
-    , desc_(ogr_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
-    , indexed_(false)
+    : datasource(params),
+      extent_(),
+      type_(datasource::Vector),
+      desc_(ogr_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
+      indexed_(false)
 {
     init(params);
 }

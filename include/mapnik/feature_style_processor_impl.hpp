@@ -65,9 +65,9 @@ struct layer_rendering_material
     std::vector<layer_rendering_material> materials_;
 
     layer_rendering_material(layer const& lay, projection const& dest)
-        : lay_(lay)
-        , proj0_(dest)
-        , proj1_(lay.srs(), true)
+        : lay_(lay),
+          proj0_(dest),
+          proj1_(lay.srs(), true)
     {}
 
     layer_rendering_material(layer_rendering_material&& rhs) = default;

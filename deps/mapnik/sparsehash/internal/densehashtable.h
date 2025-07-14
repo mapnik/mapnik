@@ -167,9 +167,9 @@ struct dense_hashtable_iterator
                              pointer it,
                              pointer it_end,
                              bool advance)
-        : ht(h)
-        , pos(it)
-        , end(it_end)
+        : ht(h),
+          pos(it),
+          end(it_end)
     {
         if (advance)
             advance_past_empty_and_deleted();
@@ -235,23 +235,23 @@ struct dense_hashtable_const_iterator
                                    pointer it,
                                    pointer it_end,
                                    bool advance)
-        : ht(h)
-        , pos(it)
-        , end(it_end)
+        : ht(h),
+          pos(it),
+          end(it_end)
     {
         if (advance)
             advance_past_empty_and_deleted();
     }
     dense_hashtable_const_iterator()
-        : ht(NULL)
-        , pos(pointer())
-        , end(pointer())
+        : ht(NULL),
+          pos(pointer()),
+          end(pointer())
     {}
     // This lets us convert regular iterators to const iterators
     dense_hashtable_const_iterator(const iterator& it)
-        : ht(it.ht)
-        , pos(it.pos)
-        , end(it.end)
+        : ht(it.ht),
+          pos(it.pos),
+          end(it.end)
     {}
     // The default destructor is fine; we don't define one
     // The default operator= is fine; we don't define one
@@ -739,14 +739,14 @@ class dense_hashtable
                              const ExtractKey& ext = ExtractKey(),
                              const SetKey& set = SetKey(),
                              const Alloc& alloc = Alloc())
-        : settings(hf)
-        , key_info(ext, set, eql)
-        , num_deleted(0)
-        , num_elements(0)
-        , num_buckets(expected_max_items_in_table == 0 ? HT_DEFAULT_STARTING_BUCKETS
-                                                       : settings.min_buckets(expected_max_items_in_table, 0))
-        , val_info(alloc_impl<value_alloc_type>(alloc))
-        , table(NULL)
+        : settings(hf),
+          key_info(ext, set, eql),
+          num_deleted(0),
+          num_elements(0),
+          num_buckets(expected_max_items_in_table == 0 ? HT_DEFAULT_STARTING_BUCKETS
+                                                       : settings.min_buckets(expected_max_items_in_table, 0)),
+          val_info(alloc_impl<value_alloc_type>(alloc)),
+          table(NULL)
     {
         // table is NULL until emptyval is set.  However, we set num_buckets
         // here so we know how much space to allocate once emptyval is set
@@ -756,13 +756,13 @@ class dense_hashtable
     // As a convenience for resize(), we allow an optional second argument
     // which lets you make this new hashtable a different size than ht
     dense_hashtable(const dense_hashtable& ht, size_type min_buckets_wanted = HT_DEFAULT_STARTING_BUCKETS)
-        : settings(ht.settings)
-        , key_info(ht.key_info)
-        , num_deleted(0)
-        , num_elements(0)
-        , num_buckets(0)
-        , val_info(ht.val_info)
-        , table(NULL)
+        : settings(ht.settings),
+          key_info(ht.key_info),
+          num_deleted(0),
+          num_elements(0),
+          num_buckets(0),
+          val_info(ht.val_info),
+          table(NULL)
     {
         if (!ht.settings.use_empty())
         {
@@ -1351,12 +1351,12 @@ class dense_hashtable
         typedef typename alloc_impl<value_alloc_type>::value_type value_type;
 
         ValInfo(const alloc_impl<value_alloc_type>& a)
-            : alloc_impl<value_alloc_type>(a)
-            , emptyval()
+            : alloc_impl<value_alloc_type>(a),
+              emptyval()
         {}
         ValInfo(const ValInfo& v)
-            : alloc_impl<value_alloc_type>(v)
-            , emptyval(v.emptyval)
+            : alloc_impl<value_alloc_type>(v),
+              emptyval(v.emptyval)
         {}
 
         value_type emptyval; // which key marks unused entries
@@ -1383,9 +1383,9 @@ class dense_hashtable
     {
       public:
         KeyInfo(const ExtractKey& ek, const SetKey& sk, const EqualKey& eq)
-            : ExtractKey(ek)
-            , SetKey(sk)
-            , EqualKey(eq)
+            : ExtractKey(ek),
+              SetKey(sk),
+              EqualKey(eq)
         {}
 
         // We want to return the exact same type as ExtractKey: Key or const Key&

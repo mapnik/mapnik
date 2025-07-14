@@ -34,9 +34,9 @@ class featureset_buffer : public Featureset
 {
   public:
     featureset_buffer()
-        : features_()
-        , pos_()
-        , end_()
+        : features_(),
+          pos_(),
+          end_()
     {}
 
     virtual ~featureset_buffer() {}

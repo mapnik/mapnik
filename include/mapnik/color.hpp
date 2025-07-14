@@ -50,11 +50,11 @@ class MAPNIK_DECL color : boost::equality_comparable<color>
 
     // default ctor
     color()
-        : red_(0xff)
-        , green_(0xff)
-        , blue_(0xff)
-        , alpha_(0xff)
-        , premultiplied_(false)
+        : red_(0xff),
+          green_(0xff),
+          blue_(0xff),
+          alpha_(0xff),
+          premultiplied_(false)
     {}
 
     color(std::uint8_t _red,
@@ -62,37 +62,37 @@ class MAPNIK_DECL color : boost::equality_comparable<color>
           std::uint8_t _blue,
           std::uint8_t _alpha = 0xff,
           bool premultiplied = false)
-        : red_(_red)
-        , green_(_green)
-        , blue_(_blue)
-        , alpha_(_alpha)
-        , premultiplied_(premultiplied)
+        : red_(_red),
+          green_(_green),
+          blue_(_blue),
+          alpha_(_alpha),
+          premultiplied_(premultiplied)
     {}
 
     color(std::uint32_t _rgba, bool premultiplied = false)
-        : red_(_rgba & 0xff)
-        , green_((_rgba >> 8) & 0xff)
-        , blue_((_rgba >> 16) & 0xff)
-        , alpha_((_rgba >> 24) & 0xff)
-        , premultiplied_(premultiplied)
+        : red_(_rgba & 0xff),
+          green_((_rgba >> 8) & 0xff),
+          blue_((_rgba >> 16) & 0xff),
+          alpha_((_rgba >> 24) & 0xff),
+          premultiplied_(premultiplied)
     {}
 
     // copy ctor
     color(const color& rhs)
-        : red_(rhs.red_)
-        , green_(rhs.green_)
-        , blue_(rhs.blue_)
-        , alpha_(rhs.alpha_)
-        , premultiplied_(rhs.premultiplied_)
+        : red_(rhs.red_),
+          green_(rhs.green_),
+          blue_(rhs.blue_),
+          alpha_(rhs.alpha_),
+          premultiplied_(rhs.premultiplied_)
     {}
 
     // move ctor
     color(color&& rhs)
-        : red_(std::move(rhs.red_))
-        , green_(std::move(rhs.green_))
-        , blue_(std::move(rhs.blue_))
-        , alpha_(std::move(rhs.alpha_))
-        , premultiplied_(std::move(rhs.premultiplied_))
+        : red_(std::move(rhs.red_)),
+          green_(std::move(rhs.green_)),
+          blue_(std::move(rhs.blue_)),
+          alpha_(std::move(rhs.alpha_)),
+          premultiplied_(std::move(rhs.premultiplied_))
     {}
 
     color(std::string const& str, bool premultiplied = false);

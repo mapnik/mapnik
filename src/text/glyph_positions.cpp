@@ -30,11 +30,11 @@
 namespace mapnik {
 
 glyph_positions::glyph_positions()
-    : data_()
-    , base_point_()
-    , marker_info_()
-    , marker_pos_()
-    , bbox_()
+    : data_(),
+      base_point_(),
+      marker_info_(),
+      marker_pos_(),
+      bbox_()
 {}
 
 glyph_positions::const_iterator glyph_positions::begin() const

@@ -50,8 +50,8 @@ class MAPNIK_DECL vertex_cache : util::noncopyable
     struct segment
     {
         segment(double x, double y, double _length)
-            : pos(x, y)
-            , length(_length)
+            : pos(x, y),
+              length(_length)
         {}
         pixel_position
           pos; // Last point of this segment, first point is implicitly defined by the previous segement in this vector
@@ -62,8 +62,8 @@ class MAPNIK_DECL vertex_cache : util::noncopyable
     struct segment_vector
     {
         segment_vector()
-            : vector()
-            , length(0.)
+            : vector(),
+              length(0.)
         {}
         void add_segment(double x, double y, double len)
         {
@@ -97,9 +97,9 @@ class MAPNIK_DECL vertex_cache : util::noncopyable
     {
       public:
         scoped_state(vertex_cache& pp)
-            : pp_(pp)
-            , state_(pp.save_state())
-            , restored_(false)
+            : pp_(pp),
+              state_(pp.save_state()),
+              restored_(false)
         {}
         void restore()
         {
@@ -207,19 +207,19 @@ class MAPNIK_DECL vertex_cache : util::noncopyable
 
 template<typename T>
 vertex_cache::vertex_cache(T& path)
-    : current_position_()
-    , segment_starting_point_()
-    , subpaths_()
-    , current_subpath_()
-    , current_segment_()
-    , vertex_segment_()
-    , vertex_subpath_()
-    , initialized_(false)
-    , position_in_segment_(0.)
-    , angle_(0.)
-    , angle_valid_(false)
-    , offseted_lines_()
-    , position_(0.)
+    : current_position_(),
+      segment_starting_point_(),
+      subpaths_(),
+      current_subpath_(),
+      current_segment_(),
+      vertex_segment_(),
+      vertex_subpath_(),
+      initialized_(false),
+      position_in_segment_(0.),
+      angle_(0.),
+      angle_valid_(false),
+      offseted_lines_(),
+      position_(0.)
 {
     path.rewind(0);
     unsigned cmd;

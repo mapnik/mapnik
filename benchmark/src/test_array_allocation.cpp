@@ -38,9 +38,9 @@ class test1 : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test1(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -63,9 +63,9 @@ class test1b : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test1b(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -88,9 +88,9 @@ class test1c : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test1c(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -112,9 +112,9 @@ class test2 : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test2(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -136,9 +136,9 @@ class test3 : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test3(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -158,9 +158,9 @@ class test3b : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test3b(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -181,9 +181,9 @@ class test3c : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test3c(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -204,9 +204,9 @@ class test3d : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test3d(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -232,9 +232,9 @@ class test4 : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test4(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -255,9 +255,9 @@ class test5 : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test5(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -277,9 +277,9 @@ class test5b : public benchmark::test_case
     uint32_t size_;
     std::vector<char> array_;
     test5b(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -304,9 +304,9 @@ class test6 : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test6(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -330,9 +330,9 @@ class test7 : public benchmark::test_case
     uint32_t size_;
     std::vector<uint8_t> array_;
     test7(mapnik::parameters const& params)
-        : test_case(params)
-        , size_(*params.get<mapnik::value_integer>("size", 256 * 256))
-        , array_(size_, 0)
+        : test_case(params),
+          size_(*params.get<mapnik::value_integer>("size", 256 * 256)),
+          array_(size_, 0)
     {}
     bool validate() const { return true; }
     bool operator()() const

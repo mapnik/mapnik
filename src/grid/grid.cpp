@@ -37,16 +37,16 @@ const typename hit_grid<T>::value_type hit_grid<T>::base_mask = std::numeric_lim
 
 template<typename T>
 hit_grid<T>::hit_grid(std::size_t width, std::size_t height, std::string const& key)
-    : width_(width)
-    , height_(height)
-    , key_(key)
-    , data_(width, height)
-    , id_name_("__id__")
-    , painted_(false)
-    , names_()
-    , f_keys_()
-    , features_()
-    , ctx_(std::make_shared<mapnik::context_type>())
+    : width_(width),
+      height_(height),
+      key_(key),
+      data_(width, height),
+      id_name_("__id__"),
+      painted_(false),
+      names_(),
+      f_keys_(),
+      features_(),
+      ctx_(std::make_shared<mapnik::context_type>())
 {
     f_keys_[base_mask] = "";
     data_.set(base_mask);
@@ -54,16 +54,16 @@ hit_grid<T>::hit_grid(std::size_t width, std::size_t height, std::string const& 
 
 template<typename T>
 hit_grid<T>::hit_grid(hit_grid<T> const& rhs)
-    : width_(rhs.width_)
-    , height_(rhs.height_)
-    , key_(rhs.key_)
-    , data_(rhs.data_)
-    , id_name_("__id__")
-    , painted_(rhs.painted_)
-    , names_(rhs.names_)
-    , f_keys_(rhs.f_keys_)
-    , features_(rhs.features_)
-    , ctx_(rhs.ctx_)
+    : width_(rhs.width_),
+      height_(rhs.height_),
+      key_(rhs.key_),
+      data_(rhs.data_),
+      id_name_("__id__"),
+      painted_(rhs.painted_),
+      names_(rhs.names_),
+      f_keys_(rhs.f_keys_),
+      features_(rhs.features_),
+      ctx_(rhs.ctx_)
 {
     f_keys_[base_mask] = "";
     data_.set(base_mask);

@@ -48,12 +48,12 @@ ogr_featureset::ogr_featureset(mapnik::context_ptr const& ctx,
                                OGRLayer& layer,
                                OGRGeometry& extent,
                                std::string const& encoding)
-    : ctx_(ctx)
-    , layer_(layer)
-    , layerdef_(layer.GetLayerDefn())
-    , tr_(new transcoder(encoding))
-    , fidcolumn_(layer_.GetFIDColumn())
-    , count_(0)
+    : ctx_(ctx),
+      layer_(layer),
+      layerdef_(layer.GetLayerDefn()),
+      tr_(new transcoder(encoding)),
+      fidcolumn_(layer_.GetFIDColumn()),
+      count_(0)
 
 {
     layer_.SetSpatialFilter(&extent);
@@ -63,13 +63,12 @@ ogr_featureset::ogr_featureset(mapnik::context_ptr const& ctx,
                                OGRLayer& layer,
                                mapnik::box2d<double> const& extent,
                                std::string const& encoding)
-    : ctx_(ctx)
-    , layer_(layer)
-    , layerdef_(layer.GetLayerDefn())
-    , tr_(new transcoder(encoding))
-    , fidcolumn_(layer_.GetFIDColumn())
-    , // TODO - unused
-    count_(0)
+    : ctx_(ctx),
+      layer_(layer),
+      layerdef_(layer.GetLayerDefn()),
+      tr_(new transcoder(encoding)),
+      fidcolumn_(layer_.GetFIDColumn()), // TODO - unused
+      count_(0)
 {
     layer_.SetSpatialFilterRect(extent.minx(), extent.miny(), extent.maxx(), extent.maxy());
 }

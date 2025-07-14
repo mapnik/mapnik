@@ -198,14 +198,14 @@ void handle_png_options(std::string const& type, png_options& opts)
 #endif
 
 png_saver::png_saver(std::ostream& stream, std::string const& t)
-    : stream_(stream)
-    , t_(t)
+    : stream_(stream),
+      t_(t)
 {}
 
 png_saver_pal::png_saver_pal(std::ostream& stream, std::string const& t, rgba_palette const& pal)
-    : stream_(stream)
-    , t_(t)
-    , pal_(pal)
+    : stream_(stream),
+      t_(t),
+      pal_(pal)
 {}
 
 template<>

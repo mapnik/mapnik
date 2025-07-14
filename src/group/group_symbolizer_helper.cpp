@@ -40,9 +40,9 @@ template<typename Helper>
 struct apply_find_line_placements : util::noncopyable
 {
     apply_find_line_placements(view_transform const& t, proj_transform const& prj_trans, Helper& helper)
-        : t_(t)
-        , prj_trans_(prj_trans)
-        , helper_(helper)
+        : t_(t),
+          prj_trans_(prj_trans),
+          helper_(helper)
     {}
 
     template<typename Adapter>
@@ -70,8 +70,8 @@ group_symbolizer_helper::group_symbolizer_helper(group_symbolizer const& sym,
                                                  view_transform const& t,
                                                  DetectorType& detector,
                                                  box2d<double> const& query_extent)
-    : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent)
-    , detector_(detector)
+    : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
+      detector_(detector)
 {}
 
 pixel_position_list const& group_symbolizer_helper::get()

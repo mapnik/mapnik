@@ -41,7 +41,7 @@ BraceWrapping:
 BreakBeforeBinaryOperators: None
 BreakBeforeConceptDeclarations: false
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializers: BeforeComma
+BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: AfterComma
 BreakStringLiterals: true
 ColumnLimit: 120
@@ -64,7 +64,7 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 LambdaBodyIndentation: Signature
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
-# PackConstructorInitializers: CurrentLine # only clang-format > 14
+PackConstructorInitializers: Never # only clang-format > 14
 PointerAlignment: Left
 #QualifierAlignment: Left # only clang-format > 14
 ReferenceAlignment: Left

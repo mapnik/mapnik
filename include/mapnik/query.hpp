@@ -43,43 +43,43 @@ class query
           resolution_type const& _resolution,
           double _scale_denominator,
           box2d<double> const& unbuffered_bbox)
-        : bbox_(bbox)
-        , resolution_(_resolution)
-        , scale_denominator_(_scale_denominator)
-        , filter_factor_(1.0)
-        , unbuffered_bbox_(unbuffered_bbox)
-        , names_()
-        , vars_()
+        : bbox_(bbox),
+          resolution_(_resolution),
+          scale_denominator_(_scale_denominator),
+          filter_factor_(1.0),
+          unbuffered_bbox_(unbuffered_bbox),
+          names_(),
+          vars_()
     {}
 
     query(box2d<double> const& bbox, resolution_type const& _resolution, double _scale_denominator = 1.0)
-        : bbox_(bbox)
-        , resolution_(_resolution)
-        , scale_denominator_(_scale_denominator)
-        , filter_factor_(1.0)
-        , unbuffered_bbox_(bbox)
-        , names_()
-        , vars_()
+        : bbox_(bbox),
+          resolution_(_resolution),
+          scale_denominator_(_scale_denominator),
+          filter_factor_(1.0),
+          unbuffered_bbox_(bbox),
+          names_(),
+          vars_()
     {}
 
     query(box2d<double> const& bbox)
-        : bbox_(bbox)
-        , resolution_(resolution_type(1.0, 1.0))
-        , scale_denominator_(1.0)
-        , filter_factor_(1.0)
-        , unbuffered_bbox_(bbox)
-        , names_()
-        , vars_()
+        : bbox_(bbox),
+          resolution_(resolution_type(1.0, 1.0)),
+          scale_denominator_(1.0),
+          filter_factor_(1.0),
+          unbuffered_bbox_(bbox),
+          names_(),
+          vars_()
     {}
 
     query(query const& other)
-        : bbox_(other.bbox_)
-        , resolution_(other.resolution_)
-        , scale_denominator_(other.scale_denominator_)
-        , filter_factor_(other.filter_factor_)
-        , unbuffered_bbox_(other.unbuffered_bbox_)
-        , names_(other.names_)
-        , vars_(other.vars_)
+        : bbox_(other.bbox_),
+          resolution_(other.resolution_),
+          scale_denominator_(other.scale_denominator_),
+          filter_factor_(other.filter_factor_),
+          unbuffered_bbox_(other.unbuffered_bbox_),
+          names_(other.names_),
+          vars_(other.vars_)
     {}
 
     query& operator=(query const& other)

@@ -189,8 +189,8 @@ class layout_container
 {
   public:
     layout_container()
-        : glyphs_count_(0)
-        , line_count_(0)
+        : glyphs_count_(0),
+          line_count_(0)
     {}
 
     void add(text_layout_ptr layout);

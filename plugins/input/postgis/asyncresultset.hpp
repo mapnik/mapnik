@@ -42,11 +42,11 @@ class AsyncResultSet : public IResultSet,
                    std::shared_ptr<Pool<Connection, ConnectionCreator>> const& pool,
                    std::shared_ptr<Connection> const& conn,
                    std::string const& sql)
-        : ctx_(ctx)
-        , pool_(pool)
-        , conn_(conn)
-        , sql_(sql)
-        , is_closed_(false)
+        : ctx_(ctx),
+          pool_(pool),
+          conn_(conn),
+          sql_(sql),
+          is_closed_(false)
     {}
 
     virtual bool use_connection() { return true; }

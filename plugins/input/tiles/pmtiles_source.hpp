@@ -50,17 +50,17 @@ struct entryv3
     uint32_t run_length;
 
     entryv3()
-        : tile_id(0)
-        , offset(0)
-        , length(0)
-        , run_length(0)
+        : tile_id(0),
+          offset(0),
+          length(0),
+          run_length(0)
     {}
 
     entryv3(uint64_t _tile_id, uint64_t _offset, uint32_t _length, uint32_t _run_length)
-        : tile_id(_tile_id)
-        , offset(_offset)
-        , length(_length)
-        , run_length(_run_length)
+        : tile_id(_tile_id),
+          offset(_offset),
+          length(_length),
+          run_length(_run_length)
     {}
 };
 namespace {
@@ -389,8 +389,8 @@ class pmtiles_source : public tiles_source
 
     pmtiles_source() {}
     pmtiles_source(std::string const& file_name)
-        : file_(file_name.c_str(), boost::interprocess::read_only)
-        , region_(file_, boost::interprocess::read_only)
+        : file_(file_name.c_str(), boost::interprocess::read_only),
+          region_(file_, boost::interprocess::read_only)
     {
         if (!is_good())
         {

@@ -72,9 +72,9 @@ template<typename Pixmap>
 struct apply_vertex_mode
 {
     apply_vertex_mode(Pixmap& pixmap, view_transform const& t, proj_transform const& prj_trans)
-        : pixmap_(pixmap)
-        , t_(t)
-        , prj_trans_(prj_trans)
+        : pixmap_(pixmap),
+          t_(t),
+          prj_trans_(prj_trans)
     {}
 
     template<typename Adapter>
@@ -117,11 +117,11 @@ struct RingRenderer
     using path_type = transform_path_adapter<view_transform, geometry::ring_vertex_adapter<double>>;
 
     RingRenderer(rasterizer& ras_ptr, BufferType& im, view_transform const& tr, proj_transform const& prj_trans)
-        : ras_ptr_(ras_ptr)
-        , im_(im)
-        , tr_(tr)
-        , prj_trans_(prj_trans)
-        , sl_()
+        : ras_ptr_(ras_ptr),
+          im_(im),
+          tr_(tr),
+          prj_trans_(prj_trans),
+          sl_()
     {}
 
     void draw_ring(geometry::linear_ring<double> const& ring, agg::rgba8 const& color)

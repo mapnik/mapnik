@@ -51,9 +51,9 @@ struct _mapnik_lib_t
     std::string error_str;
     handle dl;
     _mapnik_lib_t()
-        : name{"unknown"}
-        , error_str{""}
-        , dl{nullptr}
+        : name{"unknown"},
+          error_str{""},
+          dl{nullptr}
     {}
     ~_mapnik_lib_t()
     {
@@ -83,8 +83,8 @@ struct _mapnik_lib_t
 };
 
 PluginInfo::PluginInfo(std::string const& filename, std::string const& library_name)
-    : filename_(filename)
-    , module_{std::make_unique<mapnik_lib_t>()}
+    : filename_(filename),
+      module_{std::make_unique<mapnik_lib_t>()}
 {
     assert(module_ != nullptr);
 #if defined(_WIN32)

@@ -61,10 +61,10 @@ struct assign
 
 template<typename T>
 box2d<T>::box2d()
-    : minx_(std::numeric_limits<T>::max())
-    , miny_(std::numeric_limits<T>::max())
-    , maxx_(-std::numeric_limits<T>::max())
-    , maxy_(-std::numeric_limits<T>::max())
+    : minx_(std::numeric_limits<T>::max()),
+      miny_(std::numeric_limits<T>::max()),
+      maxx_(-std::numeric_limits<T>::max()),
+      maxy_(-std::numeric_limits<T>::max())
 {}
 
 template<typename T>
@@ -81,18 +81,18 @@ box2d<T>::box2d(coord<T, 2> const& c0, coord<T, 2> const& c1)
 
 template<typename T>
 box2d<T>::box2d(box2d_type const& rhs)
-    : minx_(rhs.minx_)
-    , miny_(rhs.miny_)
-    , maxx_(rhs.maxx_)
-    , maxy_(rhs.maxy_)
+    : minx_(rhs.minx_),
+      miny_(rhs.miny_),
+      maxx_(rhs.maxx_),
+      maxy_(rhs.maxy_)
 {}
 
 template<typename T>
 box2d<T>::box2d(box2d_type&& rhs)
-    : minx_(std::move(rhs.minx_))
-    , miny_(std::move(rhs.miny_))
-    , maxx_(std::move(rhs.maxx_))
-    , maxy_(std::move(rhs.maxy_))
+    : minx_(std::move(rhs.minx_)),
+      miny_(std::move(rhs.miny_)),
+      maxx_(std::move(rhs.maxx_)),
+      maxy_(std::move(rhs.maxy_))
 {}
 
 template<typename T>

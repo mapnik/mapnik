@@ -64,15 +64,15 @@ struct _regex_replace_impl : util::noncopyable
 {
 #if defined(BOOST_REGEX_HAS_ICU)
     _regex_replace_impl(value_unicode_string const& ustr, value_unicode_string const& f)
-        : pattern_(boost::make_u32regex(ustr))
-        , format_(f)
+        : pattern_(boost::make_u32regex(ustr)),
+          format_(f)
     {}
     boost::u32regex pattern_;
     value_unicode_string format_;
 #else
     _regex_replace_impl(std::string const& ustr, std::string const& f)
-        : pattern_(ustr)
-        , format_(f)
+        : pattern_(ustr),
+          format_(f)
     {}
     boost::regex pattern_;
     std::string format_;
@@ -80,8 +80,8 @@ struct _regex_replace_impl : util::noncopyable
 };
 
 regex_match_node::regex_match_node(transcoder const& tr, expr_node const& a, std::string const& ustr)
-    : expr(a)
-    , impl_(new _regex_match_impl(
+    : expr(a),
+      impl_(new _regex_match_impl(
 #if defined(BOOST_REGEX_HAS_ICU)
         tr.transcode(ustr.c_str())
 #else
@@ -118,8 +118,8 @@ regex_replace_node::regex_replace_node(transcoder const& tr,
                                        expr_node const& a,
                                        std::string const& ustr,
                                        std::string const& f)
-    : expr(a)
-    , impl_(new _regex_replace_impl(
+    : expr(a),
+      impl_(new _regex_replace_impl(
 #if defined(BOOST_REGEX_HAS_ICU)
         tr.transcode(ustr.c_str()),
         tr.transcode(f.c_str())

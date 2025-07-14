@@ -48,8 +48,8 @@ struct extract_positions
     using box_type = typename boxes_type::value_type::first_type;
 
     extract_positions(Iterator start, Boxes& boxes)
-        : start_(start)
-        , boxes_(boxes)
+        : start_(start),
+          boxes_(boxes)
     {}
 
     template<typename T>

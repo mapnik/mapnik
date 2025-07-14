@@ -86,12 +86,12 @@ bool parse_positions(std::string const& evaluated_positions,
 text_placement_info_simple::text_placement_info_simple(text_placements_simple const* parent,
                                                        std::string const& evaluated_positions,
                                                        double scale_factor_)
-    : text_placement_info(parent, scale_factor_)
-    , state(0)
-    , position_state(0)
-    , direction_(parent->direction_)
-    , text_sizes_(parent->text_sizes_)
-    , parent_(parent)
+    : text_placement_info(parent, scale_factor_),
+      state(0),
+      position_state(0),
+      direction_(parent->direction_),
+      text_sizes_(parent->text_sizes_),
+      parent_(parent)
 {
     if (direction_.empty() && !parse_positions(evaluated_positions, direction_, text_sizes_))
     {
@@ -144,17 +144,17 @@ text_placement_info_ptr text_placements_simple::get_placement_info(double scale_
 }
 
 text_placements_simple::text_placements_simple(symbolizer_base::value_type const& positions)
-    : direction_()
-    , text_sizes_()
-    , positions_(positions)
+    : direction_(),
+      text_sizes_(),
+      positions_(positions)
 {}
 
 text_placements_simple::text_placements_simple(symbolizer_base::value_type const& positions,
                                                std::vector<directions_e>&& direction,
                                                std::vector<int>&& text_sizes)
-    : direction_(direction)
-    , text_sizes_(text_sizes)
-    , positions_(positions)
+    : direction_(direction),
+      text_sizes_(text_sizes),
+      positions_(positions)
 {}
 
 namespace detail {

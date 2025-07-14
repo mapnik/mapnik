@@ -127,12 +127,12 @@ class label_collision_detector4 : util::noncopyable
     struct label
     {
         label(box2d<double> const& b)
-            : box(b)
-            , text()
+            : box(b),
+              text()
         {}
         label(box2d<double> const& b, mapnik::value_unicode_string const& t)
-            : box(b)
-            , text(t)
+            : box(b),
+              text(t)
         {}
 
         box2d<double> box;

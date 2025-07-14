@@ -49,8 +49,8 @@ struct pair_layout
 {
   public:
     pair_layout(double item_margin = 1.0, double max_difference = -1.0)
-        : item_margin_(item_margin)
-        , max_difference_(max_difference)
+        : item_margin_(item_margin),
+          max_difference_(max_difference)
     {}
 
     double get_item_margin() const { return item_margin_; }

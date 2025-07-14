@@ -26,10 +26,10 @@ struct weighted_vertex : private util::noncopyable
     weighted_vertex* next;
 
     weighted_vertex(vertex2d coord_)
-        : coord(coord_)
-        , weight(std::numeric_limits<double>::infinity())
-        , prev(nullptr)
-        , next(nullptr)
+        : coord(coord_),
+          weight(std::numeric_limits<double>::infinity()),
+          prev(nullptr),
+          next(nullptr)
     {}
 
     double nominalWeight()
@@ -90,11 +90,11 @@ struct simplify_converter
 {
   public:
     simplify_converter(Geometry& geom)
-        : geom_(geom)
-        , tolerance_(0.0)
-        , status_(initial)
-        , algorithm_(radial_distance)
-        , pos_(0)
+        : geom_(geom),
+          tolerance_(0.0),
+          status_(initial),
+          algorithm_(radial_distance),
+          pos_(0)
     {}
 
     enum status : std::uint8_t { initial, process, closing, done, cache };

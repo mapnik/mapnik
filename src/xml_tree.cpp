@@ -103,8 +103,8 @@ struct name_trait<mapnik::enumeration<ENUM, F_TO_STRING, F_FROM_STRING, F_LOOKUP
 };
 
 xml_tree::xml_tree()
-    : node_(*this, "<root>")
-    , file_()
+    : node_(*this, "<root>"),
+      file_()
 {
     node_.set_processed(true); // root node is always processed
 }
@@ -130,13 +130,13 @@ const xml_node& xml_tree::root() const
 }
 
 xml_attribute::xml_attribute(const char* value_)
-    : value(value_)
-    , processed(false)
+    : value(value_),
+      processed(false)
 {}
 
 node_not_found::node_not_found(std::string const& node_name)
-    : node_name_(node_name)
-    , msg_()
+    : node_name_(node_name),
+      msg_()
 {}
 
 const char* node_not_found::what() const noexcept
@@ -148,9 +148,9 @@ const char* node_not_found::what() const noexcept
 node_not_found::~node_not_found() {}
 
 attribute_not_found::attribute_not_found(std::string const& node_name, std::string const& attribute_name)
-    : node_name_(node_name)
-    , attribute_name_(attribute_name)
-    , msg_()
+    : node_name_(node_name),
+      attribute_name_(attribute_name),
+      msg_()
 {}
 
 const char* attribute_not_found::what() const noexcept
@@ -162,8 +162,8 @@ const char* attribute_not_found::what() const noexcept
 attribute_not_found::~attribute_not_found() {}
 
 more_than_one_child::more_than_one_child(std::string const& node_name)
-    : node_name_(node_name)
-    , msg_()
+    : node_name_(node_name),
+      msg_()
 {}
 
 const char* more_than_one_child::what() const noexcept
@@ -175,12 +175,12 @@ const char* more_than_one_child::what() const noexcept
 more_than_one_child::~more_than_one_child() {}
 
 xml_node::xml_node(xml_tree& tree, std::string&& name, unsigned line, bool is_text)
-    : tree_(tree)
-    , name_(std::move(name))
-    , is_text_(is_text)
-    , line_(line)
-    , processed_(false)
-    , ignore_(false)
+    : tree_(tree),
+      name_(std::move(name)),
+      is_text_(is_text),
+      line_(line),
+      processed_(false),
+      ignore_(false)
 {}
 
 std::string xml_node::xml_text = "<xmltext>";

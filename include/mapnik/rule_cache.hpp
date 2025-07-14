@@ -38,15 +38,15 @@ class rule_cache : private util::noncopyable
   public:
     using rule_ptrs = std::vector<rule const*>;
     rule_cache()
-        : if_rules_()
-        , else_rules_()
-        , also_rules_()
+        : if_rules_(),
+          else_rules_(),
+          also_rules_()
     {}
 
     rule_cache(rule_cache&& rhs) // move ctor
-        : if_rules_(std::move(rhs.if_rules_))
-        , else_rules_(std::move(rhs.else_rules_))
-        , also_rules_(std::move(rhs.also_rules_))
+        : if_rules_(std::move(rhs.if_rules_)),
+          else_rules_(std::move(rhs.else_rules_)),
+          also_rules_(std::move(rhs.also_rules_))
     {}
 
     rule_cache& operator=(rule_cache&& rhs) // move assign

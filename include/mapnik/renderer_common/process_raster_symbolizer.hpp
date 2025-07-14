@@ -69,23 +69,23 @@ struct image_dispatcher
                      F& composite,
                      std::optional<double> const& nodata,
                      bool need_scaling)
-        : start_x_(start_x)
-        , start_y_(start_y)
-        , width_(width)
-        , height_(height)
-        , scale_x_(scale_x)
-        , scale_y_(scale_y)
-        , offset_x_(offset_x)
-        , offset_y_(offset_y)
-        , method_(method)
-        , filter_factor_(filter_factor)
-        , opacity_(opacity)
-        , comp_op_(comp_op)
-        , sym_(sym)
-        , feature_(feature)
-        , composite_(composite)
-        , nodata_(nodata)
-        , need_scaling_(need_scaling)
+        : start_x_(start_x),
+          start_y_(start_y),
+          width_(width),
+          height_(height),
+          scale_x_(scale_x),
+          scale_y_(scale_y),
+          offset_x_(offset_x),
+          offset_y_(offset_y),
+          method_(method),
+          filter_factor_(filter_factor),
+          opacity_(opacity),
+          comp_op_(comp_op),
+          sym_(sym),
+          feature_(feature),
+          composite_(composite),
+          nodata_(nodata),
+          need_scaling_(need_scaling)
     {}
 
     void operator()(image_null const&) const {} // no-op
@@ -183,24 +183,24 @@ struct image_warp_dispatcher
                           feature_impl const& feature,
                           F& composite,
                           std::optional<double> const& nodata)
-        : prj_trans_(prj_trans)
-        , start_x_(start_x)
-        , start_y_(start_y)
-        , width_(width)
-        , height_(height)
-        , target_ext_(target_ext)
-        , source_ext_(source_ext)
-        , offset_x_(offset_x)
-        , offset_y_(offset_y)
-        , mesh_size_(mesh_size)
-        , scaling_method_(scaling_method)
-        , filter_factor_(filter_factor)
-        , opacity_(opacity)
-        , comp_op_(comp_op)
-        , sym_(sym)
-        , feature_(feature)
-        , composite_(composite)
-        , nodata_(nodata)
+        : prj_trans_(prj_trans),
+          start_x_(start_x),
+          start_y_(start_y),
+          width_(width),
+          height_(height),
+          target_ext_(target_ext),
+          source_ext_(source_ext),
+          offset_x_(offset_x),
+          offset_y_(offset_y),
+          mesh_size_(mesh_size),
+          scaling_method_(scaling_method),
+          filter_factor_(filter_factor),
+          opacity_(opacity),
+          comp_op_(comp_op),
+          sym_(sym),
+          feature_(feature),
+          composite_(composite),
+          nodata_(nodata)
     {}
 
     void operator()(image_null const&) const {} // no-op

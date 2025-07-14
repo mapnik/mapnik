@@ -56,25 +56,25 @@ DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(sqlite_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(sqlite_datasource_plugin);
 
 sqlite_datasource::sqlite_datasource(parameters const& params)
-    : datasource(params)
-    , extent_()
-    , extent_initialized_(false)
-    , type_(datasource::Vector)
-    , table_(*params.get<std::string>("table", ""))
-    , fields_(*params.get<std::string>("fields", "*"))
-    , metadata_(*params.get<std::string>("metadata", ""))
-    , geometry_table_(*params.get<std::string>("geometry_table", ""))
-    , geometry_field_(*params.get<std::string>("geometry_field", ""))
-    , index_table_(*params.get<std::string>("index_table", ""))
-    , key_field_(*params.get<std::string>("key_field", ""))
-    , row_offset_(*params.get<mapnik::value_integer>("row_offset", 0))
-    , row_limit_(*params.get<mapnik::value_integer>("row_limit", 0))
-    , intersects_token_("!intersects!")
-    , pixel_width_token_("!pixel_width!")
-    , pixel_height_token_("!pixel_height!")
-    , desc_(sqlite_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
-    , format_(mapnik::wkbAuto)
-    , twkb_encoding_(false)
+    : datasource(params),
+      extent_(),
+      extent_initialized_(false),
+      type_(datasource::Vector),
+      table_(*params.get<std::string>("table", "")),
+      fields_(*params.get<std::string>("fields", "*")),
+      metadata_(*params.get<std::string>("metadata", "")),
+      geometry_table_(*params.get<std::string>("geometry_table", "")),
+      geometry_field_(*params.get<std::string>("geometry_field", "")),
+      index_table_(*params.get<std::string>("index_table", "")),
+      key_field_(*params.get<std::string>("key_field", "")),
+      row_offset_(*params.get<mapnik::value_integer>("row_offset", 0)),
+      row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
+      intersects_token_("!intersects!"),
+      pixel_width_token_("!pixel_width!"),
+      pixel_height_token_("!pixel_height!"),
+      desc_(sqlite_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
+      format_(mapnik::wkbAuto),
+      twkb_encoding_(false)
 {
     /* TODO
        - throw if no primary key but spatial index is present?

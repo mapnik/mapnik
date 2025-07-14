@@ -47,18 +47,18 @@ namespace mapnik {
 struct MAPNIK_DECL text_item : util::noncopyable
 {
     text_item(unsigned s, unsigned e, UScriptCode sc, UBiDiDirection d, evaluated_format_properties_ptr const& f)
-        : start(s)
-        , end(e)
-        , script(sc)
-        , dir(d)
-        , format_(f)
+        : start(s),
+          end(e),
+          script(sc),
+          dir(d),
+          format_(f)
     {}
     text_item(text_item&& rhs)
-        : start(std::move(rhs.start))
-        , end(std::move(rhs.end))
-        , script(std::move(rhs.script))
-        , dir(std::move(rhs.dir))
-        , format_(rhs.format_)
+        : start(std::move(rhs.start)),
+          end(std::move(rhs.end)),
+          script(std::move(rhs.script)),
+          dir(std::move(rhs.dir)),
+          format_(rhs.format_)
     {}
     unsigned start; // First char (UTF16 offset)
     unsigned end;   // Char _after_ the last char (UTF16 offset)
@@ -90,9 +90,9 @@ class MAPNIK_DECL text_itemizer : util::noncopyable
     struct run : util::noncopyable
     {
         run(T const& _data, unsigned _start, unsigned _end)
-            : start(_start)
-            , end(_end)
-            , data(_data)
+            : start(_start),
+              end(_end),
+              data(_data)
         {}
         unsigned start;
         unsigned end;

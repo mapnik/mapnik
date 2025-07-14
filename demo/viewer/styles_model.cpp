@@ -62,8 +62,8 @@ class node : private mapnik::util::noncopyable
   public:
     template<typename T>
     node(T const& obj, node* parent = 0)
-        : impl_(new wrap<T>(obj))
-        , parent_(parent)
+        : impl_(new wrap<T>(obj)),
+          parent_(parent)
     {}
 
     QString name() const { return impl_->name(); }
@@ -235,8 +235,8 @@ class rule_node
 {
   public:
     rule_node(QString name, mapnik::rule const& r)
-        : name_(name)
-        , rule_(r)
+        : name_(name),
+          rule_(r)
     {}
     ~rule_node() {}
     QString name() const
@@ -256,8 +256,8 @@ class style_node
 {
   public:
     style_node(QString name, mapnik::feature_type_style const& style)
-        : name_(name)
-        , style_(style)
+        : name_(name),
+          style_(style)
     {}
 
     ~style_node() {}
@@ -288,8 +288,8 @@ class map_node
 };
 
 StyleModel::StyleModel(std::shared_ptr<mapnik::Map> map, QObject* parent)
-    : QAbstractItemModel(parent)
-    , root_(new node(map_node(map)))
+    : QAbstractItemModel(parent),
+      root_(new node(map_node(map)))
 {
     using style_type = std::map<std::string, mapnik::feature_type_style>;
     style_type const& styles = map->styles();

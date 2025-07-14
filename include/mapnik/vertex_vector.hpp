@@ -60,11 +60,11 @@ class vertex_vector : private util::noncopyable
   public:
 
     vertex_vector()
-        : num_blocks_(0)
-        , max_blocks_(0)
-        , vertices_(0)
-        , commands_(0)
-        , pos_(0)
+        : num_blocks_(0),
+          max_blocks_(0),
+          vertices_(0),
+          commands_(0),
+          pos_(0)
     {}
 
     ~vertex_vector()

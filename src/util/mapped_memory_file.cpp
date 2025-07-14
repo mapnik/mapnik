@@ -10,14 +10,13 @@ namespace util {
 mapped_memory_file::mapped_memory_file() {}
 
 mapped_memory_file::mapped_memory_file(std::string const& file_name)
-    : file_name_{file_name}
-    ,
+    : file_name_{file_name},
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    file_()
+      file_()
 #elif defined(_WIN32)
-    file_(mapnik::utf8_to_utf16(file_name), std::ios::in | std::ios::binary)
+      file_(mapnik::utf8_to_utf16(file_name), std::ios::in | std::ios::binary)
 #else
-    file_(file_name.c_str(), std::ios::in | std::ios::binary)
+      file_(file_name.c_str(), std::ios::in | std::ios::binary)
 #endif
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)

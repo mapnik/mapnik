@@ -30,16 +30,16 @@ namespace mapnik {
 struct rotation
 {
     rotation()
-        : sin(0)
-        , cos(1.)
+        : sin(0),
+          cos(1.)
     {}
     rotation(double sin_, double cos_)
-        : sin(sin_)
-        , cos(cos_)
+        : sin(sin_),
+          cos(cos_)
     {}
     rotation(double angle)
-        : sin(std::sin(angle))
-        , cos(std::cos(angle))
+        : sin(std::sin(angle)),
+          cos(std::cos(angle))
     {}
     void reset()
     {
@@ -64,12 +64,12 @@ struct pixel_position
     double x;
     double y;
     pixel_position(double x_, double y_)
-        : x(x_)
-        , y(y_)
+        : x(x_),
+          y(y_)
     {}
     pixel_position()
-        : x(0)
-        , y(0)
+        : x(0),
+          y(0)
     {}
     pixel_position operator+(pixel_position const& other) const { return pixel_position(x + other.x, y + other.y); }
 

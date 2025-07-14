@@ -7,8 +7,8 @@ class test : public benchmark::test_case
 
   public:
     test(mapnik::parameters const& params)
-        : test_case(params)
-        , value_("true")
+        : test_case(params),
+          value_("true")
     {}
     bool validate() const
     {

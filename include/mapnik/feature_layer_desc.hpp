@@ -38,17 +38,17 @@ class layer_descriptor
 {
   public:
     layer_descriptor(std::string const& name, std::string const& encoding)
-        : name_(name)
-        , encoding_(encoding)
-        , descriptors_()
-        , extra_params_()
+        : name_(name),
+          encoding_(encoding),
+          descriptors_(),
+          extra_params_()
     {}
 
     layer_descriptor(layer_descriptor const& other)
-        : name_(other.name_)
-        , encoding_(other.encoding_)
-        , descriptors_(other.descriptors_)
-        , extra_params_(other.extra_params_)
+        : name_(other.name_),
+          encoding_(other.encoding_),
+          descriptors_(other.descriptors_),
+          extra_params_(other.extra_params_)
     {}
 
     void set_name(std::string const& name) { name_ = name; }

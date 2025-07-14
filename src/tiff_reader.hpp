@@ -133,29 +133,27 @@ template<typename T>
 tiff_reader<T>::tiff_reader(std::string const& filename)
     :
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    stream_()
-    ,
+      stream_(),
 #else
-    source_()
-    , stream_(&source_)
-    ,
+      source_(),
+      stream_(&source_),
 #endif
 
-    tif_(nullptr)
-    , read_method_(generic)
-    , rows_per_strip_(0)
-    , tile_width_(0)
-    , tile_height_(0)
-    , width_(0)
-    , height_(0)
-    , bps_(0)
-    , sample_format_(SAMPLEFORMAT_UINT)
-    , photometric_(0)
-    , bands_(1)
-    , planar_config_(PLANARCONFIG_CONTIG)
-    , compression_(COMPRESSION_NONE)
-    , has_alpha_(false)
-    , is_tiled_(false)
+      tif_(nullptr),
+      read_method_(generic),
+      rows_per_strip_(0),
+      tile_width_(0),
+      tile_height_(0),
+      width_(0),
+      height_(0),
+      bps_(0),
+      sample_format_(SAMPLEFORMAT_UINT),
+      photometric_(0),
+      bands_(1),
+      planar_config_(PLANARCONFIG_CONTIG),
+      compression_(COMPRESSION_NONE),
+      has_alpha_(false),
+      is_tiled_(false)
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     const auto memory = mapnik::mapped_memory_cache::instance().find(filename, true);
@@ -179,23 +177,23 @@ tiff_reader<T>::tiff_reader(std::string const& filename)
 
 template<typename T>
 tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
-    : source_(data, size)
-    , stream_(&source_)
-    , tif_(nullptr)
-    , read_method_(generic)
-    , rows_per_strip_(0)
-    , tile_width_(0)
-    , tile_height_(0)
-    , width_(0)
-    , height_(0)
-    , bps_(0)
-    , sample_format_(SAMPLEFORMAT_UINT)
-    , photometric_(0)
-    , bands_(1)
-    , planar_config_(PLANARCONFIG_CONTIG)
-    , compression_(COMPRESSION_NONE)
-    , has_alpha_(false)
-    , is_tiled_(false)
+    : source_(data, size),
+      stream_(&source_),
+      tif_(nullptr),
+      read_method_(generic),
+      rows_per_strip_(0),
+      tile_width_(0),
+      tile_height_(0),
+      width_(0),
+      height_(0),
+      bps_(0),
+      sample_format_(SAMPLEFORMAT_UINT),
+      photometric_(0),
+      bands_(1),
+      planar_config_(PLANARCONFIG_CONTIG),
+      compression_(COMPRESSION_NONE),
+      has_alpha_(false),
+      is_tiled_(false)
 {
     if (!stream_)
         throw image_reader_exception("TIFF reader: cannot open image stream ");

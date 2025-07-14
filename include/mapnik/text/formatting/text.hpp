@@ -37,12 +37,12 @@ class MAPNIK_DECL text_node : public node
 {
   public:
     text_node(expression_ptr text)
-        : node()
-        , text_(text)
+        : node(),
+          text_(text)
     {}
     text_node(std::string text)
-        : node()
-        , text_(parse_expression(text))
+        : node(),
+          text_(parse_expression(text))
     {}
     void to_xml(boost::property_tree::ptree& xml) const;
     static node_ptr from_xml(xml_node const& xml, fontset_map const& fontsets);

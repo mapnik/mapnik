@@ -47,8 +47,8 @@ class prepared_index_statement : mapnik::util::noncopyable
 {
   public:
     prepared_index_statement(std::shared_ptr<sqlite_connection> ds, std::string const& sql)
-        : ds_(ds)
-        , stmt_(0)
+        : ds_(ds),
+          stmt_(0)
     {
         const int rc = sqlite3_prepare_v2(*(*ds_), sql.c_str(), -1, &stmt_, 0);
 

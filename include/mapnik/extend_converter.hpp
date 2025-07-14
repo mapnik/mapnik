@@ -194,8 +194,8 @@ struct extend_converter
     {}
 
     extend_converter(Geometry& geom, double extend)
-        : geom_(geom)
-        , extender_(extend)
+        : geom_(geom),
+          extender_(extend)
     {}
 
     void set_extend(double extend) { extender_.extend_length = extend; }

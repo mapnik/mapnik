@@ -52,8 +52,8 @@ class span_image_resample_gray_affine : public agg::span_image_resample_affine<S
                                     interpolator_type& inter,
                                     agg::image_filter_lut const& filter,
                                     std::optional<value_type> const& nodata_value)
-        : base_type(src, inter, filter)
-        , nodata_value_(nodata_value)
+        : base_type(src, inter, filter),
+          nodata_value_(nodata_value)
     {}
 
     void generate(color_type* span, int x, int y, unsigned len)

@@ -35,12 +35,12 @@ const std::string shape_io::DBF = ".dbf";
 const std::string shape_io::INDEX = ".index";
 
 shape_io::shape_io(std::string const& shape_name, bool open_index)
-    : type_(shape_null)
-    , shp_(shape_name + SHP)
-    , shx_(shape_name + SHX)
-    , dbf_(shape_name + DBF)
-    , reclength_(0)
-    , id_(0)
+    : type_(shape_null),
+      shp_(shape_name + SHP),
+      shx_(shape_name + SHX),
+      dbf_(shape_name + DBF),
+      reclength_(0),
+      id_(0)
 {
     bool ok = (shp_.is_open() && dbf_.is_open());
     if (!ok)

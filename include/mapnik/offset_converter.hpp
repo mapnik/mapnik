@@ -47,14 +47,14 @@ struct offset_converter
     using size_type = std::size_t;
 
     offset_converter(Geometry& geom)
-        : geom_(geom)
-        , offset_(0.0)
-        , threshold_(offset_converter_default_threshold)
-        , half_turn_segments_(16)
-        , status_(initial)
-        , pre_first_(vertex2d::no_init)
-        , pre_(vertex2d::no_init)
-        , cur_(vertex2d::no_init)
+        : geom_(geom),
+          offset_(0.0),
+          threshold_(offset_converter_default_threshold),
+          half_turn_segments_(16),
+          status_(initial),
+          pre_first_(vertex2d::no_init),
+          pre_(vertex2d::no_init),
+          cur_(vertex2d::no_init)
     {}
 
     enum status { initial, process };

@@ -45,8 +45,8 @@ class png_reader : public image_reader
     struct png_struct_guard
     {
         png_struct_guard(png_structpp png_ptr_ptr, png_infopp info_ptr_ptr)
-            : p_(png_ptr_ptr)
-            , i_(info_ptr_ptr)
+            : p_(png_ptr_ptr),
+              i_(info_ptr_ptr)
         {}
 
         ~png_struct_guard() { png_destroy_read_struct(p_, i_, 0); }
@@ -120,13 +120,13 @@ void png_reader<T>::png_read_data(png_structp png_ptr, png_bytep data, png_size_
 
 template<typename T>
 png_reader<T>::png_reader(std::string const& filename)
-    : source_()
-    , stream_(&source_)
-    , width_(0)
-    , height_(0)
-    , bit_depth_(0)
-    , color_type_(0)
-    , has_alpha_(false)
+    : source_(),
+      stream_(&source_),
+      width_(0),
+      height_(0),
+      bit_depth_(0),
+      color_type_(0),
+      has_alpha_(false)
 {
     source_.open(filename, std::ios_base::in | std::ios_base::binary);
     if (!source_.is_open())
@@ -136,13 +136,13 @@ png_reader<T>::png_reader(std::string const& filename)
 
 template<typename T>
 png_reader<T>::png_reader(char const* data, std::size_t size)
-    : source_(data, size)
-    , stream_(&source_)
-    , width_(0)
-    , height_(0)
-    , bit_depth_(0)
-    , color_type_(0)
-    , has_alpha_(false)
+    : source_(data, size),
+      stream_(&source_),
+      width_(0),
+      height_(0),
+      bit_depth_(0),
+      color_type_(0),
+      has_alpha_(false)
 {
     if (!stream_)
         throw image_reader_exception("PNG reader: cannot open image stream");

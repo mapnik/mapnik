@@ -31,43 +31,43 @@
 namespace mapnik {
 
 rule::rule()
-    : name_()
-    , min_scale_(0)
-    , max_scale_(std::numeric_limits<double>::infinity())
-    , syms_()
-    , filter_(std::make_shared<expr_node>(true))
-    , else_filter_(false)
-    , also_filter_(false)
+    : name_(),
+      min_scale_(0),
+      max_scale_(std::numeric_limits<double>::infinity()),
+      syms_(),
+      filter_(std::make_shared<expr_node>(true)),
+      else_filter_(false),
+      also_filter_(false)
 {}
 
 rule::rule(std::string const& name, double min_scale_denominator, double max_scale_denominator)
-    : name_(name)
-    , min_scale_(min_scale_denominator)
-    , max_scale_(max_scale_denominator)
-    , syms_()
-    , filter_(std::make_shared<mapnik::expr_node>(true))
-    , else_filter_(false)
-    , also_filter_(false)
+    : name_(name),
+      min_scale_(min_scale_denominator),
+      max_scale_(max_scale_denominator),
+      syms_(),
+      filter_(std::make_shared<mapnik::expr_node>(true)),
+      else_filter_(false),
+      also_filter_(false)
 {}
 
 rule::rule(rule const& rhs)
-    : name_(rhs.name_)
-    , min_scale_(rhs.min_scale_)
-    , max_scale_(rhs.max_scale_)
-    , syms_(rhs.syms_)
-    , filter_(std::make_shared<expr_node>(*rhs.filter_))
-    , else_filter_(rhs.else_filter_)
-    , also_filter_(rhs.also_filter_)
+    : name_(rhs.name_),
+      min_scale_(rhs.min_scale_),
+      max_scale_(rhs.max_scale_),
+      syms_(rhs.syms_),
+      filter_(std::make_shared<expr_node>(*rhs.filter_)),
+      else_filter_(rhs.else_filter_),
+      also_filter_(rhs.also_filter_)
 {}
 
 rule::rule(rule&& rhs)
-    : name_(std::move(rhs.name_))
-    , min_scale_(std::move(rhs.min_scale_))
-    , max_scale_(std::move(rhs.max_scale_))
-    , syms_(std::move(rhs.syms_))
-    , filter_(std::move(rhs.filter_))
-    , else_filter_(std::move(rhs.else_filter_))
-    , also_filter_(std::move(rhs.also_filter_))
+    : name_(std::move(rhs.name_)),
+      min_scale_(std::move(rhs.min_scale_)),
+      max_scale_(std::move(rhs.max_scale_)),
+      syms_(std::move(rhs.syms_)),
+      filter_(std::move(rhs.filter_)),
+      else_filter_(std::move(rhs.else_filter_)),
+      also_filter_(std::move(rhs.also_filter_))
 {}
 
 rule& rule::operator=(rule rhs)

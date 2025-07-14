@@ -54,8 +54,8 @@ class path_adapter : util::noncopyable
 
     //--------------------------------------------------------------------
     path_adapter(VertexContainer& _vertices)
-        : vertices_(_vertices)
-        , iterator_(0)
+        : vertices_(_vertices),
+          iterator_(0)
     {}
     // void remove_all() { vertices_.remove_all(); iterator_ = 0; }
     // void free_all()   { vertices_.free_all();   iterator_ = 0; }

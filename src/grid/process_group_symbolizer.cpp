@@ -63,12 +63,12 @@ struct thunk_renderer : render_thunk_list_dispatch
                    buffer_type& pixmap,
                    renderer_common& common,
                    feature_impl& feature)
-        : ren_(ren)
-        , ras_(ras)
-        , pixmap_(pixmap)
-        , common_(common)
-        , feature_(feature)
-        , tex_(pixmap, src_over, common.scale_factor_)
+        : ren_(ren),
+          ras_(ras),
+          pixmap_(pixmap),
+          common_(common),
+          feature_(feature),
+          tex_(pixmap, src_over, common.scale_factor_)
     {}
 
     virtual void operator()(vector_marker_render_thunk const& thunk)

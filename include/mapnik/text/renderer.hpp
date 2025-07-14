@@ -67,12 +67,12 @@ struct glyph_t
             rotation const& rot_,
             double size_,
             box2d<double> const& bbox_)
-        : image(image_)
-        , properties(properties_)
-        , pos(pos_)
-        , rot(rot_)
-        , size(size_)
-        , bbox(bbox_)
+        : image(image_),
+          properties(properties_),
+          pos(pos_),
+          rot(rot_),
+          size(size_),
+          bbox(bbox_)
     {}
 };
 

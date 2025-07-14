@@ -49,16 +49,16 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
                                                         std::string const& encoding,
                                                         std::string const& shape_name,
                                                         int row_limit)
-    : filter_(filter)
-    , ctx_(std::make_shared<mapnik::context_type>())
-    , shape_ptr_(std::move(shape_ptr))
-    , tr_(new mapnik::transcoder(encoding))
-    , positions_()
-    , itr_()
-    , attr_ids_()
-    , row_limit_(row_limit)
-    , count_(0)
-    , feature_bbox_()
+    : filter_(filter),
+      ctx_(std::make_shared<mapnik::context_type>()),
+      shape_ptr_(std::move(shape_ptr)),
+      tr_(new mapnik::transcoder(encoding)),
+      positions_(),
+      itr_(),
+      attr_ids_(),
+      row_limit_(row_limit),
+      count_(0),
+      feature_bbox_()
 {
     shape_ptr_->shp().skip(100);
     setup_attributes(ctx_, attribute_names, shape_name, *shape_ptr_, attr_ids_);

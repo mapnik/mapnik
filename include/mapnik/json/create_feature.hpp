@@ -111,8 +111,8 @@ struct attribute_value_visitor
 {
   public:
     attribute_value_visitor(mapnik::transcoder const& tr, keys_map const& keys)
-        : tr_(tr)
-        , keys_(keys)
+        : tr_(tr),
+          keys_(keys)
     {}
 
     mapnik::value operator()(std::string const& val) const { return mapnik::value(tr_.transcode(val.c_str())); }

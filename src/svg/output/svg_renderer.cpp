@@ -38,11 +38,11 @@ svg_renderer<T>::svg_renderer(Map const& m,
                               double scale_factor,
                               unsigned offset_x,
                               unsigned offset_y)
-    : feature_style_processor<svg_renderer>(m, scale_factor)
-    , output_iterator_(output_iterator)
-    , generator_(output_iterator)
-    , painted_(false)
-    , common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor)
+    : feature_style_processor<svg_renderer>(m, scale_factor),
+      output_iterator_(output_iterator),
+      generator_(output_iterator),
+      painted_(false),
+      common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor)
 {}
 
 template<typename T>
@@ -53,11 +53,11 @@ svg_renderer<T>::svg_renderer(Map const& m,
                               double scale_factor,
                               unsigned offset_x,
                               unsigned offset_y)
-    : feature_style_processor<svg_renderer>(m, scale_factor)
-    , output_iterator_(output_iterator)
-    , generator_(output_iterator)
-    , painted_(false)
-    , common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
+    : feature_style_processor<svg_renderer>(m, scale_factor),
+      output_iterator_(output_iterator),
+      generator_(output_iterator),
+      painted_(false),
+      common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
 {}
 
 template<typename T>

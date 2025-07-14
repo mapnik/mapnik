@@ -30,9 +30,9 @@
 #include <cmath>
 
 mvt_io::mvt_layer::mvt_layer(mvt_io& io)
-    : keys_()
-    , values_()
-    , io_(io)
+    : keys_(),
+      values_(),
+      io_(io)
 {}
 
 void mvt_io::mvt_layer::add_feature(const protozero::data_view& feature)
@@ -292,10 +292,10 @@ mvt_io::mvt_io(std::string&& data,
                const uint32_t y,
                const uint32_t zoom,
                std::string layer_name)
-    : reader_(data)
-    , context_(ctx)
-    , layer_name_(layer_name)
-    , tr_("utf-8")
+    : reader_(data),
+      context_(ctx),
+      layer_name_(layer_name),
+      tr_("utf-8")
 {
     resolution_ = mapnik::EARTH_CIRCUMFERENCE / (1 << zoom);
     tile_x_ = -0.5 * mapnik::EARTH_CIRCUMFERENCE + x * resolution_;

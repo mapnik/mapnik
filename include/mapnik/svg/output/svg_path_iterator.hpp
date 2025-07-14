@@ -68,9 +68,9 @@ class path_iterator
      * @param geometry the geometry that handles the vector of vertexes.
      */
     path_iterator(Container const& path)
-        : path_iterator::iterator_adaptor_(0)
-        , path_(path)
-        , first_value_(std::make_shared<Value>(0, 0, 0))
+        : path_iterator::iterator_adaptor_(0),
+          path_(path),
+          first_value_(std::make_shared<Value>(0, 0, 0))
     {}
 
     /*!
@@ -85,9 +85,9 @@ class path_iterator
      * @param geometry the geometry that handles the vector of vertexes.
      */
     explicit path_iterator(Value* first_element, Container const& path)
-        : path_iterator::iterator_adaptor_(first_element)
-        , path_(path)
-        , first_value_(std::make_shared<Value>(0, 0, 0))
+        : path_iterator::iterator_adaptor_(first_element),
+          path_(path),
+          first_value_(std::make_shared<Value>(0, 0, 0))
     {
         this->increment();
     }

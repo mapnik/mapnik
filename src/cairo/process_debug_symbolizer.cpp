@@ -54,9 +54,9 @@ template<typename Context>
 struct apply_vertex_mode
 {
     apply_vertex_mode(Context& context, view_transform const& t, proj_transform const& prj_trans)
-        : context_(context)
-        , t_(t)
-        , prj_trans_(prj_trans)
+        : context_(context),
+          t_(t),
+          prj_trans_(prj_trans)
     {}
 
     template<typename Adapter>

@@ -39,13 +39,13 @@ MAPNIK_DISABLE_WARNING_POP
 topojson_featureset::topojson_featureset(mapnik::topojson::topology const& topo,
                                          mapnik::transcoder const& tr,
                                          array_type&& index_array)
-    : ctx_(std::make_shared<mapnik::context_type>())
-    , topo_(topo)
-    , tr_(tr)
-    , index_array_(std::move(index_array))
-    , index_itr_(index_array_.begin())
-    , index_end_(index_array_.end())
-    , feature_id_(1)
+    : ctx_(std::make_shared<mapnik::context_type>()),
+      topo_(topo),
+      tr_(tr),
+      index_array_(std::move(index_array)),
+      index_itr_(index_array_.begin()),
+      index_end_(index_array_.end()),
+      feature_id_(1)
 {}
 
 topojson_featureset::~topojson_featureset() {}

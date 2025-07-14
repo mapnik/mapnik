@@ -35,10 +35,10 @@ namespace {
 struct apply_local_alignment
 {
     apply_local_alignment(view_transform const& t, proj_transform const& prj_trans, double& x, double& y)
-        : t_(t)
-        , prj_trans_(prj_trans)
-        , x_(x)
-        , y_(y)
+        : t_(t),
+          prj_trans_(prj_trans),
+          x_(x),
+          y_(y)
     {}
 
     void operator()(geometry::polygon_vertex_adapter<double>& va)

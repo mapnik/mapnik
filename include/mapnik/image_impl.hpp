@@ -36,8 +36,8 @@ namespace detail {
 // IMAGE_DIMENSIONS
 template<std::size_t max_size>
 image_dimensions<max_size>::image_dimensions(int width, int height)
-    : width_(width)
-    , height_(height)
+    : width_(width),
+      height_(height)
 {
     std::int64_t area = static_cast<std::int64_t>(width) * static_cast<std::int64_t>(height);
     if (width < 0)
@@ -65,32 +65,32 @@ std::size_t image_dimensions<max_size>::height() const
 // IMAGE
 template<typename T>
 image<T>::image()
-    : dimensions_(0, 0)
-    , buffer_(0)
-    , offset_(0.0)
-    , scaling_(1.0)
-    , premultiplied_alpha_(false)
-    , painted_(false)
+    : dimensions_(0, 0),
+      buffer_(0),
+      offset_(0.0),
+      scaling_(1.0),
+      premultiplied_alpha_(false),
+      painted_(false)
 {}
 
 template<typename T>
 image<T>::image(int width, int height, unsigned char* data, bool premultiplied, bool painted)
-    : dimensions_(width, height)
-    , buffer_(data, width * height * sizeof(pixel_size))
-    , offset_(0.0)
-    , scaling_(1.0)
-    , premultiplied_alpha_(premultiplied)
-    , painted_(painted)
+    : dimensions_(width, height),
+      buffer_(data, width * height * sizeof(pixel_size)),
+      offset_(0.0),
+      scaling_(1.0),
+      premultiplied_alpha_(premultiplied),
+      painted_(painted)
 {}
 
 template<typename T>
 image<T>::image(int width, int height, bool initialize, bool premultiplied, bool painted)
-    : dimensions_(width, height)
-    , buffer_(dimensions_.width() * dimensions_.height() * pixel_size)
-    , offset_(0.0)
-    , scaling_(1.0)
-    , premultiplied_alpha_(premultiplied)
-    , painted_(painted)
+    : dimensions_(width, height),
+      buffer_(dimensions_.width() * dimensions_.height() * pixel_size),
+      offset_(0.0),
+      scaling_(1.0),
+      premultiplied_alpha_(premultiplied),
+      painted_(painted)
 {
     if (initialize)
     {
@@ -100,22 +100,22 @@ image<T>::image(int width, int height, bool initialize, bool premultiplied, bool
 
 template<typename T>
 image<T>::image(image<T> const& rhs)
-    : dimensions_(rhs.dimensions_)
-    , buffer_(rhs.buffer_)
-    , offset_(rhs.offset_)
-    , scaling_(rhs.scaling_)
-    , premultiplied_alpha_(rhs.premultiplied_alpha_)
-    , painted_(rhs.painted_)
+    : dimensions_(rhs.dimensions_),
+      buffer_(rhs.buffer_),
+      offset_(rhs.offset_),
+      scaling_(rhs.scaling_),
+      premultiplied_alpha_(rhs.premultiplied_alpha_),
+      painted_(rhs.painted_)
 {}
 
 template<typename T>
 image<T>::image(image<T>&& rhs) noexcept
-    : dimensions_(std::move(rhs.dimensions_))
-    , buffer_(std::move(rhs.buffer_))
-    , offset_(rhs.offset_)
-    , scaling_(rhs.scaling_)
-    , premultiplied_alpha_(rhs.premultiplied_alpha_)
-    , painted_(rhs.painted_)
+    : dimensions_(std::move(rhs.dimensions_)),
+      buffer_(std::move(rhs.buffer_)),
+      offset_(rhs.offset_),
+      scaling_(rhs.scaling_),
+      premultiplied_alpha_(rhs.premultiplied_alpha_),
+      painted_(rhs.painted_)
 {
     rhs.dimensions_ = {0, 0};
 }

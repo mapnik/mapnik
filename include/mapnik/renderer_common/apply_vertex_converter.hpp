@@ -30,8 +30,8 @@ template<typename VertexConverter, typename Processor>
 struct apply_vertex_converter
 {
     apply_vertex_converter(VertexConverter& converter, Processor& proc)
-        : converter_(converter)
-        , proc_(proc)
+        : converter_(converter),
+          proc_(proc)
     {}
     template<typename Adapter>
     void operator()(Adapter const& adapter)

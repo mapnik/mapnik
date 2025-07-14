@@ -77,10 +77,10 @@ class linear_gradient_from_segment
 {
   public:
     linear_gradient_from_segment(double x1, double y1, double x2, double y2)
-        : x1_(x1 * static_cast<double>(agg::gradient_subpixel_scale))
-        , y1_(y1 * static_cast<double>(agg::gradient_subpixel_scale))
-        , x2_(x2 * static_cast<double>(agg::gradient_subpixel_scale))
-        , y2_(y2 * static_cast<double>(agg::gradient_subpixel_scale))
+        : x1_(x1 * static_cast<double>(agg::gradient_subpixel_scale)),
+          y1_(y1 * static_cast<double>(agg::gradient_subpixel_scale)),
+          x2_(x2 * static_cast<double>(agg::gradient_subpixel_scale)),
+          y2_(y2 * static_cast<double>(agg::gradient_subpixel_scale))
     {
         double dx = x2_ - x1_;
         double dy = y2_ - y1_;
@@ -130,12 +130,12 @@ class renderer_agg : util::noncopyable
 
     // mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, agg::pixfmt_rgba32_pre
     renderer_agg(VertexSource& source, group const& svg_group)
-        : source_(source)
-        , curved_(source_)
-        , curved_dashed_(curved_)
-        , curved_stroked_(curved_)
-        , curved_dashed_stroked_(curved_dashed_)
-        , svg_group_(svg_group)
+        : source_(source),
+          curved_(source_),
+          curved_dashed_(curved_),
+          curved_stroked_(curved_),
+          curved_dashed_stroked_(curved_dashed_),
+          svg_group_(svg_group)
     {}
 
     template<typename Rasterizer, typename Scanline, typename Renderer>
@@ -182,12 +182,12 @@ class renderer_agg : util::noncopyable
                        Renderer& ren,
                        agg::trans_affine const& mtx,
                        box2d<double> const& symbol_bbox)
-            : renderer_(renderer)
-            , ras_(ras)
-            , sl_(sl)
-            , ren_(ren)
-            , mtx_(mtx)
-            , symbol_bbox_(symbol_bbox)
+            : renderer_(renderer),
+              ras_(ras),
+              sl_(sl),
+              ren_(ren),
+              mtx_(mtx),
+              symbol_bbox_(symbol_bbox)
         {}
 
         void render_gradient(Rasterizer& ras,
@@ -500,12 +500,12 @@ class renderer_agg : util::noncopyable
                       Renderer& ren,
                       agg::trans_affine const& mtx,
                       mapnik::value_integer const& feature_id)
-            : renderer_(renderer)
-            , ras_(ras)
-            , sl_(sl)
-            , ren_(ren)
-            , mtx_(mtx)
-            , feature_id_(feature_id)
+            : renderer_(renderer),
+              ras_(ras),
+              sl_(sl),
+              ren_(ren),
+              mtx_(mtx),
+              feature_id_(feature_id)
         {}
 
         void operator()(group const& g) const

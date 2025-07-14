@@ -37,19 +37,19 @@ class attribute_descriptor
                          bool primary_key = false,
                          int size = -1,
                          int precision = -1)
-        : name_(name)
-        , type_(type)
-        , size_(size)
-        , precision_(precision)
-        , primary_key_(primary_key)
+        : name_(name),
+          type_(type),
+          size_(size),
+          precision_(precision),
+          primary_key_(primary_key)
     {}
 
     attribute_descriptor(attribute_descriptor const& other)
-        : name_(other.name_)
-        , type_(other.type_)
-        , size_(other.size_)
-        , precision_(other.precision_)
-        , primary_key_(other.primary_key_)
+        : name_(other.name_),
+          type_(other.type_),
+          size_(other.size_),
+          precision_(other.precision_),
+          primary_key_(other.primary_key_)
     {}
 
     attribute_descriptor& operator=(attribute_descriptor rhs)

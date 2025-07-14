@@ -50,14 +50,14 @@ template<typename LookupPolicy>
 raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
                                                    box2d<double> const& extent,
                                                    query const& q)
-    : policy_(policy)
-    , feature_id_(1)
-    , ctx_(std::make_shared<mapnik::context_type>())
-    , extent_(extent)
-    , bbox_(q.get_bbox())
-    , curIter_(policy_.begin())
-    , endIter_(policy_.end())
-    , filter_factor_(q.get_filter_factor())
+    : policy_(policy),
+      feature_id_(1),
+      ctx_(std::make_shared<mapnik::context_type>()),
+      extent_(extent),
+      bbox_(q.get_bbox()),
+      curIter_(policy_.begin()),
+      endIter_(policy_.end()),
+      filter_factor_(q.get_filter_factor())
 {}
 
 template<typename LookupPolicy>

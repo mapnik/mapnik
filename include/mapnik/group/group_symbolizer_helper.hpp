@@ -45,8 +45,8 @@ class group_symbolizer_helper : public base_symbolizer_helper
     struct box_element
     {
         box_element(box2d<double> const& box, value_unicode_string const& repeat_key = "")
-            : box_(box)
-            , repeat_key_(repeat_key)
+            : box_(box),
+              repeat_key_(repeat_key)
         {}
         box2d<double> box_;
         value_unicode_string repeat_key_;

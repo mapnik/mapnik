@@ -39,12 +39,12 @@ class markers_line_placement : public markers_point_placement<Locator, Detector>
     using point_placement::point_placement;
 
     markers_line_placement(Locator& locator, Detector& detector, markers_placement_params const& params)
-        : point_placement(locator, detector, params)
-        , first_point_(true)
-        , spacing_(0.0)
-        , spacing_offset_(NAN)
-        , marker_width_((params.size * params.tr).width())
-        , path_(locator)
+        : point_placement(locator, detector, params),
+          first_point_(true),
+          spacing_(0.0),
+          spacing_offset_(NAN),
+          marker_width_((params.size * params.tr).width()),
+          path_(locator)
     {
         spacing_ = params.spacing < 1 ? 100 : params.spacing;
         spacing_offset_ = params.spacing_offset;

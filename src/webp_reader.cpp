@@ -44,8 +44,8 @@ namespace mapnik {
 struct external_buffer_policy
 {
     external_buffer_policy(uint8_t const* data, std::size_t size)
-        : data_(data)
-        , size_(size)
+        : data_(data),
+          size_(size)
     {}
 
     uint8_t const* data() const { return data_; }
@@ -59,8 +59,8 @@ struct external_buffer_policy
 struct internal_buffer_policy
 {
     internal_buffer_policy(std::size_t size)
-        : data_((size != 0) ? static_cast<uint8_t*>(::operator new(sizeof(uint8_t) * size)) : 0)
-        , size_(size)
+        : data_((size != 0) ? static_cast<uint8_t*>(::operator new(sizeof(uint8_t) * size)) : 0),
+          size_(size)
     {}
 
     uint8_t* data() const { return data_; }
@@ -129,21 +129,21 @@ void register_webp_reader()
 // ctor
 template<typename T>
 webp_reader<T>::webp_reader(char const* data, std::size_t size)
-    : buffer_(new buffer_policy_type(reinterpret_cast<uint8_t const*>(data), size))
-    , width_(0)
-    , height_(0)
-    , has_alpha_(false)
+    : buffer_(new buffer_policy_type(reinterpret_cast<uint8_t const*>(data), size)),
+      width_(0),
+      height_(0),
+      has_alpha_(false)
 {
     init();
 }
 
 template<typename T>
 webp_reader<T>::webp_reader(std::string const& filename)
-    : buffer_(nullptr)
-    , size_(0)
-    , width_(0)
-    , height_(0)
-    , has_alpha_(false)
+    : buffer_(nullptr),
+      size_(0),
+      width_(0),
+      height_(0),
+      has_alpha_(false)
 {
     std::ifstream file(filename.c_str(), std::ios::binary);
     if (!file)

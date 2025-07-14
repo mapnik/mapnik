@@ -415,10 +415,10 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
 face_manager::face_manager(font_library& library,
                            freetype_engine::font_file_mapping_type const& font_file_mapping,
                            freetype_engine::font_memory_cache_type const& font_cache)
-    : face_cache_(new face_cache())
-    , library_(library)
-    , font_file_mapping_(font_file_mapping)
-    , font_memory_cache_(font_cache)
+    : face_cache_(new face_cache()),
+      library_(library),
+      font_file_mapping_(font_file_mapping),
+      font_memory_cache_(font_cache)
 {
     FT_Stroker s;
     FT_Error error = FT_Stroker_New(library_.get(), &s);

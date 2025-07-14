@@ -55,28 +55,28 @@ struct coord<T, 2>
 
   public:
     coord()
-        : x()
-        , y()
+        : x(),
+          y()
     {}
     coord(T x_, T y_)
-        : x(x_)
-        , y(y_)
+        : x(x_),
+          y(y_)
     {}
 
     coord(coord<T, 2> const& rhs)
-        : x(rhs.x)
-        , y(rhs.y)
+        : x(rhs.x),
+          y(rhs.y)
     {}
 
     template<typename T2>
     coord(coord<T2, 2> const& rhs)
-        : x(type(rhs.x))
-        , y(type(rhs.y))
+        : x(type(rhs.x)),
+          y(type(rhs.y))
     {}
 
     coord(coord<T, 2>&& rhs) noexcept
-        : x(std::move(rhs.x))
-        , y(std::move(rhs.y))
+        : x(std::move(rhs.x)),
+          y(std::move(rhs.y))
     {}
 
     coord<T, 2>& operator=(coord<T, 2> rhs)
@@ -158,27 +158,27 @@ struct coord<T, 3>
 
   public:
     coord()
-        : x()
-        , y()
-        , z()
+        : x(),
+          y(),
+          z()
     {}
     coord(T x_, T y_, T z_)
-        : x(x_)
-        , y(y_)
-        , z(z_)
+        : x(x_),
+          y(y_),
+          z(z_)
     {}
 
     template<typename T2>
     coord(coord<T2, 3> const& rhs)
-        : x(type(rhs.x))
-        , y(type(rhs.y))
-        , z(type(rhs.z))
+        : x(type(rhs.x)),
+          y(type(rhs.y)),
+          z(type(rhs.z))
     {}
 
     coord(coord<T, 3>&& rhs) noexcept
-        : x(std::move(rhs.x))
-        , y(std::move(rhs.y))
-        , z(std::move(rhs.z))
+        : x(std::move(rhs.x)),
+          y(std::move(rhs.y)),
+          z(std::move(rhs.z))
     {}
 
     coord<T, 3> operator=(coord<T, 3> rhs)

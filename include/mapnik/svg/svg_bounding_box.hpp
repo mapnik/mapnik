@@ -37,12 +37,12 @@ template<typename VertexSource>
 struct bounding_box
 {
     bounding_box(VertexSource& vs, double& x1, double& y1, double& x2, double& y2, bool& first)
-        : vs_(vs)
-        , x1_(x1)
-        , y1_(y1)
-        , x2_(x2)
-        , y2_(y2)
-        , first_(first)
+        : vs_(vs),
+          x1_(x1),
+          y1_(y1),
+          x2_(x2),
+          y2_(y2),
+          first_(first)
     {}
 
     void operator()(group const& g) const

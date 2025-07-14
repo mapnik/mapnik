@@ -90,10 +90,10 @@ class quad_tree : util::noncopyable
     using query_iterator = typename result_type::iterator;
 
     explicit quad_tree(bbox_type const& ext, unsigned int max_depth = 8, double ratio = 0.55)
-        : max_depth_(max_depth)
-        , ratio_(ratio)
-        , query_result_()
-        , nodes_()
+        : max_depth_(max_depth),
+          ratio_(ratio),
+          query_result_(),
+          nodes_()
     {
         nodes_.push_back(std::make_unique<node>(ext));
         root_ = nodes_[0].get();

@@ -93,8 +93,8 @@ class cairo_face : private util::noncopyable
     {
       public:
         handle(std::shared_ptr<font_library> const& library, face_ptr const& face)
-            : library_(library)
-            , face_(face)
+            : library_(library),
+              face_(face)
         {}
 
       private:
@@ -190,8 +190,8 @@ class cairo_pattern : private util::noncopyable
     }
 
     cairo_pattern(cairo_surface_ptr const& surface)
-        : surface_(surface)
-        , pattern_(cairo_pattern_create_for_surface(surface_.get()))
+        : surface_(surface),
+          pattern_(cairo_pattern_create_for_surface(surface_.get()))
     {}
 
     ~cairo_pattern()
@@ -420,10 +420,10 @@ template<typename Context>
 struct line_pattern_rasterizer
 {
     line_pattern_rasterizer(Context& context, cairo_pattern& pattern, unsigned width, unsigned height)
-        : context_(context)
-        , pattern_(pattern)
-        , width_(width)
-        , height_(height)
+        : context_(context),
+          pattern_(pattern),
+          width_(width),
+          height_(height)
     {}
 
     template<typename T>

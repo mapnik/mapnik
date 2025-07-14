@@ -25,8 +25,8 @@
 using mapnik::Map;
 
 LayerListModel::LayerListModel(std::shared_ptr<Map> map, QObject* parent)
-    : QAbstractListModel(parent)
-    , map_(map)
+    : QAbstractListModel(parent),
+      map_(map)
 {}
 
 int LayerListModel::rowCount(QModelIndex const&) const

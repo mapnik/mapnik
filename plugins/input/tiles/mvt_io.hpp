@@ -43,9 +43,9 @@ class mvt_io
         std::string const& name_;
 
         value_visitor(mapnik::transcoder& tr, mapnik::feature_ptr& feature, std::string const& name)
-            : tr_(tr)
-            , feature_(feature)
-            , name_(name)
+            : tr_(tr),
+              feature_(feature),
+              name_(name)
         {}
 
         void operator()(std::string const& val) { feature_->put(name_, tr_.transcode(val.data(), val.length())); }

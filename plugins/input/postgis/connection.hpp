@@ -43,9 +43,9 @@ class Connection
 {
   public:
     Connection(std::string const& connection_str, std::optional<std::string> const& password)
-        : cursorId(0)
-        , closed_(false)
-        , pending_(false)
+        : cursorId(0),
+          closed_(false),
+          pending_(false)
     {
         std::string connect_with_pass = connection_str;
         if (password && !password->empty())

@@ -48,8 +48,8 @@ class pgraster_wkb_reader
   public:
 
     pgraster_wkb_reader(const uint8_t* wkb, int size, int bnd = 0)
-        : ptr_(wkb)
-        , bandno_(bnd)
+        : ptr_(wkb),
+          bandno_(bnd)
     {}
 
     mapnik::raster_ptr get_raster();

@@ -52,13 +52,13 @@ class octree : private util::noncopyable
     struct node
     {
         node()
-            : reds(0)
-            , greens(0)
-            , blues(0)
-            , count(0)
-            , count_cum(0)
-            , children_count(0)
-            , index(0)
+            : reds(0),
+              greens(0),
+              blues(0),
+              count(0),
+              count_cum(0),
+              children_count(0),
+              index(0)
         {
             std::fill(children_, children_ + 8, nullptr);
         }
@@ -99,11 +99,11 @@ class octree : private util::noncopyable
 
   public:
     explicit octree(unsigned max_colors = 256)
-        : max_colors_(max_colors)
-        , colors_(0)
-        , offset_(0)
-        , leaf_level_(InsertPolicy::MAX_LEVELS)
-        , root_(new node())
+        : max_colors_(max_colors),
+          colors_(0),
+          offset_(0),
+          leaf_level_(InsertPolicy::MAX_LEVELS),
+          root_(new node())
     {}
 
     ~octree() { delete root_; }

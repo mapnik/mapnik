@@ -112,8 +112,8 @@ class progress_timer : public timer
 {
   public:
     progress_timer(std::ostream& os, std::string const& base_message)
-        : os_(os)
-        , base_message_(base_message)
+        : os_(os),
+          base_message_(base_message)
     {}
 
     ~progress_timer()

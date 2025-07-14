@@ -12,9 +12,9 @@ class test_static : public benchmark::test_case
 
   public:
     test_static(mapnik::parameters const& params)
-        : test_case(params)
-        , step_(STEP_NUM)
-        , start_(START_NUM)
+        : test_case(params),
+          step_(STEP_NUM),
+          start_(START_NUM)
     {}
     bool validate() const { return true; }
     bool operator()() const
@@ -45,9 +45,9 @@ class test_numeric : public benchmark::test_case
 
   public:
     test_numeric(mapnik::parameters const& params)
-        : test_case(params)
-        , step_(STEP_NUM)
-        , start_(START_NUM)
+        : test_case(params),
+          step_(STEP_NUM),
+          start_(START_NUM)
     {}
     bool validate() const { return true; }
     bool operator()() const

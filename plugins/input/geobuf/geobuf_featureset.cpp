@@ -31,11 +31,11 @@
 #include "geobuf_featureset.hpp"
 
 geobuf_featureset::geobuf_featureset(std::vector<mapnik::feature_ptr> const& features, array_type&& index_array)
-    : features_(features)
-    , index_array_(std::move(index_array))
-    , index_itr_(index_array_.begin())
-    , index_end_(index_array_.end())
-    , ctx_(std::make_shared<mapnik::context_type>())
+    : features_(features),
+      index_array_(std::move(index_array)),
+      index_itr_(index_array_.begin()),
+      index_end_(index_array_.end()),
+      ctx_(std::make_shared<mapnik::context_type>())
 {}
 
 geobuf_featureset::~geobuf_featureset() {}

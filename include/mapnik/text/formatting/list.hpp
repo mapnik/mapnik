@@ -40,8 +40,8 @@ class MAPNIK_DECL list_node : public node
 {
   public:
     list_node()
-        : node()
-        , children_()
+        : node(),
+          children_()
     {}
     virtual void to_xml(boost::property_tree::ptree& xml) const;
     virtual void apply(evaluated_format_properties_ptr const& p,

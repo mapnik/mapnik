@@ -42,21 +42,19 @@ csv_featureset::csv_featureset(std::string const& filename,
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 //
 #elif defined(_WIN32)
-    file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
-    ,
+      file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
 #else
-    file_(std::fopen(filename.c_str(), "rb"), std::fclose)
-    ,
+      file_(std::fopen(filename.c_str(), "rb"), std::fclose),
 #endif
-    separator_(separator)
-    , quote_(quote)
-    , headers_(headers)
-    , index_array_(std::move(index_array))
-    , index_itr_(index_array_.begin())
-    , index_end_(index_array_.end())
-    , ctx_(ctx)
-    , locator_(locator)
-    , tr_("utf8")
+      separator_(separator),
+      quote_(quote),
+      headers_(headers),
+      index_array_(std::move(index_array)),
+      index_itr_(index_array_.begin()),
+      index_end_(index_array_.end()),
+      ctx_(ctx),
+      locator_(locator),
+      tr_("utf8")
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     const auto memory = mapnik::mapped_memory_cache::instance().find(filename, true);

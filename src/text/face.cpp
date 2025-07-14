@@ -37,8 +37,8 @@ MAPNIK_DISABLE_WARNING_POP
 namespace mapnik {
 
 font_face::font_face(FT_Face face)
-    : face_(face)
-    , color_font_(init_color_font())
+    : face_(face),
+      color_font_(init_color_font())
 {}
 
 bool font_face::init_color_font()

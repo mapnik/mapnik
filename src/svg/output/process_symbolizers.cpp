@@ -48,8 +48,8 @@ struct coord_transformer
     using calc_type = CalculationType;
 
     coord_transformer(view_transform const& tr, proj_transform const& prj_trans)
-        : tr_(tr)
-        , prj_trans_(prj_trans)
+        : tr_(tr),
+          prj_trans_(prj_trans)
     {}
 
     template<typename P1, typename P2>

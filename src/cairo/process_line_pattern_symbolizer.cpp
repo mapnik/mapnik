@@ -48,11 +48,11 @@ struct prepare_pattern_visitor
                             feature_impl const& feature,
                             std::size_t& width,
                             std::size_t& height)
-        : common_(common)
-        , sym_(sym)
-        , feature_(feature)
-        , width_(width)
-        , height_(height)
+        : common_(common),
+          sym_(sym),
+          feature_(feature),
+          width_(width),
+          height_(height)
     {}
 
     std::shared_ptr<cairo_pattern> operator()(mapnik::marker_null const&)
@@ -107,12 +107,12 @@ struct warp_pattern : cairo_pattern_base
                  symbolizer_base const& sym,
                  mapnik::feature_impl const& feature,
                  proj_transform const& prj_trans)
-        : cairo_pattern_base{marker, common, sym, feature, prj_trans}
-        , clip_(get<value_bool, keys::clip>(sym, feature, common.vars_))
-        , offset_(get<value_double, keys::offset>(sym, feature, common.vars_))
-        , clip_box_(clipping_extent(common))
-        , tr_(geom_transform())
-        , converter_(clip_box_, sym, common.t_, prj_trans, tr_, feature, common.vars_, common.scale_factor_)
+        : cairo_pattern_base{marker, common, sym, feature, prj_trans},
+          clip_(get<value_bool, keys::clip>(sym, feature, common.vars_)),
+          offset_(get<value_double, keys::offset>(sym, feature, common.vars_)),
+          clip_box_(clipping_extent(common)),
+          tr_(geom_transform()),
+          converter_(clip_box_, sym, common.t_, prj_trans, tr_, feature, common.vars_, common.scale_factor_)
     {
         value_double offset = get<value_double, keys::offset>(sym, feature, common.vars_);
         value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common.vars_);

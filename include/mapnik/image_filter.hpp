@@ -164,9 +164,9 @@ struct double_buffer
     boost::gil::rgba8_view_t src_view;
 
     explicit double_buffer(Image& src)
-        : dst_buffer(src.width(), src.height())
-        , dst_view(view(dst_buffer))
-        , src_view(rgba8_view(src))
+        : dst_buffer(src.width(), src.height()),
+          dst_view(view(dst_buffer)),
+          src_view(rgba8_view(src))
     {}
 
     ~double_buffer() { copy_pixels(dst_view, src_view); }
@@ -936,8 +936,8 @@ template<typename Src>
 struct filter_visitor
 {
     filter_visitor(Src& src, double scale_factor = 1.0)
-        : src_(src)
-        , scale_factor_(scale_factor)
+        : src_(src),
+          scale_factor_(scale_factor)
     {}
 
     template<typename T>

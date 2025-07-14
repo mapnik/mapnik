@@ -36,8 +36,8 @@ namespace visual_tests {
 struct map_size
 {
     map_size(std::size_t _width, std::size_t _height)
-        : width(_width)
-        , height(_height)
+        : width(_width),
+          height(_height)
     {}
     map_size() {}
     std::size_t width = 0;
@@ -47,12 +47,12 @@ struct map_size
 struct config
 {
     config()
-        : status(true)
-        , scales({1.0, 2.0})
-        , sizes({{500, 100}})
-        , tiles({{1, 1}})
-        , bbox()
-        , ignored_renderers()
+        : status(true),
+          scales({1.0, 2.0}),
+          sizes({{500, 100}}),
+          tiles({{1, 1}}),
+          bbox(),
+          ignored_renderers()
     {}
 
     bool status;

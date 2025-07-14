@@ -58,21 +58,21 @@ double scales[] = {279541132.014, 139770566.007, 69885283.0036, 34942641.5018, 1
                    8530.9183354,  4265.4591677,  2132.72958385, 1066.36479192, 533.182395962};
 
 MapWidget::MapWidget(QWidget* parent)
-    : QWidget(parent)
-    , map_()
-    , selected_(1)
-    , extent_()
-    , cur_tool_(ZoomToBox)
-    , start_x_(0)
-    , start_y_(0)
-    , end_x_(0)
-    , end_y_(0)
-    , drag_(false)
-    , first_(true)
-    , pen_(QColor(0, 0, 255, 96))
-    , selectedLayer_(-1)
-    , scaling_factor_(1.0)
-    , cur_renderer_(AGG)
+    : QWidget(parent),
+      map_(),
+      selected_(1),
+      extent_(),
+      cur_tool_(ZoomToBox),
+      start_x_(0),
+      start_y_(0),
+      end_x_(0),
+      end_y_(0),
+      drag_(false),
+      first_(true),
+      pen_(QColor(0, 0, 255, 96)),
+      selectedLayer_(-1),
+      scaling_factor_(1.0),
+      cur_renderer_(AGG)
 {
     pen_.setWidth(3);
     pen_.setCapStyle(Qt::RoundCap);

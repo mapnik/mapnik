@@ -64,79 +64,79 @@ struct path_attributes
     double dash_offset;
     // Empty constructor
     path_attributes()
-        : fill_gradient()
-        , stroke_gradient()
-        , transform()
-        , opacity(1.0)
-        , fill_opacity(1.0)
-        , stroke_opacity(1.0)
-        , miter_limit(4.0)
-        , stroke_width(1.0)
-        , index(0)
-        , fill_color(agg::rgba(0, 0, 0))
-        , stroke_color(agg::rgba(0, 0, 0))
-        , line_join(agg::miter_join)
-        , line_cap(agg::butt_cap)
-        , fill_flag(true)
-        , fill_none(false)
-        , stroke_flag(false)
-        , stroke_none(false)
-        , even_odd_flag(false)
-        , visibility_flag(true)
-        , display_flag(true)
-        , dash()
-        , dash_offset(0.0)
+        : fill_gradient(),
+          stroke_gradient(),
+          transform(),
+          opacity(1.0),
+          fill_opacity(1.0),
+          stroke_opacity(1.0),
+          miter_limit(4.0),
+          stroke_width(1.0),
+          index(0),
+          fill_color(agg::rgba(0, 0, 0)),
+          stroke_color(agg::rgba(0, 0, 0)),
+          line_join(agg::miter_join),
+          line_cap(agg::butt_cap),
+          fill_flag(true),
+          fill_none(false),
+          stroke_flag(false),
+          stroke_none(false),
+          even_odd_flag(false),
+          visibility_flag(true),
+          display_flag(true),
+          dash(),
+          dash_offset(0.0)
     {}
 
     // Copy constructor
     path_attributes(path_attributes const& attr)
-        : fill_gradient(attr.fill_gradient)
-        , stroke_gradient(attr.stroke_gradient)
-        , transform(attr.transform)
-        , opacity(attr.opacity)
-        , fill_opacity(attr.fill_opacity)
-        , stroke_opacity(attr.stroke_opacity)
-        , miter_limit(attr.miter_limit)
-        , stroke_width(attr.stroke_width)
-        , index(attr.index)
-        , fill_color(attr.fill_color)
-        , stroke_color(attr.stroke_color)
-        , line_join(attr.line_join)
-        , line_cap(attr.line_cap)
-        , fill_flag(attr.fill_flag)
-        , fill_none(attr.fill_none)
-        , stroke_flag(attr.stroke_flag)
-        , stroke_none(attr.stroke_none)
-        , even_odd_flag(attr.even_odd_flag)
-        , visibility_flag(attr.visibility_flag)
-        , display_flag(attr.display_flag)
-        , dash(attr.dash)
-        , dash_offset(attr.dash_offset)
+        : fill_gradient(attr.fill_gradient),
+          stroke_gradient(attr.stroke_gradient),
+          transform(attr.transform),
+          opacity(attr.opacity),
+          fill_opacity(attr.fill_opacity),
+          stroke_opacity(attr.stroke_opacity),
+          miter_limit(attr.miter_limit),
+          stroke_width(attr.stroke_width),
+          index(attr.index),
+          fill_color(attr.fill_color),
+          stroke_color(attr.stroke_color),
+          line_join(attr.line_join),
+          line_cap(attr.line_cap),
+          fill_flag(attr.fill_flag),
+          fill_none(attr.fill_none),
+          stroke_flag(attr.stroke_flag),
+          stroke_none(attr.stroke_none),
+          even_odd_flag(attr.even_odd_flag),
+          visibility_flag(attr.visibility_flag),
+          display_flag(attr.display_flag),
+          dash(attr.dash),
+          dash_offset(attr.dash_offset)
     {}
     // Copy constructor with new index value
     path_attributes(path_attributes const& attr, unsigned idx)
-        : fill_gradient(attr.fill_gradient)
-        , stroke_gradient(attr.stroke_gradient)
-        , transform(attr.transform)
-        , opacity(attr.opacity)
-        , fill_opacity(attr.fill_opacity)
-        , stroke_opacity(attr.stroke_opacity)
-        , miter_limit(attr.miter_limit)
-        , stroke_width(attr.stroke_width)
-        , index(idx)
-        , fill_color(attr.fill_color)
-        , stroke_color(attr.stroke_color)
-        , line_join(attr.line_join)
-        , line_cap(attr.line_cap)
-        , fill_flag(attr.fill_flag)
-        , fill_none(attr.fill_none)
-        , stroke_flag(attr.stroke_flag)
-        , stroke_none(attr.stroke_none)
-        , even_odd_flag(attr.even_odd_flag)
-        , visibility_flag(attr.visibility_flag)
-        , display_flag(attr.display_flag)
-        , dash(attr.dash)
-        , dash_offset(attr.dash_offset)
+        : fill_gradient(attr.fill_gradient),
+          stroke_gradient(attr.stroke_gradient),
+          transform(attr.transform),
+          opacity(attr.opacity),
+          fill_opacity(attr.fill_opacity),
+          stroke_opacity(attr.stroke_opacity),
+          miter_limit(attr.miter_limit),
+          stroke_width(attr.stroke_width),
+          index(idx),
+          fill_color(attr.fill_color),
+          stroke_color(attr.stroke_color),
+          line_join(attr.line_join),
+          line_cap(attr.line_cap),
+          fill_flag(attr.fill_flag),
+          fill_none(attr.fill_none),
+          stroke_flag(attr.stroke_flag),
+          stroke_none(attr.stroke_none),
+          even_odd_flag(attr.even_odd_flag),
+          visibility_flag(attr.visibility_flag),
+          display_flag(attr.display_flag),
+          dash(attr.dash),
+          dash_offset(attr.dash_offset)
     {}
 };
 

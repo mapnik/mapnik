@@ -42,23 +42,23 @@ struct group_layout_manager
     {}
 
     explicit group_layout_manager(group_layout const& layout)
-        : layout_(layout)
-        , update_layout_(false)
+        : layout_(layout),
+          update_layout_(false)
     {}
 
     group_layout_manager(group_layout const& layout, pixel_position const& input_origin)
-        : layout_(layout)
-        , input_origin_(input_origin)
-        , update_layout_(false)
+        : layout_(layout),
+          input_origin_(input_origin),
+          update_layout_(false)
     {}
 
     group_layout_manager(group_layout const& layout,
                          pixel_position const& input_origin,
                          std::vector<bound_box> const& item_boxes)
-        : layout_(layout)
-        , input_origin_(input_origin)
-        , member_boxes_(item_boxes)
-        , update_layout_(true)
+        : layout_(layout),
+          input_origin_(input_origin),
+          member_boxes_(item_boxes),
+          update_layout_(true)
     {}
 
     void set_input_origin(double x, double y)

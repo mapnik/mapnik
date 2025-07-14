@@ -53,9 +53,9 @@ class Pool : private util::noncopyable
   public:
 
     Pool(const Creator<T>& creator, unsigned initialSize, unsigned maxSize)
-        : creator_(creator)
-        , initialSize_(initialSize)
-        , maxSize_(maxSize)
+        : creator_(creator),
+          initialSize_(initialSize),
+          maxSize_(maxSize)
     {
         for (unsigned i = 0; i < initialSize_; ++i)
         {

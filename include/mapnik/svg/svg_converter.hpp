@@ -58,11 +58,11 @@ class svg_converter : util::noncopyable
   public:
 
     svg_converter(VertexSource& source, group& svg_group)
-        : source_(source)
-        , svg_group_(svg_group)
-        , attr_stack_()
-        , svg_width_(0.0)
-        , svg_height_(0.0)
+        : source_(source),
+          svg_group_(svg_group),
+          attr_stack_(),
+          svg_width_(0.0),
+          svg_height_(0.0)
     {}
 
     void set_opacity(double opacity) { svg_group_.opacity = opacity; }

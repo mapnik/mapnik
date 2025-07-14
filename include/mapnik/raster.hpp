@@ -44,18 +44,18 @@ class raster : private util::noncopyable
 
     template<typename ImageData>
     raster(box2d<double> const& ext, box2d<double> const& query_ext, ImageData&& data, double filter_factor)
-        : ext_(ext)
-        , query_ext_(query_ext)
-        , data_(std::move(data))
-        , filter_factor_(filter_factor)
+        : ext_(ext),
+          query_ext_(query_ext),
+          data_(std::move(data)),
+          filter_factor_(filter_factor)
     {}
 
     template<typename ImageData>
     raster(box2d<double> const& ext, ImageData&& data, double filter_factor)
-        : ext_(ext)
-        , query_ext_(ext)
-        , data_(std::move(data))
-        , filter_factor_(filter_factor)
+        : ext_(ext),
+          query_ext_(ext),
+          data_(std::move(data)),
+          filter_factor_(filter_factor)
     {}
 
     void set_nodata(double _nodata) { nodata_ = _nodata; }

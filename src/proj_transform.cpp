@@ -122,11 +122,11 @@ std::vector<box2d<double>> split_bounding_box(box2d<double> const& bbox)
 } // namespace
 
 proj_transform::proj_transform(projection const& source, projection const& dest)
-    : is_source_longlat_(false)
-    , is_dest_longlat_(false)
-    , is_source_equal_dest_(false)
-    , wgs84_to_merc_(false)
-    , merc_to_wgs84_(false)
+    : is_source_longlat_(false),
+      is_dest_longlat_(false),
+      is_source_equal_dest_(false),
+      wgs84_to_merc_(false),
+      merc_to_wgs84_(false)
 {
     is_source_equal_dest_ = (source == dest);
     if (!is_source_equal_dest_)

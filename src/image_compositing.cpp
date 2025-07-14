@@ -175,11 +175,11 @@ namespace detail {
 struct composite_visitor
 {
     composite_visitor(image_any const& src, composite_mode_e mode, float opacity, int dx, int dy)
-        : src_(src)
-        , mode_(mode)
-        , opacity_(opacity)
-        , dx_(dx)
-        , dy_(dy)
+        : src_(src),
+          mode_(mode),
+          opacity_(opacity),
+          dx_(dx),
+          dy_(dy)
     {}
 
     template<typename T>

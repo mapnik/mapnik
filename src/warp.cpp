@@ -208,15 +208,15 @@ struct warp_image_visitor
                        scaling_method_e scaling_method,
                        double filter_factor,
                        std::optional<double> const& nodata_value)
-        : target_raster_(target_raster)
-        , prj_trans_(prj_trans)
-        , source_ext_(source_ext)
-        , offset_x_(offset_x)
-        , offset_y_(offset_y)
-        , mesh_size_(mesh_size)
-        , scaling_method_(scaling_method)
-        , filter_factor_(filter_factor)
-        , nodata_value_(nodata_value)
+        : target_raster_(target_raster),
+          prj_trans_(prj_trans),
+          source_ext_(source_ext),
+          offset_x_(offset_x),
+          offset_y_(offset_y),
+          mesh_size_(mesh_size),
+          scaling_method_(scaling_method),
+          filter_factor_(filter_factor),
+          nodata_value_(nodata_value)
     {}
 
     void operator()(image_null const&) const {}

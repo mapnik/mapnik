@@ -120,14 +120,14 @@ struct collect_attributes_visitor
 };
 
 topojson_datasource::topojson_datasource(parameters const& params)
-    : datasource(params)
-    , type_(datasource::Vector)
-    , desc_(topojson_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
-    , filename_()
-    , inline_string_()
-    , extent_()
-    , tr_(new mapnik::transcoder(*params.get<std::string>("encoding", "utf-8")))
-    , tree_(nullptr)
+    : datasource(params),
+      type_(datasource::Vector),
+      desc_(topojson_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
+      filename_(),
+      inline_string_(),
+      extent_(),
+      tr_(new mapnik::transcoder(*params.get<std::string>("encoding", "utf-8"))),
+      tree_(nullptr)
 {
     const auto inline_string = params.get<std::string>("inline");
     if (inline_string)

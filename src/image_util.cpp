@@ -1218,12 +1218,12 @@ struct visitor_composite_pixel
                             unsigned c,
                             unsigned cover,
                             double opacity)
-        : opacity_(clamp(opacity, 0.0, 1.0))
-        , comp_op_(comp_op)
-        , x_(x)
-        , y_(y)
-        , c_(c)
-        , cover_(cover)
+        : opacity_(clamp(opacity, 0.0, 1.0)),
+          comp_op_(comp_op),
+          x_(x),
+          y_(y),
+          c_(c),
+          cover_(cover)
     {}
 
     void operator()(image_rgba8& data) const
@@ -1316,9 +1316,9 @@ template<typename T1>
 struct visitor_set_pixel
 {
     visitor_set_pixel(std::size_t x, std::size_t y, T1 const& val)
-        : val_(val)
-        , x_(x)
-        , y_(y)
+        : val_(val),
+          x_(x),
+          y_(y)
     {}
 
     template<typename T2>
@@ -1341,9 +1341,9 @@ template<>
 struct visitor_set_pixel<color>
 {
     visitor_set_pixel(std::size_t x, std::size_t y, color const& val)
-        : val_(val)
-        , x_(x)
-        , y_(y)
+        : val_(val),
+          x_(x),
+          y_(y)
     {}
 
     template<typename T2>
@@ -1614,8 +1614,8 @@ template<typename T1>
 struct visitor_get_pixel
 {
     visitor_get_pixel(std::size_t x, std::size_t y)
-        : x_(x)
-        , y_(y)
+        : x_(x),
+          y_(y)
     {}
 
     template<typename T2>
@@ -1640,8 +1640,8 @@ template<>
 struct visitor_get_pixel<color>
 {
     visitor_get_pixel(std::size_t x, std::size_t y)
-        : x_(x)
-        , y_(y)
+        : x_(x),
+          y_(y)
     {}
 
     template<typename T2>
@@ -2155,10 +2155,10 @@ namespace detail {
 struct visitor_create_view
 {
     visitor_create_view(std::size_t x, std::size_t y, std::size_t w, std::size_t h)
-        : x_(x)
-        , y_(y)
-        , w_(w)
-        , h_(h)
+        : x_(x),
+          y_(y),
+          w_(w),
+          h_(h)
     {}
 
     image_view_any operator()(image_null const&) const
@@ -2381,9 +2381,9 @@ namespace detail {
 struct visitor_compare
 {
     visitor_compare(image_any const& im2, double threshold, bool alpha)
-        : im2_(im2)
-        , threshold_(threshold)
-        , alpha_(alpha)
+        : im2_(im2),
+          threshold_(threshold),
+          alpha_(alpha)
     {}
 
     template<typename T>

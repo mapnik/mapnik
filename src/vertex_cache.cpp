@@ -28,14 +28,14 @@
 namespace mapnik {
 
 vertex_cache::vertex_cache(vertex_cache&& rhs)
-    : current_position_(std::move(rhs.current_position_))
-    , segment_starting_point_(std::move(rhs.segment_starting_point_))
-    , subpaths_(std::move(rhs.subpaths_))
-    , position_in_segment_(std::move(rhs.position_in_segment_))
-    , angle_(std::move(rhs.angle_))
-    , angle_valid_(std::move(rhs.angle_valid_))
-    , offseted_lines_(std::move(rhs.offseted_lines_))
-    , position_(std::move(rhs.position_))
+    : current_position_(std::move(rhs.current_position_)),
+      segment_starting_point_(std::move(rhs.segment_starting_point_)),
+      subpaths_(std::move(rhs.subpaths_)),
+      position_in_segment_(std::move(rhs.position_in_segment_)),
+      angle_(std::move(rhs.angle_)),
+      angle_valid_(std::move(rhs.angle_valid_)),
+      offseted_lines_(std::move(rhs.offseted_lines_)),
+      position_(std::move(rhs.position_))
 {
     // The C++11 standard doesn't guarantee iterators are valid when container is moved.
     // We can create them from indexes but we don't need to. Just let them uninitialized.

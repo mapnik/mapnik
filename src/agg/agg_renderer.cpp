@@ -63,14 +63,14 @@ namespace mapnik {
 
 template<typename T0, typename T1>
 agg_renderer<T0, T1>::agg_renderer(Map const& m, T0& pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
-    : feature_style_processor<agg_renderer>(m, scale_factor)
-    , buffers_()
-    , internal_buffers_(m.width(), m.height())
-    , inflated_buffer_()
-    , ras_ptr(std::make_unique<rasterizer>())
-    , gamma_method_(gamma_method_enum::GAMMA_POWER)
-    , gamma_(1.0)
-    , common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor)
+    : feature_style_processor<agg_renderer>(m, scale_factor),
+      buffers_(),
+      internal_buffers_(m.width(), m.height()),
+      inflated_buffer_(),
+      ras_ptr(std::make_unique<rasterizer>()),
+      gamma_method_(gamma_method_enum::GAMMA_POWER),
+      gamma_(1.0),
+      common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor)
 {
     setup(m, pixmap);
 }
@@ -83,14 +83,14 @@ agg_renderer<T0, T1>::agg_renderer(Map const& m,
                                    double scale_factor,
                                    unsigned offset_x,
                                    unsigned offset_y)
-    : feature_style_processor<agg_renderer>(m, scale_factor)
-    , buffers_()
-    , internal_buffers_(req.width(), req.height())
-    , inflated_buffer_()
-    , ras_ptr(std::make_unique<rasterizer>())
-    , gamma_method_(gamma_method_enum::GAMMA_POWER)
-    , gamma_(1.0)
-    , common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
+    : feature_style_processor<agg_renderer>(m, scale_factor),
+      buffers_(),
+      internal_buffers_(req.width(), req.height()),
+      inflated_buffer_(),
+      ras_ptr(std::make_unique<rasterizer>()),
+      gamma_method_(gamma_method_enum::GAMMA_POWER),
+      gamma_(1.0),
+      common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
 {
     setup(m, pixmap);
 }
@@ -102,14 +102,14 @@ agg_renderer<T0, T1>::agg_renderer(Map const& m,
                                    double scale_factor,
                                    unsigned offset_x,
                                    unsigned offset_y)
-    : feature_style_processor<agg_renderer>(m, scale_factor)
-    , buffers_()
-    , internal_buffers_(m.width(), m.height())
-    , inflated_buffer_()
-    , ras_ptr(std::make_unique<rasterizer>())
-    , gamma_method_(gamma_method_enum::GAMMA_POWER)
-    , gamma_(1.0)
-    , common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor, detector)
+    : feature_style_processor<agg_renderer>(m, scale_factor),
+      buffers_(),
+      internal_buffers_(m.width(), m.height()),
+      inflated_buffer_(),
+      ras_ptr(std::make_unique<rasterizer>()),
+      gamma_method_(gamma_method_enum::GAMMA_POWER),
+      gamma_(1.0),
+      common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor, detector)
 {
     setup(m, pixmap);
 }
@@ -118,10 +118,10 @@ template<typename buffer_type>
 struct setup_agg_bg_visitor
 {
     setup_agg_bg_visitor(buffer_type& pixmap, renderer_common const& common, composite_mode_e mode, double opacity)
-        : pixmap_(pixmap)
-        , common_(common)
-        , mode_(mode)
-        , opacity_(opacity)
+        : pixmap_(pixmap),
+          common_(common),
+          mode_(mode),
+          opacity_(opacity)
     {}
 
     void operator()(marker_null const&) const {}
@@ -375,15 +375,15 @@ struct agg_render_marker_visitor
                               agg::trans_affine const& tr,
                               double opacity,
                               composite_mode_e comp_op)
-        : common_(common)
-        , current_buffer_(current_buffer)
-        , ras_ptr_(ras_ptr)
-        , gamma_method_(gamma_method)
-        , gamma_(gamma)
-        , pos_(pos)
-        , tr_(tr)
-        , opacity_(opacity)
-        , comp_op_(comp_op)
+        : common_(common),
+          current_buffer_(current_buffer),
+          ras_ptr_(ras_ptr),
+          gamma_method_(gamma_method),
+          gamma_(gamma),
+          pos_(pos),
+          tr_(tr),
+          opacity_(opacity),
+          comp_op_(comp_op)
     {}
 
     void operator()(marker_null const&) const {}

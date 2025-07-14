@@ -62,9 +62,9 @@ struct MAPNIK_DECL rgb
     std::uint8_t b;
 
     inline rgb(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_)
-        : r(r_)
-        , g(g_)
-        , b(b_)
+        : r(r_),
+          g(g_),
+          b(b_)
     {}
     rgb(rgba const& c);
 
@@ -79,24 +79,24 @@ struct MAPNIK_DECL rgba
     std::uint8_t a;
 
     inline rgba(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_, std::uint8_t a_)
-        : r(r_)
-        , g(g_)
-        , b(b_)
-        , a(a_)
+        : r(r_),
+          g(g_),
+          b(b_),
+          a(a_)
     {}
 
     inline rgba(rgb const& c)
-        : r(c.r)
-        , g(c.g)
-        , b(c.b)
-        , a(0xFF)
+        : r(c.r),
+          g(c.g),
+          b(c.b),
+          a(0xFF)
     {}
 
     inline rgba(unsigned const& c)
-        : r(U2RED(c))
-        , g(U2GREEN(c))
-        , b(U2BLUE(c))
-        , a(U2ALPHA(c))
+        : r(U2RED(c)),
+          g(U2GREEN(c)),
+          b(U2BLUE(c)),
+          a(U2ALPHA(c))
     {}
 
     inline bool operator==(rgba const& y) const { return r == y.r && g == y.g && b == y.b && a == y.a; }

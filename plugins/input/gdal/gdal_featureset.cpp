@@ -89,20 +89,20 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  std::optional<double> const& nodata,
                                  double nodata_tolerance,
                                  int64_t max_image_area)
-    : dataset_(dataset)
-    , ctx_(std::make_shared<mapnik::context_type>())
-    , band_(band)
-    , gquery_(q)
-    , raster_extent_(extent)
-    , raster_width_(width)
-    , raster_height_(height)
-    , dx_(dx)
-    , dy_(dy)
-    , nbands_(nbands)
-    , nodata_value_(nodata)
-    , nodata_tolerance_(nodata_tolerance)
-    , max_image_area_(max_image_area)
-    , first_(true)
+    : dataset_(dataset),
+      ctx_(std::make_shared<mapnik::context_type>()),
+      band_(band),
+      gquery_(q),
+      raster_extent_(extent),
+      raster_width_(width),
+      raster_height_(height),
+      dx_(dx),
+      dy_(dy),
+      nbands_(nbands),
+      nodata_value_(nodata),
+      nodata_tolerance_(nodata_tolerance),
+      max_image_area_(max_image_area),
+      first_(true)
 {
     ctx_->push("nodata");
 }

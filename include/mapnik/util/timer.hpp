@@ -33,9 +33,9 @@ class auto_cpu_timer
 {
   public:
     auto_cpu_timer(std::ostream& os, std::string const& message)
-        : start_(std::chrono::system_clock::now())
-        , os_(os)
-        , message_(message)
+        : start_(std::chrono::system_clock::now()),
+          os_(os),
+          message_(message)
     {}
 
     ~auto_cpu_timer()

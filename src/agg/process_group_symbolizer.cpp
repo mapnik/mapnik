@@ -64,11 +64,11 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
                    std::unique_ptr<rasterizer> const& ras_ptr,
                    buffer_type& buf,
                    renderer_common& common)
-        : ren_(ren)
-        , ras_ptr_(ras_ptr)
-        , buf_(buf)
-        , common_(common)
-        , tex_(buf,
+        : ren_(ren),
+          ras_ptr_(ras_ptr),
+          buf_(buf),
+          common_(common),
+          tex_(buf,
                halo_rasterizer_enum::HALO_RASTERIZER_FULL,
                src_over,
                src_over,

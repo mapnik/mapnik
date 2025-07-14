@@ -55,11 +55,11 @@ void gdal_datasource_plugin::before_unload() const
 }
 
 gdal_datasource::gdal_datasource(parameters const& params)
-    : datasource(params)
-    , dataset_(nullptr, &GDALClose)
-    , desc_(gdal_datasource::name(), "utf-8")
-    , nodata_value_(params.get<double>("nodata"))
-    , nodata_tolerance_(*params.get<double>("nodata_tolerance", 1e-12))
+    : datasource(params),
+      dataset_(nullptr, &GDALClose),
+      desc_(gdal_datasource::name(), "utf-8"),
+      nodata_value_(params.get<double>("nodata")),
+      nodata_tolerance_(*params.get<double>("nodata_tolerance", 1e-12))
 {
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Initializing...";
 

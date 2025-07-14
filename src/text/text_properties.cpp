@@ -83,9 +83,9 @@ evaluated_text_properties_ptr evaluate_text_properties(text_symbolizer_propertie
 }
 
 text_symbolizer_properties::text_symbolizer_properties()
-    : layout_defaults()
-    , format_defaults()
-    , tree_()
+    : layout_defaults(),
+      format_defaults(),
+      tree_()
 {}
 
 void text_symbolizer_properties::set_format_tree(formatting::node_ptr tree)
@@ -251,9 +251,9 @@ void text_symbolizer_properties::add_expressions(expression_set& output) const
 }
 
 text_layout_properties::text_layout_properties()
-    : halign(enumeration_wrapper(static_cast<int>(horizontal_alignment_enum::H_AUTO)))
-    , jalign(enumeration_wrapper(static_cast<int>(justify_alignment_enum::J_AUTO)))
-    , valign(enumeration_wrapper(static_cast<int>(vertical_alignment_enum::V_AUTO)))
+    : halign(enumeration_wrapper(static_cast<int>(horizontal_alignment_enum::H_AUTO))),
+      jalign(enumeration_wrapper(static_cast<int>(justify_alignment_enum::J_AUTO))),
+      valign(enumeration_wrapper(static_cast<int>(vertical_alignment_enum::V_AUTO)))
 {}
 
 void text_layout_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
@@ -337,18 +337,18 @@ void text_layout_properties::add_expressions(expression_set& output) const
 
 // text format properties
 format_properties::format_properties()
-    : face_name()
-    , fontset()
-    , text_size(10.0)
-    , character_spacing(0.0)
-    , line_spacing(0.0)
-    , text_opacity(1.0)
-    , halo_opacity(1.0)
-    , fill(color(0, 0, 0))
-    , halo_fill(color(255, 255, 255))
-    , halo_radius(0.0)
-    , text_transform(enumeration_wrapper(static_cast<int>(text_transform_enum::NONE)))
-    , ff_settings()
+    : face_name(),
+      fontset(),
+      text_size(10.0),
+      character_spacing(0.0),
+      line_spacing(0.0),
+      text_opacity(1.0),
+      halo_opacity(1.0),
+      fill(color(0, 0, 0)),
+      halo_fill(color(255, 255, 255)),
+      halo_radius(0.0),
+      text_transform(enumeration_wrapper(static_cast<int>(text_transform_enum::NONE))),
+      ff_settings()
 {}
 
 void format_properties::from_xml(xml_node const& node, fontset_map const& fontsets, bool is_shield)

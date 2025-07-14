@@ -16,8 +16,8 @@ class test : public benchmark::test_case
 
   public:
     test(mapnik::parameters const& params)
-        : test_case(params)
-        , utf8_(from_u8string(u8"שלום"))
+        : test_case(params),
+          utf8_(from_u8string(u8"שלום"))
     {}
     bool validate() const
     {
@@ -49,8 +49,8 @@ class test2 : public benchmark::test_case
 
   public:
     test2(mapnik::parameters const& params)
-        : test_case(params)
-        , utf8_(from_u8string(u8"שלום"))
+        : test_case(params),
+          utf8_(from_u8string(u8"שלום"))
     {}
     bool validate() const
     {
@@ -78,8 +78,8 @@ class test3 : public benchmark::test_case
 
   public:
     test3(mapnik::parameters const& params)
-        : test_case(params)
-        , utf8_(from_u8string(u8"שלום"))
+        : test_case(params),
+          utf8_(from_u8string(u8"שלום"))
     {}
     bool validate() const
     {

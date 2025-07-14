@@ -36,8 +36,8 @@ class svg_storage : util::noncopyable
 {
   public:
     svg_storage()
-        : svg_width_(0)
-        , svg_height_(0)
+        : svg_width_(0),
+          svg_height_(0)
     {}
 
     VertexSource& source() { return source_; }

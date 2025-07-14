@@ -150,8 +150,8 @@ void handle_tiff_options(std::string const& type, tiff_config& config)
 #endif
 
 tiff_saver::tiff_saver(std::ostream& stream, std::string const& t)
-    : stream_(stream)
-    , t_(t)
+    : stream_(stream),
+      t_(t)
 {}
 
 template<>

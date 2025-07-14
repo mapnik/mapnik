@@ -61,13 +61,13 @@ ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const& c
                                                     filterT const& filter,
                                                     std::string const& index_file,
                                                     std::string const& encoding)
-    : ctx_(ctx)
-    , layer_(layer)
-    , layerdef_(layer.GetLayerDefn())
-    , filter_(filter)
-    , tr_(new transcoder(encoding))
-    , fidcolumn_(layer_.GetFIDColumn())
-    , feature_envelope_()
+    : ctx_(ctx),
+      layer_(layer),
+      layerdef_(layer.GetLayerDefn()),
+      filter_(filter),
+      tr_(new transcoder(encoding)),
+      fidcolumn_(layer_.GetFIDColumn()),
+      feature_envelope_()
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     const auto memory = mapnik::mapped_memory_cache::instance().find(index_file, true);

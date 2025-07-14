@@ -67,34 +67,32 @@ using mapnik::sql_utils::literal;
 using std::shared_ptr;
 
 pgraster_datasource::pgraster_datasource(parameters const& params)
-    : datasource(params)
-    , table_(*params.get<std::string>("table", ""))
-    , raster_table_(*params.get<std::string>("raster_table", ""))
-    , raster_field_(*params.get<std::string>("raster_field", ""))
-    , key_field_(*params.get<std::string>("key_field", ""))
-    , cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0))
-    , row_limit_(*params.get<value_integer>("row_limit", 0))
-    , type_(datasource::Raster)
-    , srid_(*params.get<value_integer>("srid", 0))
-    , band_(*params.get<value_integer>("band", 0))
-    , extent_initialized_(false)
-    , prescale_rasters_(*params.get<mapnik::boolean_type>("prescale_rasters", false))
-    , use_overviews_(*params.get<mapnik::boolean_type>("use_overviews", false))
-    , clip_rasters_(*params.get<mapnik::boolean_type>("clip_rasters", false))
-    , desc_(*params.get<std::string>("type"), "utf-8")
-    , creator_(params)
-    , re_tokens_("!(@?\\w+)!")
-    , // matches  !mapnik_var!  or  !@user_var!
-    pool_max_size_(*params_.get<value_integer>("max_size", 10))
-    , persist_connection_(*params.get<mapnik::boolean_type>("persist_connection", true))
-    , extent_from_subquery_(*params.get<mapnik::boolean_type>("extent_from_subquery", false))
-    , estimate_extent_(*params.get<mapnik::boolean_type>("estimate_extent", false))
-    , max_async_connections_(*params_.get<value_integer>("max_async_connection", 1))
-    , asynchronous_request_(false)
-    ,
-    // params below are for testing purposes only and may be removed at any time
-    intersect_min_scale_(*params.get<value_integer>("intersect_min_scale", 0))
-    , intersect_max_scale_(*params.get<value_integer>("intersect_max_scale", 0))
+    : datasource(params),
+      table_(*params.get<std::string>("table", "")),
+      raster_table_(*params.get<std::string>("raster_table", "")),
+      raster_field_(*params.get<std::string>("raster_field", "")),
+      key_field_(*params.get<std::string>("key_field", "")),
+      cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0)),
+      row_limit_(*params.get<value_integer>("row_limit", 0)),
+      type_(datasource::Raster),
+      srid_(*params.get<value_integer>("srid", 0)),
+      band_(*params.get<value_integer>("band", 0)),
+      extent_initialized_(false),
+      prescale_rasters_(*params.get<mapnik::boolean_type>("prescale_rasters", false)),
+      use_overviews_(*params.get<mapnik::boolean_type>("use_overviews", false)),
+      clip_rasters_(*params.get<mapnik::boolean_type>("clip_rasters", false)),
+      desc_(*params.get<std::string>("type"), "utf-8"),
+      creator_(params),
+      re_tokens_("!(@?\\w+)!"), // matches  !mapnik_var!  or  !@user_var!
+      pool_max_size_(*params_.get<value_integer>("max_size", 10)),
+      persist_connection_(*params.get<mapnik::boolean_type>("persist_connection", true)),
+      extent_from_subquery_(*params.get<mapnik::boolean_type>("extent_from_subquery", false)),
+      estimate_extent_(*params.get<mapnik::boolean_type>("estimate_extent", false)),
+      max_async_connections_(*params_.get<value_integer>("max_async_connection", 1)),
+      asynchronous_request_(false),
+      // params below are for testing purposes only and may be removed at any time
+      intersect_min_scale_(*params.get<value_integer>("intersect_min_scale", 0)),
+      intersect_max_scale_(*params.get<value_integer>("intersect_max_scale", 0))
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "pgraster_datasource::init");

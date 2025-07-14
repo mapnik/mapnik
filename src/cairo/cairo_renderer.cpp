@@ -54,12 +54,12 @@ cairo_renderer<T>::cairo_renderer(Map const& m,
                                   double scale_factor,
                                   unsigned offset_x,
                                   unsigned offset_y)
-    : feature_style_processor<cairo_renderer>(m, scale_factor)
-    , m_(m)
-    , context_(cairo)
-    , common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor)
-    , face_manager_(common_.shared_font_library_)
-    , style_level_compositing_(false)
+    : feature_style_processor<cairo_renderer>(m, scale_factor),
+      m_(m),
+      context_(cairo),
+      common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor),
+      face_manager_(common_.shared_font_library_),
+      style_level_compositing_(false)
 {
     setup(m);
 }
@@ -72,12 +72,12 @@ cairo_renderer<T>::cairo_renderer(Map const& m,
                                   double scale_factor,
                                   unsigned offset_x,
                                   unsigned offset_y)
-    : feature_style_processor<cairo_renderer>(m, scale_factor)
-    , m_(m)
-    , context_(cairo)
-    , common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
-    , face_manager_(common_.shared_font_library_)
-    , style_level_compositing_(false)
+    : feature_style_processor<cairo_renderer>(m, scale_factor),
+      m_(m),
+      context_(cairo),
+      common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor),
+      face_manager_(common_.shared_font_library_),
+      style_level_compositing_(false)
 
 {
     setup(m);
@@ -90,12 +90,12 @@ cairo_renderer<T>::cairo_renderer(Map const& m,
                                   double scale_factor,
                                   unsigned offset_x,
                                   unsigned offset_y)
-    : feature_style_processor<cairo_renderer>(m, scale_factor)
-    , m_(m)
-    , context_(cairo)
-    , common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor, detector)
-    , face_manager_(common_.shared_font_library_)
-    , style_level_compositing_(false)
+    : feature_style_processor<cairo_renderer>(m, scale_factor),
+      m_(m),
+      context_(cairo),
+      common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor, detector),
+      face_manager_(common_.shared_font_library_),
+      style_level_compositing_(false)
 
 {
     setup(m);
@@ -108,8 +108,8 @@ cairo_renderer<T>::~cairo_renderer()
 struct setup_marker_visitor
 {
     setup_marker_visitor(cairo_context& context, renderer_common const& common)
-        : context_(context)
-        , common_(common)
+        : context_(context),
+          common_(common)
     {}
 
     void operator()(marker_null const&) const {}
@@ -245,12 +245,12 @@ struct cairo_render_marker_visitor
                                 agg::trans_affine const& tr,
                                 double opacity,
                                 bool recenter)
-        : context_(context)
-        , common_(common)
-        , pos_(pos)
-        , tr_(tr)
-        , opacity_(opacity)
-        , recenter_(recenter)
+        : context_(context),
+          common_(common),
+          pos_(pos),
+          tr_(tr),
+          opacity_(opacity),
+          recenter_(recenter)
     {}
 
     void operator()(marker_null const&) {}

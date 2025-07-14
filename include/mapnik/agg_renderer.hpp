@@ -68,10 +68,10 @@ class buffer_stack
 {
   public:
     buffer_stack(std::size_t width, std::size_t height)
-        : width_(width)
-        , height_(height)
-        , buffers_()
-        , position_(buffers_.begin())
+        : width_(width),
+          height_(height),
+          buffers_(),
+          position_(buffers_.begin())
     {}
 
     T& push()

@@ -136,13 +136,13 @@ template<typename Tag>
 struct binary_node
 {
     binary_node(expr_node&& a, expr_node&& b)
-        : left(std::move(a))
-        , right(std::move(b))
+        : left(std::move(a)),
+          right(std::move(b))
     {}
 
     binary_node(expr_node const& a, expr_node const& b)
-        : left(a)
-        , right(b)
+        : left(a),
+          right(b)
     {}
 
     static const char* type() { return Tag::str(); }
@@ -154,8 +154,8 @@ struct unary_function_call
     using argument_type = expr_node;
     unary_function_call() = default;
     unary_function_call(unary_function_impl _fun, argument_type const& _arg)
-        : fun(_fun)
-        , arg(_arg)
+        : fun(_fun),
+          arg(_arg)
     {}
 
     unary_function_impl fun;
@@ -167,9 +167,9 @@ struct binary_function_call
     using argument_type = expr_node;
     binary_function_call() = default;
     binary_function_call(binary_function_impl _fun, argument_type const& _arg1, argument_type const& _arg2)
-        : fun(_fun)
-        , arg1(_arg1)
-        , arg2(_arg2)
+        : fun(_fun),
+          arg1(_arg1),
+          arg2(_arg2)
     {}
     binary_function_impl fun;
     argument_type arg1;

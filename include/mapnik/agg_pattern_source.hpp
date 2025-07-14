@@ -39,8 +39,8 @@ class pattern_source : private util::noncopyable
 {
   public:
     pattern_source(image_rgba8 const& pattern, double opacity = 1.0)
-        : pattern_(pattern)
-        , opacity_(opacity)
+        : pattern_(pattern),
+          opacity_(opacity)
     {}
 
     unsigned int width() const { return pattern_.width(); }

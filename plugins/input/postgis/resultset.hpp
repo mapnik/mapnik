@@ -50,8 +50,8 @@ class ResultSet : public IResultSet,
 {
   public:
     ResultSet(PGresult* res)
-        : res_(res)
-        , pos_(-1)
+        : res_(res),
+          pos_(-1)
     {
         numTuples_ = PQntuples(res_);
     }

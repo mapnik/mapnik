@@ -44,13 +44,13 @@ class ConnectionCreator
 {
   public:
     ConnectionCreator(mapnik::parameters const& params)
-        : host_{params.get<std::string>("host")}
-        , port_{params.get<std::string>("port")}
-        , dbname_{params.get<std::string>("dbname")}
-        , user_{params.get<std::string>("user")}
-        , password_{params.get<std::string>("password")}
-        , connect_timeout_{params.get<std::string>("connect_timeout", "4")}
-        , application_name_{params.get<std::string>("application_name")}
+        : host_{params.get<std::string>("host")},
+          port_{params.get<std::string>("port")},
+          dbname_{params.get<std::string>("dbname")},
+          user_{params.get<std::string>("user")},
+          password_{params.get<std::string>("password")},
+          connect_timeout_{params.get<std::string>("connect_timeout", "4")},
+          application_name_{params.get<std::string>("application_name")}
     {}
 
     T* operator()() const { return new T(connection_string_safe(), password_); }

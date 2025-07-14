@@ -31,60 +31,60 @@
 namespace mapnik {
 
 layer::layer(std::string const& _name, std::string const& _srs)
-    : name_(_name)
-    , srs_(_srs)
-    , minimum_scale_denom_(0)
-    , maximum_scale_denom_(std::numeric_limits<double>::max())
-    , active_(true)
-    , queryable_(false)
-    , clear_label_cache_(false)
-    , cache_features_(false)
-    , group_by_()
-    , styles_()
-    , layers_()
-    , ds_()
-    , buffer_size_()
-    , maximum_extent_()
-    , comp_op_()
-    , opacity_(1.0f)
+    : name_(_name),
+      srs_(_srs),
+      minimum_scale_denom_(0),
+      maximum_scale_denom_(std::numeric_limits<double>::max()),
+      active_(true),
+      queryable_(false),
+      clear_label_cache_(false),
+      cache_features_(false),
+      group_by_(),
+      styles_(),
+      layers_(),
+      ds_(),
+      buffer_size_(),
+      maximum_extent_(),
+      comp_op_(),
+      opacity_(1.0f)
 {}
 
 layer::layer(layer const& rhs)
-    : name_(rhs.name_)
-    , srs_(rhs.srs_)
-    , minimum_scale_denom_(rhs.minimum_scale_denom_)
-    , maximum_scale_denom_(rhs.maximum_scale_denom_)
-    , active_(rhs.active_)
-    , queryable_(rhs.queryable_)
-    , clear_label_cache_(rhs.clear_label_cache_)
-    , cache_features_(rhs.cache_features_)
-    , group_by_(rhs.group_by_)
-    , styles_(rhs.styles_)
-    , layers_(rhs.layers_)
-    , ds_(rhs.ds_)
-    , buffer_size_(rhs.buffer_size_)
-    , maximum_extent_(rhs.maximum_extent_)
-    , comp_op_(rhs.comp_op_)
-    , opacity_(rhs.opacity_)
+    : name_(rhs.name_),
+      srs_(rhs.srs_),
+      minimum_scale_denom_(rhs.minimum_scale_denom_),
+      maximum_scale_denom_(rhs.maximum_scale_denom_),
+      active_(rhs.active_),
+      queryable_(rhs.queryable_),
+      clear_label_cache_(rhs.clear_label_cache_),
+      cache_features_(rhs.cache_features_),
+      group_by_(rhs.group_by_),
+      styles_(rhs.styles_),
+      layers_(rhs.layers_),
+      ds_(rhs.ds_),
+      buffer_size_(rhs.buffer_size_),
+      maximum_extent_(rhs.maximum_extent_),
+      comp_op_(rhs.comp_op_),
+      opacity_(rhs.opacity_)
 {}
 
 layer::layer(layer&& rhs)
-    : name_(std::move(rhs.name_))
-    , srs_(std::move(rhs.srs_))
-    , minimum_scale_denom_(std::move(rhs.minimum_scale_denom_))
-    , maximum_scale_denom_(std::move(rhs.maximum_scale_denom_))
-    , active_(std::move(rhs.active_))
-    , queryable_(std::move(rhs.queryable_))
-    , clear_label_cache_(std::move(rhs.clear_label_cache_))
-    , cache_features_(std::move(rhs.cache_features_))
-    , group_by_(std::move(rhs.group_by_))
-    , styles_(std::move(rhs.styles_))
-    , layers_(std::move(rhs.layers_))
-    , ds_(std::move(rhs.ds_))
-    , buffer_size_(std::move(rhs.buffer_size_))
-    , maximum_extent_(std::move(rhs.maximum_extent_))
-    , comp_op_(std::move(rhs.comp_op_))
-    , opacity_(std::move(rhs.opacity_))
+    : name_(std::move(rhs.name_)),
+      srs_(std::move(rhs.srs_)),
+      minimum_scale_denom_(std::move(rhs.minimum_scale_denom_)),
+      maximum_scale_denom_(std::move(rhs.maximum_scale_denom_)),
+      active_(std::move(rhs.active_)),
+      queryable_(std::move(rhs.queryable_)),
+      clear_label_cache_(std::move(rhs.clear_label_cache_)),
+      cache_features_(std::move(rhs.cache_features_)),
+      group_by_(std::move(rhs.group_by_)),
+      styles_(std::move(rhs.styles_)),
+      layers_(std::move(rhs.layers_)),
+      ds_(std::move(rhs.ds_)),
+      buffer_size_(std::move(rhs.buffer_size_)),
+      maximum_extent_(std::move(rhs.maximum_extent_)),
+      comp_op_(std::move(rhs.comp_op_)),
+      opacity_(std::move(rhs.opacity_))
 {}
 
 layer& layer::operator=(layer rhs)

@@ -35,9 +35,9 @@ class char_array_buffer : public std::streambuf
 {
   public:
     char_array_buffer(char const* data, std::size_t size)
-        : begin_(data)
-        , end_(data + size)
-        , current_(data)
+        : begin_(data),
+          end_(data + size),
+          current_(data)
     {}
 
   private:

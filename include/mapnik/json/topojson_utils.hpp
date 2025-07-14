@@ -38,8 +38,8 @@ namespace topojson {
 struct bounding_box_visitor
 {
     bounding_box_visitor(topology const& topo)
-        : topo_(topo)
-        , num_arcs_(topo_.arcs.size())
+        : topo_(topo),
+          num_arcs_(topo_.arcs.size())
     {}
 
     box2d<double> operator()(mapnik::topojson::empty const&) const { return box2d<double>(); }
@@ -277,11 +277,11 @@ template<typename Context>
 struct feature_generator
 {
     feature_generator(Context& ctx, mapnik::transcoder const& tr, topology const& topo, std::size_t feature_id)
-        : ctx_(ctx)
-        , tr_(tr)
-        , topo_(topo)
-        , num_arcs_(topo.arcs.size())
-        , feature_id_(feature_id)
+        : ctx_(ctx),
+          tr_(tr),
+          topo_(topo),
+          num_arcs_(topo.arcs.size()),
+          feature_id_(feature_id)
     {}
 
     feature_ptr operator()(point const& pt) const

@@ -333,8 +333,8 @@ struct extract_value
     using result_type = T;
 
     extract_value(mapnik::feature_impl const& feature, mapnik::attributes const& v)
-        : feature_(feature)
-        , vars_(v)
+        : feature_(feature),
+          vars_(v)
     {}
 
     auto operator()(mapnik::expression_ptr const& expr) const -> result_type

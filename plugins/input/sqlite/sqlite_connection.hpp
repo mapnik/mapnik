@@ -52,8 +52,8 @@ class sqlite_connection
   public:
 
     sqlite_connection(std::string const& file)
-        : db_(0)
-        , file_(file)
+        : db_(0),
+          file_(file)
     {
 #if SQLITE_VERSION_NUMBER >= 3005000
         int mode = SQLITE_OPEN_READWRITE;
@@ -82,8 +82,8 @@ class sqlite_connection
     }
 
     sqlite_connection(std::string const& file, int flags)
-        : db_(0)
-        , file_(file)
+        : db_(0),
+          file_(file)
     {
 #if SQLITE_VERSION_NUMBER >= 3005000
         const int rc = sqlite3_open_v2(file_.c_str(), &db_, flags, 0);

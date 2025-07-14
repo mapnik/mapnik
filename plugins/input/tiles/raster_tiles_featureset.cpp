@@ -55,14 +55,14 @@ raster_tiles_featureset::raster_tiles_featureset(std::shared_ptr<mapnik::tiles_s
                                                  std::unordered_map<std::string, std::string>& vector_tile_cache,
                                                  std::size_t datasource_hash,
                                                  double filter_factor)
-    : source_ptr_(source_ptr)
-    , context_(ctx)
-    , zoom_(zoom)
-    , extent_(extent)
-    , layer_(layer)
-    , vector_tile_cache_(vector_tile_cache)
-    , datasource_hash_(datasource_hash)
-    , filter_factor_(filter_factor)
+    : source_ptr_(source_ptr),
+      context_(ctx),
+      zoom_(zoom),
+      extent_(extent),
+      layer_(layer),
+      vector_tile_cache_(vector_tile_cache),
+      datasource_hash_(datasource_hash),
+      filter_factor_(filter_factor)
 {
     int tile_count = 1 << zoom;
     xmin_ =

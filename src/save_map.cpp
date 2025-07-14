@@ -135,9 +135,9 @@ class serialize_symbolizer_property
 {
   public:
     serialize_symbolizer_property(Meta const& meta, boost::property_tree::ptree& node, bool explicit_defaults)
-        : meta_(meta)
-        , node_(node)
-        , explicit_defaults_(explicit_defaults)
+        : meta_(meta),
+          node_(node),
+          explicit_defaults_(explicit_defaults)
     {}
 
     void operator()(mapnik::enumeration_wrapper const& e) const
@@ -225,8 +225,8 @@ class serialize_symbolizer
 {
   public:
     serialize_symbolizer(ptree& r, bool explicit_defaults)
-        : rule_(r)
-        , explicit_defaults_(explicit_defaults)
+        : rule_(r),
+          explicit_defaults_(explicit_defaults)
     {}
 
     template<typename Symbolizer>
@@ -255,8 +255,8 @@ class serialize_group_layout
 {
   public:
     serialize_group_layout(ptree& parent_node, bool explicit_defaults)
-        : parent_node_(parent_node)
-        , explicit_defaults_(explicit_defaults)
+        : parent_node_(parent_node),
+          explicit_defaults_(explicit_defaults)
     {}
 
     void operator()(simple_row_layout const& layout) const

@@ -72,9 +72,9 @@ inline void reverse_bytes(char size, char* address)
 struct wkb_stream
 {
     wkb_stream(char* buffer, std::size_t size)
-        : buffer_(buffer)
-        , size_(size)
-        , pos_(0)
+        : buffer_(buffer),
+          size_(size),
+          pos_(0)
     {}
 
     void write(char const* data, std::size_t size)
@@ -105,8 +105,8 @@ inline void write(S& stream, T val, std::size_t size, wkbByteOrder byte_order)
 struct wkb_buffer
 {
     wkb_buffer(std::size_t size)
-        : size_(size)
-        , data_((size_ != 0) ? static_cast<char*>(::operator new(size_)) : 0)
+        : size_(size),
+          data_((size_ != 0) ? static_cast<char*>(::operator new(size_)) : 0)
     {}
 
     ~wkb_buffer() { ::operator delete(data_); }

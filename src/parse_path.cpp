@@ -55,8 +55,8 @@ namespace path_processor_detail {
 struct path_visitor_
 {
     path_visitor_(std::string& filename, feature_impl const& f)
-        : filename_(filename)
-        , feature_(f)
+        : filename_(filename),
+          feature_(f)
     {}
 
     void operator()(std::string const& token) const { filename_ += token; }

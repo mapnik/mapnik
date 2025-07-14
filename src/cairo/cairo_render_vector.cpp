@@ -38,10 +38,10 @@ struct group_renderer
                    cairo_context& context,
                    svg_path_adapter& svg_path,
                    box2d<double> const& bbox)
-        : transform_(transform)
-        , context_(context)
-        , svg_path_(svg_path)
-        , bbox_(bbox)
+        : transform_(transform),
+          context_(context),
+          svg_path_(svg_path),
+          bbox_(bbox)
     {}
 
     void operator()(svg::group const& g) const

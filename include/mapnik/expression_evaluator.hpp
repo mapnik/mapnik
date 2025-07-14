@@ -41,8 +41,8 @@ struct evaluate
     using variable_type = T2;
     using result_type = T1; //  we need this because automatic result_type deduction fails
     explicit evaluate(feature_type const& f, variable_type const& v)
-        : feature_(f)
-        , vars_(v)
+        : feature_(f),
+          vars_(v)
     {}
 
     value_type operator()(value_integer val) const { return val; }

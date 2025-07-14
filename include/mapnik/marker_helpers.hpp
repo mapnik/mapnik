@@ -65,12 +65,12 @@ struct vector_markers_dispatch : util::noncopyable
                             attributes const& vars,
                             bool snap_to_pixels,
                             markers_renderer_context& renderer_context)
-        : params_(src->bounding_box(), recenter(src) * marker_trans, sym, feature, vars, scale_factor, snap_to_pixels)
-        , renderer_context_(renderer_context)
-        , src_(src)
-        , path_(path)
-        , group_attrs_(group_attrs)
-        , detector_(detector)
+        : params_(src->bounding_box(), recenter(src) * marker_trans, sym, feature, vars, scale_factor, snap_to_pixels),
+          renderer_context_(renderer_context),
+          src_(src),
+          path_(path),
+          group_attrs_(group_attrs),
+          detector_(detector)
     {}
 
     template<typename T>
@@ -116,10 +116,10 @@ struct raster_markers_dispatch : util::noncopyable
                             feature_impl const& feature,
                             attributes const& vars,
                             markers_renderer_context& renderer_context)
-        : params_(box2d<double>(0, 0, src.width(), src.height()), marker_trans, sym, feature, vars, scale_factor)
-        , renderer_context_(renderer_context)
-        , src_(src)
-        , detector_(detector)
+        : params_(box2d<double>(0, 0, src.width(), src.height()), marker_trans, sym, feature, vars, scale_factor),
+          renderer_context_(renderer_context),
+          src_(src),
+          detector_(detector)
     {}
 
     template<typename T>

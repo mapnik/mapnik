@@ -42,8 +42,8 @@ struct thunk_markers_renderer_context : markers_renderer_context
                                    feature_impl const& feature,
                                    attributes const& vars,
                                    render_thunk_list& thunks)
-        : comp_op_(get<composite_mode_e, keys::comp_op>(sym, feature, vars))
-        , thunks_(thunks)
+        : comp_op_(get<composite_mode_e, keys::comp_op>(sym, feature, vars)),
+          thunks_(thunks)
     {}
 
     virtual void render_marker(svg_path_ptr const& src,
@@ -77,13 +77,13 @@ render_thunk_extractor::render_thunk_extractor(box2d<double>& box,
                                                proj_transform const& prj_trans,
                                                virtual_renderer_common& common,
                                                box2d<double> const& clipping_extent)
-    : box_(box)
-    , thunks_(thunks)
-    , feature_(feature)
-    , vars_(vars)
-    , prj_trans_(prj_trans)
-    , common_(common)
-    , clipping_extent_(clipping_extent)
+    : box_(box),
+      thunks_(thunks),
+      feature_(feature),
+      vars_(vars),
+      prj_trans_(prj_trans),
+      common_(common),
+      clipping_extent_(clipping_extent)
 {}
 
 void render_thunk_extractor::operator()(markers_symbolizer const& sym) const

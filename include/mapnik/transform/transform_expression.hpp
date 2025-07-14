@@ -61,12 +61,12 @@ struct matrix_node
 
     template<typename T>
     explicit matrix_node(T const& m)
-        : a_(m.sx)
-        , b_(m.shy)
-        , c_(m.shx)
-        , d_(m.sy)
-        , e_(m.tx)
-        , f_(m.ty)
+        : a_(m.sx),
+          b_(m.shy),
+          c_(m.shx),
+          d_(m.sy),
+          e_(m.tx),
+          f_(m.ty)
     {}
 
     matrix_node(expr_node const& a,
@@ -75,12 +75,12 @@ struct matrix_node
                 expr_node const& d,
                 expr_node const& e,
                 expr_node const& f)
-        : a_(a)
-        , b_(b)
-        , c_(c)
-        , d_(d)
-        , e_(e)
-        , f_(f)
+        : a_(a),
+          b_(b),
+          c_(c),
+          d_(d),
+          e_(e),
+          f_(f)
     {}
 };
 
@@ -92,8 +92,8 @@ struct translate_node
     translate_node() = default;
 
     translate_node(expr_node const& tx, boost::optional<expr_node> const& ty)
-        : tx_(tx)
-        , ty_(ty ? expr_node(*ty) : value_null())
+        : tx_(tx),
+          ty_(ty ? expr_node(*ty) : value_null())
     {}
 };
 
@@ -105,8 +105,8 @@ struct scale_node
     scale_node() = default;
 
     scale_node(expr_node const& sx, boost::optional<expr_node> const& sy)
-        : sx_(sx)
-        , sy_(sy ? expr_node(*sy) : value_null())
+        : sx_(sx),
+          sy_(sy ? expr_node(*sy) : value_null())
     {}
 };
 
@@ -125,15 +125,15 @@ struct rotate_node
     {}
 
     rotate_node(expr_node const& angle, expr_node const& cx, expr_node const& cy)
-        : angle_(angle)
-        , cx_(cx)
-        , cy_(cy)
+        : angle_(angle),
+          cx_(cx),
+          cy_(cy)
     {}
 
     rotate_node(expr_node const& angle, boost::optional<expr_node> const& cx, boost::optional<expr_node> const& cy)
-        : angle_(angle)
-        , cx_(cx ? expr_node(*cx) : value_null())
-        , cy_(cy ? expr_node(*cy) : value_null())
+        : angle_(angle),
+          cx_(cx ? expr_node(*cx) : value_null()),
+          cy_(cy ? expr_node(*cy) : value_null())
     {}
 
     rotate_node(expr_node const& angle, boost::optional<coords_type> const& center)

@@ -57,15 +57,15 @@ struct transform_path_adapter
     using value_type = typename select_value_type<Geometry, void>::type;
 
     transform_path_adapter(Transform const& _t, Geometry& _geom, proj_transform const& prj_trans)
-        : t_(&_t)
-        , geom_(_geom)
-        , prj_trans_(&prj_trans)
+        : t_(&_t),
+          geom_(_geom),
+          prj_trans_(&prj_trans)
     {}
 
     explicit transform_path_adapter(Geometry& _geom)
-        : t_(0)
-        , geom_(_geom)
-        , prj_trans_(0)
+        : t_(0),
+          geom_(_geom),
+          prj_trans_(0)
     {}
 
     void set_proj_trans(proj_transform const& prj_trans) { prj_trans_ = &prj_trans; }

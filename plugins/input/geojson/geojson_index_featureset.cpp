@@ -41,13 +41,11 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename,
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 //
 #elif defined(_WIN32)
-    file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
-    ,
+      file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
 #else
-    file_(std::fopen(filename.c_str(), "rb"), std::fclose)
-    ,
+      file_(std::fopen(filename.c_str(), "rb"), std::fclose),
 #endif
-    ctx_(std::make_shared<mapnik::context_type>())
+      ctx_(std::make_shared<mapnik::context_type>())
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     const auto memory = mapnik::mapped_memory_cache::instance().find(filename, true);

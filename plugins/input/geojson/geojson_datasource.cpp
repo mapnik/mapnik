@@ -90,15 +90,15 @@ struct attr_value_converter
 };
 
 geojson_datasource::geojson_datasource(parameters const& params)
-    : datasource(params)
-    , type_(datasource::Vector)
-    , desc_(geojson_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
-    , filename_()
-    , from_inline_string_(false)
-    , extent_()
-    , features_()
-    , tree_(nullptr)
-    , num_features_to_query_(
+    : datasource(params),
+      type_(datasource::Vector),
+      desc_(geojson_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
+      filename_(),
+      from_inline_string_(false),
+      extent_(),
+      features_(),
+      tree_(nullptr),
+      num_features_to_query_(
         std::max(mapnik::value_integer(1), *params.get<mapnik::value_integer>("num_features_to_query", 5)))
 {
     const auto inline_string = params.get<std::string>("inline");

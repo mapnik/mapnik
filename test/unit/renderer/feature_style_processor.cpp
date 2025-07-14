@@ -33,10 +33,10 @@ class test_renderer : public mapnik::feature_style_processor<test_renderer>
     using processor_impl_type = test_renderer;
 
     test_renderer(mapnik::Map const& map, rendering_result& result)
-        : mapnik::feature_style_processor<test_renderer>(map)
-        , result_(result)
-        , painted_(false)
-        , vars_()
+        : mapnik::feature_style_processor<test_renderer>(map),
+          result_(result),
+          painted_(false),
+          vars_()
     {}
 
     void start_map_processing(mapnik::Map const& map) { result_.start_map_processing++; }

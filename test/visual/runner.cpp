@@ -53,15 +53,15 @@ class renderer_visitor
                      std::size_t iterations,
                      bool is_fail_limit,
                      std::atomic<std::size_t>& fail_count)
-        : name_(name)
-        , map_(map)
-        , tiles_(tiles)
-        , scale_factor_(scale_factor)
-        , results_(results)
-        , report_(report)
-        , iterations_(iterations)
-        , is_fail_limit_(is_fail_limit)
-        , fail_count_(fail_count)
+        : name_(name),
+          map_(map),
+          tiles_(tiles),
+          scale_factor_(scale_factor),
+          results_(results),
+          report_(report),
+          iterations_(iterations),
+          is_fail_limit_(is_fail_limit),
+          fail_count_(fail_count)
     {}
 
     template<typename T, typename std::enable_if<T::renderer_type::support_tiles>::type* = nullptr>
@@ -139,12 +139,12 @@ runner::runner(runner::path_type const& styles_dir,
                std::size_t fail_limit,
                std::size_t jobs,
                runner::renderer_container const& renderers)
-    : styles_dir_(styles_dir)
-    , defaults_(defaults)
-    , jobs_(jobs)
-    , iterations_(iterations)
-    , fail_limit_(fail_limit)
-    , renderers_(renderers)
+    : styles_dir_(styles_dir),
+      defaults_(defaults),
+      jobs_(jobs),
+      iterations_(iterations),
+      fail_limit_(fail_limit),
+      renderers_(renderers)
 {}
 
 result_list runner::test_all(report_type& report) const

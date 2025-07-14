@@ -16,8 +16,8 @@ class test_datasource : public mapnik::memory_datasource
 {
   public:
     test_datasource(mapnik::box2d<double> const& expected_query_bbox)
-        : mapnik::memory_datasource(prepare_params())
-        , expected_query_bbox_(expected_query_bbox)
+        : mapnik::memory_datasource(prepare_params()),
+          expected_query_bbox_(expected_query_bbox)
     {}
 
     virtual mapnik::featureset_ptr features(mapnik::query const& q) const

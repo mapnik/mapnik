@@ -37,33 +37,33 @@ constexpr detail::EnumMapT<filter_mode_enum, 3> filter_mode_e_map{{
 IMPLEMENT_ENUM(filter_mode_e, filter_mode_enum);
 
 feature_type_style::feature_type_style()
-    : rules_()
-    , filter_mode_(filter_mode_enum::FILTER_ALL)
-    , filters_()
-    , direct_filters_()
-    , comp_op_()
-    , opacity_(1.0f)
-    , image_filters_inflate_(false)
+    : rules_(),
+      filter_mode_(filter_mode_enum::FILTER_ALL),
+      filters_(),
+      direct_filters_(),
+      comp_op_(),
+      opacity_(1.0f),
+      image_filters_inflate_(false)
 {}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs)
-    : rules_(rhs.rules_)
-    , filter_mode_(rhs.filter_mode_)
-    , filters_(rhs.filters_)
-    , direct_filters_(rhs.direct_filters_)
-    , comp_op_(rhs.comp_op_)
-    , opacity_(rhs.opacity_)
-    , image_filters_inflate_(rhs.image_filters_inflate_)
+    : rules_(rhs.rules_),
+      filter_mode_(rhs.filter_mode_),
+      filters_(rhs.filters_),
+      direct_filters_(rhs.direct_filters_),
+      comp_op_(rhs.comp_op_),
+      opacity_(rhs.opacity_),
+      image_filters_inflate_(rhs.image_filters_inflate_)
 {}
 
 feature_type_style::feature_type_style(feature_type_style&& rhs)
-    : rules_(std::move(rhs.rules_))
-    , filter_mode_(std::move(rhs.filter_mode_))
-    , filters_(std::move(rhs.filters_))
-    , direct_filters_(std::move(rhs.direct_filters_))
-    , comp_op_(std::move(rhs.comp_op_))
-    , opacity_(std::move(rhs.opacity_))
-    , image_filters_inflate_(std::move(rhs.image_filters_inflate_))
+    : rules_(std::move(rhs.rules_)),
+      filter_mode_(std::move(rhs.filter_mode_)),
+      filters_(std::move(rhs.filters_)),
+      direct_filters_(std::move(rhs.direct_filters_)),
+      comp_op_(std::move(rhs.comp_op_)),
+      opacity_(std::move(rhs.opacity_)),
+      image_filters_inflate_(std::move(rhs.image_filters_inflate_))
 {}
 
 feature_type_style& feature_type_style::operator=(feature_type_style rhs)

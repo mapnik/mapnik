@@ -79,10 +79,10 @@ struct wkb_reader : util::noncopyable
     };
 
     wkb_reader(const char* wkb, std::size_t size, wkbFormat format)
-        : wkb_(wkb)
-        , size_(size)
-        , pos_(0)
-        , format_(format)
+        : wkb_(wkb),
+          size_(size),
+          pos_(0),
+          format_(format)
     {
         // try to determine WKB format automatically
         if (format_ == wkbAuto)

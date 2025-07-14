@@ -77,8 +77,8 @@ std::ostream& operator<<(std::ostream& os, agg::trans_affine const& tr)
 struct group_attribute_visitor
 {
     group_attribute_visitor(std::stringstream& ss, unsigned padding)
-        : ss_(ss)
-        , padding_(padding)
+        : ss_(ss),
+          padding_(padding)
     {}
 
     void operator()(mapnik::svg::group const& g) const
@@ -159,10 +159,10 @@ struct test_parser
     mapnik::svg::svg_parser p;
 
     explicit test_parser(bool strict = false)
-        : stl_storage(path.source())
-        , svg_path(stl_storage)
-        , svg(svg_path, path.svg_group())
-        , p(svg, strict)
+        : stl_storage(path.source()),
+          svg_path(stl_storage),
+          svg(svg_path, path.svg_group()),
+          p(svg, strict)
     {}
 
     mapnik::svg::svg_parser* operator->() { return &p; }

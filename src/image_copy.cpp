@@ -60,8 +60,8 @@ struct visitor_image_copy_so
     using dst_type = typename T0::pixel_type;
 
     visitor_image_copy_so(double offset, double scaling)
-        : offset_(offset)
-        , scaling_(scaling)
+        : offset_(offset),
+          scaling_(scaling)
     {}
 
     T0 operator()(image_null const&) { throw std::runtime_error("Can not cast a null image"); }

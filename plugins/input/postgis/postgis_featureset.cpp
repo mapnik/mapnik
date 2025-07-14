@@ -51,14 +51,14 @@ postgis_featureset::postgis_featureset(std::shared_ptr<IResultSet> const& rs,
                                        bool key_field,
                                        bool key_field_as_attribute,
                                        bool twkb_encoding)
-    : rs_(rs)
-    , ctx_(ctx)
-    , tr_(new transcoder(encoding))
-    , totalGeomSize_(0)
-    , feature_id_(1)
-    , key_field_(key_field)
-    , key_field_as_attribute_(key_field_as_attribute)
-    , twkb_encoding_(twkb_encoding)
+    : rs_(rs),
+      ctx_(ctx),
+      tr_(new transcoder(encoding)),
+      totalGeomSize_(0),
+      feature_id_(1),
+      key_field_(key_field),
+      key_field_as_attribute_(key_field_as_attribute),
+      twkb_encoding_(twkb_encoding)
 {}
 
 feature_ptr postgis_featureset::next()

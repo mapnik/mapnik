@@ -93,8 +93,8 @@ class group_attribute_collector : public util::noncopyable
 
   public:
     group_attribute_collector(std::set<std::string>& names, bool expand_index_columns)
-        : names_(names)
-        , expand_index_columns_(expand_index_columns)
+        : names_(names),
+          expand_index_columns_(expand_index_columns)
     {}
 
     void operator()(group_symbolizer const& sym);
@@ -104,8 +104,8 @@ template<typename Container>
 struct extract_attribute_names
 {
     explicit extract_attribute_names(Container& names)
-        : names_(names)
-        , f_attr_(names)
+        : names_(names),
+          f_attr_(names)
     {}
 
     void operator()(mapnik::expression_ptr const& expr) const
@@ -159,9 +159,9 @@ struct extract_attribute_names
 struct symbolizer_attributes
 {
     symbolizer_attributes(std::set<std::string>& names, double& filter_factor)
-        : filter_factor_(filter_factor)
-        , f_attrs_(names)
-        , g_attrs_(names, true)
+        : filter_factor_(filter_factor),
+          f_attrs_(names),
+          g_attrs_(names, true)
     {}
 
     template<typename T>
@@ -212,9 +212,9 @@ class attribute_collector : public util::noncopyable
   public:
 
     attribute_collector(std::set<std::string>& names)
-        : names_(names)
-        , filter_factor_(1.0)
-        , f_attr(names)
+        : names_(names),
+          filter_factor_(1.0),
+          f_attr(names)
     {}
     template<typename RuleType>
     void operator()(RuleType const& r)

@@ -42,8 +42,8 @@ struct placement_finder_adapter
 {
     using placement_finder_type = T;
     placement_finder_adapter(T& finder, bool points_on_line)
-        : finder_(finder)
-        , points_on_line_(points_on_line)
+        : finder_(finder),
+          points_on_line_(points_on_line)
     {}
 
     template<typename PathT>

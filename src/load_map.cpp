@@ -89,14 +89,14 @@ class map_parser : util::noncopyable
 {
   public:
     map_parser(Map& map, bool strict, std::string const& filename = "")
-        : strict_(strict)
-        , filename_(filename)
-        , font_library_()
-        , font_file_mapping_(map.get_font_file_mapping())
-        , font_name_cache_()
-        , file_sources_()
-        , fontsets_()
-        , xml_base_path_()
+        : strict_(strict),
+          filename_(filename),
+          font_library_(),
+          font_file_mapping_(map.get_font_file_mapping()),
+          font_name_cache_(),
+          file_sources_(),
+          fontsets_(),
+          xml_base_path_()
     {}
 
     void parse_map(Map& map, xml_node const& node, std::string const& base_path);

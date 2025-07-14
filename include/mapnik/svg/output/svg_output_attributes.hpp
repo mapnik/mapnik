@@ -49,15 +49,15 @@ namespace svg {
 struct path_output_attributes
 {
     path_output_attributes()
-        : fill_color_("none")
-        , fill_opacity_(1.0)
-        , stroke_color_("none")
-        , stroke_opacity_(1.0)
-        , stroke_width_(0.0)
-        , stroke_linecap_("butt")
-        , stroke_linejoin_("miter")
-        , stroke_dasharray_()
-        , stroke_dashoffset_(0.0)
+        : fill_color_("none"),
+          fill_opacity_(1.0),
+          stroke_color_("none"),
+          stroke_opacity_(1.0),
+          stroke_width_(0.0),
+          stroke_linecap_("butt"),
+          stroke_linejoin_("miter"),
+          stroke_dasharray_(),
+          stroke_dashoffset_(0.0)
     {}
 
     void set_fill_color(color const& fill_color);
@@ -115,11 +115,11 @@ struct path_output_attributes
 struct rect_output_attributes
 {
     rect_output_attributes()
-        : x_(0)
-        , y_(0)
-        , width_(400)
-        , height_(400)
-        , fill_color_("#000000")
+        : x_(0),
+          y_(0),
+          width_(400),
+          height_(400),
+          fill_color_("#000000")
     {}
 
     rect_output_attributes(const int x,
@@ -127,11 +127,11 @@ struct rect_output_attributes
                            const unsigned width,
                            const unsigned height,
                            color const& _fill_color)
-        : x_(x)
-        , y_(y)
-        , width_(width)
-        , height_(height)
-        , fill_color_(_fill_color.to_hex_string())
+        : x_(x),
+          y_(y),
+          width_(width),
+          height_(height),
+          fill_color_(_fill_color.to_hex_string())
     {}
 
     void set_x(const int x);

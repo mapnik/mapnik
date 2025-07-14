@@ -30,11 +30,11 @@ namespace mapnik {
 
 template<typename T>
 image_view<T>::image_view(std::size_t x, std::size_t y, std::size_t width, std::size_t height, T const& data)
-    : x_(x)
-    , y_(y)
-    , width_(width)
-    , height_(height)
-    , data_(data)
+    : x_(x),
+      y_(y),
+      width_(width),
+      height_(height),
+      data_(data)
 {
     if (x_ >= data_.width() && data_.width() > 0)
         x_ = data_.width() - 1;

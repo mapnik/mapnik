@@ -62,41 +62,39 @@ using mapnik::sql_utils::literal;
 using std::shared_ptr;
 
 postgis_datasource::postgis_datasource(parameters const& params)
-    : datasource(params)
-    , table_(*params.get<std::string>("table", ""))
-    , geometry_table_(*params.get<std::string>("geometry_table", ""))
-    , geometry_field_(*params.get<std::string>("geometry_field", ""))
-    , key_field_(*params.get<std::string>("key_field", ""))
-    , cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0))
-    , row_limit_(*params.get<mapnik::value_integer>("row_limit", 0))
-    , type_(datasource::Vector)
-    , srid_(*params.get<mapnik::value_integer>("srid", 0))
-    , extent_initialized_(false)
-    , simplify_geometries_(false)
-    , desc_(postgis_datasource::name(), "utf-8")
-    , creator_(params)
-    , pool_max_size_(*params_.get<mapnik::value_integer>("max_size", 10))
-    , persist_connection_(*params.get<mapnik::boolean_type>("persist_connection", true))
-    , extent_from_subquery_(*params.get<mapnik::boolean_type>("extent_from_subquery", false))
-    , max_async_connections_(*params_.get<mapnik::value_integer>("max_async_connection", 1))
-    , asynchronous_request_(false)
-    , twkb_encoding_(false)
-    , twkb_rounding_adjustment_(*params_.get<mapnik::value_double>("twkb_rounding_adjustment", 0.0))
-    , simplify_snap_ratio_(*params_.get<mapnik::value_double>("simplify_snap_ratio", 1.0 / 40.0))
-    ,
-    // 1/20 of pixel seems to be a good compromise to avoid
-    // drop of collapsed polygons.
-    // See https://github.com/mapnik/mapnik/issues/1639
-    // See http://trac.osgeo.org/postgis/ticket/2093
-    simplify_dp_ratio_(*params_.get<mapnik::value_double>("simplify_dp_ratio", 1.0 / 20.0))
-    , simplify_dp_preserve_(false)
-    , simplify_clip_resolution_(*params_.get<mapnik::value_double>("simplify_clip_resolution", 0.0))
-    , re_tokens_("!(@?\\w+)!")
-    , // matches  !mapnik_var!  or  !@user_var!
-    // params below are for testing purposes only and may be removed at any time
-    intersect_min_scale_(*params.get<mapnik::value_integer>("intersect_min_scale", 0))
-    , intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0))
-    , key_field_as_attribute_(*params.get<mapnik::boolean_type>("key_field_as_attribute", true))
+    : datasource(params),
+      table_(*params.get<std::string>("table", "")),
+      geometry_table_(*params.get<std::string>("geometry_table", "")),
+      geometry_field_(*params.get<std::string>("geometry_field", "")),
+      key_field_(*params.get<std::string>("key_field", "")),
+      cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0)),
+      row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
+      type_(datasource::Vector),
+      srid_(*params.get<mapnik::value_integer>("srid", 0)),
+      extent_initialized_(false),
+      simplify_geometries_(false),
+      desc_(postgis_datasource::name(), "utf-8"),
+      creator_(params),
+      pool_max_size_(*params_.get<mapnik::value_integer>("max_size", 10)),
+      persist_connection_(*params.get<mapnik::boolean_type>("persist_connection", true)),
+      extent_from_subquery_(*params.get<mapnik::boolean_type>("extent_from_subquery", false)),
+      max_async_connections_(*params_.get<mapnik::value_integer>("max_async_connection", 1)),
+      asynchronous_request_(false),
+      twkb_encoding_(false),
+      twkb_rounding_adjustment_(*params_.get<mapnik::value_double>("twkb_rounding_adjustment", 0.0)),
+      simplify_snap_ratio_(*params_.get<mapnik::value_double>("simplify_snap_ratio", 1.0 / 40.0)),
+      // 1/20 of pixel seems to be a good compromise to avoid
+      // drop of collapsed polygons.
+      // See https://github.com/mapnik/mapnik/issues/1639
+      // See http://trac.osgeo.org/postgis/ticket/2093
+      simplify_dp_ratio_(*params_.get<mapnik::value_double>("simplify_dp_ratio", 1.0 / 20.0)),
+      simplify_dp_preserve_(false),
+      simplify_clip_resolution_(*params_.get<mapnik::value_double>("simplify_clip_resolution", 0.0)),
+      re_tokens_("!(@?\\w+)!"), // matches  !mapnik_var!  or  !@user_var!
+      // params below are for testing purposes only and may be removed at any time
+      intersect_min_scale_(*params.get<mapnik::value_integer>("intersect_min_scale", 0)),
+      intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0)),
+      key_field_as_attribute_(*params.get<mapnik::boolean_type>("key_field_as_attribute", true))
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "postgis_datasource::init");

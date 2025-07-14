@@ -46,8 +46,8 @@ DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(memory_datasource_plugin);
 struct accumulate_extent
 {
     accumulate_extent(box2d<double>& ext)
-        : ext_(ext)
-        , first_(true)
+        : ext_(ext),
+          first_(true)
     {}
 
     void operator()(feature_ptr const& feat)
@@ -75,11 +75,11 @@ const char* memory_datasource::name()
 }
 
 memory_datasource::memory_datasource(parameters const& _params)
-    : datasource(_params)
-    , desc_(memory_datasource::name(), *params_.get<std::string>("encoding", "utf-8"))
-    , type_(datasource::Vector)
-    , bbox_check_(*params_.get<boolean_type>("bbox_check", true))
-    , type_set_(false)
+    : datasource(_params),
+      desc_(memory_datasource::name(), *params_.get<std::string>("encoding", "utf-8")),
+      type_(datasource::Vector),
+      bbox_check_(*params_.get<boolean_type>("bbox_check", true)),
+      type_set_(false)
 {}
 
 memory_datasource::~memory_datasource() {}

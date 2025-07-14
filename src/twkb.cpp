@@ -66,28 +66,19 @@ struct twkb_reader : mapnik::util::noncopyable
     };
 
     twkb_reader(char const* twkb, size_t size)
-        : twkb_(twkb)
-        , size_(size)
-        , pos_(0)
-        , twkb_type_(0)
-        , // Geometry type
-        has_bbox_(0)
-        , // Bounding box?
-        has_size_(0)
-        , // Size attribute?
-        has_idlist_(0)
-        , // Presence of X/Y
-        has_z_(0)
-        , // Presence of Z
-        has_m_(0)
-        , // Presence of M
-        is_empty_(0)
-        , // Empty?
-        factor_xy_(0.0)
-        , // Expansion factor for X/Y
-        factor_z_(0.0)
-        ,              // Expansion factor for Z
-        factor_m_(0.0) // Expansion factor for M
+        : twkb_(twkb),
+          size_(size),
+          pos_(0),
+          twkb_type_(0),   // Geometry type
+          has_bbox_(0),    // Bounding box?
+          has_size_(0),    // Size attribute?
+          has_idlist_(0),  // Presence of X/Y
+          has_z_(0),       // Presence of Z
+          has_m_(0),       // Presence of M
+          is_empty_(0),    // Empty?
+          factor_xy_(0.0), // Expansion factor for X/Y
+          factor_z_(0.0),  // Expansion factor for Z
+          factor_m_(0.0)   // Expansion factor for M
     {}
 
     mapnik::geometry::geometry<double> read()

@@ -229,17 +229,17 @@ const double root_output_attributes::SVG_VERSION = 1.1;
 const std::string root_output_attributes::SVG_NAMESPACE_URL = "http://www.w3.org/2000/svg";
 
 root_output_attributes::root_output_attributes()
-    : width_(400)
-    , height_(400)
-    , svg_version_(SVG_VERSION)
-    , svg_namespace_url_(SVG_NAMESPACE_URL)
+    : width_(400),
+      height_(400),
+      svg_version_(SVG_VERSION),
+      svg_namespace_url_(SVG_NAMESPACE_URL)
 {}
 
 root_output_attributes::root_output_attributes(unsigned width, unsigned height)
-    : width_(width)
-    , height_(height)
-    , svg_version_(SVG_VERSION)
-    , svg_namespace_url_(SVG_NAMESPACE_URL)
+    : width_(width),
+      height_(height),
+      svg_version_(SVG_VERSION),
+      svg_namespace_url_(SVG_NAMESPACE_URL)
 {}
 
 void root_output_attributes::set_width(unsigned width)

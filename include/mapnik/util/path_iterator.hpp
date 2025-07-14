@@ -49,8 +49,8 @@ class path_iterator : public boost::iterator_facade<path_iterator<T>,
     using value_type = typename std::tuple<unsigned, double, double>;
 
     path_iterator()
-        : v_(mapnik::SEG_END, 0, 0)
-        , vertices_()
+        : v_(mapnik::SEG_END, 0, 0),
+          vertices_()
     {}
 
     explicit path_iterator(path_type const& vertices)
@@ -84,14 +84,14 @@ class path_iterator<path_type> : public boost::iterator_facade<path_iterator<pat
     using value_type = std::tuple<unsigned, double, double>;
     using size_type = path_type::size_type;
     path_iterator()
-        : v_(mapnik::SEG_END, 0, 0)
-        , vertices_()
-        , pos_(0)
+        : v_(mapnik::SEG_END, 0, 0),
+          vertices_(),
+          pos_(0)
     {}
 
     explicit path_iterator(path_type const& vertices)
-        : vertices_(&vertices)
-        , pos_(0)
+        : vertices_(&vertices),
+          pos_(0)
     {
         increment();
     }

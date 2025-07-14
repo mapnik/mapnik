@@ -46,13 +46,13 @@ struct render_marker_symbolizer_visitor
                                      RendererType const& common,
                                      box2d<double> const& clip_box,
                                      ContextType& renderer_context)
-        : filename_(filename)
-        , sym_(sym)
-        , feature_(feature)
-        , prj_trans_(prj_trans)
-        , common_(common)
-        , clip_box_(clip_box)
-        , renderer_context_(renderer_context)
+        : filename_(filename),
+          sym_(sym),
+          feature_(feature),
+          prj_trans_(prj_trans),
+          common_(common),
+          clip_box_(clip_box),
+          renderer_context_(renderer_context)
     {}
 
     svg::group const& get_marker_attributes(svg_path_ptr const& stock_marker, svg::group& custom_group_attrs) const
@@ -227,12 +227,12 @@ markers_dispatch_params::markers_dispatch_params(box2d<double> const& size,
                        get<value_bool, keys::allow_overlap>(sym, feature, vars),
                        get<value_bool, keys::avoid_edges>(sym, feature, vars),
                        get<direction_enum, keys::direction>(sym, feature, vars),
-                       scale}
-    , placement_method(get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars))
-    , ignore_placement(get<value_bool, keys::ignore_placement>(sym, feature, vars))
-    , snap_to_pixels(snap)
-    , scale_factor(scale)
-    , opacity(get<value_double, keys::opacity>(sym, feature, vars))
+                       scale},
+      placement_method(get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars)),
+      ignore_placement(get<value_bool, keys::ignore_placement>(sym, feature, vars)),
+      snap_to_pixels(snap),
+      scale_factor(scale),
+      opacity(get<value_double, keys::opacity>(sym, feature, vars))
 {
     placement_params.spacing *= scale;
 }

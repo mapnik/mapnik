@@ -33,10 +33,10 @@ class CursorResultSet : public IResultSet,
 {
   public:
     CursorResultSet(std::shared_ptr<Connection> const& conn, std::string cursorName, int fetch_count)
-        : conn_(conn)
-        , cursorName_(cursorName)
-        , fetch_size_(fetch_count)
-        , is_closed_(false)
+        : conn_(conn),
+          cursorName_(cursorName),
+          fetch_size_(fetch_count),
+          is_closed_(false)
     {
         getNextResultSet();
     }

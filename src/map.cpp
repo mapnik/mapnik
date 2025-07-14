@@ -64,81 +64,80 @@ constexpr detail::EnumMapT<Map::aspect_fix_mode, 10> aspect_fix_mode_e_map{{
 IMPLEMENT_ENUM(aspect_fix_mode_e, Map::aspect_fix_mode)
 
 Map::Map()
-    : width_(400)
-    , height_(400)
-    , srs_(MAPNIK_GEOGRAPHIC_PROJ)
-    , buffer_size_(0)
-    , background_image_comp_op_(src_over)
-    , background_image_opacity_(1.0)
-    , aspectFixMode_(GROW_BBOX)
-    , base_path_("")
-    , extra_params_()
-    , font_directory_()
-    , font_file_mapping_()
-    , font_memory_cache_()
+    : width_(400),
+      height_(400),
+      srs_(MAPNIK_GEOGRAPHIC_PROJ),
+      buffer_size_(0),
+      background_image_comp_op_(src_over),
+      background_image_opacity_(1.0),
+      aspectFixMode_(GROW_BBOX),
+      base_path_(""),
+      extra_params_(),
+      font_directory_(),
+      font_file_mapping_(),
+      font_memory_cache_()
 {}
 
 Map::Map(int width, int height, std::string const& srs)
-    : width_(width)
-    , height_(height)
-    , srs_(srs)
-    , buffer_size_(0)
-    , background_image_comp_op_(src_over)
-    , background_image_opacity_(1.0)
-    , aspectFixMode_(GROW_BBOX)
-    , base_path_("")
-    , extra_params_()
-    , font_directory_()
-    , font_file_mapping_()
-    , font_memory_cache_()
+    : width_(width),
+      height_(height),
+      srs_(srs),
+      buffer_size_(0),
+      background_image_comp_op_(src_over),
+      background_image_opacity_(1.0),
+      aspectFixMode_(GROW_BBOX),
+      base_path_(""),
+      extra_params_(),
+      font_directory_(),
+      font_file_mapping_(),
+      font_memory_cache_()
 {}
 
 Map::Map(Map const& rhs)
-    : width_(rhs.width_)
-    , height_(rhs.height_)
-    , srs_(rhs.srs_)
-    , buffer_size_(rhs.buffer_size_)
-    , background_(rhs.background_)
-    , background_image_(rhs.background_image_)
-    , background_image_comp_op_(rhs.background_image_comp_op_)
-    , background_image_opacity_(rhs.background_image_opacity_)
-    , styles_(rhs.styles_)
-    , fontsets_(rhs.fontsets_)
-    , layers_(rhs.layers_)
-    , aspectFixMode_(rhs.aspectFixMode_)
-    , current_extent_(rhs.current_extent_)
-    , maximum_extent_(rhs.maximum_extent_)
-    , base_path_(rhs.base_path_)
-    , extra_params_(rhs.extra_params_)
-    , font_directory_(rhs.font_directory_)
-    , font_file_mapping_(rhs.font_file_mapping_)
-    ,
-    // on copy discard memory caches
-    font_memory_cache_()
+    : width_(rhs.width_),
+      height_(rhs.height_),
+      srs_(rhs.srs_),
+      buffer_size_(rhs.buffer_size_),
+      background_(rhs.background_),
+      background_image_(rhs.background_image_),
+      background_image_comp_op_(rhs.background_image_comp_op_),
+      background_image_opacity_(rhs.background_image_opacity_),
+      styles_(rhs.styles_),
+      fontsets_(rhs.fontsets_),
+      layers_(rhs.layers_),
+      aspectFixMode_(rhs.aspectFixMode_),
+      current_extent_(rhs.current_extent_),
+      maximum_extent_(rhs.maximum_extent_),
+      base_path_(rhs.base_path_),
+      extra_params_(rhs.extra_params_),
+      font_directory_(rhs.font_directory_),
+      font_file_mapping_(rhs.font_file_mapping_),
+      // on copy discard memory caches
+      font_memory_cache_()
 {
     init_proj_transforms();
 }
 
 Map::Map(Map&& rhs)
-    : width_(std::move(rhs.width_))
-    , height_(std::move(rhs.height_))
-    , srs_(std::move(rhs.srs_))
-    , buffer_size_(std::move(rhs.buffer_size_))
-    , background_(std::move(rhs.background_))
-    , background_image_(std::move(rhs.background_image_))
-    , background_image_comp_op_(std::move(rhs.background_image_comp_op_))
-    , background_image_opacity_(std::move(rhs.background_image_opacity_))
-    , styles_(std::move(rhs.styles_))
-    , fontsets_(std::move(rhs.fontsets_))
-    , layers_(std::move(rhs.layers_))
-    , aspectFixMode_(std::move(rhs.aspectFixMode_))
-    , current_extent_(std::move(rhs.current_extent_))
-    , maximum_extent_(std::move(rhs.maximum_extent_))
-    , base_path_(std::move(rhs.base_path_))
-    , extra_params_(std::move(rhs.extra_params_))
-    , font_directory_(std::move(rhs.font_directory_))
-    , font_file_mapping_(std::move(rhs.font_file_mapping_))
-    , font_memory_cache_(std::move(rhs.font_memory_cache_))
+    : width_(std::move(rhs.width_)),
+      height_(std::move(rhs.height_)),
+      srs_(std::move(rhs.srs_)),
+      buffer_size_(std::move(rhs.buffer_size_)),
+      background_(std::move(rhs.background_)),
+      background_image_(std::move(rhs.background_image_)),
+      background_image_comp_op_(std::move(rhs.background_image_comp_op_)),
+      background_image_opacity_(std::move(rhs.background_image_opacity_)),
+      styles_(std::move(rhs.styles_)),
+      fontsets_(std::move(rhs.fontsets_)),
+      layers_(std::move(rhs.layers_)),
+      aspectFixMode_(std::move(rhs.aspectFixMode_)),
+      current_extent_(std::move(rhs.current_extent_)),
+      maximum_extent_(std::move(rhs.maximum_extent_)),
+      base_path_(std::move(rhs.base_path_)),
+      extra_params_(std::move(rhs.extra_params_)),
+      font_directory_(std::move(rhs.font_directory_)),
+      font_file_mapping_(std::move(rhs.font_file_mapping_)),
+      font_memory_cache_(std::move(rhs.font_memory_cache_))
 {}
 
 Map::~Map() {}

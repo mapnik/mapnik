@@ -307,8 +307,8 @@ void handle_webp_options(std::string const& type, WebPConfig& config, bool& alph
 #endif
 
 webp_saver::webp_saver(std::ostream& stream, std::string const& t)
-    : stream_(stream)
-    , t_(t)
+    : stream_(stream),
+      t_(t)
 {}
 
 template<>

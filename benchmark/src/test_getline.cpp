@@ -6,8 +6,8 @@ class test : public benchmark::test_case
   public:
     std::string line_data_;
     test(mapnik::parameters const& params)
-        : test_case(params)
-        , line_data_("this is one line\nand this is a second line\nand a third line")
+        : test_case(params),
+          line_data_("this is one line\nand this is a second line\nand a third line")
     {
         auto line_data = params.get<std::string>("line");
         if (line_data)
@@ -54,8 +54,8 @@ class test2 : public benchmark::test_case
   public:
     std::string line_data_;
     test2(mapnik::parameters const& params)
-        : test_case(params)
-        , line_data_("this is one line\nand this is a second line\nand a third line")
+        : test_case(params),
+          line_data_("this is one line\nand this is a second line\nand a third line")
     {
         auto line_data = params.get<std::string>("line");
         if (line_data)

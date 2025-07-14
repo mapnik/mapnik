@@ -56,10 +56,10 @@ class libxml2_loader : util::noncopyable
 {
   public:
     libxml2_loader(const char* encoding = nullptr, int options = DEFAULT_OPTIONS, const char* url = nullptr)
-        : ctx_(0)
-        , encoding_(encoding)
-        , options_(options)
-        , url_(url)
+        : ctx_(0),
+          encoding_(encoding),
+          options_(options),
+          url_(url)
     {
         LIBXML_TEST_VERSION;
         ctx_ = xmlNewParserCtxt();
