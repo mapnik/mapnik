@@ -40,7 +40,6 @@ void register_image_readers()
 #ifdef HAVE_AVIF
     register_avif_reader();
 #endif
-
 }
 } // namespace mapnik
 
