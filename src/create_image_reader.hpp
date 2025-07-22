@@ -14,6 +14,9 @@ void register_tiff_reader();
 #ifdef HAVE_WEBP
 void register_webp_reader();
 #endif
+#ifdef HAVE_AVIF
+void register_avif_reader();
+#endif
 } // namespace mapnik
 
 #endif

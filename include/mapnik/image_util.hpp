@@ -361,6 +361,11 @@ inline bool is_webp(std::string const& filename)
     return boost::algorithm::iends_with(filename, std::string(".webp"));
 }
 
+inline bool is_avif(std::string const& filename)
+{
+    return boost::algorithm::iends_with(filename, std::string(".avif"));
+}
+
 inline std::optional<std::string> type_from_filename(std::string const& filename)
 {
     if (is_png(filename))
@@ -377,6 +382,8 @@ inline std::optional<std::string> type_from_filename(std::string const& filename
         return "ps";
     if (is_webp(filename))
         return "webp";
+    if (is_avif(filename))
+        return "avif";
     return std::nullopt;
 }
 

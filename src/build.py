@@ -111,6 +111,10 @@ if '-DBOOST_REGEX_HAS_ICU' in env['CPPDEFINES']:
 
 lib_env['LIBS'].append('harfbuzz')
 
+if '-DHAVE_AVIF' in env['CPPDEFINES']:
+    lib_env['LIBS'].append('avif')
+    enabled_imaging_libraries.append('avif_reader.cpp')
+
 if '-DHAVE_JPEG' in env['CPPDEFINES']:
    lib_env['LIBS'].append('jpeg')
    enabled_imaging_libraries.append('jpeg_reader.cpp')
