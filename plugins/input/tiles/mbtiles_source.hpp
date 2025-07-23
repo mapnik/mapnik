@@ -62,10 +62,10 @@ class mbtiles_source : public tiles_source
         }
         format_ = result->column_text(0);
 
-        if (format_ != "pbf" && format_ != "jpg" && format_ != "png" && format_ != "webp")
+        if (format_ != "pbf" && format_ != "jpg" && format_ != "png" && format_ != "webp" && format_ != "avif")
         {
             throw mapnik::datasource_exception("MBTiles Plugin: " + database_path_ + " has unsupported tile format '" +
-                                               format_ + "', expected 'pbf|jpg|png|webp'.");
+                                               format_ + "', expected 'pbf|jpg|png|webp|avif'.");
         }
         result = dataset_->execute_query("SELECT value FROM metadata WHERE name = 'bounds';");
         if (result->is_valid() && result->step_next() && result->column_type(0) == SQLITE_TEXT)
@@ -155,7 +155,7 @@ class mbtiles_source : public tiles_source
         }
         return json_value;
     }
-    bool is_raster() const { return format_ == "png" || format_ == "jpg" || format_ == "webp"; }
+    bool is_raster() const { return format_ == "png" || format_ == "jpg" || format_ == "webp" || format_ == "avif"; }
 };
 
 } // namespace mapnik
