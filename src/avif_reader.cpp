@@ -166,6 +166,7 @@ void avif_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
         if (!cropped)
         {
             avifRGBImageSetDefaults(&rgb, decoder_->image);
+            rgb.depth = 8;
             std::uint32_t const pixelSize = avifRGBImagePixelSize(&rgb);
             std::uint32_t const rowBytes = rgb.width * pixelSize;
             rgb.pixels = image.bytes();
@@ -186,6 +187,7 @@ void avif_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
                 image_reader_exception(std::string("AVIF Reader:") + avifResultToString(result));
             }
             avifRGBImageSetDefaults(&rgb, crop.get());
+            rgb.depth = 8;
             std::uint32_t const pixelSize = avifRGBImagePixelSize(&rgb);
             std::uint32_t const rowBytes = rgb.width * pixelSize;
             rgb.pixels = image.bytes();
