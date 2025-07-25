@@ -180,7 +180,18 @@ void avif_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
         else
         {
             avif::ImagePtr crop{avifImageCreateEmpty()};
-            avifCropRect rect = {x0, y0, width_, height_};
+            avifPixelFormatInfo formatInfo;
+            avifGetPixelFormatInfo(decoder_->image->yuvFormat, &formatInfo);
+            std::uint32_t x_padding = x0 & formatInfo.chromaShiftX;
+            std::uint32_t y_padding = y0 & formatInfo.chromaShiftY;
+            std::uint32_t w = image.width();
+            std::uint32_t h = image.height();
+            auto r_x0 = x0 - x_padding;
+            auto r_y0 = y0 - y_padding;
+
+            auto r_width = std::min(decoder_->image->width, w + x_padding);
+            auto r_height = std::min(decoder_->image->height, h + y_padding);
+            avifCropRect rect = {r_x0, r_y0, r_width, r_height};
             avifResult result = avifImageSetViewRect(crop.get(), decoder_->image, &rect);
             if (result != AVIF_RESULT_OK)
             {
@@ -190,12 +201,30 @@ void avif_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
             rgb.depth = 8;
             std::uint32_t const pixelSize = avifRGBImagePixelSize(&rgb);
             std::uint32_t const rowBytes = rgb.width * pixelSize;
-            rgb.pixels = image.bytes();
-            rgb.rowBytes = rowBytes;
-            result = avifImageYUVToRGB(crop.get(), &rgb);
-            if (result != AVIF_RESULT_OK)
+            if (x_padding == 0 && y_padding == 0)
             {
-                image_reader_exception(std::string("AVIF Reader:") + avifResultToString(result));
+                rgb.pixels = image.bytes();
+                rgb.rowBytes = rowBytes;
+                result = avifImageYUVToRGB(crop.get(), &rgb);
+                if (result != AVIF_RESULT_OK)
+                {
+                    image_reader_exception(std::string("AVIF Reader:") + avifResultToString(result));
+                }
+            }
+            else
+            {
+                mapnik::image_rgba8 padded_image(r_width, r_height, true, true);
+                rgb.pixels = padded_image.bytes();
+                rgb.rowBytes = rowBytes;
+                result = avifImageYUVToRGB(crop.get(), &rgb);
+                if (result != AVIF_RESULT_OK)
+                {
+                    image_reader_exception(std::string("AVIF Reader:") + avifResultToString(result));
+                }
+                for (std::size_t row = 0; row < image.height(); ++row)
+                {
+                    image.set_row(row, padded_image.get_row(row + y_padding) + x_padding, image.width());
+                }
             }
         }
     }
