@@ -25,13 +25,16 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/color.hpp>
 // avif
-#include <avif/avif_cxx.h>
+#include <avif/avif.h>
 // std
 #include <cstdio>
 #include <memory>
 #include <fstream>
 
 namespace mapnik {
+
+using avif_decoder_ptr = std::unique_ptr<avifDecoder, void (*)(avifDecoder*)>;
+using avif_image_ptr = std::unique_ptr<avifImage, void (*)(avifImage*)>;
 
 template<typename T>
 class avif_reader : public image_reader
@@ -40,7 +43,9 @@ class avif_reader : public image_reader
     using buffer_policy_type = T;
 
   private:
-    avif::DecoderPtr decoder_{avifDecoderCreate()};
+    avif_decoder_ptr decoder_{avifDecoderCreate(), [](avifDecoder* ptr) {
+                                  avifDecoderDestroy(ptr);
+                              }};
     std::unique_ptr<buffer_policy_type> buffer_;
     size_t size_ = 0;
     unsigned width_ = 0;
@@ -179,7 +184,9 @@ void avif_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
         }
         else
         {
-            avif::ImagePtr crop{avifImageCreateEmpty()};
+            mapnik::avif_image_ptr crop{avifImageCreateEmpty(), [](avifImage* ptr) {
+                                            avifImageDestroy(ptr);
+                                        }};
             avifPixelFormatInfo formatInfo;
             avifGetPixelFormatInfo(decoder_->image->yuvFormat, &formatInfo);
             std::uint32_t x_padding = x0 & formatInfo.chromaShiftX;
