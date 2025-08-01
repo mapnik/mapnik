@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
-
+#include <mapnik/image_util.hpp>
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
@@ -40,38 +40,6 @@ MAPNIK_DISABLE_WARNING_POP
 #include <algorithm>
 
 namespace mapnik {
-
-struct external_buffer_policy
-{
-    external_buffer_policy(uint8_t const* data, std::size_t size)
-        : data_(data),
-          size_(size)
-    {}
-
-    uint8_t const* data() const { return data_; }
-
-    std::size_t size() const { return size_; }
-
-    uint8_t const* data_;
-    std::size_t size_;
-};
-
-struct internal_buffer_policy
-{
-    internal_buffer_policy(std::size_t size)
-        : data_((size != 0) ? static_cast<uint8_t*>(::operator new(sizeof(uint8_t) * size)) : 0),
-          size_(size)
-    {}
-
-    uint8_t* data() const { return data_; }
-
-    std::size_t size() const { return size_; }
-
-    ~internal_buffer_policy() { ::operator delete(data_), data_ = 0; }
-
-    uint8_t* data_;
-    std::size_t size_;
-};
 
 template<typename T>
 class webp_reader : public image_reader

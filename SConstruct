@@ -84,6 +84,7 @@ pretty_dep_names = {
     'proj-min-version':'libproj >=%s required' % PROJ_MIN_VERSION_STRING,
     'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program or configure with PG_LIBS & PG_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/PostGIS',
     'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/SQLite',
+    'avif':'AVIF C library | configure with AVIF_LIBS & AVIF_INCLUDES',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
@@ -397,6 +398,9 @@ opts.AddVariables(
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc', PathVariable.PathAccept),
     PathVariable('HB_INCLUDES', 'Search path for HarfBuzz include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('HB_LIBS','Search path for HarfBuzz include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    BoolVariable('AVIF', 'Build Mapnik with AVIF read support', 'True'),
+    PathVariable('AVIF_INCLUDES', 'Search path for libavif include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('AVIF_LIBS','Search path for libavif library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('PNG', 'Build Mapnik with PNG read and write support', 'True'),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PNG_LIBS','Search path for libpng library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
@@ -1544,6 +1548,15 @@ if not preconfigured:
     else:
         env['SKIPPED_DEPS'].append('png')
 
+    if env['AVIF']:
+        OPTIONAL_LIBSHEADERS.append(['avif', 'avif/avif.h', False,'C','-DHAVE_AVIF'])
+        inc_path = env['%s_INCLUDES' % 'AVIF']
+        lib_path = env['%s_LIBS' % 'AVIF']
+        env.AppendUnique(CPPPATH = fix_path(inc_path))
+        env.AppendUnique(LIBPATH = fix_path(lib_path))
+    else:
+        env['SKIPPED_DEPS'].append('avif')
+
     if env['WEBP']:
         if env.get('WEBP_LIBS') or env.get('WEBP_INCLUDES'):
             OPTIONAL_LIBSHEADERS.append(['webp', 'webp/decode.h', False,'C','-DHAVE_WEBP'])
@@ -1696,6 +1709,8 @@ if not preconfigured:
                         env['MISSING_DEPS'].append(libname)
                     else:
                         color_print(4, 'Could not find optional header or shared library for %s' % libname)
+                        color_print(5, "libname: %s" %libname)
+                        color_print(5, "headers:%s" % headers)
                         env['SKIPPED_DEPS'].append(libname)
                 elif libname == 'proj':
                     result, version = conf.proj_version()

@@ -296,6 +296,10 @@ if(USE_WEBP)
     )
 endif()
 
+if(USE_AVIF)
+    target_sources(mapnik PRIVATE avif_reader.cpp)
+endif()
+
 if(USE_GRID_RENDERER)
     target_sources(mapnik PRIVATE
         grid/grid_renderer.cpp

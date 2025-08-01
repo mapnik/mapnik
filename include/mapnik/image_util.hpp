@@ -361,6 +361,11 @@ inline bool is_webp(std::string const& filename)
     return boost::algorithm::iends_with(filename, std::string(".webp"));
 }
 
+inline bool is_avif(std::string const& filename)
+{
+    return boost::algorithm::iends_with(filename, std::string(".avif"));
+}
+
 inline std::optional<std::string> type_from_filename(std::string const& filename)
 {
     if (is_png(filename))
@@ -377,6 +382,8 @@ inline std::optional<std::string> type_from_filename(std::string const& filename
         return "ps";
     if (is_webp(filename))
         return "webp";
+    if (is_avif(filename))
+        return "avif";
     return std::nullopt;
 }
 
@@ -405,6 +412,40 @@ void add_border(T& image)
         image(image.width() - 1, y) = 0xffff0000; // blue
     }
 }
+
+//
+struct external_buffer_policy
+{
+    external_buffer_policy(uint8_t const* data, std::size_t size)
+        : data_(data),
+          size_(size)
+    {}
+
+    uint8_t const* data() const { return data_; }
+
+    std::size_t size() const { return size_; }
+
+    uint8_t const* data_;
+    std::size_t size_;
+};
+
+struct internal_buffer_policy
+{
+    internal_buffer_policy(std::size_t size)
+        : data_((size != 0) ? static_cast<uint8_t*>(::operator new(sizeof(uint8_t) * size)) : 0),
+          size_(size)
+    {}
+
+    uint8_t* data() const { return data_; }
+
+    std::size_t size() const { return size_; }
+
+    ~internal_buffer_policy() { ::operator delete(data_), data_ = 0; }
+
+    uint8_t* data_;
+    std::size_t size_;
+};
+
 } // namespace mapnik
 
 #endif // MAPNIK_IMAGE_UTIL_HPP

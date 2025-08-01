@@ -58,6 +58,10 @@ inline std::optional<std::string> type_from_bytes(char const* data, size_t size)
         {
             return "webp";
         }
+        else if (header[9] == 'a' && header[10] == 'v' && header[11] == 'i' && header[12] == 'f')
+        {
+            return "avif";
+        }
     }
     return std::nullopt;
 }
