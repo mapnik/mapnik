@@ -32,6 +32,7 @@ jobs:
             libjpeg-dev \
             libtiff-dev \
             libwebp-dev \
+            libavif-dev \
             libcairo2-dev \
             libproj-dev \
             libgdal-dev \
