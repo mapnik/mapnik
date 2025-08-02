@@ -50,7 +50,7 @@ TEST_CASE("avif io")
         mapnik::image_rgba8 im1(256, 256);
         reader->read(0, 0, im1);
         mapnik::image_rgba8 im2(256, 256);
-        reader2->read(0,0,im2);
+        reader2->read(0, 0, im2);
         REQUIRE(identical(im1, im2));
         REQUIRE(im1.get_dtype() == mapnik::image_dtype::image_dtype_rgba8);
     }
@@ -62,7 +62,7 @@ TEST_CASE("avif io")
         REQUIRE(reader->width() == 256);
         REQUIRE(reader->height() == 256);
         REQUIRE(!reader->has_alpha());
-        auto image = reader->read(28, 28, 256 - 2*28, 256 - 2*28);
+        auto image = reader->read(28, 28, 256 - 2 * 28, 256 - 2 * 28);
         REQUIRE(image.width() == 200);
         REQUIRE(image.height() == 200);
         REQUIRE(image.get_dtype() == mapnik::image_dtype::image_dtype_rgba8);
@@ -74,7 +74,7 @@ TEST_CASE("avif io")
         REQUIRE(reader->width() == 256);
         REQUIRE(reader->height() == 256);
         REQUIRE(!reader->has_alpha());
-        auto image = reader->read(28, 28, 256 - 2*28, 256 - 2*28);
+        auto image = reader->read(28, 28, 256 - 2 * 28, 256 - 2 * 28);
         REQUIRE(image.width() == 200);
         REQUIRE(image.height() == 200);
         REQUIRE(image.get_dtype() == mapnik::image_dtype::image_dtype_rgba8);
@@ -86,7 +86,7 @@ TEST_CASE("avif io")
         REQUIRE(reader->width() == 256);
         REQUIRE(reader->height() == 256);
         REQUIRE(!reader->has_alpha());
-        auto image = reader->read(28, 28, 256 - 2*28, 256 - 2*28);
+        auto image = reader->read(28, 28, 256 - 2 * 28, 256 - 2 * 28);
         REQUIRE(image.width() == 200);
         REQUIRE(image.height() == 200);
         REQUIRE(image.get_dtype() == mapnik::image_dtype::image_dtype_rgba8);
@@ -98,7 +98,7 @@ TEST_CASE("avif io")
         REQUIRE(reader->width() == 256);
         REQUIRE(reader->height() == 256);
         REQUIRE(!reader->has_alpha());
-        auto image = reader->read(28, 28, 256 - 2*28, 256 - 2*28);
+        auto image = reader->read(28, 28, 256 - 2 * 28, 256 - 2 * 28);
         REQUIRE(image.width() == 200);
         REQUIRE(image.height() == 200);
         REQUIRE(image.get_dtype() == mapnik::image_dtype::image_dtype_rgba8);
@@ -110,7 +110,7 @@ TEST_CASE("avif io")
         REQUIRE(reader->width() == 256);
         REQUIRE(reader->height() == 256);
         REQUIRE(!reader->has_alpha());
-        auto image = reader->read(28, 28, 256 - 2*28, 256 - 2*28);
+        auto image = reader->read(28, 28, 256 - 2 * 28, 256 - 2 * 28);
         REQUIRE(image.width() == 200);
         REQUIRE(image.height() == 200);
         REQUIRE(image.get_dtype() == mapnik::image_dtype::image_dtype_rgba8);
@@ -122,7 +122,7 @@ TEST_CASE("avif io")
         REQUIRE(reader->width() == 256);
         REQUIRE(reader->height() == 256);
         REQUIRE(!reader->has_alpha());
-        auto image = reader->read(28, 28, 256 - 2*28, 256 - 2*28);
+        auto image = reader->read(28, 28, 256 - 2 * 28, 256 - 2 * 28);
         REQUIRE(image.width() == 200);
         REQUIRE(image.height() == 200);
         REQUIRE(image.get_dtype() == mapnik::image_dtype::image_dtype_rgba8);
