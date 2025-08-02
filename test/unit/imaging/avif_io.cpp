@@ -1,6 +1,3 @@
-// disabled on windows due to https://github.com/mapnik/mapnik/issues/2838
-// TODO - get to the bottom of why including `tiff_reader.cpp` breaks windows
-// or re-write image_readers to allow `#include tiff_reader.hpp`
 #ifdef HAVE_AVIF
 
 #include "catch.hpp"
@@ -11,7 +8,7 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/util/fs.hpp>
-#include <iostream>
+
 namespace {
 
 template<typename Image1, typename Image2>
@@ -26,7 +23,6 @@ bool identical(Image1 const& im1, Image2 const& im2)
         {
             if (im1(i, j) != im2(i, j))
             {
-                std::cerr << i << ":" << j << std::endl;
                 return false;
             }
         }
