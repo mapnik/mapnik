@@ -121,7 +121,7 @@ PluginInfo::~PluginInfo() {}
 void* PluginInfo::get_symbol(std::string const& sym_name) const
 {
 #ifdef MAPNIK_SUPPORTS_DLOPEN
-    return static_cast<void*>(dlsym(module_->dl, sym_name.c_str()));
+    return reinterpret_cast<void*>(dlsym(module_->dl, sym_name.c_str()));
 #else
     return nullptr;
 #endif

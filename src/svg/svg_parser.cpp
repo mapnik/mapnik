@@ -1654,7 +1654,7 @@ svg_parser::~svg_parser() {}
 void svg_parser::parse(std::string const& filename)
 {
 #ifdef _WIN32
-    std::basic_ifstream<char> stream(mapnik::utf8_to_utf16(filename));
+    std::basic_ifstream<char> stream(mapnik::utf8_to_utf16_path(filename));
 #else
     std::basic_ifstream<char> stream(filename.c_str());
 #endif
