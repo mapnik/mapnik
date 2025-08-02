@@ -43,7 +43,7 @@ TEST_CASE("avif io")
         REQUIRE(reader->height() == 256);
         mapnik::image_rgba8 im(256, 256);
         reader->read(0, 0, im);
-        REQUIRE(im1.get_dtype() == mapnik::image_dtype::image_dtype_rgba8);
+        REQUIRE(im.get_dtype() == mapnik::image_dtype::image_dtype_rgba8);
     }
 
     SECTION("avif yuv:444 depth:8")
