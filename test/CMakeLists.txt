@@ -69,6 +69,7 @@ add_executable(mapnik-test-unit
     unit/imaging/image_view.cpp
     unit/imaging/tiff_io.cpp
     unit/imaging/webp_io.cpp
+    unit/imaging/avif_io.cpp
     unit/map/background.cpp
     unit/numerics/enumeration.cpp
     unit/numerics/safe_cast.cpp
