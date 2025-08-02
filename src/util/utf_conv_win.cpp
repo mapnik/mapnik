@@ -56,6 +56,11 @@ std::wstring utf8_to_utf16(std::string const& str)
     return wstr;
 }
 
+std::filesystem::path utf8_to_utf16_path(std::string const& str)
+{
+    return std::filesystem::path(utf8_to_utf16(str));
+}
+
 } // namespace mapnik
 
 #endif // _WIN32

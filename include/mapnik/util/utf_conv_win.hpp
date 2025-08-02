@@ -28,6 +28,7 @@
 #include <mapnik/config.hpp>
 // stl
 #include <string>
+#include <filesystem>
 
 namespace mapnik {
 
@@ -35,6 +36,7 @@ namespace mapnik {
 
 MAPNIK_DECL std::string utf16_to_utf8(std::wstring const& wstr);
 MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
+MAPNIK_DECL std::filesystem::path utf8_to_utf16_path(std::string const& str);
 
 } // namespace mapnik
 #endif // _WIN32
