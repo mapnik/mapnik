@@ -5,6 +5,19 @@ A simple log of core changes affecting Mapnik usage.
 Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
+
+## Mapnik 4.1.2
+
+Released August 3nd, 2025
+
+(Packaged from [xxxx](https://github.com/mapnik/mapnik/commit/xxxxx))
+
+- Upgrade protozero to v1.8.1 (https://github.com/mapbox/protozero/pull/133)
+- Upgrade polylabel to v2.0.1
+- Upgrade to VCPKG_RELEASE: 2025.07.25
+- Implement avif_reader + basic unit tests
+- Fix compilation issues using mingw (https://github.com/mapnik/mapnik/pull/4514)
+
 ## Mapnik 4.1.1
 
 Released June 27th, 2025
