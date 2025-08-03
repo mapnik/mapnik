@@ -10,7 +10,7 @@ For a complete change history, see the git log.
 
 Released August 3nd, 2025
 
-(Packaged from [xxxx](https://github.com/mapnik/mapnik/commit/xxxxx))
+(Packaged from [5d0326e9e](https://github.com/mapnik/mapnik/commit/5d0326e9e))
 
 - Upgrade protozero to v1.8.1 (https://github.com/mapbox/protozero/pull/133)
 - Upgrade polylabel to v2.0.1
