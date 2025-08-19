@@ -1414,7 +1414,7 @@ if not preconfigured:
     ### platform specific bits
 
     thread_suffix = 'mt'
-    if env['PLATFORM'] == 'FreeBSD':
+    if env['PLATFORM'] == 'FreeBSD' or env['PLATFORM'] == 'OpenBSD':
         thread_suffix = ''
         env.Append(LIBS = 'pthread')
 
