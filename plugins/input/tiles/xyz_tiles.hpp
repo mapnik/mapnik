@@ -28,6 +28,7 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio/strand.hpp>
+#include <boost/asio/spawn.hpp>
 #include <boost/format.hpp>
 #include <boost/json.hpp>
 
@@ -111,6 +112,41 @@ inline void fail(beast::error_code ec, char const* what)
 
 namespace  xyz_tiles {
 
+inline std::string metadata_http(std::string const& host, std::string const& port, std::string const& target, beast::error_code& ec)
+{
+    ec = {};
+    boost::asio::io_context ioc;
+    std::string result;
+    boost::asio::spawn(ioc, [&](boost::asio::yield_context yield)
+    {
+        boost::asio::ip::tcp::resolver resolver(ioc);
+        beast::tcp_stream stream(ioc);
+        auto const endpoints = resolver.async_resolve(host, port, yield[ec]);
+        if (ec) return;
+        stream.expires_after(std::chrono::seconds(30));
+        stream.async_connect(endpoints, yield[ec]);
+        if (ec) return;
+        //HTTP GET
+        http::request<http::string_body> req{http::verb::get, target, 11};
+        req.set(http::field::host, host);
+        req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+        http::async_write(stream, req, yield[ec]);
+        if (ec) return;
+        beast::flat_buffer buffer;
+        http::response<http::string_body> res;
+        http::async_read(stream, buffer, res, yield[ec]);
+        if (ec) return;
+        stream.socket().shutdown(tcp::socket::shutdown_both, ec);
+        if (ec) return;
+        result = std::move(res.body());
+    }, [] (std::exception_ptr ex)
+    {
+        if (ex) std::rethrow_exception(ex);
+    });
+    ioc.run();
+    return result;
+}
+
 inline boost::json::value metadata(std::string const& url_str)
 {
     auto result = boost::urls::parse_uri_reference(url_str);
@@ -124,39 +160,22 @@ inline boost::json::value metadata(std::string const& url_str)
     std::string host = result->host();
     std::string port = result->port();
     std::string target = result->path();
-
+    beast::error_code ec;
+    std::string str = metadata_http(host, port, target, ec);
+    if (ec)
+    {
+        mapnik::datasource_exception("Tiles datasource: Error fetching metatada" + ec.to_string());
+    }
+    boost::json::value json;
     try
     {
-        boost::asio::io_context ioc;
-        tcp::resolver resolver(ioc);
-        beast::tcp_stream stream(ioc);
-        // Look up the domain name
-        auto const results = resolver.resolve(host, port);
-        // Make the connection on the IP address we get from a lookup
-        //stream.expires_after (std::chrono::seconds(10)); // 10sec
-        stream.connect(results);
-        // Set up an HTTP GET request message
-        http::request<http::string_body> req{http::verb::get, target, 11};
-        req.set(http::field::host, host);
-        req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-
-        // Send the HTTP request to the remote host
-        http::write(stream, req);
-        // This buffer is used for reading and must be persisted
-        beast::flat_buffer buffer;
-
-        // Declare a container to hold the response
-        http::response<http::string_body> res;
-
-        // Receive the HTTP response
-        http::read(stream, buffer, res);
-        json_value = boost::json::parse(res.body());
+        json = boost::json::parse(str);
     }
-    catch(std::exception const& ex)
+    catch (std::exception e)
     {
-        throw mapnik::datasource_exception(std::string("xyz_tiles: ") + ex.what());
+        mapnik::datasource_exception("Tiles datasource: Failed to parse JSON");
     }
-    return json_value;
+    return json;
 }
 
 }

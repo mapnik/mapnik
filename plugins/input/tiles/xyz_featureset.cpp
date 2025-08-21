@@ -171,14 +171,14 @@ bool xyz_featureset::next_tile()
         tile_data tile;
         if (queue_.pop(tile))
         {
-            ++consumed_count_;
-            if (consumed_count_ == 16) return false;
+            if (++consumed_count_ == 16) return false;
             auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % tile.zoom % tile.x % tile.y).str();
             auto itr = vector_tile_cache_.find(datasource_key);
             if (itr == vector_tile_cache_.end())
             {
                 std::cerr << "\e[41m Consumed: #" << consumed_count_
-                          << " " << tile.zoom << ":" << tile.x << ":" << tile.y << " num_tiles/consumed:" << num_tiles_ << "/" << consumed_count_ << " available:" << queue_.read_available() << "\e[0m" << std::endl;
+                          << " " << tile.zoom << ":" << tile.x << ":" << tile.y << " num_tiles/consumed:"
+                          << num_tiles_ << "/" << consumed_count_ << " available:" << queue_.read_available() << "\e[0m" << std::endl;
                 vector_tile_cache_.emplace(datasource_key, tile.data);
             }
             else
