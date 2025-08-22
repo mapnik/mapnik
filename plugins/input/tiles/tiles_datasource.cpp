@@ -362,6 +362,17 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
     double x1 = (tile_x + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) - 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     double y1 = -(tile_y + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) + 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     auto query_bbox = mapnik::box2d<double>{x0, y0, x1, y1};
+    if (url_template_)
+    {
+        auto datasource_hash = std::hash<std::string>{}(*url_template_);
+        return std::make_shared<xyz_featureset>(*url_template_,
+                                                context,
+                                                maxzoom_,
+                                                query_bbox,
+                                                layer_,
+                                                tile_cache(),
+                                                datasource_hash);
+    }
     if (!source_ptr_->is_raster())
         return std::make_shared<vector_tiles_featureset>(source_ptr_,
                                                          context,
