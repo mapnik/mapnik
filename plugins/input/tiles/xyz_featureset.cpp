@@ -58,28 +58,15 @@ xyz_featureset::xyz_featureset(std::string url_template,
                              (tile_count / mapnik::EARTH_CIRCUMFERENCE));
     ymax_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.miny()) *
                              (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    //std::cerr << "EXTENT:" << extent_ << std::endl;
+
     boost::urls::url url = boost::urls::format(url_template_, {{"z", zoom_}, {"x", 0}, {"y", 0}});
-    //std::string scheme = url.scheme();
     host_ = url.host();
     port_ = url.port();
-    //std::string path = url.path();
-    std::cerr << "\e[31mxyz_featureset::xyz_featureset " << extent_ << " "
-              << xmin_ << ":"  << xmax_ << " " << ymin_ << ":" << ymax_ <<  "\e[0m" << std::endl;
 
-
-    //std::cerr << " NUM TILES: " << num_tiles_ << " TARGETS SIZE:" << stash_.targets().size()<< std::endl;
-    //open_tile();
 }
-
-// xyz_featureset::init()
-// {
-
-// }
 
 xyz_featureset::~xyz_featureset()
 {
-    //std::cerr << " xyz_featureset::~xyz_featureset() URL template:" << url_template_ << std::endl;
     for(std::size_t i = 0; i < workers_.size(); ++i)
     {
         workers_[i].join();
@@ -172,26 +159,17 @@ bool xyz_featureset::next_tile()
         if (queue_.pop(tile))
         {
             if (++consumed_count_ == 16) return false;
+
+            std::string decompressed;
+            mapnik::vector_tile_impl::zlib_decompress(tile.data.data(), tile.data.size(), decompressed);
+            vector_tile_.reset(new mvt_io(std::move(decompressed), context_, tile.x, tile.y, zoom_, layer_));
+
             auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % tile.zoom % tile.x % tile.y).str();
             auto itr = vector_tile_cache_.find(datasource_key);
             if (itr == vector_tile_cache_.end())
             {
-                std::cerr << "\e[41m Consumed: #" << consumed_count_
-                          << " " << tile.zoom << ":" << tile.x << ":" << tile.y << " num_tiles/consumed:"
-                          << num_tiles_ << "/" << consumed_count_ << " available:" << queue_.read_available() << "\e[0m" << std::endl;
-                vector_tile_cache_.emplace(datasource_key, tile.data);
+                vector_tile_cache_.emplace(datasource_key, std::move(tile.data));
             }
-            else
-            {
-                std::cerr << "\e[42m Consumed: #" << consumed_count_
-                          << " " << tile.zoom << ":" << tile.x << ":" << tile.y << " "
-                          << tile.data.length() << " num_tiles/consumed:" << num_tiles_ << "/" << consumed_count_
-                          << " available:" << queue_.read_available() << " STASHED\e[0m" << std::endl;
-            }
-            //
-            std::string decompressed;
-            mapnik::vector_tile_impl::zlib_decompress(tile.data.data(), tile.data.size(), decompressed);
-            vector_tile_.reset(new mvt_io(std::move(decompressed), context_, tile.x, tile.y, zoom_, layer_));
             return true;
         }
         if (consumed_count_ == num_tiles_) break;

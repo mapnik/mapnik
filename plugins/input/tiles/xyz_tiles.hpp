@@ -81,17 +81,17 @@ public:
         return targets_;
     }
 
-    void push_async(tile_data const& data)
+    void push_async(tile_data && data)
     {
         boost::asio::post(strand_, [&, data] {
-            while (!queue_.push(data))
+            while (!queue_.push(std::move(data)))
                 ;
         });
     }
 
-    void push(tile_data const& data)
+    void push(tile_data && data)
     {
-        queue_.push(data);
+        queue_.push(std::move(data));
     }
 
     std::optional<zxy> get_zxy()
@@ -122,22 +122,22 @@ inline std::string metadata_http(std::string const& host, std::string const& por
         boost::asio::ip::tcp::resolver resolver(ioc);
         beast::tcp_stream stream(ioc);
         auto const endpoints = resolver.async_resolve(host, port, yield[ec]);
-        if (ec) return;
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
         stream.expires_after(std::chrono::seconds(30));
         stream.async_connect(endpoints, yield[ec]);
-        if (ec) return;
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
         //HTTP GET
         http::request<http::string_body> req{http::verb::get, target, 11};
         req.set(http::field::host, host);
         req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
         http::async_write(stream, req, yield[ec]);
-        if (ec) return;
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
         beast::flat_buffer buffer;
         http::response<http::string_body> res;
         http::async_read(stream, buffer, res, yield[ec]);
-        if (ec) return;
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
         stream.socket().shutdown(tcp::socket::shutdown_both, ec);
-        if (ec) return;
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
         result = std::move(res.body());
     }, [] (std::exception_ptr ex)
     {
@@ -255,7 +255,6 @@ public:
 
         std::cerr << "\e[46m target:" << url.path() << " thread:" << std::this_thread::get_id() <<"\e[0m" << std::endl;
         req_.target(url.path());
-        // Set a timeout on the operation
         stream_.expires_after(std::chrono::seconds(10));
         // Send the HTTP request to the remote host
         http::async_write(stream_, req_,
@@ -268,9 +267,7 @@ public:
         boost::ignore_unused(bytes_transferred);
 
         if(ec) return fail(ec, "write");
-        // Receive the HTTP response
         res_ = {};
-        // Set a timeout on the operation
         stream_.expires_after(std::chrono::seconds(10));
         http::async_read(stream_, buffer_, res_,
             beast::bind_front_handler(
@@ -281,25 +278,15 @@ public:
     void on_read(beast::error_code ec, std::size_t bytes_transferred)
     {
         boost::ignore_unused(bytes_transferred);
-        //using namespace std::chrono_literals;
-        //std::this_thread::sleep_for(50ms);
-
         if(ec) return fail(ec, "read");
-        std::cerr << req_.target() << std::endl;
-        //std::string data = res_.body();
-        std::cerr << "response result:" << res_.result() << std::endl;
-        //std::cerr << "response size:" << data.size() << std::endl;
         stash_.push_async(tile_data(std::get<0>(tile_), std::get<1>(tile_), std::get<2>(tile_), std::move(res_.body())));
         auto zxy = stash_.get_zxy();
         if (!zxy)
         {
-            // Work is done, gracefully close the socket
             stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
-            // not_connected happens sometimes so don't bother reporting it.
             if (ec && ec != beast::errc::not_connected)
             {
                 return fail(ec, "shutdown");
-                // If we get here then the connection is closed gracefully
             }
             return;
         }
@@ -308,7 +295,7 @@ public:
                                        {{"z", std::get<0>(tile_)},
                                         {"x", std::get<1>(tile_)},
                                         {"y", std::get<2>(tile_)}});
-        std::cerr << "\e[1;46m target:" << url.path() << " thread:" << std::this_thread::get_id() <<"\e[0m" << std::endl;
+
         req_.target(url.path());
         http::async_write(stream_, req_,
             beast::bind_front_handler(
