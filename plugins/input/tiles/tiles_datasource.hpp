@@ -22,7 +22,7 @@
 
 #ifndef TILES_DATASOURCE_HPP_
 #define TILES_DATASOURCE_HPP_
-
+//mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/query.hpp>
@@ -31,11 +31,14 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/datasource_plugin.hpp>
-
+//boost
+#include <boost/json.hpp>
+//stl
 #include <memory>
 #include <string>
 #include <tuple>
 #include <unordered_map>
+#include <optional>
 
 DATASOURCE_PLUGIN_DEF(tiles_datasource_plugin, tiles);
 
@@ -61,10 +64,12 @@ class tiles_datasource : public mapnik::datasource
 
   private:
     void init(mapnik::parameters const& params);
+    void init_metadata(boost::json::value const& json);
     mapnik::context_ptr get_context_with_attributes() const;
     mapnik::context_ptr get_query_context(mapnik::query const& q) const;
     std::string database_path_;
     std::shared_ptr<mapnik::tiles_source> source_ptr_;
+    std::optional<std::string> url_template_;
     static std::unordered_map<std::string, std::string>& tile_cache();
 
   public:
