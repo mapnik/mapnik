@@ -27,6 +27,7 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
+#include <boost/asio/ssl.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/format.hpp>
@@ -112,7 +113,7 @@ inline void fail(beast::error_code ec, char const* what)
 
 namespace  xyz_tiles {
 
-inline std::string metadata_http(std::string const& host, std::string const& port, std::string const& target, beast::error_code& ec)
+inline std::string metadata_impl(std::string const& host, std::string const& port, std::string const& target, beast::error_code& ec)
 {
     ec = {};
     boost::asio::io_context ioc;
@@ -147,6 +148,59 @@ inline std::string metadata_http(std::string const& host, std::string const& por
     return result;
 }
 
+inline std::string metadata_ssl_impl(std::string const& host, std::string const& port, std::string const& target, beast::error_code& ec)
+{
+    ec = {};
+    boost::asio::io_context ioc;
+    boost::asio::ssl::context ctx{boost::asio::ssl::context::tlsv12_client};
+    std::string result;
+    boost::asio::spawn(ioc, [&](boost::asio::yield_context yield)
+    {
+        boost::asio::ip::tcp::resolver resolver(ioc);
+        boost::asio::ssl::stream<beast::tcp_stream> stream(ioc, ctx);
+
+        if (!SSL_set_tlsext_host_name(stream.native_handle(), host.c_str()))
+        {
+            ec.assign(static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category());
+            throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        }
+        stream.set_verify_callback(boost::asio::ssl::host_name_verification(host));
+        auto const endpoints = resolver.async_resolve(host, port, yield[ec]);
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+
+        get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
+        get_lowest_layer(stream).async_connect(endpoints, yield[ec]);
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+
+        get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
+        stream.async_handshake(boost::asio::ssl::stream_base::client, yield[ec]);
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        //HTTP GET
+        http::request<http::string_body> req{http::verb::get, target, 11};
+        req.set(http::field::host, host);
+        req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+        http::async_write(stream, req, yield[ec]);
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+
+        boost::beast::flat_buffer buffer;
+        http::response<http::string_body> res;
+        http::async_read(stream, buffer, res, yield[ec]);
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+
+        stream.async_shutdown(yield[ec]);
+        if(ec == boost::asio::ssl::error::stream_truncated)
+            ec = {};
+        else if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        result = std::move(res.body());
+    }, [] (std::exception_ptr ex)
+    {
+        if (ex) std::rethrow_exception(ex);
+    });
+    ioc.run();
+    return result;
+}
+
+
 inline boost::json::value metadata(std::string const& url_str)
 {
     auto result = boost::urls::parse_uri_reference(url_str);
@@ -155,13 +209,25 @@ inline boost::json::value metadata(std::string const& url_str)
         throw mapnik::datasource_exception(result.error().to_string());
     }
     boost::json::value json_value;
-
+    std::string default_port = "80";
     std::string scheme = result->scheme();
+    if (scheme == "https") default_port = "443";
     std::string host = result->host();
-    std::string port = result->port();
+    std::string port = result->port().empty()? default_port : std::string(result->port());
     std::string target = result->path();
+    std::string query = result->query();
+    if (!query.empty()) target += "?" + query;
     beast::error_code ec;
-    std::string str = metadata_http(host, port, target, ec);
+    std::string str;
+
+    if (scheme == "https")
+    {
+        str = metadata_ssl_impl(host, port, target, ec);
+    }
+    else
+    {
+        str = metadata_impl(host, port, target, ec);
+    }
     if (ec)
     {
         mapnik::datasource_exception("Tiles datasource: Error fetching metatada" + ec.to_string());
@@ -253,8 +319,11 @@ public:
                                         {"x", std::get<1>(tile_)},
                                         {"y", std::get<2>(tile_)}});
 
-        std::cerr << "\e[46m target:" << url.path() << " thread:" << std::this_thread::get_id() <<"\e[0m" << std::endl;
-        req_.target(url.path());
+        std::cerr << "#1 URL: " << url << std::endl;
+        std::string target = url.path();
+        if (!url.query().empty()) target += "?" + url.query();
+        req_.target(target);
+        std::cerr << "\e[41m target:" << url.path() << " thread:" << std::this_thread::get_id() <<"\e[0m" << std::endl;
         stream_.expires_after(std::chrono::seconds(10));
         // Send the HTTP request to the remote host
         http::async_write(stream_, req_,
@@ -296,10 +365,165 @@ public:
                                         {"x", std::get<1>(tile_)},
                                         {"y", std::get<2>(tile_)}});
 
-        req_.target(url.path());
+        std::cerr << "#2 URL: " << url << std::endl;
+        std::string target = url.path();
+        if (!url.query().empty()) target += "?" + url.query();
+        req_.target(target);
+        std::cerr << "\e[41m target:" << url.path() << " thread:" << std::this_thread::get_id() <<"\e[0m" << std::endl;
         http::async_write(stream_, req_,
             beast::bind_front_handler(
                 &worker::on_write,
+                shared_from_this()));
+    }
+};
+
+class worker_ssl : public std::enable_shared_from_this<worker_ssl>
+{
+    tiles_stash& stash_;
+    std::string url_template_;
+    boost::asio::strand<boost::asio::io_context::executor_type> ex_;
+    tcp::resolver resolver_;
+    boost::asio::ssl::stream<beast::tcp_stream> stream_;
+    beast::flat_buffer buffer_;
+    http::request<http::empty_body> req_;
+    http::response<http::string_body> res_;
+    zxy tile_;
+public:
+    worker_ssl(worker_ssl&&) = default;
+
+    explicit worker_ssl(boost::asio::io_context& ioc, boost::asio::ssl::context& ctx, std::string const& url_template, tiles_stash & stash)
+        : stash_(stash),
+          url_template_(url_template),
+          ex_(boost::asio::make_strand(ioc.get_executor())),
+          resolver_(boost::asio::make_strand(ioc)),
+          stream_(boost::asio::make_strand(ioc), ctx)
+    {
+        req_.version(11); // HTTP 1.1
+        req_.method(http::verb::get);
+        req_.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+    }
+
+    // Start the asynchronous operation
+    void run(std::string const& host, std::string const& port)
+    {
+        req_.set(http::field::host, host);
+
+         // SSL
+        beast::error_code ec{};
+        if (!SSL_set_tlsext_host_name(stream_.native_handle(), host.c_str()))
+        {
+            ec.assign(static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category());
+            return fail(ec, "SSL_set_tlsext_host_name");
+        }
+        stream_.set_verify_callback(boost::asio::ssl::host_name_verification(host));
+
+        resolver_.async_resolve(
+            host,
+            port,
+            beast::bind_front_handler(
+                &worker_ssl::on_resolve,
+                shared_from_this()));
+    }
+
+    void on_resolve(beast::error_code ec, tcp::resolver::results_type results)
+    {
+        if (ec) return fail(ec, "resolve");
+        // Set a timeout on the operation
+        beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(10));
+        // Make the connection on the IP address we get from a lookup
+        beast::get_lowest_layer(stream_).async_connect(
+            results,
+            beast::bind_front_handler(
+                &worker_ssl::on_connect,
+                shared_from_this()));
+    }
+    void on_connect(beast::error_code ec, tcp::resolver::results_type::endpoint_type)
+    {
+        if (ec) return fail(ec, "connect");
+        // SSL handshake
+        stream_.async_handshake(
+            boost::asio::ssl::stream_base::client,
+            beast::bind_front_handler(
+                &worker_ssl::on_handshake,
+                shared_from_this()));
+    }
+
+    void on_handshake(beast::error_code ec)
+    {
+        if (ec) return fail(ec, "connect");
+
+        auto zxy = stash_.get_zxy();
+        if (!zxy)
+        {
+            beast::get_lowest_layer(stream_).socket().shutdown(tcp::socket::shutdown_both, ec);
+            if (ec && ec != beast::errc::not_connected)
+            {
+                return fail(ec, "shutdown");
+            }
+            return;
+        }
+        tile_ = *zxy;
+        auto url = boost::urls::format(url_template_,
+                                       {{"z", std::get<0>(tile_)},
+                                        {"x", std::get<1>(tile_)},
+                                        {"y", std::get<2>(tile_)}});
+        std::cerr << "#1 SSL URL: " << url << std::endl;
+        std::string target = url.path();
+        if (!url.query().empty()) target += "?" + url.query();
+        req_.target(target);
+        std::cerr << "\e[46m target:" << target << " thread:" << std::this_thread::get_id() <<"\e[0m" << std::endl;
+        beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(10));
+        http::async_write(stream_, req_,
+            beast::bind_front_handler(
+                &worker_ssl::on_write,
+                shared_from_this()));
+    }
+    void on_write(beast::error_code ec, std::size_t bytes_transferred)
+    {
+        boost::ignore_unused(bytes_transferred);
+        if(ec) return fail(ec, "write");
+        // Receive the HTTP response
+        res_ = {};
+        http::async_read(stream_, buffer_, res_,
+            beast::bind_front_handler(
+                &worker_ssl::on_read,
+                shared_from_this()));
+    }
+
+    void on_read(beast::error_code ec, std::size_t bytes_transferred)
+    {
+        boost::ignore_unused(bytes_transferred);
+
+        if(ec) return fail(ec, "read");
+        stash_.push(tile_data(std::get<0>(tile_), std::get<1>(tile_), std::get<2>(tile_), std::move(res_.body())));
+        auto zxy = stash_.get_zxy();
+        if (!zxy)
+        {
+            // Work is done, gracefully close the socket
+            beast::get_lowest_layer(stream_).socket().shutdown(tcp::socket::shutdown_both, ec);
+            // not_connected happens sometimes so don't bother reporting it.
+            if (ec && ec != beast::errc::not_connected)
+            {
+                return fail(ec, "shutdown");
+                // If we get here then the connection is closed gracefully
+            }
+            return;
+        }
+        tile_ = *zxy;
+        auto url = boost::urls::format(url_template_,
+                                       {{"z", std::get<0>(tile_)},
+                                        {"x", std::get<1>(tile_)},
+                                        {"y", std::get<2>(tile_)}});
+        std::cerr << "#2 SSL URL: " << url << std::endl;
+        std::string target = url.path();
+        if (!url.query().empty()) target += "?" + url.query();
+        req_.target(target);
+        std::cerr << "\e[45m target:" << target << " thread:" << std::this_thread::get_id() <<"\e[0m" << std::endl;
+        beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(10));
+
+        http::async_write(stream_, req_,
+            beast::bind_front_handler(
+                &worker_ssl::on_write,
                 shared_from_this()));
     }
 };

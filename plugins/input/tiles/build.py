@@ -45,7 +45,7 @@ plugin_sources = Split(
 )
 
 # Link Library to Dependencies
-libraries = ['sqlite3', 'boost_url', 'boost_context']
+libraries = ['sqlite3', 'boost_url', 'boost_context', 'ssl', 'crypto']
 linkflags = []
 
 if env['SQLITE_LINKFLAGS']:

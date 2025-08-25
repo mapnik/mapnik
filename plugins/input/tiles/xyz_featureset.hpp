@@ -70,6 +70,8 @@ class xyz_featureset : public mapnik::Featureset
     std::size_t datasource_hash_;
     bool next_tile();
     bool first_ = true;
+    bool ssl_ = false;
+    boost::asio::ssl::context ctx_{boost::asio::ssl::context::tlsv12_client};
 };
 
 #endif // XYZ_FEATURESET_HPP

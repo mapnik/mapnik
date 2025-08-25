@@ -61,7 +61,16 @@ xyz_featureset::xyz_featureset(std::string url_template,
 
     boost::urls::url url = boost::urls::format(url_template_, {{"z", zoom_}, {"x", 0}, {"y", 0}});
     host_ = url.host();
-    port_ = url.port();
+    auto scheme = url.scheme();
+    if (scheme == "https")
+    {
+        ssl_ = true;
+        port_ = url.port().empty() ? "443" : url.port();
+    }
+    else
+    {
+        port_ = url.port().empty() ? "80" : url.port();
+    }
 
 }
 
@@ -139,12 +148,22 @@ bool xyz_featureset::next_tile()
                 auto reporting_work = boost::asio::require(
                     ioc_.get_executor(),
                     boost::asio::execution::outstanding_work.tracked);
-
-                workers_.emplace_back([this, reporting_work] {
-                    boost::asio::io_context ioc;
-                    std::make_shared<worker>(ioc, url_template_, stash_)->run(host_, port_);
-                    ioc.run();
-                });
+                if (ssl_)
+                {
+                    workers_.emplace_back([this, reporting_work] {
+                        boost::asio::io_context ioc;
+                        std::make_shared<worker_ssl>(ioc, ctx_, url_template_, stash_)->run(host_, port_);
+                        ioc.run();
+                    });
+                }
+                else
+                {
+                    workers_.emplace_back([this, reporting_work] {
+                        boost::asio::io_context ioc;
+                        std::make_shared<worker>(ioc, url_template_, stash_)->run(host_, port_);
+                        ioc.run();
+                    });
+                }
             }
             workers_.emplace_back([this]
             {
