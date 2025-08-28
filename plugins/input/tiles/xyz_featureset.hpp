@@ -36,7 +36,10 @@ class xyz_featureset : public mapnik::Featureset
     xyz_featureset(std::string url_template,
                    mapnik::context_ptr const& ctx,
                    int const zoom,
-                   mapnik::box2d<double> const& extent,
+                   int const xmin,
+                   int const xmax,
+                   int const ymin,
+                   int const ymax,
                    std::string const& layer,
                    std::unordered_map<std::string, std::string>& vector_tile_cache,
                    std::size_t datasource_hash);
@@ -49,17 +52,19 @@ class xyz_featureset : public mapnik::Featureset
     bool valid() const;
     std::string url_template_;
     mapnik::context_ptr context_;
+    boost::asio::io_context ioc_;
+    boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::tlsv12_client};
     int zoom_;
-    mapnik::box2d<double> extent_;
-    std::string const layer_;
-    std::unique_ptr<mvt_io> vector_tile_;
-    queue_type queue_{16};
-    std::unordered_map<std::string, std::string>& vector_tile_cache_;
     int xmin_;
     int xmax_;
     int ymin_;
     int ymax_;
-    boost::asio::io_context ioc_;
+    mapnik::box2d<double> extent_;
+    std::string const layer_;
+    std::unique_ptr<mvt_io> vector_tile_;
+    std::unordered_map<std::string, std::string>& vector_tile_cache_;
+    const std::size_t QUEUE_SIZE_;
+    queue_type queue_;
     std::vector<std::thread> workers_;
     std::vector<zxy> targets_;
     std::string host_;
@@ -71,7 +76,9 @@ class xyz_featureset : public mapnik::Featureset
     bool next_tile();
     bool first_ = true;
     bool ssl_ = false;
-    boost::asio::ssl::context ctx_{boost::asio::ssl::context::tlsv12_client};
+
+    std::atomic<bool> done_ = false;
+
 };
 
 #endif // XYZ_FEATURESET_HPP

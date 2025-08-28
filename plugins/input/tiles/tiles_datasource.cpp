@@ -77,6 +77,22 @@ mapnik::box2d<double> tiles_datasource::envelope() const
     return extent_;
 }
 
+namespace {
+
+boost::json::value const& xyz_metadata(std::string const& url_str)
+{
+    static thread_local std::unordered_map<std::string, boost::json::value> metadata_cache;
+    auto itr = metadata_cache.find(url_str);
+    if (itr == metadata_cache.end())
+    {
+        auto meta = xyz_tiles::metadata(url_str);
+        auto result = metadata_cache.emplace(url_str, std::move(meta));
+        return result.first->second;
+    }
+    return itr->second;
+}
+} //
+
 void tiles_datasource::init_metadata(boost::json::value const& metadata)
 {
     auto layers = metadata.at("vector_layers");
@@ -218,7 +234,7 @@ void tiles_datasource::init(mapnik::parameters const& params)
         // Bounds are specified in EPSG:4326, therefore transformation is required.
         mapnik::lonlat2merc(extent_.minx_, extent_.miny_);
         mapnik::lonlat2merc(extent_.maxx_, extent_.maxy_);
-        auto metadata = xyz_tiles::metadata(*json_url);
+        auto metadata = xyz_metadata(*json_url);
         init_metadata(metadata);
         std::cerr << "min/max zoom: " << minzoom_ << "," << maxzoom_ << std::endl;
         auto tiles = metadata.at("tiles");
@@ -292,7 +308,7 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
     mapnik::progress_timer __stats__(std::clog, "tiles_datasource::features");
 #endif
     auto& vector_tile_cache = tile_cache();
-    if (vector_tile_cache.size() > 16)
+    if (vector_tile_cache.size() > 64)
     {
         vector_tile_cache.clear();
     }
@@ -303,11 +319,25 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
 
     if (url_template_)
     {
+        bbox.set_minx(bbox.minx() + 1e-6);
+        bbox.set_maxx(bbox.maxx() - 1e-6);
+        bbox.set_miny(bbox.miny() + 1e-6);
+        bbox.set_maxy(bbox.maxy() - 1e-6);
+
+        int tile_count = 1 << zoom;
+        auto xmin = static_cast<int>((bbox.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) *
+                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+        auto xmax = static_cast<int>((bbox.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) *
+                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+        auto ymin = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - bbox.maxy()) *
+                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+        auto ymax = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - bbox.miny()) *
+                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
         auto datasource_hash = std::hash<std::string>{}(*url_template_);
         return std::make_shared<xyz_featureset>(*url_template_,
                                                 context,
                                                 zoom,
-                                                bbox,
+                                                xmin, xmax, ymin, ymax,
                                                 layer_,
                                                 vector_tile_cache,
                                                 datasource_hash);
@@ -368,7 +398,10 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
         return std::make_shared<xyz_featureset>(*url_template_,
                                                 context,
                                                 maxzoom_,
-                                                query_bbox,
+                                                tile_x,
+                                                tile_x,
+                                                tile_y,
+                                                tile_y,
                                                 layer_,
                                                 tile_cache(),
                                                 datasource_hash);
