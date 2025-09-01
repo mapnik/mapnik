@@ -39,6 +39,7 @@
 #include <thread>
 #include <tuple>
 
+#include <mapnik/debug.hpp>
 
 namespace beast = boost::beast;
 namespace http  = beast::http;
@@ -109,7 +110,7 @@ public:
 // Report a failure
 inline void fail(beast::error_code ec, char const* what)
 {
-    std::cerr << what << ": " << ec.message() << " FIXME\n";
+    MAPNIK_LOG_ERROR(fail) << "Tiles Plugin:" << ec.message();
 }
 
 namespace  xyz_tiles {
@@ -124,22 +125,22 @@ inline std::string metadata_impl(std::string const& host, std::string const& por
         boost::asio::ip::tcp::resolver resolver(ioc);
         beast::tcp_stream stream(ioc);
         auto const endpoints = resolver.async_resolve(host, port, yield[ec]);
-        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
         stream.expires_after(std::chrono::seconds(30));
         stream.async_connect(endpoints, yield[ec]);
-        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
         //HTTP GET
         http::request<http::string_body> req{http::verb::get, target, 11};
         req.set(http::field::host, host);
         req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
         http::async_write(stream, req, yield[ec]);
-        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
         beast::flat_buffer buffer;
         http::response<http::string_body> res;
         http::async_read(stream, buffer, res, yield[ec]);
-        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
         stream.socket().shutdown(tcp::socket::shutdown_both, ec);
-        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
         result = std::move(res.body());
     }, [] (std::exception_ptr ex)
     {
@@ -163,35 +164,35 @@ inline std::string metadata_ssl_impl(std::string const& host, std::string const&
         if (!SSL_set_tlsext_host_name(stream.native_handle(), host.c_str()))
         {
             ec.assign(static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category());
-            throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+            throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
         }
         stream.set_verify_callback(boost::asio::ssl::host_name_verification(host));
         auto const endpoints = resolver.async_resolve(host, port, yield[ec]);
-        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
 
         get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
         get_lowest_layer(stream).async_connect(endpoints, yield[ec]);
-        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
 
         get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
         stream.async_handshake(boost::asio::ssl::stream_base::client, yield[ec]);
-        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
         //HTTP GET
         http::request<http::string_body> req{http::verb::get, target, 11};
         req.set(http::field::host, host);
         req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
         http::async_write(stream, req, yield[ec]);
-        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
 
         boost::beast::flat_buffer buffer;
         http::response<http::string_body> res;
         http::async_read(stream, buffer, res, yield[ec]);
-        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
 
         stream.async_shutdown(yield[ec]);
         if(ec == boost::asio::ssl::error::stream_truncated)
             ec = {};
-        else if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.to_string());
+        else if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
         result = std::move(res.body());
     }, [] (std::exception_ptr ex)
     {
@@ -207,7 +208,7 @@ inline boost::json::value metadata(std::string const& url_str)
     auto result = boost::urls::parse_uri_reference(url_str);
     if (!result)
     {
-        throw mapnik::datasource_exception(result.error().to_string());
+        throw mapnik::datasource_exception(result.error().message());
     }
     boost::json::value json_value;
     std::string default_port = "80";
@@ -231,7 +232,7 @@ inline boost::json::value metadata(std::string const& url_str)
     }
     if (ec)
     {
-        mapnik::datasource_exception("Tiles datasource: Error fetching metatada" + ec.to_string());
+        mapnik::datasource_exception("Tiles datasource: Error fetching metatada" + ec.message());
     }
     boost::json::value json;
     try
