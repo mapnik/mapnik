@@ -236,7 +236,6 @@ void tiles_datasource::init(mapnik::parameters const& params)
         mapnik::lonlat2merc(extent_.maxx_, extent_.maxy_);
         auto metadata = xyz_metadata(*json_url);
         init_metadata(metadata);
-        std::cerr << "min/max zoom: " << minzoom_ << "," << maxzoom_ << std::endl;
         auto tiles = metadata.at("tiles");
         for (auto const& tiles_url : tiles.as_array())
         {
