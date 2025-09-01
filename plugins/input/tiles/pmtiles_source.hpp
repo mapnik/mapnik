@@ -522,7 +522,7 @@ class pmtiles_source : public tiles_source
         }
         else
         {
-            metadata = {data() + metadata_offset, metadata_length};
+            metadata = {data() + metadata_offset, static_cast<std::size_t>(metadata_length)};
         }
         boost::json::value json_value;
         try
