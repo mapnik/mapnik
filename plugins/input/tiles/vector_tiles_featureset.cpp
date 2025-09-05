@@ -57,8 +57,8 @@ vector_tiles_featureset::vector_tiles_featureset(std::shared_ptr<mapnik::tiles_s
                              (tile_count / mapnik::EARTH_CIRCUMFERENCE));
     ymax_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.miny()) *
                              (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    x_ = xmin_;
-    y_ = ymin_;
+    x_ = xmax_;
+    y_ = ymax_;
     open_tile();
 }
 
@@ -101,14 +101,14 @@ mapnik::feature_ptr vector_tiles_featureset::next()
 
 bool vector_tiles_featureset::next_tile()
 {
-    ++x_;
-    if (x_ <= xmax_)
+    --x_;
+    if (x_ >= xmin_)
     {
         return true;
     }
-    x_ = xmin_;
-    ++y_;
-    return y_ <= ymax_;
+    x_ = xmax_;
+    --y_;
+    return y_ >= ymin_;
 }
 
 bool vector_tiles_featureset::open_tile()

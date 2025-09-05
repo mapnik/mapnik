@@ -44,10 +44,10 @@ enum class tile_type : std::uint8_t { UNKNOWN = 0x00, MVT = 0x01, PNG = 0x02, JP
 
 struct entryv3
 {
-    uint64_t tile_id;
-    uint64_t offset;
-    uint32_t length;
-    uint32_t run_length;
+    std::uint64_t tile_id;
+    std::uint64_t offset;
+    std::uint32_t length;
+    std::uint32_t run_length;
 
     entryv3()
         : tile_id(0),
@@ -56,7 +56,7 @@ struct entryv3
           run_length(0)
     {}
 
-    entryv3(uint64_t _tile_id, uint64_t _offset, uint32_t _length, uint32_t _run_length)
+    entryv3(std::uint64_t _tile_id, std::uint64_t _offset, std::uint32_t _length, std::uint32_t _run_length)
         : tile_id(_tile_id),
           offset(_offset),
           length(_length),
@@ -78,68 +78,68 @@ struct malformed_directory_exception : std::exception
     char const* what() const noexcept override { return "malformed directory exception"; }
 };
 
-constexpr int8_t const max_varint_length = sizeof(uint64_t) * 8 / 7 + 1;
+constexpr int8_t const max_varint_length = sizeof(std::uint64_t) * 8 / 7 + 1;
 // from https://github.com/mapbox/protozero/blob/master/include/protozero/varint.hpp
-uint64_t decode_varint_impl(char const** data, char const* end)
+std::uint64_t decode_varint_impl(char const** data, char const* end)
 {
-    auto const* begin = reinterpret_cast<int8_t const*>(*data);
-    auto const* iend = reinterpret_cast<int8_t const*>(end);
-    int8_t const* p = begin;
-    uint64_t val = 0;
+    auto const* begin = reinterpret_cast<std::int8_t const*>(*data);
+    auto const* iend = reinterpret_cast<std::int8_t const*>(end);
+    std::int8_t const* p = begin;
+    std::uint64_t val = 0;
     if (iend - begin >= max_varint_length)
     { // fast path
         do
         {
-            int64_t b = *p++;
-            val = ((uint64_t(b) & 0x7fU));
+            std::int64_t b = *p++;
+            val = ((std::uint64_t(b) & 0x7fU));
             if (b >= 0)
             {
                 break;
             }
             b = *p++;
-            val |= ((uint64_t(b) & 0x7fU) << 7U);
+            val |= ((std::uint64_t(b) & 0x7fU) << 7U);
             if (b >= 0)
             {
                 break;
             }
             b = *p++;
-            val |= ((uint64_t(b) & 0x7fU) << 14U);
+            val |= ((std::uint64_t(b) & 0x7fU) << 14U);
             if (b >= 0)
             {
                 break;
             }
             b = *p++;
-            val |= ((uint64_t(b) & 0x7fU) << 21U);
+            val |= ((std::uint64_t(b) & 0x7fU) << 21U);
             if (b >= 0)
             {
                 break;
             }
             b = *p++;
-            val |= ((uint64_t(b) & 0x7fU) << 28U);
+            val |= ((std::uint64_t(b) & 0x7fU) << 28U);
             if (b >= 0)
             {
                 break;
             }
             b = *p++;
-            val |= ((uint64_t(b) & 0x7fU) << 35U);
+            val |= ((std::uint64_t(b) & 0x7fU) << 35U);
             if (b >= 0)
             {
                 break;
             }
             b = *p++;
-            val |= ((uint64_t(b) & 0x7fU) << 42U);
+            val |= ((std::uint64_t(b) & 0x7fU) << 42U);
             if (b >= 0)
             {
                 break;
             }
             b = *p++;
-            val |= ((uint64_t(b) & 0x7fU) << 49U);
+            val |= ((std::uint64_t(b) & 0x7fU) << 49U);
             if (b >= 0)
             {
                 break;
             }
             b = *p++;
-            val |= ((uint64_t(b) & 0x7fU) << 56U);
+            val |= ((std::uint64_t(b) & 0x7fU) << 56U);
             if (b >= 0)
             {
                 break;
@@ -158,26 +158,26 @@ uint64_t decode_varint_impl(char const** data, char const* end)
         unsigned int shift = 0;
         while (p != iend && *p < 0)
         {
-            val |= (uint64_t(*p++) & 0x7fU) << shift;
+            val |= (std::uint64_t(*p++) & 0x7fU) << shift;
             shift += 7;
         }
         if (p == iend)
         {
             throw end_of_buffer_exception{};
         }
-        val |= uint64_t(*p++) << shift;
+        val |= std::uint64_t(*p++) << shift;
     }
 
     *data = reinterpret_cast<char const*>(p);
     return val;
 }
 
-uint64_t decode_varint(char const** data, char const* end)
+std::uint64_t decode_varint(char const** data, char const* end)
 {
     // If this is a one-byte varint, decode it here.
-    if (end != *data && ((static_cast<uint64_t>(**data) & 0x80U) == 0))
+    if (end != *data && ((static_cast<std::uint64_t>(**data) & 0x80U) == 0))
     {
-        auto const val = static_cast<uint64_t>(**data);
+        auto const val = static_cast<std::uint64_t>(**data);
         ++(*data);
         return val;
     }
@@ -190,58 +190,58 @@ inline std::vector<entryv3> deserialize_directory(std::string const& decompresse
     char const* t = decompressed.data();
     char const* end = t + decompressed.size();
 
-    uint64_t const num_entries_64bit = decode_varint(&t, end);
+    std::uint64_t const num_entries_64bit = decode_varint(&t, end);
     // Sanity check to avoid excessive memory allocation attempt:
     // each directory entry takes at least 4 bytes
     if (num_entries_64bit / 4U > decompressed.size())
     {
         throw malformed_directory_exception();
     }
-    size_t const num_entries = static_cast<size_t>(num_entries_64bit);
+    std::size_t const num_entries = static_cast<std::size_t>(num_entries_64bit);
     // std::cerr << "Decompressed size" << decompressed.size() << std::endl;
     std::vector<entryv3> result;
     result.resize(num_entries);
 
-    uint64_t last_id = 0;
+    std::uint64_t last_id = 0;
     for (std::size_t i = 0; i < num_entries; ++i)
     {
-        uint64_t const val = decode_varint(&t, end);
-        if (val > std::numeric_limits<uint64_t>::max() - last_id)
+        std::uint64_t const val = decode_varint(&t, end);
+        if (val > std::numeric_limits<std::uint64_t>::max() - last_id)
         {
             throw malformed_directory_exception();
         }
-        uint64_t const tile_id = last_id + val;
+        std::uint64_t const tile_id = last_id + val;
         result[i].tile_id = tile_id;
         last_id = tile_id;
     }
 
     for (std::size_t i = 0; i < num_entries; ++i)
     {
-        uint64_t const val = decode_varint(&t, end);
-        if (val > std::numeric_limits<uint32_t>::max())
+        std::uint64_t const val = decode_varint(&t, end);
+        if (val > std::numeric_limits<std::uint32_t>::max())
         {
             throw malformed_directory_exception();
         }
-        result[i].run_length = static_cast<uint32_t>(val);
+        result[i].run_length = static_cast<std::uint32_t>(val);
     }
 
-    for (size_t i = 0; i < num_entries; i++)
+    for (std::size_t i = 0; i < num_entries; ++i)
     {
-        uint64_t const val = decode_varint(&t, end);
-        if (val > std::numeric_limits<uint32_t>::max())
+        std::uint64_t const val = decode_varint(&t, end);
+        if (val > std::numeric_limits<std::uint32_t>::max())
         {
             throw malformed_directory_exception();
         }
-        result[i].length = static_cast<uint32_t>(val);
+        result[i].length = static_cast<std::uint32_t>(val);
     }
 
-    for (size_t i = 0; i < num_entries; i++)
+    for (std::size_t i = 0; i < num_entries; ++i)
     {
-        uint64_t tmp = decode_varint(&t, end);
+        std::uint64_t tmp = decode_varint(&t, end);
 
         if (i > 0 && tmp == 0)
         {
-            if (result[i - 1].offset > std::numeric_limits<uint64_t>::max() - result[i - 1].length)
+            if (result[i - 1].offset > std::numeric_limits<std::uint64_t>::max() - result[i - 1].length)
             {
                 throw malformed_directory_exception();
             }
@@ -262,7 +262,7 @@ inline std::vector<entryv3> deserialize_directory(std::string const& decompresse
 }
 
 // use a 0 length entry as a null value.
-entryv3 find_tile(std::vector<entryv3> const& entries, uint64_t tile_id)
+entryv3 find_tile(std::vector<entryv3> const& entries, std::uint64_t tile_id)
 {
     int m = 0;
     int n = static_cast<int>(entries.size()) - 1;
@@ -297,7 +297,7 @@ entryv3 find_tile(std::vector<entryv3> const& entries, uint64_t tile_id)
 
     return entryv3{0, 0, 0, 0};
 }
-void rotate(int64_t n, uint32_t& x, uint32_t& y, uint32_t rx, uint32_t ry)
+void rotate(std::int64_t n, std::uint32_t& x, std::uint32_t& y, std::uint32_t rx, std::uint32_t ry)
 {
     if (ry == 0)
     {
@@ -306,13 +306,13 @@ void rotate(int64_t n, uint32_t& x, uint32_t& y, uint32_t rx, uint32_t ry)
             x = n - 1 - x;
             y = n - 1 - y;
         }
-        uint32_t t = x;
+        std::uint32_t t = x;
         x = y;
         y = t;
     }
 }
 
-inline uint64_t zxy_to_tileid(uint8_t z, uint32_t x, uint32_t y)
+inline std::uint64_t zxy_to_tileid(std::uint8_t z, std::uint32_t x, std::uint32_t y)
 {
     if (z > 31)
     {
@@ -322,13 +322,13 @@ inline uint64_t zxy_to_tileid(uint8_t z, uint32_t x, uint32_t y)
     {
         throw std::overflow_error("tile x/y outside zoom level bounds");
     }
-    uint64_t acc = ((1LL << (z * 2U)) - 1) / 3;
-    uint32_t tx = x, ty = y;
+    std::uint64_t acc = ((1LL << (z * 2U)) - 1) / 3;
+    std::uint32_t tx = x, ty = y;
     int a = z - 1;
-    for (uint32_t s = 1LL << a; s > 0; s >>= 1)
+    for (std::uint32_t s = 1LL << a; s > 0; s >>= 1)
     {
-        uint32_t rx = s & tx;
-        uint32_t ry = s & ty;
+        std::uint32_t rx = s & tx;
+        std::uint32_t ry = s & ty;
         rotate(s, tx, ty, rx, ry);
         acc += ((3LL * rx) ^ ry) << a;
         a--;
@@ -448,7 +448,7 @@ class pmtiles_source : public tiles_source
     compression_type compression_;
     tile_type type_;
 
-    std::pair<uint64_t, uint32_t> get_tile_position(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
+    std::pair<std::uint64_t, std::uint32_t> get_tile_position(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
     {
         try
         {
