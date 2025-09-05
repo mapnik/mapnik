@@ -45,8 +45,6 @@ xyz_featureset::xyz_featureset(std::string url_template,
       xmax_(xmax),
       ymin_(ymin),
       ymax_(ymax),
-
-      //extent_(extent),
       layer_(layer),
       vector_tile_(nullptr),
       vector_tile_cache_(vector_tile_cache),
