@@ -145,38 +145,36 @@ bool xyz_featureset::next_tile()
             }
         }
         if (num_tiles_ != QUEUE_SIZE_) throw mapnik::datasource_exception("FAIL");
-        if (true) //!stash_.targets().empty())
+
+        std::size_t max_threads = 4;
+        std::size_t threads = std::min(max_threads, stash_.targets().size()) ;
+        workers_.reserve(threads + 1);
+        for(std::size_t i = 0; i < threads; ++i)
         {
-            std::size_t max_threads = 4;
-            std::size_t threads = std::min(max_threads, stash_.targets().size()) ;
-            workers_.reserve(threads + 1);
-            for(std::size_t i = 0; i < threads; ++i)
+            auto reporting_work = boost::asio::require(
+                ioc_.get_executor(),
+                boost::asio::execution::outstanding_work.tracked);
+            if (ssl_)
             {
-                auto reporting_work = boost::asio::require(
-                    ioc_.get_executor(),
-                    boost::asio::execution::outstanding_work.tracked);
-                if (ssl_)
-                {
-                    workers_.emplace_back([this, reporting_work] {
-                        boost::asio::io_context ioc;
-                        std::make_shared<worker_ssl>(ioc, ssl_ctx_, url_template_, stash_, std::ref(done_))->run(host_, port_);
-                        ioc.run();
-                    });
-                }
-                else
-                {
-                    workers_.emplace_back([this, reporting_work] {
-                        boost::asio::io_context ioc;
-                        std::make_shared<worker>(ioc, url_template_, stash_, std::ref(done_))->run(host_, port_);
-                        ioc.run();
-                    });
-                }
+                workers_.emplace_back([this, reporting_work] {
+                    boost::asio::io_context ioc;
+                    std::make_shared<worker_ssl>(ioc, ssl_ctx_, url_template_, stash_, std::ref(done_))->run(host_, port_);
+                    ioc.run();
+                });
             }
-            workers_.emplace_back([this]
+            else
             {
-                ioc_.run();
-            });
+                workers_.emplace_back([this, reporting_work] {
+                    boost::asio::io_context ioc;
+                    std::make_shared<worker>(ioc, url_template_, stash_, std::ref(done_))->run(host_, port_);
+                    ioc.run();
+                });
+            }
         }
+        workers_.emplace_back([this]
+        {
+            ioc_.run();
+        });
     }
     // consume tiles from the queue
     bool status = false;
@@ -194,15 +192,21 @@ bool xyz_featureset::next_tile()
                 status = true;
 
                 //std::cerr << "\e[1;41m Consumer thread:" << std::this_thread::get_id() << " tile size:" << tile.data.size() << "\e[0m" << std::endl;
-                std::string decompressed;
-                mapnik::vector_tile_impl::zlib_decompress(tile.data.data(), tile.data.size(), decompressed);
-                vector_tile_.reset(new mvt_io(std::move(decompressed), context_, tile.x, tile.y, zoom_, layer_));
+
 
                 auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % tile.zoom % tile.x % tile.y).str();
                 auto itr = vector_tile_cache_.find(datasource_key);
                 if (itr == vector_tile_cache_.end())
                 {
-                    vector_tile_cache_.emplace(datasource_key, std::move(tile.data));
+                    std::string decompressed;
+                    mapnik::vector_tile_impl::zlib_decompress(tile.data.data(), tile.data.size(), decompressed);
+                    vector_tile_cache_.emplace(datasource_key, decompressed);
+                    vector_tile_.reset(new mvt_io(std::move(decompressed), context_, tile.x, tile.y, zoom_, layer_));
+                }
+                else
+                {
+                    std::string buffer = itr->second;
+                    vector_tile_.reset(new mvt_io(std::move(buffer), context_, tile.x, tile.y, zoom_, layer_));
                 }
                 if (consumed_count_ == QUEUE_SIZE_) done_.store(true);
                 break;
