@@ -202,7 +202,6 @@ inline std::string metadata_ssl_impl(std::string const& host, std::string const&
     return result;
 }
 
-
 inline boost::json::value metadata(std::string const& url_str)
 {
     auto result = boost::urls::parse_uri_reference(url_str);
@@ -267,8 +266,8 @@ public:
         : stash_(stash),
           url_template_(url_template),
           ex_(boost::asio::make_strand(ioc.get_executor())),
-          resolver_(boost::asio::make_strand(ioc)),
-          stream_(boost::asio::make_strand(ioc)),
+          resolver_(ex_),
+          stream_(ex_),
           done_(done)
     {
         req_.version(11); // HTTP 1.1
@@ -415,8 +414,8 @@ public:
         : stash_(stash),
           url_template_(url_template),
           ex_(boost::asio::make_strand(ioc.get_executor())),
-          resolver_(boost::asio::make_strand(ioc)),
-          stream_(boost::asio::make_strand(ioc), ctx),
+          resolver_(ex_),
+          stream_(ex_, ctx),
           done_(done)
     {
         req_.version(11); // HTTP 1.1
