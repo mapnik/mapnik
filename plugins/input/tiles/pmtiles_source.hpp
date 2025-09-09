@@ -198,7 +198,6 @@ inline std::vector<entryv3> deserialize_directory(std::string const& decompresse
         throw malformed_directory_exception();
     }
     std::size_t const num_entries = static_cast<std::size_t>(num_entries_64bit);
-    // std::cerr << "Decompressed size" << decompressed.size() << std::endl;
     std::vector<entryv3> result;
     result.resize(num_entries);
 
