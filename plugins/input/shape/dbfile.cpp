@@ -32,10 +32,6 @@
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-#include <boost/interprocess/mapped_region.hpp>
-#include <mapnik/mapped_memory_cache.hpp>
-#endif
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
