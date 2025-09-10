@@ -285,11 +285,7 @@ std::int64_t scale_to_zoom(double scale, std::int64_t minzoom, std::int64_t maxz
     for (std::int64_t zoom = 0; zoom < 22; ++zoom)
     {
         if (scale > std::ceil(scales[zoom]))
-            return std::min(zoom, minzoom);
-        else if (scale < std::ceil(scales[zoom]) && scale > std::ceil(scales[zoom + 1]))
-        {
             return std::min(zoom, maxzoom);
-        }
     }
     return maxzoom;
 }
