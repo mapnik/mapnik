@@ -158,7 +158,7 @@ bool xyz_featureset::next_tile()
             {
                 workers_.emplace_back([this, reporting_work] {
                     boost::asio::io_context ioc;
-                    std::make_shared<worker_ssl>(ioc, ssl_ctx_, url_template_, stash_, std::ref(done_))->run(host_, port_);
+                    std::make_shared<worker_ssl>(ioc, ssl_ctx_, host_, port_, url_template_, stash_, std::ref(done_))->run();
                     ioc.run();
                 });
             }
@@ -166,7 +166,7 @@ bool xyz_featureset::next_tile()
             {
                 workers_.emplace_back([this, reporting_work] {
                     boost::asio::io_context ioc;
-                    std::make_shared<worker>(ioc, url_template_, stash_, std::ref(done_))->run(host_, port_);
+                    std::make_shared<worker>(ioc, host_, port_, url_template_, stash_, std::ref(done_))->run();
                     ioc.run();
                 });
             }

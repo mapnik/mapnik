@@ -250,6 +250,8 @@ inline boost::json::value metadata(std::string const& url_str)
 class worker : public std::enable_shared_from_this<worker>
 {
     tiles_stash& stash_;
+    std::string host_;
+    std::string port_;
     std::string url_template_;
     boost::asio::strand<boost::asio::io_context::executor_type> ex_;
     tcp::resolver resolver_;
@@ -262,8 +264,11 @@ class worker : public std::enable_shared_from_this<worker>
 public:
     worker(worker&&) = default;
 
-    explicit worker(boost::asio::io_context& ioc, std::string const& url_template, tiles_stash & stash, std::atomic<bool> & done)
+    explicit worker(boost::asio::io_context& ioc, std::string const& host, std::string const& port,
+                    std::string const& url_template, tiles_stash & stash, std::atomic<bool> & done)
         : stash_(stash),
+          host_(host),
+          port_(port),
           url_template_(url_template),
           ex_(boost::asio::make_strand(ioc.get_executor())),
           resolver_(ex_),
@@ -276,12 +281,12 @@ public:
     }
 
     // Start the asynchronous operation
-    void run(std::string const& host, std::string const& port)
+    void run()
     {
-        req_.set(http::field::host, host);
+        req_.set(http::field::host, host_);
         resolver_.async_resolve(
-            host,
-            port,
+            host_,
+            port_,
             beast::bind_front_handler(
                 &worker::on_resolve,
                 shared_from_this()));
@@ -398,6 +403,8 @@ public:
 class worker_ssl : public std::enable_shared_from_this<worker_ssl>
 {
     tiles_stash& stash_;
+    std::string host_;
+    std::string port_;
     std::string url_template_;
     boost::asio::strand<boost::asio::io_context::executor_type> ex_;
     tcp::resolver resolver_;
@@ -410,8 +417,12 @@ class worker_ssl : public std::enable_shared_from_this<worker_ssl>
 public:
     worker_ssl(worker_ssl&&) = default;
 
-    explicit worker_ssl(boost::asio::io_context& ioc, boost::asio::ssl::context& ctx, std::string const& url_template, tiles_stash & stash, std::atomic<bool> & done)
+    explicit worker_ssl(boost::asio::io_context& ioc, boost::asio::ssl::context& ctx,
+                        std::string const& host, std::string const& port,
+                        std::string const& url_template, tiles_stash & stash, std::atomic<bool> & done)
         : stash_(stash),
+          host_(host),
+          port_(port),
           url_template_(url_template),
           ex_(boost::asio::make_strand(ioc.get_executor())),
           resolver_(ex_),
@@ -424,22 +435,22 @@ public:
     }
 
     // Start the asynchronous operation
-    void run(std::string const& host, std::string const& port)
+    void run()
     {
-        req_.set(http::field::host, host);
+        req_.set(http::field::host, host_);
 
          // SSL
         beast::error_code ec {};
-        if (!SSL_set_tlsext_host_name(stream_.native_handle(), host.c_str()))
+        if (!SSL_set_tlsext_host_name(stream_.native_handle(), host_.c_str()))
         {
             ec.assign(static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category());
             return fail(ec, "SSL_set_tlsext_host_name");
         }
-        stream_.set_verify_callback(boost::asio::ssl::host_name_verification(host));
+        stream_.set_verify_callback(boost::asio::ssl::host_name_verification(host_));
 
         resolver_.async_resolve(
-            host,
-            port,
+            host_,
+            port_,
             beast::bind_front_handler(
                 &worker_ssl::on_resolve,
                 shared_from_this()));
