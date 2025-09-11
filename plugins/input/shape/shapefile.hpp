@@ -33,12 +33,6 @@
 #include <mapnik/global.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/geometry/box2d.hpp>
-
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-#include <boost/interprocess/mapped_region.hpp>
-#endif
-#include <mapnik/util/noncopyable.hpp>
-
 #include <mapnik/util/mapped_memory_file.hpp>
 
 using mapnik::box2d;

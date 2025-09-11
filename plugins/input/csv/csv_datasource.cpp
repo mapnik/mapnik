@@ -44,15 +44,6 @@
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geom_util.hpp>
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/interprocess/mapped_region.hpp>
-#include <boost/interprocess/streams/bufferstream.hpp>
-MAPNIK_DISABLE_WARNING_POP
-#include <mapnik/mapped_memory_cache.hpp>
-#endif
 #include <mapnik/util/mapped_memory_file.hpp>
 
 // stl
