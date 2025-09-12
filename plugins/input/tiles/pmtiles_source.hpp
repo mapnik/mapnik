@@ -24,15 +24,13 @@
 #define MAPNIK_PMTILES_SOURCE_HPP
 
 #include <mapnik/global.hpp>
+#include <mapnik/util/mapped_memory_file.hpp>
 #include "tiles_source.hpp"
 // stl
 #include <iostream>
 #include <tuple>
 #include <fstream>
 
-// boost
-#include <boost/interprocess/file_mapping.hpp>
-#include <boost/interprocess/mapped_region.hpp>
 // mapnik_vector_tile
 #include "vector_tile_compression.hpp"
 
@@ -351,8 +349,9 @@ inline std::uint64_t read_uint64_xdr(char const* buf, std::size_t pos)
     return val;
 }
 
-class pmtiles_source : public tiles_source
+class pmtiles_source : public tiles_source, util::mapped_memory_file
 {
+    std::size_t const HEADER_SIZE = 127;
     struct header
     {
         explicit header(char const* data)
@@ -388,8 +387,7 @@ class pmtiles_source : public tiles_source
 
     pmtiles_source() {}
     pmtiles_source(std::string const& file_name)
-        : file_(file_name.c_str(), boost::interprocess::read_only),
-          region_(file_, boost::interprocess::read_only)
+        : mapped_memory_file(file_name)
     {
         if (!is_good())
         {
@@ -402,7 +400,15 @@ class pmtiles_source : public tiles_source
 
     void init()
     {
-        header h(data());
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+        std::string_view buffer {file_.buffer().first, HEADER_SIZE};
+#else
+        std::string buffer;
+        buffer.resize(HEADER_SIZE);
+        file_.seekg(0);
+        file_.read(buffer.data(), HEADER_SIZE);
+#endif
+        header h(buffer.data());
         if (!h.check_valid())
         {
             throw mapnik::datasource_exception("PMTiles: invalid magic number");
@@ -420,31 +426,35 @@ class pmtiles_source : public tiles_source
             extent_ = mapnik::box2d<double>{h.minx(), h.miny(), h.maxx(), h.maxy()};
             root_dir_offset_ = h.root_dir_offset();
             root_dir_length_ = h.root_dir_length();
+            metadata_offset_ = h.metadata_offset();
+            metadata_length_ = h.metadata_length();
             tile_data_offset_ = h.tile_data_offset();
             leaf_directories_offset_ = h.leaf_directories_offset();
-            compression_ = h.tile_compression();
+            internal_compression_ = h.internal_compression();
+            tile_compression_ = h.tile_compression();
             type_ = h.type();
+            // std::cerr << "Metadata offset/length:" << metadata_offset_ << "," << metadata_length_ << std::endl;
             // std::cerr << "Internal compression:" << (int)h.internal_compression() << std::endl;
             // std::cerr << "Tile compression:" << (int)h.tile_compression() << std::endl;
             // std::cerr << "Addressed tile count:" << h.addressed_tile_count() << std::endl;
         }
     }
 
-    inline bool is_good() const { return (region_.get_size() > 0); }
+    inline bool is_good() const { return file_.good(); }
     inline bool is_raster() const { return type_ != tile_type::MVT; }
 
   private:
-    inline char const* data() const { return reinterpret_cast<char const*>(region_.get_address()); }
-    boost::interprocess::file_mapping file_;
-    boost::interprocess::mapped_region region_;
     std::uint64_t root_dir_offset_;
     std::uint64_t root_dir_length_;
+    std::uint64_t metadata_offset_;
+    std::uint64_t metadata_length_;
     std::uint64_t tile_data_offset_;
     std::uint64_t leaf_directories_offset_;
     std::uint8_t minzoom_ = 0;
     std::uint8_t maxzoom_ = 14;
     mapnik::box2d<double> extent_;
-    compression_type compression_;
+    compression_type internal_compression_;
+    compression_type tile_compression_;
     tile_type type_;
 
     std::pair<std::uint64_t, std::uint32_t> get_tile_position(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
@@ -457,7 +467,15 @@ class pmtiles_source : public tiles_source
             for (std::size_t depth = 0; depth < 4; ++depth)
             {
                 std::string decompressed_dir;
-                mapnik::vector_tile_impl::zlib_decompress(data() + dir_offset, dir_length, decompressed_dir);
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+                std::string_view buffer{file_.buffer().first + dir_offset, dir_length};
+#else
+                std::string buffer;
+                buffer.resize(dir_length);
+                file_.seekg(dir_offset, std::ios::beg);
+                file_.read(buffer.data(), dir_length);
+#endif
+                mapnik::vector_tile_impl::zlib_decompress(buffer.data(), buffer.size(), decompressed_dir);
                 auto dir_entries = deserialize_directory(decompressed_dir);
                 auto entry = find_tile(dir_entries, tile_id);
                 if (entry.length > 0)
@@ -496,32 +514,63 @@ class pmtiles_source : public tiles_source
     std::string get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
     {
         auto tile = get_tile_position(z, x, y);
-        if (compression_ == compression_type::GZIP)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+        std::string_view buffer{file_.buffer().first + tile.first, tile.second};
+#else
+        std::string buffer;
+        buffer.resize(tile.second);
+        file_.seekg(tile.first, std::ios::beg);
+        file_.read(buffer.data(), tile.second);
+#endif
+        if (tile_compression_ == compression_type::GZIP)
         {
-            if (mapnik::vector_tile_impl::is_gzip_compressed(data() + tile.first, tile.second) ||
-                mapnik::vector_tile_impl::is_zlib_compressed(data() + tile.first, tile.second))
+            if (mapnik::vector_tile_impl::is_gzip_compressed(buffer.data(), buffer.size()) ||
+                mapnik::vector_tile_impl::is_zlib_compressed(buffer.data(), buffer.size()))
             {
                 std::string decompressed;
-                mapnik::vector_tile_impl::zlib_decompress(data() + tile.first, tile.second, decompressed);
+                mapnik::vector_tile_impl::zlib_decompress(buffer.data(), buffer.size(), decompressed);
                 return decompressed;
             }
         }
-        return std::string(data() + tile.first, tile.second);
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+        return std::string{buffer};
+#else
+        return buffer;
+#endif
+    }
+
+    std::string get_tile_raw(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
+    {
+        auto tile = get_tile_position(z, x, y);
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+        std::string_view buffer{file_.buffer().first + tile.first, tile.second};
+#else
+        std::string buffer;
+        buffer.resize(tile.second);
+        file_.seekg(tile.first, std::ios::beg);
+        file_.read(buffer.data(), tile.second);
+#endif
+        return std::string{buffer};
     }
 
     boost::json::value metadata() const
     {
-        header h(data());
-        auto metadata_offset = h.metadata_offset();
-        auto metadata_length = h.metadata_length();
         std::string metadata;
-        if (h.internal_compression() == compression_type::GZIP)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+        std::string_view buffer{file_.buffer().first + metadata_offset_, metadata_length_};
+#else
+        std::string buffer;
+        buffer.resize(metadata_length_);
+        file_.seekg(metadata_offset_);
+        file_.read(buffer.data(), metadata_length_);
+#endif
+        if (internal_compression_ == compression_type::GZIP)
         {
-            mapnik::vector_tile_impl::zlib_decompress(data() + metadata_offset, metadata_length, metadata);
+            mapnik::vector_tile_impl::zlib_decompress(buffer.data(), buffer.size(), metadata);
         }
         else
         {
-            metadata = {data() + metadata_offset, static_cast<std::size_t>(metadata_length)};
+            metadata = buffer;
         }
         boost::json::value json_value;
         try
