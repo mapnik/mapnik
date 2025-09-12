@@ -126,7 +126,7 @@ inline std::string metadata_impl(std::string const& host, std::string const& por
         beast::tcp_stream stream(ioc);
         auto const endpoints = resolver.async_resolve(host, port, yield[ec]);
         if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
-        stream.expires_after(std::chrono::seconds(30));
+        stream.expires_after(std::chrono::seconds(10));
         stream.async_connect(endpoints, yield[ec]);
         if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
         //HTTP GET
@@ -170,11 +170,11 @@ inline std::string metadata_ssl_impl(std::string const& host, std::string const&
         auto const endpoints = resolver.async_resolve(host, port, yield[ec]);
         if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
 
-        get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
+        get_lowest_layer(stream).expires_after(std::chrono::seconds(10));
         get_lowest_layer(stream).async_connect(endpoints, yield[ec]);
         if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
 
-        get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
+        get_lowest_layer(stream).expires_after(std::chrono::seconds(10));
         stream.async_handshake(boost::asio::ssl::stream_base::client, yield[ec]);
         if (ec) throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
         //HTTP GET
