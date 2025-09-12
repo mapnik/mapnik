@@ -28,6 +28,8 @@
 // stl
 #include <cmath>
 #include <optional>
+// boost
+#include <boost/algorithm/string.hpp>
 
 namespace mapnik {
 constexpr char const MAPNIK_GEOGRAPHIC_PROJ_STR[10]{"epsg:4326"};
@@ -38,13 +40,14 @@ extern std::string const MAPNIK_WEBMERCATOR_PROJ = MAPNIK_WEBMERCATOR_PROJ_STR; 
 
 static char const* well_known_srs_strings[] = {MAPNIK_GEOGRAPHIC_PROJ.c_str(), MAPNIK_WEBMERCATOR_PROJ.c_str(), ""};
 
+
 std::optional<well_known_srs_e> is_well_known_srs(std::string const& srs)
 {
-    if (srs == MAPNIK_GEOGRAPHIC_PROJ)
+    if (boost::iequals(srs, MAPNIK_GEOGRAPHIC_PROJ))
     {
         return mapnik::well_known_srs_enum::WGS_84;
     }
-    else if (srs == MAPNIK_WEBMERCATOR_PROJ)
+    else if (boost::iequals(srs, MAPNIK_WEBMERCATOR_PROJ))
     {
         return mapnik::well_known_srs_enum::WEB_MERC;
     }
