@@ -161,13 +161,13 @@ class sqlite_utils
         int const rc = sqlite3_prepare_v2(*(*ds), sql.str().c_str(), -1, &stmt, 0);
         if (rc == SQLITE_OK)
         {
-            std::shared_ptr<sqlite_resultset> rs = std::make_shared<sqlite_resultset>(stmt);
-            while (rs->is_valid() && rs->step_next())
+            sqlite_resultset rs {stmt};
+            while (rs.is_valid() && rs.step_next())
             {
-                int const type_oid = rs->column_type(0);
+                int const type_oid = rs.column_type(0);
                 if (type_oid == SQLITE_TEXT)
                 {
-                    char const* data = rs->column_text(0);
+                    char const* data = rs.column_text(0);
                     if (data)
                     {
                         tables.push_back(std::string(data));
@@ -177,7 +177,7 @@ class sqlite_utils
         }
     }
 
-    static void query_extent(std::shared_ptr<sqlite_resultset> rs, mapnik::box2d<double>& extent)
+    static void query_extent(std::unique_ptr<sqlite_resultset> & rs, mapnik::box2d<double>& extent)
     {
         bool first = true;
         while (rs->is_valid() && rs->step_next())
@@ -209,7 +209,7 @@ class sqlite_utils
 
     static bool create_spatial_index(std::string const& index_db,
                                      std::string const& index_table,
-                                     std::shared_ptr<sqlite_resultset> rs)
+                                     std::unique_ptr<sqlite_resultset>& rs)
     {
         /* TODO
            - speedups
@@ -335,7 +335,7 @@ class sqlite_utils
         mapnik::box2d<double> bbox;
     } rtree_type;
 
-    static void build_tree(std::shared_ptr<sqlite_resultset> rs, std::vector<sqlite_utils::rtree_type>& rtree_list)
+    static void build_tree(std::unique_ptr<sqlite_resultset>& rs, std::vector<sqlite_utils::rtree_type>& rtree_list)
     {
         while (rs->is_valid() && rs->step_next())
         {
@@ -470,7 +470,7 @@ class sqlite_utils
             s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata;
             s << " WHERE LOWER(f_table_name) = LOWER('" << geometry_table << "')";
             MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
-            std::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
+            auto rs = ds->execute_query(s.str());
             if (rs->is_valid() && rs->step_next())
             {
                 double xmin = rs->column_double(0);
@@ -486,7 +486,7 @@ class sqlite_utils
             std::ostringstream s;
             s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM " << index_table;
             MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
-            std::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
+            auto rs = ds->execute_query(s.str());
             if (rs->is_valid() && rs->step_next())
             {
                 if (!rs->column_isnull(0))
@@ -506,7 +506,7 @@ class sqlite_utils
             std::ostringstream s;
             s << "SELECT " << geometry_field << "," << key_field << " FROM (" << table << ")";
             MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
-            std::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
+            auto rs = ds->execute_query(s.str());
             sqlite_utils::query_extent(rs, extent);
             return true;
         }
@@ -519,7 +519,7 @@ class sqlite_utils
         {
             std::ostringstream s;
             s << "SELECT pkid,xmin,xmax,ymin,ymax FROM " << index_table << " LIMIT 1";
-            std::shared_ptr<sqlite_resultset> rs = ds->execute_query(s.str());
+            auto rs = ds->execute_query(s.str());
             if (rs->is_valid() && rs->step_next())
             {
                 return true;
@@ -539,7 +539,7 @@ class sqlite_utils
                                            std::shared_ptr<sqlite_connection> ds)
     {
         bool found = false;
-        std::shared_ptr<sqlite_resultset> rs(ds->execute_query(query));
+        auto rs = ds->execute_query(query);
         if (rs->is_valid() && rs->step_next())
         {
             for (int i = 0; i < rs->column_count(); ++i)
@@ -601,7 +601,7 @@ class sqlite_utils
         // if the subquery-based type detection failed
         std::ostringstream s;
         s << "PRAGMA table_info(" << table << ")";
-        std::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
+        auto rs = ds->execute_query(s.str());
         bool found_table = false;
         bool found_pk = false;
         while (rs->is_valid() && rs->step_next())
