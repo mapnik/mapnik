@@ -162,7 +162,7 @@ class mbtiles_source : public tiles_source
             }
             if (metadata.empty())
             {
-                throw mapnik::datasource_exception("PMTiles plugin: " + database_path_ +
+                throw mapnik::datasource_exception("Tiles plugin: " + database_path_ +
                                                    " has no 'json' entry in metadata table.");
             }
             try
