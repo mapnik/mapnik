@@ -105,11 +105,11 @@ void tiles_datasource::init_metadata(boost::json::value const& metadata)
             found = true;
             if (auto const* p = layer.as_object().if_contains("minzoom"))
             {
-                minzoom_ = p->as_int64();//std::max(minzoom_, p->as_int64());
+                minzoom_ = p->as_int64();
             }
             if (auto const* p = layer.as_object().if_contains("maxzoom"))
             {
-                maxzoom_ = p->as_int64();//std::min(maxzoom_, p->as_int64());
+                maxzoom_ = p->as_int64();
             }
             for (auto const& field : layer.at("fields").as_object())
             {
@@ -312,22 +312,17 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
     auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
     mapnik::context_ptr context = get_query_context(q);
 
+    int tile_count = 1 << zoom;
+    auto xmin = static_cast<int>((bbox.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) *
+                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    auto xmax = static_cast<int>((bbox.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) *
+                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    auto ymin = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - bbox.maxy()) *
+                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    auto ymax = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - bbox.miny()) *
+                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
     if (url_template_)
     {
-        bbox.set_minx(bbox.minx() + 1e-6);
-        bbox.set_maxx(bbox.maxx() - 1e-6);
-        bbox.set_miny(bbox.miny() + 1e-6);
-        bbox.set_maxy(bbox.maxy() - 1e-6);
-
-        int tile_count = 1 << zoom;
-        auto xmin = static_cast<int>((bbox.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) *
-                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-        auto xmax = static_cast<int>((bbox.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) *
-                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-        auto ymin = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - bbox.maxy()) *
-                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-        auto ymax = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - bbox.miny()) *
-                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
         auto datasource_hash = std::hash<std::string>{}(*url_template_);
         return std::make_shared<xyz_featureset>(*url_template_,
                                                 context,
@@ -337,7 +332,6 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
                                                 vector_tile_cache,
                                                 datasource_hash);
     }
-
     if (source_ptr_)
     {
         auto datasource_hash = std::hash<std::string>{}(database_path_);
@@ -354,13 +348,13 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
         }
         else
         {
-            return std::make_shared<vector_tiles_featureset>(source_ptr_,
-                                                             context,
-                                                             zoom,
-                                                             bbox,
-                                                             layer_,
-                                                             vector_tile_cache,
-                                                             datasource_hash);
+            return std::make_shared<xyz_featureset>(database_path_,
+                                                    context,
+                                                    zoom,
+                                                    xmin, xmax, ymin, ymax,
+                                                    layer_,
+                                                    vector_tile_cache,
+                                                    datasource_hash);
         }
     }
 

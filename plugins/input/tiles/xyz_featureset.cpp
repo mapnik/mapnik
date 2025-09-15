@@ -23,6 +23,8 @@
 // mapnik
 #include <mapnik/well_known_srs.hpp>
 #include "xyz_featureset.hpp"
+#include "pmtiles_source.hpp"
+#include "mbtiles_source.hpp"
 #include "vector_tile_compression.hpp"
 // boost
 #include <boost/format.hpp>
@@ -53,19 +55,27 @@ xyz_featureset::xyz_featureset(std::string url_template,
       stash_(ioc_,targets_, queue_),
       datasource_hash_(datasource_hash)
 {
-    boost::urls::url url = boost::urls::format(url_template_, {{"z", zoom_}, {"x", 0}, {"y", 0}});
-    host_ = url.host();
-    auto scheme = url.scheme();
-    if (scheme == "https")
+    try
     {
-        ssl_ = true;
-        port_ = url.port().empty() ? "443" : url.port();
+        boost::urls::url url = boost::urls::format(url_template_, {{"z", zoom_}, {"x", 0}, {"y", 0}});
+        host_ = url.host();
+        auto scheme = url.scheme();
+        if (scheme == "https")
+        {
+            ssl_ = true;
+            local_file_ = false;
+            port_ = url.port().empty() ? "443" : url.port();
+        }
+        else if (scheme == "http")
+        {
+            port_ = url.port().empty() ? "80" : url.port();
+            local_file_ = false;
+        }
     }
-    else
+    catch (std::exception & ex)
     {
-        port_ = url.port().empty() ? "80" : url.port();
+        std::cerr  << ex.what() << std::endl;
     }
-
 }
 
 xyz_featureset::~xyz_featureset()
@@ -140,7 +150,7 @@ bool xyz_featureset::next_tile()
                 else
                 {
                     std::string buffer = itr->second;
-                    stash_.push_async(tile_data(zoom_, x, y, std::move(buffer)));
+                    stash_.push_async(tile_data(zoom_, x, y));// std::move(buffer)));
                 }
             }
         }
@@ -162,6 +172,31 @@ bool xyz_featureset::next_tile()
                     ioc.run();
                 });
             }
+            else if (local_file_)
+            {
+                workers_.emplace_back([this, reporting_work] {
+                    //std::cerr << "\e[1;41m  Producer thread:" << std::this_thread::get_id() << " layer:" << layer_ << "\e[0m" << std::endl;
+                    std::unique_ptr<mapnik::tiles_source> source = nullptr;
+                    if (url_template_.ends_with(".pmtiles"))
+                    {
+                        source = std::make_unique<mapnik::pmtiles_source>(url_template_);
+                    }
+                    else if (url_template_.ends_with(".mbtiles"))
+                    {
+                        source = std::make_unique<mapnik::mbtiles_source>(url_template_);
+                    }
+                    if (source)
+                    {
+                        while (!done_)
+                        {
+                            auto zxy = stash_.get_zxy();
+                            if (!zxy) break;
+                            auto data = source->get_tile_raw(std::get<0>(*zxy),std::get<1>(*zxy),std::get<2>(*zxy));
+                            stash_.push_async(tile_data{std::get<0>(*zxy), std::get<1>(*zxy), std::get<2>(*zxy), std::move(data)});
+                        }
+                    }
+                });
+            }
             else
             {
                 workers_.emplace_back([this, reporting_work] {
@@ -178,47 +213,33 @@ bool xyz_featureset::next_tile()
     }
     // consume tiles from the queue
     bool status = false;
-    //std::thread consumer([this, &status] {
-        //std::cerr << "\e[1;41m Consumer thread:" << std::this_thread::get_id() << " layer:" << layer_ << "\e[0m" << std::endl;
-        //std::size_t count = 0;
-        while (!done_.load())
+    while (!done_.load())
+    {
+        tile_data tile;
+        if (queue_.pop(tile))
         {
-            tile_data tile;
-            if (queue_.pop(tile))
+            ++consumed_count_;
+            auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % tile.zoom % tile.x % tile.y).str();
+            auto itr = vector_tile_cache_.find(datasource_key);
+            if (itr != vector_tile_cache_.end())
             {
-                ++consumed_count_;
-                if (tile.data.size() == 0)
-                    break;
+                auto buffer = itr->second;
+                vector_tile_.reset(new mvt_io(std::move(buffer), context_, tile.x, tile.y, zoom_, layer_));
                 status = true;
-
-                //std::cerr << "\e[1;41m Consumer thread:" << std::this_thread::get_id() << " tile size:" << tile.data.size() << "\e[0m" << std::endl;
-
-
-                auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % tile.zoom % tile.x % tile.y).str();
-                auto itr = vector_tile_cache_.find(datasource_key);
-                if (itr == vector_tile_cache_.end())
-                {
-                    std::string decompressed;
-                    mapnik::vector_tile_impl::zlib_decompress(tile.data.data(), tile.data.size(), decompressed);
-                    vector_tile_cache_.emplace(datasource_key, decompressed);
-                    vector_tile_.reset(new mvt_io(std::move(decompressed), context_, tile.x, tile.y, zoom_, layer_));
-                }
-                else
-                {
-                    std::string buffer = itr->second;
-                    vector_tile_.reset(new mvt_io(std::move(buffer), context_, tile.x, tile.y, zoom_, layer_));
-                }
-                if (consumed_count_ == QUEUE_SIZE_) done_.store(true);
-                break;
             }
-            if (consumed_count_ == num_tiles_) done_.store(true);
-            //++count;
-            //little_nap(std::chrono::microseconds(100));
-            //std::cerr << "\e[1;41m count:" <<  count << "\e[0m" << std::endl;
+            else if (tile.data)
+            {
+                if ((*tile.data).empty()) continue;
+                std::string decompressed;
+                mapnik::vector_tile_impl::zlib_decompress((*tile.data).data(), (*tile.data).size(), decompressed);
+                vector_tile_cache_.emplace(datasource_key, decompressed);
+                vector_tile_.reset(new mvt_io(std::move(decompressed), context_, tile.x, tile.y, zoom_, layer_));
+                status = true;
+            }
+            if (consumed_count_ == QUEUE_SIZE_) done_.store(true);
+            break;
         }
-        //status = false;
-        //});
-
-        //consumer.join();
+        if (consumed_count_ == num_tiles_) done_.store(true);
+    }
     return status;
 }

@@ -52,11 +52,14 @@ struct tile_data
     std::size_t zoom;
     std::size_t x;
     std::size_t y;
-    std::string data;
+    std::optional<std::string> data;
 
     tile_data() = default; // default-ctor
     tile_data(tile_data const&) = default; // copy-ctor
     tile_data& operator=(tile_data const&) = default; // copy-assignable
+    tile_data(std::size_t zoom_, std::size_t x_, std::size_t y_)
+        : zoom(zoom_), x(x_), y(y_)
+    {}
     tile_data(std::size_t zoom_, std::size_t x_, std::size_t y_, std::string && data_)
         : zoom(zoom_), x(x_), y(y_), data(std::move(data_))
     {}
@@ -86,7 +89,7 @@ public:
 
     void push_async(tile_data && data)
     {
-        boost::asio::post(strand_, [&, data] {
+        boost::asio::post(strand_, [this, data] {
             while (!queue_.push(std::move(data)))
                 ;
         });
@@ -320,7 +323,6 @@ public:
         if (!zxy)
         {
             // Work is done, gracefully close the socket
-            //std::cerr << "\e[1;41m  stream_.socket().shutdown \e[0m" << std::endl;
             stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
             // not_connected happens sometimes so don't bother reporting it.
             if (ec && ec != beast::errc::not_connected)

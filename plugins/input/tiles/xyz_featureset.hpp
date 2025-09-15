@@ -76,7 +76,7 @@ class xyz_featureset : public mapnik::Featureset
     bool next_tile();
     bool first_ = true;
     bool ssl_ = false;
-
+    bool local_file_ = true;
     std::atomic<bool> done_ = false;
 
 };
