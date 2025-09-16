@@ -53,7 +53,9 @@ class xyz_featureset : public mapnik::Featureset
     std::string url_template_;
     mapnik::context_ptr context_;
     boost::asio::io_context ioc_;
+#if defined(MAPNIK_HAS_OPENSSL)
     boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::tlsv12_client};
+#endif
     int zoom_;
     int xmin_;
     int xmax_;

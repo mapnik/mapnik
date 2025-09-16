@@ -36,7 +36,6 @@ xyz_featureset::xyz_featureset(std::string url_template,
                                int const xmax,
                                int const ymin,
                                int const ymax,
-                               //mapnik::box2d<double> const& extent,
                                std::string const& layer,
                                std::unordered_map<std::string, std::string>& vector_tile_cache,
                                std::size_t datasource_hash)
@@ -120,17 +119,6 @@ mapnik::feature_ptr xyz_featureset::next()
     return mapnik::feature_ptr();
 }
 
-void little_nap(std::chrono::microseconds us)
-{
-    auto start = std::chrono::high_resolution_clock::now();
-    auto end = start + us;
-    do
-    {
-        std::this_thread::yield();
-    }
-    while (std::chrono::high_resolution_clock::now() < end);
-}
-
 bool xyz_featureset::next_tile()
 {
     if (first_)
@@ -150,11 +138,10 @@ bool xyz_featureset::next_tile()
                 else
                 {
                     std::string buffer = itr->second;
-                    stash_.push_async(tile_data(zoom_, x, y));// std::move(buffer)));
+                    stash_.push_async(tile_data(zoom_, x, y));
                 }
             }
         }
-        if (num_tiles_ != QUEUE_SIZE_) throw mapnik::datasource_exception("FAIL");
 
         std::size_t max_threads = 4;
         std::size_t threads = std::min(max_threads, stash_.targets().size()) ;
@@ -164,18 +151,10 @@ bool xyz_featureset::next_tile()
             auto reporting_work = boost::asio::require(
                 ioc_.get_executor(),
                 boost::asio::execution::outstanding_work.tracked);
-            if (ssl_)
+
+            if (local_file_)
             {
                 workers_.emplace_back([this, reporting_work] {
-                    boost::asio::io_context ioc;
-                    std::make_shared<worker_ssl>(ioc, ssl_ctx_, host_, port_, url_template_, stash_, std::ref(done_))->run();
-                    ioc.run();
-                });
-            }
-            else if (local_file_)
-            {
-                workers_.emplace_back([this, reporting_work] {
-                    //std::cerr << "\e[1;41m  Producer thread:" << std::this_thread::get_id() << " layer:" << layer_ << "\e[0m" << std::endl;
                     std::unique_ptr<mapnik::tiles_source> source = nullptr;
                     if (url_template_.ends_with(".pmtiles"))
                     {
@@ -197,6 +176,16 @@ bool xyz_featureset::next_tile()
                     }
                 });
             }
+#if defined(MAPNIK_HAS_OPENSSL)
+            else if (ssl_)
+            {
+                workers_.emplace_back([this, reporting_work] {
+                    boost::asio::io_context ioc;
+                    std::make_shared<worker_ssl>(ioc, ssl_ctx_, host_, port_, url_template_, stash_, std::ref(done_))->run();
+                    ioc.run();
+                });
+            }
+#endif
             else
             {
                 workers_.emplace_back([this, reporting_work] {

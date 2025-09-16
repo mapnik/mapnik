@@ -27,11 +27,14 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
-#include <boost/asio/ssl.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/format.hpp>
 #include <boost/json.hpp>
+
+#if defined(MAPNIK_HAS_OPENSSL)
+#include <boost/asio/ssl.hpp>
+#endif
 
 #include <boost/lockfree/spsc_queue.hpp>
 #include <boost/algorithm/string.hpp>
@@ -153,6 +156,8 @@ inline std::string metadata_impl(std::string const& host, std::string const& por
     return result;
 }
 
+#if defined(MAPNIK_HAS_OPENSSL)
+
 inline std::string metadata_ssl_impl(std::string const& host, std::string const& port, std::string const& target, beast::error_code& ec)
 {
     ec = {};
@@ -205,6 +210,8 @@ inline std::string metadata_ssl_impl(std::string const& host, std::string const&
     return result;
 }
 
+#endif
+
 inline boost::json::value metadata(std::string const& url_str)
 {
     auto result = boost::urls::parse_uri_reference(url_str);
@@ -226,7 +233,11 @@ inline boost::json::value metadata(std::string const& url_str)
 
     if (scheme == "https")
     {
+#if defined(MAPNIK_HAS_OPENSSL)
         str = metadata_ssl_impl(host, port, target, ec);
+#else
+        throw mapnik::datasource_exception("Tiles plugin: SSL support not available");
+#endif
     }
     else
     {
@@ -402,6 +413,7 @@ public:
     }
 };
 
+#if defined(MAPNIK_HAS_OPENSSL)
 class worker_ssl : public std::enable_shared_from_this<worker_ssl>
 {
     tiles_stash& stash_;
@@ -578,4 +590,5 @@ public:
     }
 };
 
+#endif // MAPNIK_HAS_OPENSSL
 #endif // XYZ_FEATURESET_HPP
