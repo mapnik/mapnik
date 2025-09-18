@@ -40,7 +40,6 @@ extern std::string const MAPNIK_WEBMERCATOR_PROJ = MAPNIK_WEBMERCATOR_PROJ_STR; 
 
 static char const* well_known_srs_strings[] = {MAPNIK_GEOGRAPHIC_PROJ.c_str(), MAPNIK_WEBMERCATOR_PROJ.c_str(), ""};
 
-
 std::optional<well_known_srs_e> is_well_known_srs(std::string const& srs)
 {
     if (boost::iequals(srs, MAPNIK_GEOGRAPHIC_PROJ))
