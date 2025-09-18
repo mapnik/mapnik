@@ -22,7 +22,7 @@
 
 #ifndef TILES_DATASOURCE_HPP_
 #define TILES_DATASOURCE_HPP_
-//mapnik
+// mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/query.hpp>
@@ -31,9 +31,9 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/datasource_plugin.hpp>
-//boost
+// boost
 #include <boost/json.hpp>
-//stl
+// stl
 #include <memory>
 #include <string>
 #include <tuple>
@@ -79,6 +79,7 @@ class tiles_datasource : public mapnik::datasource
     std::string json_;
     std::string layer_;
     mapnik::layer_descriptor desc_;
+    bool is_vector_ = false;
 };
 
 #endif // TILES_DATASOURCE_HPP_

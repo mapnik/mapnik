@@ -161,7 +161,7 @@ class sqlite_utils
         int const rc = sqlite3_prepare_v2(*(*ds), sql.str().c_str(), -1, &stmt, 0);
         if (rc == SQLITE_OK)
         {
-            sqlite_resultset rs {stmt};
+            sqlite_resultset rs{stmt};
             while (rs.is_valid() && rs.step_next())
             {
                 int const type_oid = rs.column_type(0);
@@ -177,7 +177,7 @@ class sqlite_utils
         }
     }
 
-    static void query_extent(std::unique_ptr<sqlite_resultset> & rs, mapnik::box2d<double>& extent)
+    static void query_extent(std::unique_ptr<sqlite_resultset>& rs, mapnik::box2d<double>& extent)
     {
         bool first = true;
         while (rs->is_valid() && rs->step_next())

@@ -38,7 +38,7 @@
 class sqlite_featureset : public mapnik::Featureset
 {
   public:
-    sqlite_featureset(std::unique_ptr<sqlite_resultset> && rs,
+    sqlite_featureset(std::unique_ptr<sqlite_resultset>&& rs,
                       mapnik::context_ptr const& ctx,
                       std::string const& encoding,
                       mapnik::box2d<double> const& bbox,

@@ -27,19 +27,19 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
+#include "xyz_tiles.hpp"
 #include "mvt_io.hpp"
-
-namespace mapnik {
-class tiles_source; // fwd decl
-}
 
 class vector_tiles_featureset : public mapnik::Featureset
 {
   public:
-    vector_tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
+    vector_tiles_featureset(std::string const& url_template,
                             mapnik::context_ptr const& ctx,
-                            int const zoom,
-                            mapnik::box2d<double> const& extent,
+                            int zoom,
+                            int xmin,
+                            int xmax,
+                            int ymin,
+                            int ymax,
                             std::string const& layer,
                             std::unordered_map<std::string, std::string>& vector_tile_cache,
                             std::size_t datasource_hash);
@@ -50,24 +50,36 @@ class vector_tiles_featureset : public mapnik::Featureset
   private:
     mapnik::feature_ptr next_feature();
     bool valid() const;
-    std::shared_ptr<mapnik::tiles_source> source_ptr_;
+    std::string url_template_;
     mapnik::context_ptr context_;
+    boost::asio::io_context ioc_;
+#if defined(MAPNIK_HAS_OPENSSL)
+    boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::tlsv12_client};
+#endif
     int zoom_;
-    mapnik::box2d<double> extent_;
-    std::string const layer_;
-    std::unique_ptr<mvt_io> vector_tile_;
-    std::unordered_map<std::string, std::string>& vector_tile_cache_;
     int xmin_;
     int xmax_;
     int ymin_;
     int ymax_;
-    /// x index of the currently accessed tile
-    int x_ = 0;
-    /// y index of the currently accessed tile
-    int y_ = 0;
+    mapnik::box2d<double> extent_;
+    std::string const layer_;
+    std::unique_ptr<mvt_io> vector_tile_;
+    std::unordered_map<std::string, std::string>& vector_tile_cache_;
+    std::size_t const QUEUE_SIZE_;
+    queue_type queue_;
+    std::vector<std::thread> workers_;
+    std::vector<zxy> targets_;
+    std::string host_;
+    std::string port_;
+    tiles_stash stash_;
+    std::size_t num_tiles_{0};
+    std::size_t consumed_count_{0};
     std::size_t datasource_hash_;
     bool next_tile();
-    bool open_tile();
+    bool first_ = true;
+    bool ssl_ = false;
+    bool local_file_ = true;
+    std::atomic<bool> done_ = false;
 };
 
 #endif // VECTOR_TILES_FEATURESET_HPP

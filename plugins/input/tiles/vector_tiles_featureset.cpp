@@ -22,47 +22,68 @@
 
 // mapnik
 #include <mapnik/well_known_srs.hpp>
-#include "tiles_source.hpp"
 #include "vector_tiles_featureset.hpp"
+#include "pmtiles_source.hpp"
+#include "mbtiles_source.hpp"
+#include "vector_tile_compression.hpp"
 // boost
 #include <boost/format.hpp>
 
-vector_tiles_featureset::vector_tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
+vector_tiles_featureset::vector_tiles_featureset(std::string const& url_template,
                                                  mapnik::context_ptr const& ctx,
-                                                 int const zoom,
-                                                 mapnik::box2d<double> const& extent,
+                                                 int zoom,
+                                                 int xmin,
+                                                 int xmax,
+                                                 int ymin,
+                                                 int ymax,
                                                  std::string const& layer,
                                                  std::unordered_map<std::string, std::string>& vector_tile_cache,
                                                  std::size_t datasource_hash)
-    : source_ptr_(source_ptr),
+    : url_template_(url_template),
       context_(ctx),
       zoom_(zoom),
-      extent_(extent),
+      xmin_(xmin),
+      xmax_(xmax),
+      ymin_(ymin),
+      ymax_(ymax),
       layer_(layer),
       vector_tile_(nullptr),
       vector_tile_cache_(vector_tile_cache),
+      QUEUE_SIZE_((xmax - xmin + 1) * (ymax - ymin + 1)),
+      queue_(QUEUE_SIZE_),
+      stash_(ioc_, targets_, queue_),
       datasource_hash_(datasource_hash)
 {
-    extent_.set_minx(extent_.minx() + 1e-6);
-    extent_.set_maxx(extent_.maxx() - 1e-6);
-    extent_.set_miny(extent_.miny() + 1e-6);
-    extent_.set_maxy(extent_.maxy() - 1e-6);
-
-    int tile_count = 1 << zoom;
-    xmin_ =
-      static_cast<int>((extent_.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    xmax_ =
-      static_cast<int>((extent_.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    ymin_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.maxy()) *
-                             (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    ymax_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.miny()) *
-                             (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    x_ = xmax_;
-    y_ = ymax_;
-    open_tile();
+    try
+    {
+        boost::urls::url url = boost::urls::format(url_template_, {{"z", zoom_}, {"x", 0}, {"y", 0}});
+        host_ = url.host();
+        auto scheme = url.scheme();
+        if (scheme == "https")
+        {
+            ssl_ = true;
+            local_file_ = false;
+            port_ = url.port().empty() ? "443" : url.port();
+        }
+        else if (scheme == "http")
+        {
+            port_ = url.port().empty() ? "80" : url.port();
+            local_file_ = false;
+        }
+    }
+    catch (std::exception& ex)
+    {
+        std::cerr << ex.what() << std::endl;
+    }
 }
 
-vector_tiles_featureset::~vector_tiles_featureset() {}
+vector_tiles_featureset::~vector_tiles_featureset()
+{
+    for (std::size_t i = 0; i < workers_.size(); ++i)
+    {
+        workers_[i].join();
+    }
+}
 
 bool vector_tiles_featureset::valid() const
 {
@@ -81,14 +102,12 @@ mapnik::feature_ptr vector_tiles_featureset::next_feature()
 
 mapnik::feature_ptr vector_tiles_featureset::next()
 {
-    // If current tile is processed completely, go forward to the next tile.
-    // else step forward to the next feature
     mapnik::feature_ptr f = next_feature();
     if (f)
     {
         return f;
     }
-    while (next_tile() && open_tile() && valid())
+    while (next_tile() && valid())
     {
         f = next_feature();
         if (f)
@@ -101,30 +120,117 @@ mapnik::feature_ptr vector_tiles_featureset::next()
 
 bool vector_tiles_featureset::next_tile()
 {
-    --x_;
-    if (x_ >= xmin_)
+    if (first_)
     {
-        return true;
-    }
-    x_ = xmax_;
-    --y_;
-    return y_ >= ymin_;
-}
+        first_ = false;
+        for (int x = xmin_; x <= xmax_; ++x)
+        {
+            for (int y = ymin_; y <= ymax_; ++y)
+            {
+                ++num_tiles_;
+                auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % zoom_ % x % y).str();
+                auto itr = vector_tile_cache_.find(datasource_key);
+                if (itr == vector_tile_cache_.end())
+                {
+                    stash_.targets().emplace_back(zoom_, x, y);
+                }
+                else
+                {
+                    std::string buffer = itr->second;
+                    stash_.push_async(tile_data(zoom_, x, y));
+                }
+            }
+        }
 
-bool vector_tiles_featureset::open_tile()
-{
-    auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % zoom_ % x_ % y_).str();
-    auto itr = vector_tile_cache_.find(datasource_key);
-    if (itr == vector_tile_cache_.end())
-    {
-        auto decompressed = source_ptr_->get_tile(zoom_, x_, y_);
-        vector_tile_cache_.emplace(datasource_key, decompressed);
-        vector_tile_.reset(new mvt_io(std::move(decompressed), context_, x_, y_, zoom_, layer_));
+        std::size_t max_threads = 4;
+        std::size_t threads = std::min(max_threads, stash_.targets().size());
+        workers_.reserve(threads + 1);
+        for (std::size_t i = 0; i < threads; ++i)
+        {
+            auto reporting_work =
+              boost::asio::require(ioc_.get_executor(), boost::asio::execution::outstanding_work.tracked);
+
+            if (local_file_)
+            {
+                workers_.emplace_back([this, reporting_work] {
+                    std::unique_ptr<mapnik::tiles_source> source = nullptr;
+                    if (url_template_.ends_with(".pmtiles"))
+                    {
+                        source = std::make_unique<mapnik::pmtiles_source>(url_template_);
+                    }
+                    else if (url_template_.ends_with(".mbtiles"))
+                    {
+                        source = std::make_unique<mapnik::mbtiles_source>(url_template_);
+                    }
+                    if (source)
+                    {
+                        while (!done_)
+                        {
+                            auto zxy = stash_.get_zxy();
+                            if (!zxy)
+                                break;
+                            auto data = source->get_tile_raw(std::get<0>(*zxy), std::get<1>(*zxy), std::get<2>(*zxy));
+                            stash_.push_async(
+                              tile_data{std::get<0>(*zxy), std::get<1>(*zxy), std::get<2>(*zxy), std::move(data)});
+                        }
+                    }
+                });
+            }
+#if defined(MAPNIK_HAS_OPENSSL)
+            else if (ssl_)
+            {
+                workers_.emplace_back([this, reporting_work] {
+                    boost::asio::io_context ioc;
+                    std::make_shared<worker_ssl>(ioc, ssl_ctx_, host_, port_, url_template_, stash_, std::ref(done_))
+                      ->run();
+                    ioc.run();
+                });
+            }
+#endif
+            else
+            {
+                workers_.emplace_back([this, reporting_work] {
+                    boost::asio::io_context ioc;
+                    std::make_shared<worker>(ioc, host_, port_, url_template_, stash_, std::ref(done_))->run();
+                    ioc.run();
+                });
+            }
+        }
+        workers_.emplace_back([this] { ioc_.run(); });
     }
-    else
+    // consume tiles from the queue
+    bool status = false;
+    while (!done_.load())
     {
-        std::string buffer = itr->second;
-        vector_tile_.reset(new mvt_io(std::move(buffer), context_, x_, y_, zoom_, layer_));
+        tile_data tile;
+        if (queue_.pop(tile))
+        {
+            ++consumed_count_;
+            auto datasource_key =
+              (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % tile.zoom % tile.x % tile.y).str();
+            auto itr = vector_tile_cache_.find(datasource_key);
+            if (itr != vector_tile_cache_.end())
+            {
+                auto buffer = itr->second;
+                vector_tile_.reset(new mvt_io(std::move(buffer), context_, tile.x, tile.y, zoom_, layer_));
+                status = true;
+            }
+            else if (tile.data)
+            {
+                if ((*tile.data).empty())
+                    continue;
+                std::string decompressed;
+                mapnik::vector_tile_impl::zlib_decompress((*tile.data).data(), (*tile.data).size(), decompressed);
+                vector_tile_cache_.emplace(datasource_key, decompressed);
+                vector_tile_.reset(new mvt_io(std::move(decompressed), context_, tile.x, tile.y, zoom_, layer_));
+                status = true;
+            }
+            if (consumed_count_ == QUEUE_SIZE_)
+                done_.store(true);
+            break;
+        }
+        if (consumed_count_ == num_tiles_)
+            done_.store(true);
     }
-    return true;
+    return status;
 }

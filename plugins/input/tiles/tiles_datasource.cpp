@@ -23,7 +23,6 @@
 #include "tiles_datasource.hpp"
 #include "vector_tiles_featureset.hpp"
 #include "raster_tiles_featureset.hpp"
-#include "xyz_featureset.hpp"
 #include "pmtiles_source.hpp"
 #include "mbtiles_source.hpp"
 #include "vector_tile_projection.hpp"
@@ -91,48 +90,79 @@ boost::json::value const& xyz_metadata(std::string const& url_str)
     }
     return itr->second;
 }
-} //
+} // namespace
 
 void tiles_datasource::init_metadata(boost::json::value const& metadata)
 {
-    auto layers = metadata.at("vector_layers");
-    bool found = false;
-    for (auto const& layer : layers.as_array())
+    // std::cerr << "Metadata:" << metadata << std::endl;
+    if (!metadata.is_object())
+        return;
+    if (auto const* p = metadata.as_object().if_contains("bounds"))
     {
-        std::string id = layer.at("id").as_string().c_str();
-        if (id == layer_)
+        if (p->is_array())
         {
-            found = true;
-            if (auto const* p = layer.as_object().if_contains("minzoom"))
+            auto bounds_array = p->as_array();
+            std::cerr << bounds_array << std::endl;
+            if (bounds_array.size() == 4)
             {
-                minzoom_ = p->as_int64();
+                extent_ = {bounds_array[0].to_number<double>(),
+                           bounds_array[1].to_number<double>(),
+                           bounds_array[2].to_number<double>(),
+                           bounds_array[3].to_number<double>()};
             }
-            if (auto const* p = layer.as_object().if_contains("maxzoom"))
+        }
+    }
+    if (auto const* p = metadata.as_object().if_contains("minzoom"))
+    {
+        minzoom_ = p->as_int64();
+    }
+    if (auto const* p = metadata.as_object().if_contains("maxzoom"))
+    {
+        maxzoom_ = p->as_int64();
+    }
+    bool found = false;
+    auto const* layers = metadata.as_object().if_contains("vector_layers");
+    if (layers && layers->is_array())
+    {
+        for (auto const& layer : layers->as_array())
+        {
+            std::string id = layer.at("id").as_string().c_str();
+            if (id == layer_)
             {
-                maxzoom_ = p->as_int64();
+                is_vector_ = true;
+                found = true;
+                if (auto const* p = layer.as_object().if_contains("minzoom"))
+                {
+                    minzoom_ = p->as_int64();
+                }
+                if (auto const* p = layer.as_object().if_contains("maxzoom"))
+                {
+                    maxzoom_ = p->as_int64();
+                }
+                for (auto const& field : layer.at("fields").as_object())
+                {
+                    std::string name{field.key_c_str()};
+                    if (field.value() == "String")
+                    {
+                        desc_.add_descriptor(mapnik::attribute_descriptor(name, mapnik::String));
+                    }
+                    else if (field.value() == "Number")
+                    {
+                        desc_.add_descriptor(mapnik::attribute_descriptor(name, mapnik::Float));
+                    }
+                    else if (field.value() == "Boolean")
+                    {
+                        desc_.add_descriptor(mapnik::attribute_descriptor(name, mapnik::Boolean));
+                    }
+                }
+                break;
             }
-            for (auto const& field : layer.at("fields").as_object())
-            {
-                std::string name{field.key_c_str()};
-                if (field.value() == "String")
-                {
-                    desc_.add_descriptor(mapnik::attribute_descriptor(name, mapnik::String));
-                }
-                else if (field.value() == "Number")
-                {
-                    desc_.add_descriptor(mapnik::attribute_descriptor(name, mapnik::Float));
-                }
-                else if (field.value() == "Boolean")
-                {
-                    desc_.add_descriptor(mapnik::attribute_descriptor(name, mapnik::Boolean));
-                }
-            }
-            break;
         }
     }
     if (!found)
     {
-        throw mapnik::datasource_exception("Requested layer '" + layer_ + "' not found.");
+        // throw mapnik::datasource_exception("Requested layer '" + layer_ + "' not found.");
+        std::cerr << "Requested layer '" << layer_ << "' not found." << std::endl;
     }
 }
 
@@ -173,7 +203,7 @@ void tiles_datasource::init(mapnik::parameters const& params)
             throw mapnik::datasource_exception("Unexpected file extension in tiles source: " + database_path_);
         }
 
-        if (!source_ptr_->is_raster())
+        if (true)
         {
             std::optional<std::string> layer = params.get<std::string>("layer");
             try
@@ -182,27 +212,14 @@ void tiles_datasource::init(mapnik::parameters const& params)
             }
             catch (std::bad_optional_access&)
             {
-                throw mapnik::datasource_exception("Tiles Plugin: parameter 'layer' is missing.");
+                // throw mapnik::datasource_exception("Tiles Plugin: parameter 'layer' is missing.");
+                std::cerr << "Tiles Plugin: parameter 'layer' is missing. FIXME" << std::endl;
             }
         }
-
         minzoom_ = source_ptr_->minzoom();
         maxzoom_ = source_ptr_->maxzoom();
         extent_ = source_ptr_->extent();
-        // overwrite envelope with user supplied
-        std::optional<std::string> ext = params.get<std::string>("extent");
-        if (ext && !ext->empty())
-        {
-            extent_.from_string(*ext);
-        }
-        if (!extent_.valid())
-        {
-            throw mapnik::datasource_exception("Tiles Plugin: " + database_path_ + " extent is invalid.");
-        }
-        // Bounds are specified in EPSG:4326, therefore transformation is required.
-        mapnik::lonlat2merc(extent_.minx_, extent_.miny_);
-        mapnik::lonlat2merc(extent_.maxx_, extent_.maxy_);
-        if (!source_ptr_->is_raster())
+        if (true)
         {
             auto metadata = source_ptr_->metadata();
             init_metadata(metadata);
@@ -217,23 +234,12 @@ void tiles_datasource::init(mapnik::parameters const& params)
         }
         catch (std::bad_optional_access&)
         {
-            throw mapnik::datasource_exception("Tiles Plugin: parameter 'layer' is missing.");
+            // throw mapnik::datasource_exception("Tiles Plugin: parameter 'layer' is missing.");
+            std::cerr << "Tiles Plugin: parameter 'layer' is missing - FIXME" << std::endl;
         }
 
         extent_ = mapnik::box2d<double>(-180, -85.0511287, 180, 85.0511287);
-        // overwrite envelope with user supplied
-        std::optional<std::string> ext = params.get<std::string>("extent");
-        if (ext && !ext->empty())
-        {
-            extent_.from_string(*ext);
-        }
-        if (!extent_.valid())
-        {
-            throw mapnik::datasource_exception("Tiles Plugin: " + database_path_ + " extent is invalid.");
-        }
-        // Bounds are specified in EPSG:4326, therefore transformation is required.
-        mapnik::lonlat2merc(extent_.minx_, extent_.miny_);
-        mapnik::lonlat2merc(extent_.maxx_, extent_.maxy_);
+
         auto metadata = xyz_metadata(*json_url);
         init_metadata(metadata);
         auto tiles = metadata.at("tiles");
@@ -242,6 +248,20 @@ void tiles_datasource::init(mapnik::parameters const& params)
             url_template_ = tiles_url.as_string();
         }
     }
+
+    // overwrite envelope with user supplied
+    std::optional<std::string> ext = params.get<std::string>("extent");
+    if (ext && !ext->empty())
+    {
+        extent_.from_string(*ext);
+    }
+    if (!extent_.valid())
+    {
+        throw mapnik::datasource_exception("Tiles Plugin: " + database_path_ + " extent is invalid.");
+    }
+    // Bounds are specified in EPSG:4326, therefore transformation is required.
+    mapnik::lonlat2merc(extent_.minx_, extent_.miny_);
+    mapnik::lonlat2merc(extent_.maxx_, extent_.maxy_);
 }
 
 mapnik::context_ptr tiles_datasource::get_context_with_attributes() const
@@ -308,56 +328,54 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
         vector_tile_cache.clear();
     }
 
-    mapnik::box2d<double> bbox = q.get_bbox().intersect(extent_);
-    auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
-    mapnik::context_ptr context = get_query_context(q);
+    if (q.get_bbox().intersects(extent_))
+    {
+        mapnik::box2d<double> bbox = q.get_bbox().intersect(extent_);
+        auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
+        mapnik::context_ptr context = get_query_context(q);
 
-    int tile_count = 1 << zoom;
-    auto xmin = static_cast<int>((bbox.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) *
-                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    auto xmax = static_cast<int>((bbox.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) *
-                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    auto ymin = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - bbox.maxy()) *
-                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    auto ymax = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - bbox.miny()) *
-                                 (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    if (url_template_)
-    {
-        auto datasource_hash = std::hash<std::string>{}(*url_template_);
-        return std::make_shared<xyz_featureset>(*url_template_,
-                                                context,
-                                                zoom,
-                                                xmin, xmax, ymin, ymax,
-                                                layer_,
-                                                vector_tile_cache,
-                                                datasource_hash);
-    }
-    if (source_ptr_)
-    {
-        auto datasource_hash = std::hash<std::string>{}(database_path_);
-        if (source_ptr_->is_raster())
+        int tile_count = 1 << zoom;
+        auto xmin = static_cast<int>((bbox.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) *
+                                     (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+        auto xmax = static_cast<int>((bbox.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) *
+                                     (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+        auto ymin = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - bbox.maxy()) *
+                                     (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+        auto ymax = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - bbox.miny()) *
+                                     (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+
+        std::string url = url_template_ ? *url_template_ : database_path_;
+        auto datasource_hash = std::hash<std::string>{}(url);
+
+        if (is_vector_)
         {
-            return std::make_shared<raster_tiles_featureset>(source_ptr_,
+            return std::make_shared<vector_tiles_featureset>(url,
                                                              context,
                                                              zoom,
+                                                             xmin,
+                                                             xmax,
+                                                             ymin,
+                                                             ymax,
+                                                             layer_,
+                                                             vector_tile_cache,
+                                                             datasource_hash);
+        }
+        else
+        {
+            return std::make_shared<raster_tiles_featureset>(url,
+                                                             context,
                                                              bbox,
+                                                             zoom,
+                                                             xmin,
+                                                             xmax,
+                                                             ymin,
+                                                             ymax,
                                                              layer_,
                                                              vector_tile_cache,
                                                              datasource_hash,
                                                              q.get_filter_factor());
         }
-        else
-        {
-            return std::make_shared<xyz_featureset>(database_path_,
-                                                    context,
-                                                    zoom,
-                                                    xmin, xmax, ymin, ymax,
-                                                    layer_,
-                                                    vector_tile_cache,
-                                                    datasource_hash);
-        }
     }
-
     return mapnik::featureset_ptr{};
 }
 
@@ -369,7 +387,6 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
 
     mapnik::filter_at_point filter(pt, tol);
     mapnik::context_ptr context = get_context_with_attributes();
-    auto datasource_hash = std::hash<std::string>{}(database_path_);
     int tile_count = 1 << maxzoom_;
     auto tile_x =
       static_cast<int>((pt.x + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
@@ -384,25 +401,17 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
     if (url_template_)
     {
         auto datasource_hash = std::hash<std::string>{}(*url_template_);
-        return std::make_shared<xyz_featureset>(*url_template_,
-                                                context,
-                                                maxzoom_,
-                                                tile_x,
-                                                tile_x,
-                                                tile_y,
-                                                tile_y,
-                                                layer_,
-                                                tile_cache(),
-                                                datasource_hash);
-    }
-    if (!source_ptr_->is_raster())
-        return std::make_shared<vector_tiles_featureset>(source_ptr_,
+        return std::make_shared<vector_tiles_featureset>(*url_template_,
                                                          context,
                                                          maxzoom_,
-                                                         query_bbox,
+                                                         tile_x,
+                                                         tile_x,
+                                                         tile_y,
+                                                         tile_y,
                                                          layer_,
                                                          tile_cache(),
                                                          datasource_hash);
+    }
     return mapnik::featureset_ptr();
 }
 

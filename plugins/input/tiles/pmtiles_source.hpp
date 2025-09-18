@@ -349,7 +349,8 @@ inline std::uint64_t read_uint64_xdr(char const* buf, std::size_t pos)
     return val;
 }
 
-class pmtiles_source : public tiles_source, util::mapped_memory_file
+class pmtiles_source : public tiles_source,
+                       util::mapped_memory_file
 {
     std::size_t const HEADER_SIZE = 127;
     struct header
@@ -401,7 +402,7 @@ class pmtiles_source : public tiles_source, util::mapped_memory_file
     void init()
     {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        std::string_view buffer {file_.buffer().first, HEADER_SIZE};
+        std::string_view buffer{file_.buffer().first, HEADER_SIZE};
 #else
         std::string buffer;
         buffer.resize(HEADER_SIZE);
