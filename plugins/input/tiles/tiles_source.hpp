@@ -40,6 +40,7 @@ class tiles_source
       get_tile_raw(std::uint8_t z, std::uint32_t x, std::uint32_t y) const = 0; // don't decompress, return raw data.
     virtual bool is_raster() const = 0;
     virtual ~tiles_source() = default;
+    static std::unique_ptr<tiles_source> get_source(std::string const& filename);
 };
 
 } // namespace mapnik

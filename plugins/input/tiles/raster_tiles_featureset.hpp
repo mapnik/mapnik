@@ -32,7 +32,7 @@
 class raster_tiles_featureset : public mapnik::Featureset
 {
   public:
-    raster_tiles_featureset(std::string const& url_template_,
+    raster_tiles_featureset(std::string const& tiles_location_,
                             mapnik::context_ptr const& ctx,
                             mapnik::box2d<double> const& extent,
                             int zoom,
@@ -49,7 +49,7 @@ class raster_tiles_featureset : public mapnik::Featureset
 
   private:
     mapnik::feature_ptr next_feature(std::string const& image_buffer, int x, int y);
-    std::string url_template_;
+    std::string tiles_location_;
     mapnik::context_ptr context_;
     boost::asio::io_context ioc_;
 #if defined(MAPNIK_HAS_OPENSSL)

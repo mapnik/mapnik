@@ -28,8 +28,7 @@
 #include <mapnik/view_transform.hpp>
 #include <mapnik/feature_factory.hpp>
 #include "raster_tiles_featureset.hpp"
-#include "pmtiles_source.hpp"
-#include "mbtiles_source.hpp"
+#include "tiles_source.hpp"
 
 // boost
 #include <boost/format.hpp>
@@ -48,7 +47,7 @@ inline mapnik::box2d<double> tile_envelope(int z, int x, int y)
 
 } // namespace
 
-raster_tiles_featureset::raster_tiles_featureset(std::string const& url_template,
+raster_tiles_featureset::raster_tiles_featureset(std::string const& tiles_location,
                                                  mapnik::context_ptr const& ctx,
                                                  mapnik::box2d<double> const& extent,
                                                  int zoom,
@@ -59,7 +58,7 @@ raster_tiles_featureset::raster_tiles_featureset(std::string const& url_template
                                                  std::unordered_map<std::string, std::string>& tiles_cache,
                                                  std::size_t datasource_hash,
                                                  double filter_factor)
-    : url_template_(url_template),
+    : tiles_location_(tiles_location),
       context_(ctx),
       extent_(extent),
       zoom_(zoom),
@@ -76,7 +75,7 @@ raster_tiles_featureset::raster_tiles_featureset(std::string const& url_template
 {
     try
     {
-        boost::urls::url url = boost::urls::format(url_template_, {{"z", zoom_}, {"x", 0}, {"y", 0}});
+        boost::urls::url url = boost::urls::format(tiles_location_, {{"z", zoom_}, {"x", 0}, {"y", 0}});
         host_ = url.host();
         auto scheme = url.scheme();
         if (scheme == "https")
@@ -188,15 +187,7 @@ mapnik::feature_ptr raster_tiles_featureset::next()
             if (local_file_)
             {
                 workers_.emplace_back([this, reporting_work] {
-                    std::unique_ptr<mapnik::tiles_source> source = nullptr;
-                    if (url_template_.ends_with(".pmtiles"))
-                    {
-                        source = std::make_unique<mapnik::pmtiles_source>(url_template_);
-                    }
-                    else if (url_template_.ends_with(".mbtiles"))
-                    {
-                        source = std::make_unique<mapnik::mbtiles_source>(url_template_);
-                    }
+                    std::unique_ptr<mapnik::tiles_source> source = mapnik::tiles_source::get_source(tiles_location_);
                     if (source)
                     {
                         while (!done_)
@@ -216,7 +207,7 @@ mapnik::feature_ptr raster_tiles_featureset::next()
             {
                 workers_.emplace_back([this, reporting_work] {
                     boost::asio::io_context ioc;
-                    std::make_shared<worker_ssl>(ioc, ssl_ctx_, host_, port_, url_template_, stash_, std::ref(done_))
+                    std::make_shared<worker_ssl>(ioc, ssl_ctx_, host_, port_, tiles_location_, stash_, std::ref(done_))
                       ->run();
                     ioc.run();
                 });
@@ -226,7 +217,7 @@ mapnik::feature_ptr raster_tiles_featureset::next()
             {
                 workers_.emplace_back([this, reporting_work] {
                     boost::asio::io_context ioc;
-                    std::make_shared<worker>(ioc, host_, port_, url_template_, stash_, std::ref(done_))->run();
+                    std::make_shared<worker>(ioc, host_, port_, tiles_location_, stash_, std::ref(done_))->run();
                     ioc.run();
                 });
             }

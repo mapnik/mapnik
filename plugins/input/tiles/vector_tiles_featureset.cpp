@@ -23,13 +23,12 @@
 // mapnik
 #include <mapnik/well_known_srs.hpp>
 #include "vector_tiles_featureset.hpp"
-#include "pmtiles_source.hpp"
-#include "mbtiles_source.hpp"
+#include "tiles_source.hpp"
 #include "vector_tile_compression.hpp"
 // boost
 #include <boost/format.hpp>
 
-vector_tiles_featureset::vector_tiles_featureset(std::string const& url_template,
+vector_tiles_featureset::vector_tiles_featureset(std::string const& tiles_location,
                                                  mapnik::context_ptr const& ctx,
                                                  int zoom,
                                                  int xmin,
@@ -39,7 +38,7 @@ vector_tiles_featureset::vector_tiles_featureset(std::string const& url_template
                                                  std::string const& layer,
                                                  std::unordered_map<std::string, std::string>& tiles_cache,
                                                  std::size_t datasource_hash)
-    : url_template_(url_template),
+    : tiles_location_(tiles_location),
       context_(ctx),
       zoom_(zoom),
       xmin_(xmin),
@@ -56,7 +55,7 @@ vector_tiles_featureset::vector_tiles_featureset(std::string const& url_template
 {
     try
     {
-        boost::urls::url url = boost::urls::format(url_template_, {{"z", zoom_}, {"x", 0}, {"y", 0}});
+        boost::urls::url url = boost::urls::format(tiles_location_, {{"z", zoom_}, {"x", 0}, {"y", 0}});
         host_ = url.host();
         auto scheme = url.scheme();
         if (scheme == "https")
@@ -153,15 +152,7 @@ bool vector_tiles_featureset::next_tile()
             if (local_file_)
             {
                 workers_.emplace_back([this, reporting_work] {
-                    std::unique_ptr<mapnik::tiles_source> source = nullptr;
-                    if (url_template_.ends_with(".pmtiles"))
-                    {
-                        source = std::make_unique<mapnik::pmtiles_source>(url_template_);
-                    }
-                    else if (url_template_.ends_with(".mbtiles"))
-                    {
-                        source = std::make_unique<mapnik::mbtiles_source>(url_template_);
-                    }
+                    std::unique_ptr<mapnik::tiles_source> source = mapnik::tiles_source::get_source(tiles_location_);
                     if (source)
                     {
                         while (!done_)
@@ -181,7 +172,7 @@ bool vector_tiles_featureset::next_tile()
             {
                 workers_.emplace_back([this, reporting_work] {
                     boost::asio::io_context ioc;
-                    std::make_shared<worker_ssl>(ioc, ssl_ctx_, host_, port_, url_template_, stash_, std::ref(done_))
+                    std::make_shared<worker_ssl>(ioc, ssl_ctx_, host_, port_, tiles_location_, stash_, std::ref(done_))
                       ->run();
                     ioc.run();
                 });
@@ -191,7 +182,7 @@ bool vector_tiles_featureset::next_tile()
             {
                 workers_.emplace_back([this, reporting_work] {
                     boost::asio::io_context ioc;
-                    std::make_shared<worker>(ioc, host_, port_, url_template_, stash_, std::ref(done_))->run();
+                    std::make_shared<worker>(ioc, host_, port_, tiles_location_, stash_, std::ref(done_))->run();
                     ioc.run();
                 });
             }

@@ -33,7 +33,7 @@
 class vector_tiles_featureset : public mapnik::Featureset
 {
   public:
-    vector_tiles_featureset(std::string const& url_template,
+    vector_tiles_featureset(std::string const& tiles_location,
                             mapnik::context_ptr const& ctx,
                             int zoom,
                             int xmin,
@@ -50,7 +50,7 @@ class vector_tiles_featureset : public mapnik::Featureset
   private:
     mapnik::feature_ptr next_feature();
     bool valid() const;
-    std::string url_template_;
+    std::string tiles_location_;
     mapnik::context_ptr context_;
     boost::asio::io_context ioc_;
 #if defined(MAPNIK_HAS_OPENSSL)

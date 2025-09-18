@@ -40,6 +40,7 @@ plugin_sources = Split(
   %(MAPNIK_VECTOR_TILE)s/vector_tile_compression.cpp
   %(MAPNIK_VECTOR_TILE)s/vector_tile_geometry_decoder.cpp
   mvt_io.cpp
+  tiles_source.cpp
   """ % locals()
 )
 

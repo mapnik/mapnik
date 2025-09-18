@@ -25,6 +25,7 @@
 
 #include <mapnik/global.hpp>
 #include <mapnik/util/mapped_memory_file.hpp>
+#include <mapnik/datasource.hpp>
 #include "tiles_source.hpp"
 // stl
 #include <iostream>
