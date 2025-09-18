@@ -31,7 +31,7 @@ plugin_env = plugin_base.Clone()
 plugin_env.Prepend(CPPPATH = '#deps/mapbox/mapnik-vector-tile/src')
 plugin_env.Prepend(CPPPATH = '#plugins/input/sqlite')
 plugin_env.Append(CPPDEFINES = 'MAPNIK_VECTOR_TILE_LIBRARY=1')
-plugin_env.Append(CPPDEFINES = 'MAPNIK_HAS_OPENSSL')
+
 plugin_sources = Split(
   """
   %(PLUGIN_NAME)s_datasource.cpp
@@ -49,7 +49,13 @@ plugin_sources = Split(
 boost_url = 'boost_url%s' % env['BOOST_APPEND']
 boost_context = 'boost_context%s' % env['BOOST_APPEND']
 
-libraries = ['sqlite3', boost_url, boost_context, 'ssl', 'crypto']
+libraries = ['sqlite3', boost_url, boost_context]
+
+if env['HAS_OPENSSL']:
+    plugin_env.Append(CPPDEFINES = 'MAPNIK_HAS_OPENSSL')
+    libraries.append('ssl')
+    libraries.append('crypto')
+
 linkflags = []
 
 if env['SQLITE_LINKFLAGS']:

@@ -511,6 +511,7 @@ pickle_store = [# Scons internal variables
         'COLOR_PRINT',
         'HAS_CAIRO',
         'MAPNIK_HAS_DLFCN',
+        'HAS_OPENSSL',
         'HAS_PYCAIRO',
         'PYCAIRO_PATHS',
         'HAS_LIBXML2',
