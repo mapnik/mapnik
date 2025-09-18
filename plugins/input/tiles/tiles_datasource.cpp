@@ -210,16 +210,27 @@ void tiles_datasource::init(mapnik::parameters const& params)
     }
     else if (json_url)
     {
-        extent_ = mapnik::box2d<double>(-180, -85.0511287, 180, 85.0511287);
-        auto metadata = xyz_metadata(*json_url);
-        init_metadata(metadata);
-        auto tiles = metadata.at("tiles");
-        for (auto const& tiles_url : tiles.as_array())
+        if ((*json_url).ends_with(".json"))
         {
-            url_template_ = tiles_url.as_string();
+            extent_ = mapnik::box2d<double>(-180, -85.0511287, 180, 85.0511287);
+            auto metadata = xyz_metadata(*json_url);
+            init_metadata(metadata);
+            auto tiles = metadata.at("tiles");
+            for (auto const& tiles_url : tiles.as_array())
+            {
+                url_template_ = tiles_url.as_string();
+            }
+        }
+        else
+        {
+            extent_ = mapnik::box2d<double>(-180, -85.0511287, 180, 85.0511287);
+            if ((*json_url).ends_with(".mvt") || (*json_url).ends_with(".pbf"))
+            {
+                is_vector_ = true;
+            }
+            url_template_ = json_url;
         }
     }
-
     // overwrite envelope with user supplied
     std::optional<std::string> ext = params.get<std::string>("extent");
     if (ext && !ext->empty())
@@ -233,6 +244,9 @@ void tiles_datasource::init(mapnik::parameters const& params)
     // Bounds are specified in EPSG:4326, therefore transformation is required.
     mapnik::lonlat2merc(extent_.minx_, extent_.miny_);
     mapnik::lonlat2merc(extent_.maxx_, extent_.maxy_);
+    // overwrite min/max zoom with user supplied values.
+    minzoom_ = *params.get<mapnik::value_integer>("minzoom", minzoom_);
+    maxzoom_ = *params.get<mapnik::value_integer>("maxzoom", maxzoom_);
 }
 
 mapnik::context_ptr tiles_datasource::get_context_with_attributes() const
@@ -315,12 +329,12 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
         auto ymax = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - bbox.miny()) *
                                      (tile_count / mapnik::EARTH_CIRCUMFERENCE));
 
-        std::string url = url_template_ ? *url_template_ : database_path_;
-        auto datasource_hash = std::hash<std::string>{}(url);
+        std::string source_location = url_template_ ? *url_template_ : database_path_;
+        auto datasource_hash = std::hash<std::string>{}(source_location);
 
         if (is_vector_ && layer_name_)
         {
-            return std::make_shared<vector_tiles_featureset>(url,
+            return std::make_shared<vector_tiles_featureset>(source_location,
                                                              context,
                                                              zoom,
                                                              xmin,
@@ -333,7 +347,7 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
         }
         else
         {
-            return std::make_shared<raster_tiles_featureset>(url,
+            return std::make_shared<raster_tiles_featureset>(source_location,
                                                              context,
                                                              bbox,
                                                              zoom,
@@ -368,10 +382,13 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
     double x1 = (tile_x + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) - 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     double y1 = -(tile_y + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) + 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     auto query_bbox = mapnik::box2d<double>{x0, y0, x1, y1};
-    if (url_template_ && layer_name_)
+
+    std::string source_location = url_template_ ? *url_template_ : database_path_;
+    auto datasource_hash = std::hash<std::string>{}(source_location);
+
+    if (is_vector_ && layer_name_)
     {
-        auto datasource_hash = std::hash<std::string>{}(*url_template_);
-        return std::make_shared<vector_tiles_featureset>(*url_template_,
+        return std::make_shared<vector_tiles_featureset>(source_location,
                                                          context,
                                                          maxzoom_,
                                                          tile_x,
