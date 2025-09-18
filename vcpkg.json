@@ -18,6 +18,8 @@
     },
     "boost-json",
     "boost-msm",
+    "boost-url",
+    "boost-context",
     "boost-program-options",
     "boost-property-tree",
     {
