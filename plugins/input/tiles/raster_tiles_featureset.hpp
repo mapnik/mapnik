@@ -48,7 +48,7 @@ class raster_tiles_featureset : public mapnik::Featureset
     mapnik::feature_ptr next();
 
   private:
-    mapnik::feature_ptr next_feature(std::string const& image_buffer, int x, int y);
+    mapnik::feature_ptr next_feature(std::string const& image_buffer, int x, int y, std::string const& datasource_key);
     std::string tiles_location_;
     mapnik::context_ptr context_;
     boost::asio::io_context ioc_;

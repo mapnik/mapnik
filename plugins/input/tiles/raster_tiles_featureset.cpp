@@ -104,7 +104,7 @@ raster_tiles_featureset::~raster_tiles_featureset()
     }
 }
 
-mapnik::feature_ptr raster_tiles_featureset::next_feature(std::string const& image_buffer, int x, int y)
+mapnik::feature_ptr raster_tiles_featureset::next_feature(std::string const& image_buffer, int x, int y, std::string const& datasource_key)
 {
     std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(image_buffer.c_str(), image_buffer.size()));
     if (reader.get())
@@ -141,7 +141,7 @@ mapnik::feature_ptr raster_tiles_featureset::next_feature(std::string const& ima
         if (height < 1)
             height = 1;
 
-        mapnik::feature_ptr feature(mapnik::feature_factory::create(context_, std::hash<std::string>{}("FIXME")));
+        mapnik::feature_ptr feature(mapnik::feature_factory::create(context_, std::hash<std::string>{}(datasource_key)));
         mapnik::image_any data = reader->read(x_off, y_off, width, height);
         auto feature_raster_extent = t.backward(mapnik::box2d<double>(x_off, y_off, x_off + width, y_off + height));
         mapnik::raster_ptr raster =
@@ -237,7 +237,7 @@ mapnik::feature_ptr raster_tiles_featureset::next()
             if (itr != tiles_cache_.end())
             {
                 auto buffer = itr->second;
-                return next_feature(buffer, tile.x, tile.y);
+                return next_feature(buffer, tile.x, tile.y, datasource_key);
             }
             else if (tile.data)
             {
@@ -246,7 +246,7 @@ mapnik::feature_ptr raster_tiles_featureset::next()
                     continue;
                 }
                 tiles_cache_.emplace(datasource_key, *tile.data);
-                return next_feature(*tile.data, tile.x, tile.y);
+                return next_feature(*tile.data, tile.x, tile.y, datasource_key);
             }
         }
         if (consumed_count_ == num_tiles_)
