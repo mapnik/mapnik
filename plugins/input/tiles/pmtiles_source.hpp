@@ -572,7 +572,7 @@ class pmtiles_source : public tiles_source,
         }
         else
         {
-            metadata = buffer;
+            metadata = std::move(buffer);
         }
         boost::json::value json_value;
         try
