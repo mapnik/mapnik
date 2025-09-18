@@ -94,7 +94,6 @@ boost::json::value const& xyz_metadata(std::string const& url_str)
 
 void tiles_datasource::init_metadata(boost::json::value const& metadata)
 {
-    // std::cerr << "Metadata:" << metadata << std::endl;
     if (!metadata.is_object())
         return;
     if (auto const* p = metadata.as_object().if_contains("bounds"))
@@ -102,7 +101,6 @@ void tiles_datasource::init_metadata(boost::json::value const& metadata)
         if (p->is_array())
         {
             auto bounds_array = p->as_array();
-            std::cerr << bounds_array << std::endl;
             if (bounds_array.size() == 4)
             {
                 extent_ = {bounds_array[0].to_number<double>(),
@@ -122,14 +120,14 @@ void tiles_datasource::init_metadata(boost::json::value const& metadata)
     }
     bool found = false;
     auto const* layers = metadata.as_object().if_contains("vector_layers");
-    if (layers && layers->is_array())
+    if (layers && layers->is_array() && layer_name_)
     {
         for (auto const& layer : layers->as_array())
         {
+            is_vector_ = true;
             std::string id = layer.at("id").as_string().c_str();
-            if (id == layer_)
+            if (id == *layer_name_)
             {
-                is_vector_ = true;
                 found = true;
                 if (auto const* p = layer.as_object().if_contains("minzoom"))
                 {
@@ -159,10 +157,9 @@ void tiles_datasource::init_metadata(boost::json::value const& metadata)
             }
         }
     }
-    if (!found)
+    if (!found && is_vector_ && layer_name_)
     {
-        // throw mapnik::datasource_exception("Requested layer '" + layer_ + "' not found.");
-        std::cerr << "Requested layer '" << layer_ << "' not found." << std::endl;
+        throw mapnik::datasource_exception("Requested layer '" + *layer_name_ + "' not found.");
     }
 }
 
@@ -174,6 +171,8 @@ void tiles_datasource::init(mapnik::parameters const& params)
     {
         throw mapnik::datasource_exception("Tiles Plugin: missing <file> or <json-url> parameter");
     }
+
+    layer_name_ = params.get<std::string>("layer");
 
     if (file)
     {
@@ -203,43 +202,15 @@ void tiles_datasource::init(mapnik::parameters const& params)
             throw mapnik::datasource_exception("Unexpected file extension in tiles source: " + database_path_);
         }
 
-        if (true)
-        {
-            std::optional<std::string> layer = params.get<std::string>("layer");
-            try
-            {
-                layer_ = layer.value();
-            }
-            catch (std::bad_optional_access&)
-            {
-                // throw mapnik::datasource_exception("Tiles Plugin: parameter 'layer' is missing.");
-                std::cerr << "Tiles Plugin: parameter 'layer' is missing. FIXME" << std::endl;
-            }
-        }
         minzoom_ = source_ptr_->minzoom();
         maxzoom_ = source_ptr_->maxzoom();
         extent_ = source_ptr_->extent();
-        if (true)
-        {
-            auto metadata = source_ptr_->metadata();
-            init_metadata(metadata);
-        }
+        auto metadata = source_ptr_->metadata();
+        init_metadata(metadata);
     }
     else if (json_url)
     {
-        std::optional<std::string> layer = params.get<std::string>("layer");
-        try
-        {
-            layer_ = layer.value();
-        }
-        catch (std::bad_optional_access&)
-        {
-            // throw mapnik::datasource_exception("Tiles Plugin: parameter 'layer' is missing.");
-            std::cerr << "Tiles Plugin: parameter 'layer' is missing - FIXME" << std::endl;
-        }
-
         extent_ = mapnik::box2d<double>(-180, -85.0511287, 180, 85.0511287);
-
         auto metadata = xyz_metadata(*json_url);
         init_metadata(metadata);
         auto tiles = metadata.at("tiles");
@@ -313,8 +284,8 @@ std::int64_t scale_to_zoom(double scale, std::int64_t minzoom, std::int64_t maxz
 
 std::unordered_map<std::string, std::string>& tiles_datasource::tile_cache()
 {
-    static thread_local std::unordered_map<std::string, std::string> vector_tile_cache;
-    return vector_tile_cache;
+    static thread_local std::unordered_map<std::string, std::string> tiles_cache;
+    return tiles_cache;
 }
 
 mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
@@ -322,10 +293,10 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "tiles_datasource::features");
 #endif
-    auto& vector_tile_cache = tile_cache();
-    if (vector_tile_cache.size() > 64)
+    auto& tiles_cache = tile_cache();
+    if (tiles_cache.size() > 64)
     {
-        vector_tile_cache.clear();
+        tiles_cache.clear();
     }
 
     if (q.get_bbox().intersects(extent_))
@@ -347,7 +318,7 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
         std::string url = url_template_ ? *url_template_ : database_path_;
         auto datasource_hash = std::hash<std::string>{}(url);
 
-        if (is_vector_)
+        if (is_vector_ && layer_name_)
         {
             return std::make_shared<vector_tiles_featureset>(url,
                                                              context,
@@ -356,8 +327,8 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
                                                              xmax,
                                                              ymin,
                                                              ymax,
-                                                             layer_,
-                                                             vector_tile_cache,
+                                                             *layer_name_,
+                                                             tiles_cache,
                                                              datasource_hash);
         }
         else
@@ -370,8 +341,7 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
                                                              xmax,
                                                              ymin,
                                                              ymax,
-                                                             layer_,
-                                                             vector_tile_cache,
+                                                             tiles_cache,
                                                              datasource_hash,
                                                              q.get_filter_factor());
         }
@@ -398,7 +368,7 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
     double x1 = (tile_x + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) - 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     double y1 = -(tile_y + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) + 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     auto query_bbox = mapnik::box2d<double>{x0, y0, x1, y1};
-    if (url_template_)
+    if (url_template_ && layer_name_)
     {
         auto datasource_hash = std::hash<std::string>{}(*url_template_);
         return std::make_shared<vector_tiles_featureset>(*url_template_,
@@ -408,7 +378,7 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
                                                          tile_x,
                                                          tile_y,
                                                          tile_y,
-                                                         layer_,
+                                                         *layer_name_,
                                                          tile_cache(),
                                                          datasource_hash);
     }

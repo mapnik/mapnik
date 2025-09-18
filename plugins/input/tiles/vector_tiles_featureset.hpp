@@ -41,7 +41,7 @@ class vector_tiles_featureset : public mapnik::Featureset
                             int ymin,
                             int ymax,
                             std::string const& layer,
-                            std::unordered_map<std::string, std::string>& vector_tile_cache,
+                            std::unordered_map<std::string, std::string>& tiles_cache,
                             std::size_t datasource_hash);
 
     virtual ~vector_tiles_featureset();
@@ -64,7 +64,7 @@ class vector_tiles_featureset : public mapnik::Featureset
     mapnik::box2d<double> extent_;
     std::string const layer_;
     std::unique_ptr<mvt_io> vector_tile_;
-    std::unordered_map<std::string, std::string>& vector_tile_cache_;
+    std::unordered_map<std::string, std::string>& tiles_cache_;
     std::size_t const QUEUE_SIZE_;
     queue_type queue_;
     std::vector<std::thread> workers_;

@@ -76,8 +76,7 @@ class tiles_datasource : public mapnik::datasource
     mapnik::box2d<double> extent_;
     std::int64_t minzoom_ = 0;
     std::int64_t maxzoom_ = 14;
-    std::string json_;
-    std::string layer_;
+    std::optional<std::string> layer_name_;
     mapnik::layer_descriptor desc_;
     bool is_vector_ = false;
 };

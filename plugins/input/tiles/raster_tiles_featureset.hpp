@@ -40,7 +40,6 @@ class raster_tiles_featureset : public mapnik::Featureset
                             int xmax,
                             int ymin,
                             int ymax,
-                            std::string const& layer,
                             std::unordered_map<std::string, std::string>& vector_tile_cache,
                             std::size_t datasource_hash,
                             double filter_factor);
@@ -62,8 +61,7 @@ class raster_tiles_featureset : public mapnik::Featureset
     int xmax_;
     int ymin_;
     int ymax_;
-    std::string const layer_;
-    std::unordered_map<std::string, std::string>& vector_tile_cache_;
+    std::unordered_map<std::string, std::string>& tiles_cache_;
     std::size_t const QUEUE_SIZE_;
     queue_type queue_;
     std::vector<std::thread> workers_;

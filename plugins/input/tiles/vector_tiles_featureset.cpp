@@ -37,7 +37,7 @@ vector_tiles_featureset::vector_tiles_featureset(std::string const& url_template
                                                  int ymin,
                                                  int ymax,
                                                  std::string const& layer,
-                                                 std::unordered_map<std::string, std::string>& vector_tile_cache,
+                                                 std::unordered_map<std::string, std::string>& tiles_cache,
                                                  std::size_t datasource_hash)
     : url_template_(url_template),
       context_(ctx),
@@ -48,7 +48,7 @@ vector_tiles_featureset::vector_tiles_featureset(std::string const& url_template
       ymax_(ymax),
       layer_(layer),
       vector_tile_(nullptr),
-      vector_tile_cache_(vector_tile_cache),
+      tiles_cache_(tiles_cache),
       QUEUE_SIZE_((xmax - xmin + 1) * (ymax - ymin + 1)),
       queue_(QUEUE_SIZE_),
       stash_(ioc_, targets_, queue_),
@@ -129,8 +129,8 @@ bool vector_tiles_featureset::next_tile()
             {
                 ++num_tiles_;
                 auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % zoom_ % x % y).str();
-                auto itr = vector_tile_cache_.find(datasource_key);
-                if (itr == vector_tile_cache_.end())
+                auto itr = tiles_cache_.find(datasource_key);
+                if (itr == tiles_cache_.end())
                 {
                     stash_.targets().emplace_back(zoom_, x, y);
                 }
@@ -208,8 +208,8 @@ bool vector_tiles_featureset::next_tile()
             ++consumed_count_;
             auto datasource_key =
               (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % tile.zoom % tile.x % tile.y).str();
-            auto itr = vector_tile_cache_.find(datasource_key);
-            if (itr != vector_tile_cache_.end())
+            auto itr = tiles_cache_.find(datasource_key);
+            if (itr != tiles_cache_.end())
             {
                 auto buffer = itr->second;
                 vector_tile_.reset(new mvt_io(std::move(buffer), context_, tile.x, tile.y, zoom_, layer_));
@@ -221,7 +221,7 @@ bool vector_tiles_featureset::next_tile()
                     continue;
                 std::string decompressed;
                 mapnik::vector_tile_impl::zlib_decompress((*tile.data).data(), (*tile.data).size(), decompressed);
-                vector_tile_cache_.emplace(datasource_key, decompressed);
+                tiles_cache_.emplace(datasource_key, decompressed);
                 vector_tile_.reset(new mvt_io(std::move(decompressed), context_, tile.x, tile.y, zoom_, layer_));
                 status = true;
             }

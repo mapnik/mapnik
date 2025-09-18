@@ -56,8 +56,7 @@ raster_tiles_featureset::raster_tiles_featureset(std::string const& url_template
                                                  int xmax,
                                                  int ymin,
                                                  int ymax,
-                                                 std::string const& layer,
-                                                 std::unordered_map<std::string, std::string>& vector_tile_cache,
+                                                 std::unordered_map<std::string, std::string>& tiles_cache,
                                                  std::size_t datasource_hash,
                                                  double filter_factor)
     : url_template_(url_template),
@@ -68,8 +67,7 @@ raster_tiles_featureset::raster_tiles_featureset(std::string const& url_template
       xmax_(xmax),
       ymin_(ymin),
       ymax_(ymax),
-      layer_(layer),
-      vector_tile_cache_(vector_tile_cache),
+      tiles_cache_(tiles_cache),
       QUEUE_SIZE_((xmax - xmin + 1) * (ymax - ymin + 1)),
       queue_(QUEUE_SIZE_),
       stash_(ioc_, targets_, queue_),
@@ -166,8 +164,8 @@ mapnik::feature_ptr raster_tiles_featureset::next()
             {
                 ++num_tiles_;
                 auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % zoom_ % x % y).str();
-                auto itr = vector_tile_cache_.find(datasource_key);
-                if (itr == vector_tile_cache_.end())
+                auto itr = tiles_cache_.find(datasource_key);
+                if (itr == tiles_cache_.end())
                 {
                     stash_.targets().emplace_back(zoom_, x, y);
                 }
@@ -244,8 +242,8 @@ mapnik::feature_ptr raster_tiles_featureset::next()
             ++consumed_count_;
             auto datasource_key =
               (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % tile.zoom % tile.x % tile.y).str();
-            auto itr = vector_tile_cache_.find(datasource_key);
-            if (itr != vector_tile_cache_.end())
+            auto itr = tiles_cache_.find(datasource_key);
+            if (itr != tiles_cache_.end())
             {
                 auto buffer = itr->second;
                 return next_feature(buffer, tile.x, tile.y);
@@ -256,7 +254,7 @@ mapnik::feature_ptr raster_tiles_featureset::next()
                 {
                     continue;
                 }
-                vector_tile_cache_.emplace(datasource_key, *tile.data);
+                tiles_cache_.emplace(datasource_key, *tile.data);
                 return next_feature(*tile.data, tile.x, tile.y);
             }
         }
