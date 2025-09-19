@@ -5,6 +5,7 @@
   "homepage": "https://github.com/mapnik/mapnik",
   "dependencies": [
     "boost-assign",
+    "boost-beast",
     "boost-bimap",
     "boost-format",
     "boost-geometry",
