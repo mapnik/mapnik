@@ -20,23 +20,23 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_VERSION_HPP
-#define MAPNIK_VERSION_HPP
+#include "pmtiles_source.hpp"
+#include "mbtiles_source.hpp"
+#include <string>
 
-#include <mapnik/stringify_macro.hpp>
+namespace mapnik {
 
-#define MAPNIK_MAJOR_VERSION 4
-#define MAPNIK_MINOR_VERSION 1
-#define MAPNIK_PATCH_VERSION 3
+std::unique_ptr<tiles_source> tiles_source::get_source(std::string const& filename)
+{
+    if (filename.ends_with(".pmtiles"))
+    {
+        return std::make_unique<mapnik::pmtiles_source>(filename);
+    }
+    else if (filename.ends_with(".mbtiles"))
+    {
+        return std::make_unique<mapnik::mbtiles_source>(filename);
+    }
+    return nullptr;
+}
 
-#define MAPNIK_VERSION MAPNIK_VERSION_ENCODE(MAPNIK_MAJOR_VERSION, MAPNIK_MINOR_VERSION, MAPNIK_PATCH_VERSION)
-
-#define MAPNIK_VERSION_STRING                                                                                          \
-    MAPNIK_STRINGIFY(MAPNIK_MAJOR_VERSION)                                                                             \
-    "." MAPNIK_STRINGIFY(MAPNIK_MINOR_VERSION) "." MAPNIK_STRINGIFY(MAPNIK_PATCH_VERSION)
-
-#define MAPNIK_VERSION_AT_LEAST(major, minor, patch) (MAPNIK_VERSION >= MAPNIK_VERSION_ENCODE(major, minor, patch))
-
-#define MAPNIK_VERSION_ENCODE(major, minor, patch) ((major) * 100000 + (minor) * 100 + (patch))
-
-#endif // MAPNIK_VERSION_HPP
+} // namespace mapnik
