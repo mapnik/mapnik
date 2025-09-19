@@ -18,6 +18,7 @@
       ]
     },
     "boost-json",
+    "boost-lockfree",
     "boost-msm",
     "boost-url",
     "boost-context",
