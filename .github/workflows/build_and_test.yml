@@ -29,14 +29,14 @@ jobs:
       Build & Test
       (${{ matrix.os }})
       (C++ ${{ matrix.cxx-standard }})
-      ${{ startsWith(matrix.os, 'macos-') && (matrix.os == 'macos-15' && '(ARM64)' || '(AMD64)') || '' }}
+      ${{ startsWith(matrix.os, 'macos-') && (matrix.os == 'macos-26' && '(ARM64)' || '(AMD64)') || '' }}
     needs: checkSource
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os:
-          - macos-15
+          - macos-26
           - ubuntu-22.04
           - windows-2022
         cxx-standard:
@@ -110,7 +110,7 @@ jobs:
           elif [ "${RUNNER_OS}" == "macOS" ]; then
             echo "CMAKE_BUILD_PARALLEL_LEVEL=$(sysctl -n hw.logicalcpu)" >> ${GITHUB_ENV}
             echo "CTEST_PARALLEL_LEVEL=$(sysctl -n hw.logicalcpu)" >> ${GITHUB_ENV}
-            PRESET=${PRESET}-${{ matrix.os == 'macos-15' && 'arm64' || 'x64' }}
+            PRESET=${PRESET}-${{ matrix.os == 'macos-26' && 'arm64' || 'x64' }}
           elif [ "${RUNNER_OS}" == "Windows" ]; then
             echo "CMAKE_BUILD_PARALLEL_LEVEL=$(pwsh -Command '(Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors')" >> ${GITHUB_ENV}
             echo "CTEST_PARALLEL_LEVEL=$(pwsh -Command '(Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors')" >> ${GITHUB_ENV}
