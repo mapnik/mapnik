@@ -100,6 +100,15 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
 
+      - name: Patch libpq RPATH issue (macOS ARM64)
+        shell: bash
+        if: runner.os == 'macOS'
+        run: |
+          BIN_PATH="$GITHUB_WORKSPACE/vcpkg/packages/libpq_arm64-osx/tools/libpq/bin/pg_config"
+            if [ -f "$BIN_PATH" ]; then
+               chmod +w "$BIN_PATH" || true
+               rm "$BIN_PATH" # Remove if cannot fix RPATH
+            fi
       - name: Set CMAKE_BUILD_PARALLEL_LEVEL, CTEST_PARALLEL_LEVEL & PRESET
         shell: bash
         run: |
