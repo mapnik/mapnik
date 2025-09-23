@@ -32,7 +32,7 @@ runs:
       env:
         UPDATE: 1
       run: |
-        ${TEST_WRAPPER:-} ctest --preset ${{ inputs.cmake-preset }}
+        ${TEST_WRAPPER:-} ctest -V --preset ${{ inputs.cmake-preset }}
 
     - name: Test visuals
       continue-on-error: true
