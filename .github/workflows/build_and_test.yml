@@ -92,6 +92,7 @@ jobs:
           elif [ "${RUNNER_OS}" == "Windows" ]; then
             choco install \
               ninja \
+              mono \
               OpenCppCoverage
             echo "C:\Program Files\OpenCppCoverage" >> ${GITHUB_PATH}
           fi
