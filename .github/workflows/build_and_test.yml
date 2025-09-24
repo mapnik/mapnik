@@ -1,5 +1,8 @@
 name: Build and Test
 
+permissions:
+  packages: write
+
 on:
   push:
     branches:
