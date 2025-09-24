@@ -78,6 +78,7 @@ jobs:
               gperf \
               lcov \
               libxxf86vm-dev \
+              mono-complete \
               ninja-build \
               postgresql-client
           elif [ "${RUNNER_OS}" == "macOS" ]; then
@@ -100,18 +101,10 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
 
-      - name: Bootstrap vcpkg (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-            ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.bat
-
       - name: Bootstrap vcpkg
-        if: runner.os != 'Windows'
         shell: bash
         run: |
           ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
-          sudo apt -y install mono-complete
 
       - name: Add NuGet sources
         shell: bash
