@@ -13,6 +13,7 @@ env:
   VCPKG_EXE: ${{ github.workspace }}/vcpkg/vcpkg
   FEED_URL: https://nuget.pkg.github.com/mapnik/index.json
   VCPKG_RELEASE: 2025.09.17
+  VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/mapnik/index.json,readwrite"
 
 jobs:
   checkSource:
@@ -99,7 +100,7 @@ jobs:
         shell: bash
         run: |
           if [ "${RUNNER_OS}" == "Windows" ]; then
-            $(pwsh ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.bat)
+            ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
           else
             ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
             sudo apt -y install mono-complete
