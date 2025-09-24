@@ -9,14 +9,15 @@ on:
       - "no-ci-*"
 
 env:
-  VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
-  VCPKG_RELEASE: 2025.07.25
+  USERNAME: mapnik
+  VCPKG_EXE: ${{ github.workspace }}/vcpkg/vcpkg
+  FEED_URL: https://nuget.pkg.github.com/mapnik/index.json
+  VCPKG_RELEASE: 2025.09.17
 
 jobs:
   checkSource:
     name: Check Source Code
     runs-on: ubuntu-22.04
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,16 +30,14 @@ jobs:
       Build & Test
       (${{ matrix.os }})
       (C++ ${{ matrix.cxx-standard }})
-      ${{ startsWith(matrix.os, 'macos-') && (matrix.os == 'macos-15' && '(ARM64)' || '(AMD64)') || '' }}
+      ${{ startsWith(matrix.os, 'macos-') && (matrix.os == 'macos-26' && '(ARM64)' || '(AMD64)') || '' }}
     needs: checkSource
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os:
-          - macos-15
           - ubuntu-22.04
-          - windows-2022
         cxx-standard:
           - 20
 
@@ -59,22 +58,18 @@ jobs:
           ref: ${{ env.VCPKG_RELEASE }}
           repository: microsoft/vcpkg
 
-      - name: Export GitHub Actions cache environment variables
-        uses: actions/github-script@v7
-        with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-
       - name: Install required system packages
         shell: bash
         run: |
           if [ "${RUNNER_OS}" == "Linux" ]; then
-            sudo apt-get update
-            sudo apt-get -y install \
+            sudo apt update
+            sudo apt -y install \
               autoconf \
               autoconf-archive \
               automake \
+              bison \
+              flex \
+              cmake \
               gperf \
               lcov \
               libxxf86vm-dev \
@@ -85,30 +80,44 @@ jobs:
               autoconf \
               autoconf-archive \
               automake \
+              mono \
               lcov \
               libtool \
-              ninja \
-              vcpkg
+              ninja
           elif [ "${RUNNER_OS}" == "Windows" ]; then
             choco install \
               ninja \
               OpenCppCoverage
             echo "C:\Program Files\OpenCppCoverage" >> ${GITHUB_PATH}
           fi
-
       - name: Enable Developer Command Prompt (Windows)
         uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
 
-      - name: Patch libpq RPATH issue (macOS ARM64)
+      - name: Bootstrap vcpkg
         shell: bash
-        if: runner.os == 'macOS'
         run: |
-          BIN_PATH="$GITHUB_WORKSPACE/vcpkg/packages/libpq_arm64-osx/tools/libpq/bin/pg_config"
-            if [ -f "$BIN_PATH" ]; then
-               chmod +w "$BIN_PATH" || true
-               rm "$BIN_PATH" # Remove if cannot fix RPATH
-            fi
+          if [ "${RUNNER_OS}" == "Windows" ]; then          
+            $(pwsh ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.bat)
+          else
+            ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
+            sudo apt -y install mono-complete
+          fi
+
+      - name: Add NuGet sources
+        shell: bash
+        run: |          
+           mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
+                sources add \
+                -Source "${{ env.FEED_URL }}" \
+                -StorePasswordInClearText \
+                -Name GitHubPackages \
+                -UserName "${{ env.USERNAME }}" \
+                -Password "${{ secrets.GITHUB_TOKEN }}"               
+           mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
+                 setapikey "${{ secrets.GITHUB_TOKEN }}" \
+                 -Source "${{ env.FEED_URL }}"
+
       - name: Set CMAKE_BUILD_PARALLEL_LEVEL, CTEST_PARALLEL_LEVEL & PRESET
         shell: bash
         run: |
