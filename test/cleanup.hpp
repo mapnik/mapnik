@@ -28,12 +28,9 @@ inline void run_cleanup()
     // http://xmlsoft.org/xmlmem.html
 #if defined(HAVE_LIBXML2)
     xmlCleanupEncodingAliases();
-    xmlCleanupGlobals();
     xmlCleanupParser();
-    xmlCleanupThreads();
     xmlCleanupInputCallbacks();
     xmlCleanupOutputCallbacks();
-    xmlCleanupMemory();
 #endif
 
 #if defined(HAVE_CAIRO)
