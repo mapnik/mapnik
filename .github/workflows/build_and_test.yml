@@ -97,9 +97,6 @@ jobs:
               OpenCppCoverage
             echo "C:\Program Files\OpenCppCoverage" >> ${GITHUB_PATH}
           fi
-      - name: Enable Developer Command Prompt (Windows)
-        uses: ilammy/msvc-dev-cmd@v1
-        if: runner.os == 'Windows'
 
       - name: Bootstrap vcpkg
         shell: bash
@@ -119,6 +116,10 @@ jobs:
            mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
                  setapikey "${{ secrets.VCPKG_CACHE_PAT }}" \
                  -Source "${{ env.FEED_URL }}"
+
+      - name: Enable Developer Command Prompt (Windows)
+        uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
 
       - name: Set CMAKE_BUILD_PARALLEL_LEVEL, CTEST_PARALLEL_LEVEL & PRESET
         shell: bash
