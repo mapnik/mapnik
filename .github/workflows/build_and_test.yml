@@ -17,7 +17,6 @@ env:
   FEED_URL: https://nuget.pkg.github.com/mapnik/index.json
   VCPKG_RELEASE: 2025.09.17
   VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/mapnik/index.json,readwrite"
-  VCPKG_INSTALL_OPTIONS: "--debug"
 
 jobs:
   checkSource:
@@ -43,6 +42,7 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
+          - windows-2022
         cxx-standard:
           - 20
 
@@ -99,15 +99,18 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
 
+      - name: Bootstrap vcpkg (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+            ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.bat
+
       - name: Bootstrap vcpkg
+        if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [ "${RUNNER_OS}" == "Windows" ]; then
-            ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
-          else
-            ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
-            sudo apt -y install mono-complete
-          fi
+          ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
+          sudo apt -y install mono-complete
 
       - name: Add NuGet sources
         shell: bash
