@@ -43,7 +43,6 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - windows-2022
         cxx-standard:
           - 20
 
@@ -119,9 +118,9 @@ jobs:
                 -StorePasswordInClearText \
                 -Name GitHubPackages \
                 -UserName "${{ env.USERNAME }}" \
-                -Password "${{ secrets.GITHUB_TOKEN }}"
+                -Password "${{ secrets.VCPKG_CACHE_PAT }}"
            mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
-                 setapikey "${{ secrets.GITHUB_TOKEN }}" \
+                 setapikey "${{ secrets.VCPKG_CACHE_PAT }}" \
                  -Source "${{ env.FEED_URL }}"
 
       - name: Set CMAKE_BUILD_PARALLEL_LEVEL, CTEST_PARALLEL_LEVEL & PRESET
