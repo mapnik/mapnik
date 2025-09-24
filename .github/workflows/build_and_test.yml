@@ -38,6 +38,7 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
+          - windows-2022
         cxx-standard:
           - 20
 
@@ -97,7 +98,7 @@ jobs:
       - name: Bootstrap vcpkg
         shell: bash
         run: |
-          if [ "${RUNNER_OS}" == "Windows" ]; then          
+          if [ "${RUNNER_OS}" == "Windows" ]; then
             $(pwsh ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.bat)
           else
             ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
@@ -106,14 +107,14 @@ jobs:
 
       - name: Add NuGet sources
         shell: bash
-        run: |          
+        run: |
            mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
                 sources add \
                 -Source "${{ env.FEED_URL }}" \
                 -StorePasswordInClearText \
                 -Name GitHubPackages \
                 -UserName "${{ env.USERNAME }}" \
-                -Password "${{ secrets.GITHUB_TOKEN }}"               
+                -Password "${{ secrets.GITHUB_TOKEN }}"
            mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
                  setapikey "${{ secrets.GITHUB_TOKEN }}" \
                  -Source "${{ env.FEED_URL }}"
