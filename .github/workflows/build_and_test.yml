@@ -98,7 +98,7 @@ jobs:
             echo "C:\Program Files\OpenCppCoverage" >> ${GITHUB_PATH}
           fi
 
-     - name: Bootstrap vcpkg (Windows)
+      - name: Bootstrap vcpkg (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
