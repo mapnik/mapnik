@@ -93,7 +93,6 @@ jobs:
           elif [ "${RUNNER_OS}" == "Windows" ]; then
             choco install \
               ninja \
-              mono \
               OpenCppCoverage
             echo "C:\Program Files\OpenCppCoverage" >> ${GITHUB_PATH}
           fi
@@ -110,7 +109,23 @@ jobs:
         run: |
           ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
 
-      - name: Add NuGet sources
+      - name: Add NuGet sources (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          .$(${{ env.VCPKG_EXE }} fetch nuget) `
+            sources add `
+            -Source "${{ env.FEED_URL }}" `
+            -StorePasswordInClearText `
+            -Name GitHubPackages `
+            -UserName "${{ env.USERNAME }}" `
+            -Password "${{ secrets.VCPKG_CACHE_PAT }}"
+          .$(${{ env.VCPKG_EXE }} fetch nuget) `
+            setapikey "${{ secrets.VCPKG_CACHE_PAT }}" `
+            -Source "${{ env.FEED_URL }}"
+
+      - name: Add NuGet sources (*nix)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
            mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
