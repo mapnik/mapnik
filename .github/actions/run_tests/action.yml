@@ -9,6 +9,7 @@ runs:
   using: composite
   steps:
     - name: Set PROJ_LIB
+      if: runner.os != 'macOS'
       shell: bash
       run: |
         cmake --preset ${{ inputs.cmake-preset }} -N -L | grep -o "PROJ_LIB=.*" >> ${GITHUB_ENV}
@@ -32,7 +33,7 @@ runs:
       env:
         UPDATE: 1
       run: |
-        ${TEST_WRAPPER:-} ctest --preset ${{ inputs.cmake-preset }}
+        ${TEST_WRAPPER:-} ctest -V --preset ${{ inputs.cmake-preset }}
 
     - name: Test visuals
       continue-on-error: true
