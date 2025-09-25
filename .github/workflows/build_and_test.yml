@@ -42,6 +42,7 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
+          - macos-26
           - windows-2022
         cxx-standard:
           - 20
