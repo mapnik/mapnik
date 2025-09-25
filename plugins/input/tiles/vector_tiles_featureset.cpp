@@ -37,6 +37,7 @@ vector_tiles_featureset::vector_tiles_featureset(std::string const& tiles_locati
                                                  int ymax,
                                                  std::string const& layer,
                                                  std::unordered_map<std::string, std::string>& tiles_cache,
+                                                 std::size_t max_threads,
                                                  std::size_t datasource_hash)
     : tiles_location_(tiles_location),
       context_(ctx),
@@ -51,6 +52,7 @@ vector_tiles_featureset::vector_tiles_featureset(std::string const& tiles_locati
       QUEUE_SIZE_((xmax - xmin + 1) * (ymax - ymin + 1)),
       queue_(QUEUE_SIZE_),
       stash_(ioc_, targets_, queue_),
+      max_threads_(max_threads),
       datasource_hash_(datasource_hash)
 {
     try
@@ -140,9 +142,7 @@ bool vector_tiles_featureset::next_tile()
                 }
             }
         }
-
-        std::size_t max_threads = 4;
-        std::size_t threads = std::min(max_threads, stash_.targets().size());
+        std::size_t threads = std::min(max_threads_, stash_.targets().size());
         workers_.reserve(threads + 1);
         for (std::size_t i = 0; i < threads; ++i)
         {

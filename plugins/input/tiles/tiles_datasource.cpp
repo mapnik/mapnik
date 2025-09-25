@@ -247,6 +247,8 @@ void tiles_datasource::init(mapnik::parameters const& params)
     // overwrite min/max zoom with user supplied values.
     minzoom_ = *params.get<mapnik::value_integer>("minzoom", minzoom_);
     maxzoom_ = *params.get<mapnik::value_integer>("maxzoom", maxzoom_);
+    // overwrite default max_threads
+    max_threads_ = *params.get<mapnik::value_integer>("max-threads", max_threads_);
 }
 
 mapnik::context_ptr tiles_datasource::get_context_with_attributes() const
@@ -343,6 +345,7 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
                                                              ymax,
                                                              *layer_name_,
                                                              tiles_cache,
+                                                             max_threads_,
                                                              datasource_hash);
         }
         else
@@ -356,6 +359,7 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
                                                              ymin,
                                                              ymax,
                                                              tiles_cache,
+                                                             max_threads_,
                                                              datasource_hash,
                                                              q.get_filter_factor());
         }
@@ -397,6 +401,7 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
                                                          tile_y,
                                                          *layer_name_,
                                                          tile_cache(),
+                                                         max_threads_,
                                                          datasource_hash);
     }
     return mapnik::featureset_ptr();

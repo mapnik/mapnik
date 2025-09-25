@@ -42,6 +42,7 @@ class vector_tiles_featureset : public mapnik::Featureset
                             int ymax,
                             std::string const& layer,
                             std::unordered_map<std::string, std::string>& tiles_cache,
+                            std::size_t max_threads,
                             std::size_t datasource_hash);
 
     virtual ~vector_tiles_featureset();
@@ -74,6 +75,7 @@ class vector_tiles_featureset : public mapnik::Featureset
     tiles_stash stash_;
     std::size_t num_tiles_{0};
     std::size_t consumed_count_{0};
+    std::size_t max_threads_;
     std::size_t datasource_hash_;
     bool next_tile();
     bool first_ = true;
