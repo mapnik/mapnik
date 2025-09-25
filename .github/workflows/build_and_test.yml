@@ -154,7 +154,7 @@ jobs:
           elif [ "${RUNNER_OS}" == "macOS" ]; then
             echo "CMAKE_BUILD_PARALLEL_LEVEL=$(sysctl -n hw.logicalcpu)" >> ${GITHUB_ENV}
             echo "CTEST_PARALLEL_LEVEL=$(sysctl -n hw.logicalcpu)" >> ${GITHUB_ENV}
-            PRESET=${PRESET}-${{ matrix.os == 'macos-15' && 'arm64' || 'x64' }}
+            PRESET=${PRESET}-${{ matrix.os == 'macos-26' && 'arm64' || 'x64' }}
           elif [ "${RUNNER_OS}" == "Windows" ]; then
             echo "CMAKE_BUILD_PARALLEL_LEVEL=$(pwsh -Command '(Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors')" >> ${GITHUB_ENV}
             echo "CTEST_PARALLEL_LEVEL=$(pwsh -Command '(Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors')" >> ${GITHUB_ENV}
