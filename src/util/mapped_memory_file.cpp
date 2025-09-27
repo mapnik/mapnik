@@ -64,7 +64,5 @@ void mapped_memory_file::deleteFile(std::string const& file_name)
     }
 }
 
-mapped_memory_file::~mapped_memory_file() {}
-
 } // namespace util
 } // namespace mapnik

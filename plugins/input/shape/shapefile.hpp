@@ -123,8 +123,6 @@ class shape_file : public mapnik::util::mapped_memory_file
         : mapped_memory_file(file_name)
     {}
 
-    ~shape_file() {}
-
     inline void read_record(record_type& rec)
     {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
