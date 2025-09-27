@@ -107,7 +107,7 @@ class mbtiles_source : public tiles_source
              "SELECT tile_data FROM tiles WHERE zoom_level = %1% AND tile_column = %2% AND tile_row = %3%") %
            (int)z % x % convert_y(y, z))
             .str();
-        std::shared_ptr<sqlite_resultset> result(dataset_->execute_query(sql));
+        auto result = dataset_->execute_query(sql);
         int size = 0;
         char const* blob = nullptr;
         if (result->is_valid() && result->step_next() && result->column_type(0) == SQLITE_BLOB)
@@ -128,6 +128,27 @@ class mbtiles_source : public tiles_source
         return std::string(blob, size);
     }
 
+    std::string get_tile_raw(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
+    {
+        std::string sql =
+          (boost::format(
+             "SELECT tile_data FROM tiles WHERE zoom_level = %1% AND tile_column = %2% AND tile_row = %3%") %
+           (int)z % x % convert_y(y, z))
+            .str();
+        auto result = dataset_->execute_query(sql);
+        int size = 0;
+        char const* blob = nullptr;
+        if (result->is_valid() && result->step_next() && result->column_type(0) == SQLITE_BLOB)
+        {
+            blob = result->column_blob(0, size);
+        }
+        else
+        {
+            return std::string();
+        }
+        return std::string(blob, size);
+    }
+
     boost::json::value metadata() const
     {
         std::string metadata;
@@ -141,7 +162,7 @@ class mbtiles_source : public tiles_source
             }
             if (metadata.empty())
             {
-                throw mapnik::datasource_exception("PMTiles plugin: " + database_path_ +
+                throw mapnik::datasource_exception("Tiles plugin: " + database_path_ +
                                                    " has no 'json' entry in metadata table.");
             }
             try

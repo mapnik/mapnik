@@ -56,7 +56,6 @@ class MAPNIK_DECL mapped_memory_file : public noncopyable
   public:
     mapped_memory_file();
     explicit mapped_memory_file(std::string const& file_name);
-    virtual ~mapped_memory_file();
 
     file_source_type& file();
     bool is_open() const;
@@ -72,7 +71,7 @@ class MAPNIK_DECL mapped_memory_file : public noncopyable
 #ifdef MAPNIK_MEMORY_MAPPED_FILE
     mapnik::mapped_region_ptr mapped_region_;
 #endif
-    file_source_type file_;
+    mutable file_source_type file_;
 };
 
 } // namespace util

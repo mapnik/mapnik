@@ -301,7 +301,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
                 mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::init(create_spatial_index)");
 #endif
 
-                std::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
+                std::unique_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
                 if (sqlite_utils::create_spatial_index(index_db, index_table_, rs))
                 {
                     // extent_initialized_ = true;
@@ -442,7 +442,7 @@ std::optional<mapnik::datasource_geometry_t> sqlite_datasource::get_geometry_typ
         {
             s << " LIMIT 5";
         }
-        std::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(s.str());
+        std::unique_ptr<sqlite_resultset> rs = dataset_->execute_query(s.str());
         int multi_type = 0;
         while (rs->is_valid() && rs->step_next())
         {
@@ -549,9 +549,9 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
         MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: " << s.str();
 
-        std::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
+        std::unique_ptr<sqlite_resultset> rs = dataset_->execute_query(s.str());
 
-        return std::make_shared<sqlite_featureset>(rs,
+        return std::make_shared<sqlite_featureset>(std::move(rs),
                                                    ctx,
                                                    desc_.get_encoding(),
                                                    e,
@@ -628,9 +628,9 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double to
 
         MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: " << s.str();
 
-        std::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
+        std::unique_ptr<sqlite_resultset> rs = dataset_->execute_query(s.str());
 
-        return std::make_shared<sqlite_featureset>(rs,
+        return std::make_shared<sqlite_featureset>(std::move(rs),
                                                    ctx,
                                                    desc_.get_encoding(),
                                                    e,

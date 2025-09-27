@@ -44,7 +44,7 @@ using mapnik::geometry_utils;
 using mapnik::query;
 using mapnik::transcoder;
 
-sqlite_featureset::sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
+sqlite_featureset::sqlite_featureset(std::unique_ptr<sqlite_resultset>&& rs,
                                      mapnik::context_ptr const& ctx,
                                      std::string const& encoding,
                                      mapnik::box2d<double> const& bbox,
@@ -52,7 +52,7 @@ sqlite_featureset::sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
                                      bool twkb_encoding,
                                      bool spatial_index,
                                      bool using_subquery)
-    : rs_(rs),
+    : rs_(std::move(rs)),
       ctx_(ctx),
       tr_(new transcoder(encoding)),
       bbox_(bbox),

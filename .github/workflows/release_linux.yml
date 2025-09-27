@@ -38,7 +38,9 @@ jobs:
             libgdal-dev \
             libboost-filesystem-dev \
             libboost-program-options-dev \
-            libboost-regex-dev
+            libboost-regex-dev \
+            libboost-url-dev \
+            libboost-context-dev
 
       - name: Configure CMake
         run: cmake -LA --preset ${{ env.PRESET }}
