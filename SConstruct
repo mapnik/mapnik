@@ -1,6 +1,6 @@
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2024 Artem Pavlenko
+# Copyright (C) 2025 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -120,7 +120,7 @@ PLUGINS = { # plugins with external dependencies
     'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
     'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
     'sqlite':  {'default':True,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
-    'tiles':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+    'tiles':   {'default':True,'path':None,'inc':None,'lib':'sqlite3','lang':'C'},
     # plugins without external dependencies requiring CheckLibWithHeader...
     'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
     'csv':     {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
@@ -450,6 +450,11 @@ opts.AddVariables(
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
     BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
     ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. ' + ', '.join(severities) + ')', 'error'),
+
+    # Plugin options
+    BoolVariable('TILES_INPUT_SSL', 'Enable SSL support for accessing tiles over network (requires openssl)', 'False'),
+    PathVariable('OPENSSL_INCLUDES', 'Search path for openssl include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('OPENSSL_LIBS','Search path for openssl library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
 
     # Plugin linking
     EnumVariable('PLUGIN_LINKING', "Set plugin linking with libmapnik", 'shared', ['shared','static']),
@@ -1316,6 +1321,7 @@ if not preconfigured:
     env['CAIRO_LIBPATHS'] = []
     env['CAIRO_ALL_LIBS'] = []
     env['CAIRO_CPPPATHS'] = []
+    env['HAS_OPENSSL'] = False
     env['HAS_PYCAIRO'] = False
     env['PYCAIRO_PATHS'] = []
     env['HAS_LIBXML2'] = False
@@ -1806,6 +1812,35 @@ if not preconfigured:
                                          env['LIBS'].remove(libname)
                                 else:
                                     details['lib'] = libname
+                elif plugin == 'tiles':
+                    if env.get('TILES_INPUT_SSL'):
+                        if env.get('OPENSSL_LIBS') or env.get('OPENSSL_INCLUDES'):
+                            if env.get('OPENSSL_INCLUDES'):
+                                inc_path = env['OPENSSL_INCLUDES']
+                                env.AppendUnique(CPPPATH = fix_path(inc_path))
+                            if env.get('OPENSSL_LIBS'):
+                                lib_path = env['OPENSSL_LIBS']
+                                env.AppendUnique(LIBPATH = fix_path(lib_path))
+                            if conf.CheckLibWithHeader('ssl', 'openssl/ssl.h', 'C') \
+                                   and conf.CheckLibWithHeader('crypto', 'openssl/crypto.h', 'C'):
+                                    env['HAS_OPENSSL'] = True
+                        elif CHECK_PKG_CONFIG and conf.CheckPKG('openssl'):
+                            cmd = 'pkg-config openssl --libs --cflags'
+                            if env['RUNTIME_LINK'] == 'static':
+                                cmd += ' --static'
+                            temp_env = Environment(ENV=os.environ)
+                            try:
+                                temp_env.ParseConfig(cmd)
+                                for lib in temp_env['LIBS']:
+                                    env.AppendUnique(LIBPATH = fix_path(lib))
+                                for inc in temp_env['CPPPATH']:
+                                    env.AppendUnique(CPPPATH = fix_path(inc))
+                                if conf.CheckLibWithHeader('ssl', 'openssl/ssl.h', 'C') \
+                                   and conf.CheckLibWithHeader('crypto', 'openssl/crypto.h', 'C'):
+                                    env['HAS_OPENSSL'] = True
+                            except OSError as e:
+                                env['HAS_OPENSSL'] = False
+
                 elif details['path'] and details['lib'] and details['inc']:
                     backup = env.Clone().Dictionary()
                     # Note, the 'delete_existing' keyword makes sure that these paths are prepended
@@ -1896,8 +1931,6 @@ if not preconfigured:
                     [
                       os.path.join(c_inc,'include/cairo'),
                       os.path.join(c_inc,'include/pixman-1'),
-                      #os.path.join(c_inc,'include/freetype2'),
-                      #os.path.join(c_inc,'include/libpng'),
                     ]
                 )
                 env["CAIRO_ALL_LIBS"] = ['cairo']
@@ -2194,6 +2227,9 @@ if not HELP_REQUESTED:
     OGR_BUILT = False
     POSTGIS_BUILT = False
     PGRASTER_BUILT = False
+    SQLITE_BUILT = False
+    TILES_BUILT = False
+
     for plugin in env['PLUGINS']:
         if env['PLUGIN_LINKING'] == 'static' or plugin not in env['REQUESTED_PLUGINS']:
             if os.path.exists('plugins/input/%s.input' % plugin):
@@ -2208,11 +2244,16 @@ if not HELP_REQUESTED:
                 if plugin == 'gdal': GDAL_BUILT = True
                 if plugin == 'postgis': POSTGIS_BUILT = True
                 if plugin == 'pgraster': PGRASTER_BUILT = True
+                if plugin == 'sqlite': SQLITE_BUILT = True
+                if plugin == 'tiles': TILES_BUILT = True
                 if plugin == 'ogr' or plugin == 'gdal':
                     if GDAL_BUILT and OGR_BUILT:
                         env['LIBS'].remove(details['lib'])
                 elif plugin == 'postgis' or plugin == 'pgraster':
                     if POSTGIS_BUILT and PGRASTER_BUILT:
+                        env['LIBS'].remove(details['lib'])
+                elif plugin == 'sqlite' or plugin == 'tiles':
+                    if SQLITE_BUILT and TILES_BUILT:
                         env['LIBS'].remove(details['lib'])
                 else:
                     env['LIBS'].remove(details['lib'])

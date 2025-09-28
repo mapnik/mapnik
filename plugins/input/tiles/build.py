@@ -51,7 +51,7 @@ boost_context = 'boost_context%s' % env['BOOST_APPEND']
 
 libraries = ['sqlite3', boost_url, boost_context]
 
-if env['HAS_OPENSSL']:
+if env['TILES_INPUT_SSL'] and env['HAS_OPENSSL']:
     plugin_env.Append(CPPDEFINES = 'MAPNIK_HAS_OPENSSL')
     libraries.append('ssl')
     libraries.append('crypto')
