@@ -77,6 +77,7 @@ mapnik_option(USE_PLUGIN_INPUT_RASTER "adds plugin input raster" ON)
 mapnik_option(USE_PLUGIN_INPUT_SHAPE "adds plugin input shape" ON)
 mapnik_option(USE_PLUGIN_INPUT_SQLITE "adds plugin input sqlite" ON)
 mapnik_option(USE_PLUGIN_INPUT_TILES "adds plugin input tiles" ON)
+mapnik_option(USE_PLUGIN_INPUT_TILES_SSL "adds SSL support in plugin input tiles" ON)
 mapnik_option(USE_PLUGIN_INPUT_TOPOJSON "adds plugin input topojson" ON)
 
 mapnik_option(BUILD_DEMO_VIEWER "builds the demo viewer" ON)

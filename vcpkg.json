@@ -65,6 +65,7 @@
     "mapbox-geometry",
     "mapbox-polylabel",
     "mapbox-variant",
+    "openssl",
     "proj",
     "protozero",
     {

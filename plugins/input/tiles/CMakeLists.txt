@@ -9,6 +9,11 @@ endif()
 add_plugin_target(input-tiles "tiles")
 add_compile_definitions(MAPNIK_VECTOR_TILE_LIBRARY=1)
 
+if(USE_PLUGIN_INPUT_TILES_SSL)
+    mapnik_pkg_check_modules(OpenSSL REQUIRED IMPORTED_TARGET openssl)
+    add_compile_definitions(MAPNIK_HAS_OPENSSL)
+endif()
+
 target_sources(input-tiles ${_plugin_visibility}
     tiles_datasource.cpp
     vector_tiles_featureset.cpp
@@ -28,6 +33,10 @@ target_link_libraries(input-tiles ${_plugin_visibility}
     Boost::url
     Boost::context
 )
+
+if(USE_PLUGIN_INPUT_TILES_SSL)
+    target_link_libraries(input-tiles ${_plugin_visibility} PkgConfig::OpenSSL)
+endif()
 
 if(WIN32)
     target_link_libraries(input-tiles ${_plugin_visibility} Boost::json)

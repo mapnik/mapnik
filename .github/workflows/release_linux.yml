@@ -40,7 +40,8 @@ jobs:
             libboost-program-options-dev \
             libboost-regex-dev \
             libboost-url-dev \
-            libboost-context-dev
+            libboost-context-dev \
+            libssl-dev
 
       - name: Configure CMake
         run: cmake -LA --preset ${{ env.PRESET }}
