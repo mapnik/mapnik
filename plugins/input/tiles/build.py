@@ -40,11 +40,22 @@ plugin_sources = Split(
   %(MAPNIK_VECTOR_TILE)s/vector_tile_compression.cpp
   %(MAPNIK_VECTOR_TILE)s/vector_tile_geometry_decoder.cpp
   mvt_io.cpp
+  tiles_source.cpp
   """ % locals()
 )
 
+
 # Link Library to Dependencies
-libraries = ['sqlite3']
+boost_url = 'boost_url%s' % env['BOOST_APPEND']
+boost_context = 'boost_context%s' % env['BOOST_APPEND']
+
+libraries = ['sqlite3', boost_url, boost_context]
+
+if env['TILES_INPUT_SSL'] and env['HAS_OPENSSL']:
+    plugin_env.Append(CPPDEFINES = 'MAPNIK_HAS_OPENSSL')
+    libraries.append('ssl')
+    libraries.append('crypto')
+
 linkflags = []
 
 if env['SQLITE_LINKFLAGS']:

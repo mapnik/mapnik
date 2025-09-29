@@ -27,21 +27,21 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
-#include "mvt_io.hpp"
-
-namespace mapnik {
-class tiles_source; // fwd decl
-}
+#include "xyz_tiles.hpp"
 
 class raster_tiles_featureset : public mapnik::Featureset
 {
   public:
-    raster_tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
+    raster_tiles_featureset(std::string const& tiles_location_,
                             mapnik::context_ptr const& ctx,
-                            int zoom,
                             mapnik::box2d<double> const& extent,
-                            std::string const& layer,
+                            int zoom,
+                            int xmin,
+                            int xmax,
+                            int ymin,
+                            int ymax,
                             std::unordered_map<std::string, std::string>& vector_tile_cache,
+                            std::size_t max_threads,
                             std::size_t datasource_hash,
                             double filter_factor);
 
@@ -49,26 +49,36 @@ class raster_tiles_featureset : public mapnik::Featureset
     mapnik::feature_ptr next();
 
   private:
-    mapnik::feature_ptr next_feature();
-    // bool valid() const;
-    std::shared_ptr<mapnik::tiles_source> source_ptr_;
+    mapnik::feature_ptr next_feature(std::string const& image_buffer, int x, int y, std::string const& datasource_key);
+    std::string tiles_location_;
     mapnik::context_ptr context_;
-    int zoom_;
+    boost::asio::io_context ioc_;
+#if defined(MAPNIK_HAS_OPENSSL)
+    boost::asio::ssl::context ssl_ctx_{boost::asio::ssl::context::tlsv12_client};
+#endif
     mapnik::box2d<double> extent_;
-    std::string const layer_;
-    // std::unique_ptr<mvt_io> vector_tile_;
-    std::unordered_map<std::string, std::string>& vector_tile_cache_;
+    int zoom_;
     int xmin_;
     int xmax_;
     int ymin_;
     int ymax_;
-    int x_ = 0;
-    int y_ = 0;
-    bool status_;
+    std::unordered_map<std::string, std::string>& tiles_cache_;
+    std::size_t const QUEUE_SIZE_;
+    queue_type queue_;
+    std::vector<std::thread> workers_;
+    std::vector<zxy> targets_;
+    std::string host_;
+    std::string port_;
+    tiles_stash stash_;
+    std::size_t num_tiles_{0};
+    std::size_t consumed_count_{0};
+    std::size_t max_threads_;
     std::size_t datasource_hash_;
     double filter_factor_;
-    bool next_tile();
-    bool open_tile();
+    bool first_ = true;
+    bool ssl_ = false;
+    bool local_file_ = true;
+    std::atomic<bool> done_ = false;
 };
 
 #endif // RASTER_TILES_FEATURESET_HPP
