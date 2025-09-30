@@ -1167,6 +1167,8 @@ def sqlite_has_rtree(context, silent=False):
     http://www.sqlite.org/c3ref/compileoption_get.html
     """
 
+    orig_libraries = context.env['LIBS']
+    context.env['LIBS'] = ['sqlite3', 'm','dl','pthread']
     if not silent:
         context.Message('Checking if SQLite supports RTREE... ')
     ret, out = context.TryRun("""
@@ -1201,6 +1203,7 @@ int main()
 }
 
 """, '.c')
+    context.env['LIBS'] = orig_libraries
     if silent:
         context.did_show_result=1
     context.Result(ret)
