@@ -6,6 +6,22 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.1.3
+
+Released October 1st, 2025
+
+(Packaged from [2c52147f1](https://github.com/mapnik/mapnik/commit/2c52147f1))
+
+- Implement support for tile JSON (accessing of PMTiles over network - boost::beast)
+- Refactor tiles.input to use Producer/Consumer pattern (non-locking boost::scsp_queue)
+- Implement SSL support in tiles.input
+- Async non-blocking methods to feth metadata over http(s) (boost::coroutine)
+- Implement both memory mapped and sequencial file I/O (controlled gloabally by MEMORY_MAPPED_FILE setting)
+- Use 'ignore case' comparison to determine `well-known` projections (#4521)
+- Refactor sqlite3 I/O framework to use  'unique_ptr' instead of shared_ptr where appropriate (sqlite.input)
+- (EXPERIMENTAL) tiles.input - add support for direct tile URLs e.g scheme://hostname:port/source-name/{z}/{x}/{y}.ext
+- Add `max-threads` datasource parameter (default:4) - tiles.input
+
 ## Mapnik 4.1.2
 
 Released August 3nd, 2025
