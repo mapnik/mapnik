@@ -190,7 +190,6 @@ bool vector_tiles_featureset::next_tile()
         workers_.emplace_back([this] { ioc_.run(); });
     }
     // consume tiles from the queue
-    bool status = false;
     while (!done_.load())
     {
         tile_data tile;
@@ -204,24 +203,19 @@ bool vector_tiles_featureset::next_tile()
             {
                 auto buffer = itr->second;
                 vector_tile_.reset(new mvt_io(std::move(buffer), context_, tile.x, tile.y, zoom_, layer_));
-                status = true;
+                return true;
             }
-            else if (tile.data)
+            else if (tile.data && !tile.data->empty())
             {
-                if ((*tile.data).empty())
-                    continue;
                 std::string decompressed;
                 mapnik::vector_tile_impl::zlib_decompress((*tile.data).data(), (*tile.data).size(), decompressed);
                 tiles_cache_.emplace(datasource_key, decompressed);
                 vector_tile_.reset(new mvt_io(std::move(decompressed), context_, tile.x, tile.y, zoom_, layer_));
-                status = true;
+                return true;
             }
-            if (consumed_count_ == QUEUE_SIZE_)
-                done_.store(true);
-            break;
         }
         if (consumed_count_ == num_tiles_)
             done_.store(true);
     }
-    return status;
+    return false;
 }
