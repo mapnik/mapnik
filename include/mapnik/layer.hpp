@@ -192,6 +192,16 @@ class MAPNIK_DECL layer
     std::string const& group_by() const;
 
     /*!
+     * @param column Set the field rendering of this layer is sorted by.
+     */
+    void set_sort_by(std::string const& column);
+
+    /*!
+     * @return optional field rendering of this layer is sorted by.
+     */
+    std::optional<std::string> const& sort_by() const;
+
+    /*!
      * @brief Attach a datasource for this layer.
      *
      * @param ds The datasource to attach.
@@ -232,6 +242,7 @@ class MAPNIK_DECL layer
     bool clear_label_cache_;
     bool cache_features_;
     std::string group_by_;
+    std::optional<std::string> sort_by_;
     std::vector<std::string> styles_;
     std::vector<layer> layers_;
     datasource_ptr ds_;

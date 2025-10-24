@@ -418,11 +418,16 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
     }
     q.set_filter_factor(collector.get_filter_factor());
 
-    // Also query the group by attribute
+    // Also query the group-by and sort-by attribute
     std::string const& group_by = lay.group_by();
     if (!group_by.empty())
     {
         q.add_property_name(group_by);
+    }
+    auto sort_by = lay.sort_by();
+    if (sort_by)
+    {
+        q.add_property_name(*sort_by);
     }
 
     bool cache_features = lay.cache_features() && active_styles.size() > 1;
@@ -482,11 +487,34 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
     bool cache_features = lay.cache_features() && active_styles.size() > 1;
 
     datasource_ptr ds = lay.datasource();
+
+    auto sort_by = lay.sort_by();
     std::string group_by = lay.group_by();
 
-    // Render incrementally when the column that we group by changes value.
-    if (!group_by.empty())
+    if (sort_by) // sort features
     {
+        featureset_ptr features = *featureset_ptr_list.begin();
+        if (features)
+        {
+            std::shared_ptr<featureset_buffer> cache = std::make_shared<featureset_buffer>();
+            feature_ptr feature;
+            while ((feature = features->next()))
+            {
+                cache->push(feature);
+            }
+            cache->sort_by(*sort_by, true);
+            std::size_t i = 0;
+            for (feature_type_style const* style : active_styles)
+            {
+                cache->prepare();
+                render_style(p, style, rule_caches[i++], cache, *proj_trans_ptr);
+            }
+            // cache->clear();
+        }
+    }
+    else if (!group_by.empty())
+    {
+        // Render incrementally when the column that we group by changes value.
         featureset_ptr features = *featureset_ptr_list.begin();
         if (features)
         {

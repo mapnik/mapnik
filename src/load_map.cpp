@@ -751,6 +751,12 @@ void map_parser::parse_layer(Parent& parent, xml_node const& node)
             lyr.set_group_by(*group_by);
         }
 
+        optional<std::string> sort_by = node.get_opt_attr<std::string>("sort-by");
+        if (sort_by)
+        {
+            lyr.set_sort_by(*sort_by);
+        }
+
         optional<int> buffer_size = node.get_opt_attr<int>("buffer-size");
         if (buffer_size)
         {

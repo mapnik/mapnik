@@ -40,6 +40,7 @@ layer::layer(std::string const& _name, std::string const& _srs)
       clear_label_cache_(false),
       cache_features_(false),
       group_by_(),
+      sort_by_(),
       styles_(),
       layers_(),
       ds_(),
@@ -59,6 +60,7 @@ layer::layer(layer const& rhs)
       clear_label_cache_(rhs.clear_label_cache_),
       cache_features_(rhs.cache_features_),
       group_by_(rhs.group_by_),
+      sort_by_(rhs.sort_by_),
       styles_(rhs.styles_),
       layers_(rhs.layers_),
       ds_(rhs.ds_),
@@ -78,6 +80,7 @@ layer::layer(layer&& rhs)
       clear_label_cache_(std::move(rhs.clear_label_cache_)),
       cache_features_(std::move(rhs.cache_features_)),
       group_by_(std::move(rhs.group_by_)),
+      sort_by_(std::move(rhs.sort_by_)),
       styles_(std::move(rhs.styles_)),
       layers_(std::move(rhs.layers_)),
       ds_(std::move(rhs.ds_)),
@@ -99,6 +102,7 @@ layer& layer::operator=(layer rhs)
     std::swap(this->clear_label_cache_, rhs.clear_label_cache_);
     std::swap(this->cache_features_, rhs.cache_features_);
     std::swap(this->group_by_, rhs.group_by_);
+    std::swap(this->sort_by_, rhs.sort_by_);
     std::swap(this->styles_, rhs.styles_);
     std::swap(this->ds_, rhs.ds_);
     std::swap(this->buffer_size_, rhs.buffer_size_);
@@ -113,9 +117,10 @@ bool layer::operator==(layer const& rhs) const
     return (name_ == rhs.name_) && (srs_ == rhs.srs_) && (minimum_scale_denom_ == rhs.minimum_scale_denom_) &&
            (maximum_scale_denom_ == rhs.maximum_scale_denom_) && (active_ == rhs.active_) &&
            (queryable_ == rhs.queryable_) && (clear_label_cache_ == rhs.clear_label_cache_) &&
-           (cache_features_ == rhs.cache_features_) && (group_by_ == rhs.group_by_) && (styles_ == rhs.styles_) &&
-           ((ds_ && rhs.ds_) ? *ds_ == *rhs.ds_ : ds_ == rhs.ds_) && (buffer_size_ == rhs.buffer_size_) &&
-           (maximum_extent_ == rhs.maximum_extent_) && (comp_op_ == rhs.comp_op_) && (opacity_ == rhs.opacity_);
+           (cache_features_ == rhs.cache_features_) && (group_by_ == rhs.group_by_) && (sort_by_ == rhs.sort_by_) &&
+           (styles_ == rhs.styles_) && ((ds_ && rhs.ds_) ? *ds_ == *rhs.ds_ : ds_ == rhs.ds_) &&
+           (buffer_size_ == rhs.buffer_size_) && (maximum_extent_ == rhs.maximum_extent_) &&
+           (comp_op_ == rhs.comp_op_) && (opacity_ == rhs.opacity_);
 }
 
 layer::~layer() {}
@@ -290,6 +295,16 @@ void layer::set_group_by(std::string const& column)
 std::string const& layer::group_by() const
 {
     return group_by_;
+}
+
+void layer::set_sort_by(std::string const& column)
+{
+    sort_by_ = column;
+}
+
+std::optional<std::string> const& layer::sort_by() const
+{
+    return sort_by_;
 }
 
 void layer::set_comp_op(composite_mode_e comp_op)
