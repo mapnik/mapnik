@@ -378,7 +378,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
         }
     }
     mapnik::parameters& extra_params = desc_.get_extra_parameters();
-    OGRSpatialReference* srs_ref = layer->GetSpatialRef();
+    OGRSpatialReference const* srs_ref = layer->GetSpatialRef();
     char* srs_output = nullptr;
     if (srs_ref && srs_ref->exportToProj4(&srs_output) == OGRERR_NONE)
     {
