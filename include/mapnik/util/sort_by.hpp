@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef MAPNIK_SORT_BY_HPP
 #define MAPNIK_SORT_BY_HPP
 
@@ -31,7 +30,7 @@ namespace mapnik {
 
 using sort_by_type = std::pair<std::string, bool>;
 
-inline bool parse_sort_by(std::string const& str, sort_by_type & result)
+inline bool parse_sort_by(std::string const& str, sort_by_type& result)
 {
     namespace x3 = boost::spirit::x3;
     auto itr = str.begin();
@@ -42,12 +41,13 @@ inline bool parse_sort_by(std::string const& str, sort_by_type & result)
     auto apply_desc = [&](auto const& ctx) {
         result.second = true;
     };
-    if (!x3::phrase_parse(itr, end,
-                          x3::no_skip[(+x3::char_("a-zA-Z_0-9-"))][apply_sort_by]
-                          > -(x3::no_case[x3::lit("DESC")][apply_desc] | x3::no_case[x3::lit("ASC")]),
+    if (!x3::phrase_parse(itr,
+                          end,
+                          x3::no_skip[(+x3::char_("a-zA-Z_0-9-"))][apply_sort_by] >
+                            -(x3::no_case[x3::lit("DESC")][apply_desc] | x3::no_case[x3::lit("ASC")]),
                           // ASC is a default
-                          x3::space
-            ) || (itr != end))
+                          x3::space) ||
+        (itr != end))
     {
         return false;
     }
