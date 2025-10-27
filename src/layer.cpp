@@ -297,12 +297,12 @@ std::string const& layer::group_by() const
     return group_by_;
 }
 
-void layer::set_sort_by(std::string const& column)
+void layer::set_sort_by(std::string const& column, bool desc)
 {
-    sort_by_ = column;
+    sort_by_ = {column, desc};
 }
 
-std::optional<std::string> const& layer::sort_by() const
+std::optional<sort_by_type> const& layer::sort_by() const
 {
     return sort_by_;
 }

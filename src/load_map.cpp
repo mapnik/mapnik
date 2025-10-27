@@ -49,6 +49,7 @@
 #include <mapnik/util/dasharray_parser.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
+#include <mapnik/util/sort_by.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/fs.hpp>
@@ -751,10 +752,23 @@ void map_parser::parse_layer(Parent& parent, xml_node const& node)
             lyr.set_group_by(*group_by);
         }
 
-        optional<std::string> sort_by = node.get_opt_attr<std::string>("sort-by");
-        if (sort_by)
+        optional<std::string> str = node.get_opt_attr<std::string>("sort-by");
+        if (str)
         {
-            lyr.set_sort_by(*sort_by);
+            mapnik::sort_by_type result;
+            if (!mapnik::parse_sort_by(*str, result))
+            {
+                std::string s_err("failed to parse Layer sort-by clause \"" + *str + "\"");
+                if (strict_)
+                {
+                    throw config_error(s_err);
+                }
+                else
+                {
+                    MAPNIK_LOG_ERROR(load_map) << "map_parser: " << s_err;
+                }
+            }
+            lyr.set_sort_by(result.first, result.second);
         }
 
         optional<int> buffer_size = node.get_opt_attr<int>("buffer-size");

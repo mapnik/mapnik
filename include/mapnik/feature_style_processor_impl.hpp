@@ -427,7 +427,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
     auto sort_by = lay.sort_by();
     if (sort_by)
     {
-        q.add_property_name(*sort_by);
+        q.add_property_name((*sort_by).first);
     }
 
     bool cache_features = lay.cache_features() && active_styles.size() > 1;
@@ -502,7 +502,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
             {
                 cache->push(feature);
             }
-            cache->sort_by(*sort_by, true);
+            cache->sort_by((*sort_by).first, (*sort_by).second);
             std::size_t i = 0;
             for (feature_type_style const* style : active_styles)
             {
