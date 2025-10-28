@@ -547,6 +547,15 @@ void serialize_layer(ptree& map_node, layer const& lyr, bool explicit_defaults)
         set_attr(layer_node, "group-by", lyr.group_by());
     }
 
+    if (lyr.sort_by() || explicit_defaults)
+    {
+        auto sort_by = *lyr.sort_by();
+        std::string str = sort_by.first;
+        if (sort_by.second)
+            str += " DESC";
+        set_attr(layer_node, "sort-by", str);
+    }
+
     auto&& buffer_size = lyr.buffer_size();
     if (buffer_size || explicit_defaults)
     {

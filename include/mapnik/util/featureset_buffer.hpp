@@ -59,6 +59,21 @@ class featureset_buffer : public Featureset
     }
 
     void clear() { features_.clear(); }
+    void sort_by(std::string const& name, bool desc = false)
+    {
+        if (desc)
+        {
+            std::sort(features_.begin(), features_.end(), [&name](feature_ptr const& lhs, feature_ptr const& rhs) {
+                return lhs->get(name) > rhs->get(name);
+            });
+        }
+        else
+        {
+            std::sort(features_.begin(), features_.end(), [&name](feature_ptr const& lhs, feature_ptr const& rhs) {
+                return lhs->get(name) < rhs->get(name);
+            });
+        }
+    }
 
   private:
     std::vector<feature_ptr> features_;
