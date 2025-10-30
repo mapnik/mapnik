@@ -54,9 +54,9 @@ MAPNIK_DISABLE_WARNING_POP
 #include <sstream>
 #include <algorithm>
 
-#if __cpp_lib_execution >= 201603
-#include <execution>
-#endif
+//#if __cpp_lib_execution >= 201603
+//#include <execution>
+//#endif
 
 namespace mapnik {
 
