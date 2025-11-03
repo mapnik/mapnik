@@ -25,7 +25,7 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/phoenix.hpp>
+#include <boost/phoenix.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
