@@ -29,6 +29,7 @@ target_include_directories(input-tiles ${_plugin_visibility} "${PROJECT_SOURCE_D
 
 target_link_libraries(input-tiles ${_plugin_visibility}
     mapnik::mapnik
+    ZLIB::ZLIB
     SQLite::SQLite3
     Boost::url
     Boost::context
