@@ -49,7 +49,7 @@ plugin_sources = Split(
 boost_url = 'boost_url%s' % env['BOOST_APPEND']
 boost_context = 'boost_context%s' % env['BOOST_APPEND']
 
-libraries = ['sqlite3', boost_url, boost_context]
+libraries = ['sqlite3', 'z', boost_url, boost_context]
 
 if env['TILES_INPUT_SSL'] and env['HAS_OPENSSL']:
     plugin_env.Append(CPPDEFINES = 'MAPNIK_HAS_OPENSSL')
