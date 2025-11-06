@@ -6,6 +6,20 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.1.4
+
+Released November 6th, 2025
+
+(Packaged from [82a684d80](https://github.com/mapnik/mapnik/commit/82a684d80))
+
+- Re-apply 32-bits warning fixes via @hummeltech
+- tiles.input - don't abort fetching remote tiles on an empty results (e.g HTTP 204)
+- Implement sort-by clause parser `<field-name>, [DESC | ASC]` e.g  "name DESC" (default to ASC)
+- ogr.input - no need for version check via @rouault (ref #4531)
+- Fix boost warnings (‘#pragma message: This header is deprecated. Use <boost/phoenix.hpp> instead.’)
+- Layer - `sort-by` parameter (#4532)
+- tiles.input - link to zlib (ref #4535)
+
 ## Mapnik 4.1.3
 
 Released October 1st, 2025
