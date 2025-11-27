@@ -34,7 +34,7 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
-#include <agg_trans_affine.h>
+#include <mapnik/agg/agg_trans_affine.h>
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
