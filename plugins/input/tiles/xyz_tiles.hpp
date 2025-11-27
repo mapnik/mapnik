@@ -23,6 +23,10 @@
 #ifndef XYZ_TILES_HPP
 #define XYZ_TILES_HPP
 
+// mapnik
+#include <mapnik/version.hpp>
+#include <mapnik/debug.hpp>
+// boost
 #include <boost/url.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
@@ -38,11 +42,10 @@
 
 #include <boost/lockfree/spsc_queue.hpp>
 #include <boost/algorithm/string.hpp>
+// stl
 #include <chrono>
 #include <thread>
 #include <tuple>
-
-#include <mapnik/debug.hpp>
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -74,6 +77,7 @@ struct tile_data
 };
 
 using queue_type = boost::lockfree::spsc_queue<tile_data>;
+static std::string USER_AGENT_STRING = (boost::format("Mapnik/%1%") % MAPNIK_VERSION_STRING).str();
 
 class tiles_stash
 {
@@ -143,7 +147,7 @@ inline std::string
           // HTTP GET
           http::request<http::string_body> req{http::verb::get, target, 11};
           req.set(http::field::host, host);
-          req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+          req.set(http::field::user_agent, USER_AGENT_STRING);
           http::async_write(stream, req, yield[ec]);
           if (ec)
               throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
@@ -202,7 +206,7 @@ inline std::string
           // HTTP GET
           http::request<http::string_body> req{http::verb::get, target, 11};
           req.set(http::field::host, host);
-          req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+          req.set(http::field::user_agent, USER_AGENT_STRING);
           http::async_write(stream, req, yield[ec]);
           if (ec)
               throw mapnik::datasource_exception("Tiles plugin:" + ec.message());
@@ -316,7 +320,7 @@ class worker : public std::enable_shared_from_this<worker>
     {
         req_.version(11); // HTTP 1.1
         req_.method(http::verb::get);
-        req_.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+        req_.set(http::field::user_agent, USER_AGENT_STRING);
     }
 
     // Start the asynchronous operation
@@ -468,7 +472,7 @@ class worker_ssl : public std::enable_shared_from_this<worker_ssl>
     {
         req_.version(11); // HTTP 1.1
         req_.method(http::verb::get);
-        req_.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+        req_.set(http::field::user_agent, USER_AGENT_STRING);
     }
 
     // Start the asynchronous operation
