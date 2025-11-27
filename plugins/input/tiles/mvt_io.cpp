@@ -158,25 +158,17 @@ mapnik::feature_ptr mvt_io::mvt_layer::next_feature()
             }
             mapnik::vector_tile_impl::GeometryPBF geoms(geom_itr);
             mapnik::geometry::geometry<double> geom =
-              mapnik::vector_tile_impl::decode_geometry<double>(geoms,
-                                                                (std::int32_t)geometry_type,
-                                                                1,
-                                                                io_.tile_x_,
-                                                                io_.tile_y_,
-                                                                scale_,
-                                                                -1.0 * scale_);
+                mapnik::vector_tile_impl::decode_geometry<double>(geoms,
+                                                                  static_cast<std::int32_t>(geometry_type),
+                                                                  1,
+                                                                  io_.bbox().minx(),
+                                                                  io_.bbox().maxy(),
+                                                                  scale_,
+                                                                  -1.0 * scale_);
             if (geom.is<mapnik::geometry::geometry_empty>())
             {
                 continue;
             }
-            //            #if defined(DEBUG)
-            //            mapnik::box2d<double> envelope = mapnik::geometry::envelope(geom);
-            //            if (!filter_.pass(envelope))
-            //            {
-            //                MAPNIK_LOG_ERROR(tile_featureset_pbf) << "tile_featureset_pbf: filter:pass should not get
-            //                here"; continue;
-            //            }
-            //            #endif
             feature->set_geometry(std::move(geom));
             return feature;
         }
@@ -298,8 +290,12 @@ mvt_io::mvt_io(std::string&& data,
       tr_("utf-8")
 {
     resolution_ = mapnik::EARTH_CIRCUMFERENCE / (1 << zoom);
-    tile_x_ = -0.5 * mapnik::EARTH_CIRCUMFERENCE + x * resolution_;
-    tile_y_ = 0.5 * mapnik::EARTH_CIRCUMFERENCE - y * resolution_;
+    double x0 = -0.5 * mapnik::EARTH_CIRCUMFERENCE + x * resolution_;
+    double y0 = 0.5 * mapnik::EARTH_CIRCUMFERENCE - y * resolution_;
+    double x1 = -0.5 * mapnik::EARTH_CIRCUMFERENCE + (x + 1) * resolution_;
+    double y1 = 0.5 * mapnik::EARTH_CIRCUMFERENCE - (y + 1) * resolution_;
+
+    bbox_.init(x0, y0, x1, y1);
 
     while (reader_.next(static_cast<uint32_t>(mvt_message::tile::layer)))
     {
@@ -310,4 +306,9 @@ mvt_io::mvt_io(std::string&& data,
             break;
         }
     }
+}
+
+mapnik::box2d<double> const& mvt_io::bbox() const
+{
+    return bbox_;
 }

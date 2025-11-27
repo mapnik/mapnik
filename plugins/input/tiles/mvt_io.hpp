@@ -95,12 +95,12 @@ class mvt_io
 
     protozero::pbf_reader reader_;
     mapnik::context_ptr context_;
-    double tile_x_;
-    double tile_y_;
     double resolution_;
+    mapnik::box2d<double> bbox_;
     std::string layer_name_;
     std::unique_ptr<mvt_layer> layer_;
     mapnik::transcoder tr_;
+
     // Read a layer from PBF. Returns true if requested layer was parsed.
     bool read_layer(protozero::pbf_message<mvt_message::layer>& l);
 
@@ -112,6 +112,7 @@ class mvt_io
                     uint32_t const zoom,
                     std::string layer_name);
     mapnik::feature_ptr next();
+    mapnik::box2d<double> const& bbox() const;
 };
 
 #endif // PLUGINS_INPUT_MBTILES_VECTOR_MVT_IO_HPP_
