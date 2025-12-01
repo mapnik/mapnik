@@ -112,11 +112,13 @@ void tiles_datasource::init_metadata(boost::json::value const& metadata)
     }
     if (auto const* p = metadata.as_object().if_contains("minzoom"))
     {
-        minzoom_ = p->as_int64();
+        if (p->is_number())
+            minzoom_ = p->as_int64();
     }
     if (auto const* p = metadata.as_object().if_contains("maxzoom"))
     {
-        maxzoom_ = p->as_int64();
+        if (p->is_number())
+            maxzoom_ = p->as_int64();
     }
     bool found = false;
     auto const* layers = metadata.as_object().if_contains("vector_layers");
@@ -131,11 +133,13 @@ void tiles_datasource::init_metadata(boost::json::value const& metadata)
                 found = true;
                 if (auto const* p = layer.as_object().if_contains("minzoom"))
                 {
-                    minzoom_ = p->as_int64();
+                    if (p->is_number())
+                        minzoom_ = p->as_int64();
                 }
                 if (auto const* p = layer.as_object().if_contains("maxzoom"))
                 {
-                    maxzoom_ = p->as_int64();
+                    if (p->is_number())
+                        maxzoom_ = p->as_int64();
                 }
                 for (auto const& field : layer.at("fields").as_object())
                 {
@@ -343,6 +347,7 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
                                                              xmax,
                                                              ymin,
                                                              ymax,
+                                                             bbox,
                                                              *layer_name_,
                                                              tiles_cache,
                                                              max_threads_,
@@ -399,6 +404,7 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
                                                          tile_x,
                                                          tile_y,
                                                          tile_y,
+                                                         query_bbox,
                                                          *layer_name_,
                                                          tile_cache(),
                                                          max_threads_,

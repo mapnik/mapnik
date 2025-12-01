@@ -40,6 +40,7 @@ class vector_tiles_featureset : public mapnik::Featureset
                             int xmax,
                             int ymin,
                             int ymax,
+                            mapnik::box2d<double> const& extent,
                             std::string const& layer,
                             std::unordered_map<std::string, std::string>& tiles_cache,
                             std::size_t max_threads,

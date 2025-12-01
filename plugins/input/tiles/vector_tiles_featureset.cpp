@@ -35,6 +35,7 @@ vector_tiles_featureset::vector_tiles_featureset(std::string const& tiles_locati
                                                  int xmax,
                                                  int ymin,
                                                  int ymax,
+                                                 mapnik::box2d<double> const& extent,
                                                  std::string const& layer,
                                                  std::unordered_map<std::string, std::string>& tiles_cache,
                                                  std::size_t max_threads,
@@ -46,6 +47,7 @@ vector_tiles_featureset::vector_tiles_featureset(std::string const& tiles_locati
       xmax_(xmax),
       ymin_(ymin),
       ymax_(ymax),
+      extent_(extent),
       layer_(layer),
       vector_tile_(nullptr),
       tiles_cache_(tiles_cache),
@@ -103,17 +105,17 @@ mapnik::feature_ptr vector_tiles_featureset::next_feature()
 
 mapnik::feature_ptr vector_tiles_featureset::next()
 {
-    mapnik::feature_ptr f = next_feature();
-    if (f)
+    while (mapnik::feature_ptr f = next_feature())
     {
-        return f;
+        if (extent_.contains(vector_tile_->bbox()) || extent_.intersects(f->envelope()))
+            return f;
     }
     while (next_tile() && valid())
     {
-        f = next_feature();
-        if (f)
+        while (mapnik::feature_ptr f = next_feature())
         {
-            return f;
+            if (extent_.contains(vector_tile_->bbox()) || extent_.intersects(f->envelope()))
+                return f;
         }
     }
     return mapnik::feature_ptr();
@@ -198,6 +200,7 @@ bool vector_tiles_featureset::next_tile()
             ++consumed_count_;
             auto datasource_key =
               (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % tile.zoom % tile.x % tile.y).str();
+
             auto itr = tiles_cache_.find(datasource_key);
             if (itr != tiles_cache_.end())
             {
