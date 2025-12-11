@@ -222,6 +222,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
 #ifdef MAPNIK_THREADSAFE
     std::lock_guard<std::recursive_mutex> lock(instance_mutex_);
 #endif
+    bool status = false;
     try
     {
         if (!mapnik::util::exists(filename))
@@ -239,6 +240,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
             MAPNIK_LOG_ERROR(datasource_cache) << "Cannot load '" << filename << "' (Unexpected plugin name)";
             return false;
         }
+
         for (auto const& name : handle_names)
         {
             std::shared_ptr<PluginInfo> plugin = std::make_shared<PluginInfo>(filename, name + "_plugin");
@@ -248,13 +250,13 @@ bool datasource_cache::register_datasource(std::string const& filename)
                 {
                     MAPNIK_LOG_ERROR(datasource_cache)
                       << "Problem loading plugin library '" << filename << "' (plugin is lacking compatible interface)";
-                    return false;
                 }
                 else
                 {
                     if (plugins_.emplace(plugin->name(), plugin).second)
                     {
                         MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Registered=" << plugin->name();
+                        status = true;
                     }
                 }
             }
@@ -263,17 +265,15 @@ bool datasource_cache::register_datasource(std::string const& filename)
                 MAPNIK_LOG_ERROR(datasource_cache)
                   << "Problem loading plugin library: " << filename
                   << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
-                return false;
             }
         }
-        return true;
     }
     catch (std::exception const& ex)
     {
         MAPNIK_LOG_ERROR(datasource_cache)
           << "Exception caught while loading plugin library: " << filename << " (" << ex.what() << ")";
     }
-    return false;
+    return status;
 }
 
 } // namespace mapnik
