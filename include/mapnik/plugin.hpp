@@ -46,8 +46,9 @@ class PluginInfo : util::noncopyable
     std::string const& name() const;
     bool valid() const;
     std::string get_error() const;
-    //void* get_symbol(std::string const& symbol_name) const;
+    // void* get_symbol(std::string const& symbol_name) const;
     datasource_plugin const* get_plugin() const;
+
   private:
     std::string filename_;
     std::string symbol_name_;

@@ -46,7 +46,7 @@ class MAPNIK_DECL datasource_plugin
 #ifndef MAPNIK_STATIC_PLUGINS
 #define DATASOURCE_PLUGIN_EXPORT(name)                                                                                 \
     extern "C" MAPNIK_EXP name##_datasource_plugin name##_plugin;                                                      \
-    name##_datasource_plugin  name##_plugin;
+    name##_datasource_plugin name##_plugin;
 #else
 #define DATASOURCE_PLUGIN_EXPORT(classname) // export classname
 #endif

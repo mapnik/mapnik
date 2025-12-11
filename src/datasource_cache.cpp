@@ -109,7 +109,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
     __extension__
 #endif
 
-    datasource_plugin const* create_datasource = itr->second->get_plugin();
+      datasource_plugin const* create_datasource = itr->second->get_plugin();
 
     if (!create_datasource)
     {
@@ -247,7 +247,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
                 if (plugin->name().empty())
                 {
                     MAPNIK_LOG_ERROR(datasource_cache)
-                        << "Problem loading plugin library '" << filename << "' (plugin is lacking compatible interface)";
+                      << "Problem loading plugin library '" << filename << "' (plugin is lacking compatible interface)";
                     return false;
                 }
                 else
@@ -261,8 +261,8 @@ bool datasource_cache::register_datasource(std::string const& filename)
             else
             {
                 MAPNIK_LOG_ERROR(datasource_cache)
-                    << "Problem loading plugin library: " << filename
-                    << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
+                  << "Problem loading plugin library: " << filename
+                  << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
                 return false;
             }
         }

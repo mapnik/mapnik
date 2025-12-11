@@ -35,8 +35,6 @@
 using mapnik::datasource;
 using mapnik::parameters;
 
-
-
 namespace mapnik {
 
 DATASOURCE_PLUGIN_IMPL(memory_datasource_plugin, memory_datasource);
