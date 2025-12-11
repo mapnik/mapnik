@@ -33,21 +33,24 @@ namespace mapnik {
 
 //  Opaque structure for handle
 using mapnik_lib_t = struct _mapnik_lib_t;
+// fwd decl
+class datasource_plugin;
 
 class PluginInfo : util::noncopyable
 {
   public:
     using callable_returning_string = char const* (*)();
     using callable_returning_void = void (*)();
-    PluginInfo(std::string const& filename, std::string const& library_name);
+    PluginInfo(std::string const& filename, std::string const& symbol_name);
     ~PluginInfo();
     std::string const& name() const;
     bool valid() const;
     std::string get_error() const;
-    void* get_symbol(std::string const& sym_name) const;
-
+    //void* get_symbol(std::string const& symbol_name) const;
+    datasource_plugin const* get_plugin() const;
   private:
     std::string filename_;
+    std::string symbol_name_;
     std::unique_ptr<mapnik_lib_t> module_;
 };
 } // namespace mapnik

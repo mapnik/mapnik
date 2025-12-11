@@ -44,9 +44,9 @@ class MAPNIK_DECL datasource_plugin
     void classname::before_unload() const {}
 
 #ifndef MAPNIK_STATIC_PLUGINS
-#define DATASOURCE_PLUGIN_EXPORT(classname)                                                                            \
-    extern "C" MAPNIK_EXP classname plugin;                                                                            \
-    classname plugin;
+#define DATASOURCE_PLUGIN_EXPORT(name)                                                                                 \
+    extern "C" MAPNIK_EXP name##_datasource_plugin name##_plugin;                                                      \
+    name##_datasource_plugin  name##_plugin;
 #else
 #define DATASOURCE_PLUGIN_EXPORT(classname) // export classname
 #endif

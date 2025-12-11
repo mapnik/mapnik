@@ -29,18 +29,20 @@
 #include <mapnik/params.hpp>
 #include <mapnik/plugin.hpp>
 #include <mapnik/util/fs.hpp>
-
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/fusion/adapted/struct.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <algorithm>
 #include <map>
 #include <stdexcept>
+#include <filesystem>
 
 namespace mapnik {
 
@@ -106,7 +108,8 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #ifdef __GNUC__
     __extension__
 #endif
-      datasource_plugin* create_datasource = reinterpret_cast<datasource_plugin*>(itr->second->get_symbol("plugin"));
+
+    datasource_plugin const* create_datasource = itr->second->get_plugin();
 
     if (!create_datasource)
     {
@@ -226,29 +229,44 @@ bool datasource_cache::register_datasource(std::string const& filename)
             MAPNIK_LOG_ERROR(datasource_cache) << "Cannot load '" << filename << "' (plugin does not exist)";
             return false;
         }
-        std::shared_ptr<PluginInfo> plugin = std::make_shared<PluginInfo>(filename, "datasource_name");
-        if (plugin->valid())
+
+        namespace x3 = boost::spirit::x3;
+        std::vector<std::string> handle_names;
+        namespace fs = std::filesystem;
+        std::string stem = fs::path(filename).stem();
+        if (!x3::parse(stem.begin(), stem.end(), +x3::char_("a-zA-Z_") % x3::lit('+'), handle_names))
         {
-            if (plugin->name().empty())
+            MAPNIK_LOG_ERROR(datasource_cache) << "Cannot load '" << filename << "' (Unexpected plugin name)";
+            return false;
+        }
+        for (auto const& name : handle_names)
+        {
+            std::shared_ptr<PluginInfo> plugin = std::make_shared<PluginInfo>(filename, name + "_plugin");
+            if (plugin->valid())
             {
-                MAPNIK_LOG_ERROR(datasource_cache)
-                  << "Problem loading plugin library '" << filename << "' (plugin is lacking compatible interface)";
+                if (plugin->name().empty())
+                {
+                    MAPNIK_LOG_ERROR(datasource_cache)
+                        << "Problem loading plugin library '" << filename << "' (plugin is lacking compatible interface)";
+                    return false;
+                }
+                else
+                {
+                    if (plugins_.emplace(plugin->name(), plugin).second)
+                    {
+                        MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Registered=" << plugin->name();
+                    }
+                }
             }
             else
             {
-                if (plugins_.emplace(plugin->name(), plugin).second)
-                {
-                    MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Registered=" << plugin->name();
-                    return true;
-                }
+                MAPNIK_LOG_ERROR(datasource_cache)
+                    << "Problem loading plugin library: " << filename
+                    << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
+                return false;
             }
         }
-        else
-        {
-            MAPNIK_LOG_ERROR(datasource_cache)
-              << "Problem loading plugin library: " << filename
-              << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
-        }
+        return true;
     }
     catch (std::exception const& ex)
     {

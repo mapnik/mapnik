@@ -52,7 +52,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <sstream>
 
 DATASOURCE_PLUGIN_IMPL(pgraster_datasource_plugin, pgraster_datasource);
-DATASOURCE_PLUGIN_EXPORT(pgraster_datasource_plugin);
+DATASOURCE_PLUGIN_EXPORT(pgraster);
 DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(pgraster_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(pgraster_datasource_plugin);
 

@@ -117,8 +117,8 @@ PLUGINS = { # plugins with external dependencies
     # configured by calling project, hence 'path':None
     'postgis': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
     'pgraster': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
-    'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
-    'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
+    'gdal+ogr': {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
+    #'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
     'sqlite':  {'default':True,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
     'tiles':   {'default':True,'path':None,'inc':None,'lib':'sqlite3','lang':'C'},
     # plugins without external dependencies requiring CheckLibWithHeader...

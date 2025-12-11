@@ -44,7 +44,7 @@ using mapnik::parameters;
 using mapnik::query;
 
 DATASOURCE_PLUGIN_IMPL(raster_datasource_plugin, raster_datasource);
-DATASOURCE_PLUGIN_EXPORT(raster_datasource_plugin);
+DATASOURCE_PLUGIN_EXPORT(raster);
 DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(raster_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(raster_datasource_plugin);
 

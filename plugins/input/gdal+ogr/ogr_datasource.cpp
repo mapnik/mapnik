@@ -61,7 +61,7 @@ using mapnik::layer_descriptor;
 using mapnik::query;
 
 DATASOURCE_PLUGIN_IMPL(ogr_datasource_plugin, ogr_datasource);
-DATASOURCE_PLUGIN_EXPORT(ogr_datasource_plugin);
+DATASOURCE_PLUGIN_EXPORT(ogr);
 
 void ogr_datasource_plugin::after_load() const
 {
