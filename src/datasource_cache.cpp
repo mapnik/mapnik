@@ -25,6 +25,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/datasource_plugin.hpp>
+#include <mapnik/filesystem.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/plugin.hpp>
@@ -42,7 +43,6 @@ MAPNIK_DISABLE_WARNING_POP
 #include <algorithm>
 #include <map>
 #include <stdexcept>
-#include <filesystem>
 
 namespace mapnik {
 
@@ -233,8 +233,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
 
         namespace x3 = boost::spirit::x3;
         std::vector<std::string> handle_names;
-        namespace fs = std::filesystem;
-        std::string stem = fs::path(filename).stem();
+        std::string stem = fs::path(filename).stem().string();
         if (!x3::parse(stem.begin(), stem.end(), +x3::char_("a-zA-Z_") % x3::lit('+'), handle_names))
         {
             MAPNIK_LOG_ERROR(datasource_cache) << "Cannot load '" << filename << "' (Unexpected plugin name)";
