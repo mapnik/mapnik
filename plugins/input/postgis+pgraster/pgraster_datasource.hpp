@@ -48,9 +48,9 @@
 #include <string>
 #include <memory>
 
-#include "../postgis/connection_manager.hpp"
-#include "../postgis/resultset.hpp"
-#include "../postgis/cursorresultset.hpp"
+// fwd decl
+class ConnectionManager;
+class IResultSet;
 
 using mapnik::box2d;
 using mapnik::coord2d;
@@ -64,7 +64,7 @@ using mapnik::processor_context_ptr;
 using mapnik::query;
 using mapnik::transcoder;
 
-typedef std::shared_ptr<ConnectionManager::PoolType> CnxPool_ptr;
+using CnxPool_ptr = std::shared_ptr<ConnectionManager::PoolType>;
 
 struct pgraster_overview
 {

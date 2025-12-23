@@ -58,7 +58,7 @@ if env['HAS_CAIRO']:
     program_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])
     program_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
 
-program_env.PrependUnique(CPPPATH=['#plugins/input/postgis'])
+program_env.PrependUnique(CPPPATH=['#plugins/input/postgis+pgraster'])
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 libraries.extend([boost_program_options,'sqlite3',env['MAPNIK_NAME'],'icuuc'])

@@ -28,7 +28,7 @@
 #include <mapnik/geometry/geometry_type.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/util/fs.hpp>
-#include "../../../plugins/input/postgis/connection_manager.hpp"
+#include "../../../plugins/input/postgis+pgraster/connection_manager.hpp"
 
 /*
   Compile and run just this test:

@@ -73,7 +73,7 @@ std::vector<ogr_utils::option_ptr> ogr_utils::split_open_options(std::string con
     return opts;
 }
 
-char** ogr_utils::open_options_for_ogr(std::vector<ogr_utils::option_ptr>& options)
+char** ogr_utils::open_options_for_ogr(std::vector<ogr_utils::option_ptr> const& options)
 {
     char** for_ogr = new char*[options.size() + 1];
     for (size_t i = 0; i < options.size(); ++i)
