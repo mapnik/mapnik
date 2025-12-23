@@ -55,12 +55,12 @@ jobs:
       - name: Free disk space on Ubuntu runner
         shell: bash
         run: |
-        if [ "${RUNNER_OS}" == "Linux" ]; then
-           df -h
-           sudo apt-get clean
-           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
-           df -h
-        fi
+          if [ "${RUNNER_OS}" == "Linux" ]; then
+             df -h
+             sudo apt-get clean
+             sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+             df -h
+          fi
 
       - name: Checkout Mapnik
         uses: actions/checkout@v4
