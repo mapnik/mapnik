@@ -10,7 +10,5 @@ target_sources(input-postgis+pgraster ${_plugin_visibility}
 )
 target_link_libraries(input-postgis+pgraster ${_plugin_visibility}
     mapnik::mapnik
-    /Users/artemp/projects/mapnik-consulting/mapnik-package-builder/_deps/lib/libgeos.a
-    /Users/artemp/projects/mapnik-consulting/mapnik-package-builder/_deps/lib/libsqlite3.a
     PostgreSQL::PostgreSQL
 )
