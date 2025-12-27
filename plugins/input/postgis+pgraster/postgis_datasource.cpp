@@ -49,7 +49,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <sstream>
 
 DATASOURCE_PLUGIN_IMPL(postgis_datasource_plugin, postgis_datasource);
-DATASOURCE_PLUGIN_EXPORT(postgis_datasource_plugin);
+DATASOURCE_PLUGIN_EXPORT(postgis);
 DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(postgis_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(postgis_datasource_plugin);
 

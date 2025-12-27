@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.30)
+# 3.30 cmake --help-policy CMP0167
 # 3.15 is required since the Boost::XXXX targets was first added. https://cmake.org/cmake/help/latest/module/FindBoost.html#imported-targets
 # 3.14 is required since SQLite3 Module was first added. https://cmake.org/cmake/help/latest/module/FindSQLite3.html#findsqlite3
 
@@ -67,12 +68,10 @@ mapnik_option(USE_STATS "Enable statistics reporting" OFF)
 mapnik_option(DISABLE_MAPNIK_AUTOSETUP "disables the autosetup. Need to call mapnik::setup() then" OFF)
 
 mapnik_option(USE_PLUGIN_INPUT_CSV "adds plugin input csv" ON)
-mapnik_option(USE_PLUGIN_INPUT_GDAL "adds plugin input gdal" ON)
+mapnik_option(USE_PLUGIN_INPUT_GDAL_OGR "adds plugin input gdal+ogr" ON)
 mapnik_option(USE_PLUGIN_INPUT_GEOBUF "adds plugin input geobuf" ON)
 mapnik_option(USE_PLUGIN_INPUT_GEOJSON "adds plugin input geojson" ON)
-mapnik_option(USE_PLUGIN_INPUT_OGR "adds plugin input ogr" ON)
-mapnik_option(USE_PLUGIN_INPUT_PGRASTER "adds plugin input pgraster" ON)
-mapnik_option(USE_PLUGIN_INPUT_POSTGIS "adds plugin input postgis" ON)
+mapnik_option(USE_PLUGIN_INPUT_POSTGIS_PGRASTER "adds plugin input postgis+pgraster" ON)
 mapnik_option(USE_PLUGIN_INPUT_RASTER "adds plugin input raster" ON)
 mapnik_option(USE_PLUGIN_INPUT_SHAPE "adds plugin input shape" ON)
 mapnik_option(USE_PLUGIN_INPUT_SQLITE "adds plugin input sqlite" ON)

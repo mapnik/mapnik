@@ -82,8 +82,9 @@ struct _mapnik_lib_t
     }
 };
 
-PluginInfo::PluginInfo(std::string const& filename, std::string const& library_name)
+PluginInfo::PluginInfo(std::string const& filename, std::string const& symbol_name)
     : filename_(filename),
+      symbol_name_(symbol_name),
       module_{std::make_unique<mapnik_lib_t>()}
 {
     assert(module_ != nullptr);
@@ -97,7 +98,7 @@ PluginInfo::PluginInfo(std::string const& filename, std::string const& library_n
 #if defined(MAPNIK_HAS_DLCFN) || defined(_WIN32)
     if (module_->dl)
     {
-        datasource_plugin* plugin{reinterpret_cast<datasource_plugin*>(get_symbol("plugin"))};
+        datasource_plugin const* plugin{get_plugin()};
         if (!plugin)
             throw std::runtime_error("plugin has a false interface"); //! todo: better error text
         module_->name = plugin->name();
@@ -118,10 +119,19 @@ PluginInfo::PluginInfo(std::string const& filename, std::string const& library_n
 
 PluginInfo::~PluginInfo() {}
 
-void* PluginInfo::get_symbol(std::string const& sym_name) const
+// void* PluginInfo::get_symbol(std::string const& sym_name) const
+// {
+// #ifdef MAPNIK_SUPPORTS_DLOPEN
+//     return reinterpret_cast<void*>(dlsym(module_->dl, sym_name.c_str()));
+// #else
+//     return nullptr;
+// #endif
+// }
+
+datasource_plugin const* PluginInfo::get_plugin() const
 {
 #ifdef MAPNIK_SUPPORTS_DLOPEN
-    return reinterpret_cast<void*>(dlsym(module_->dl, sym_name.c_str()));
+    return reinterpret_cast<datasource_plugin*>(dlsym(module_->dl, symbol_name_.c_str()));
 #else
     return nullptr;
 #endif

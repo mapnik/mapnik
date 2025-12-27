@@ -34,7 +34,7 @@ add_executable(mapnik-test-unit
     unit/datasource/geobuf.cpp
     unit/datasource/geojson.cpp
     unit/datasource/memory.cpp
-    ../plugins/input/ogr/ogr_utils.cpp
+    ../plugins/input/gdal+ogr/ogr_utils.cpp
     unit/datasource/ogr.cpp
     unit/datasource/postgis.cpp
     unit/datasource/shapeindex.cpp

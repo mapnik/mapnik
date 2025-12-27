@@ -7,7 +7,7 @@ add_executable(pgsql2sqlite
     sqlite.cpp
 )
 
-target_include_directories(pgsql2sqlite PRIVATE ../../plugins/input/postgis)
+target_include_directories(pgsql2sqlite PRIVATE ../../plugins/input/postgis+pgraster)
 target_link_libraries(pgsql2sqlite PRIVATE
     SQLite::SQLite3
     PostgreSQL::PostgreSQL

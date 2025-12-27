@@ -22,7 +22,7 @@
 // mapnik
 #include <mapnik/value/types.hpp>
 #include <mapnik/global.hpp>
-#include <mapnik/util/utf_conv_win.hpp>
+// #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/util/trim.hpp>
 

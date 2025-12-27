@@ -23,30 +23,29 @@ Import ('plugin_base')
 Import ('env')
 from copy import copy
 
-PLUGIN_NAME = 'pgraster'
+PLUGIN_NAME = 'gdal+ogr'
 
 plugin_env = plugin_base.Clone()
 
 plugin_sources = Split(
   """
-  %(PLUGIN_NAME)s_datasource.cpp
-  %(PLUGIN_NAME)s_featureset.cpp
-  %(PLUGIN_NAME)s_wkb_reader.cpp
+  gdal_datasource.cpp
+  gdal_featureset.cpp
+  ogr_converter.cpp
+  ogr_datasource.cpp
+  ogr_utils.cpp
+  ogr_featureset.cpp
+  ogr_index_featureset.cpp
   """ % locals()
 )
 
-cxxflags = []
 plugin_env['LIBS'] = []
+plugin_env.Append(LIBS=env['PLUGINS']['gdal+ogr']['lib'])
 
 if env['RUNTIME_LINK'] == 'static':
-    # pkg-config is more reliable than pg_config across platforms
-    cmd = 'pkg-config libpq --libs --static'
-    try:
-        plugin_env.ParseConfig(cmd)
-    except OSError as  e:
-        plugin_env.Append(LIBS='pq')
-else:
-    plugin_env.Append(LIBS='pq')
+    cmd = '%s --libs --dep-libs' % plugin_env['GDAL_CONFIG']
+    plugin_env.ParseConfig(cmd)
+
 
 # Link Library to Dependencies
 libraries = copy(plugin_env['LIBS'])

@@ -26,9 +26,9 @@
 
 #include "pgraster_featureset.hpp"
 #include "pgraster_wkb_reader.hpp"
-#include "../postgis/resultset.hpp"
-#include "../postgis/cursorresultset.hpp"
-#include "../postgis/numeric2string.hpp"
+#include "resultset.hpp"
+#include "cursorresultset.hpp"
+#include "numeric2string.hpp"
 
 // mapnik
 #include <mapnik/global.hpp>

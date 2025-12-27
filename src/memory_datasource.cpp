@@ -35,11 +35,10 @@
 using mapnik::datasource;
 using mapnik::parameters;
 
-DATASOURCE_PLUGIN_EXPORT(mapnik::memory_datasource_plugin)
-
 namespace mapnik {
 
 DATASOURCE_PLUGIN_IMPL(memory_datasource_plugin, memory_datasource);
+DATASOURCE_PLUGIN_EXPORT(memory)
 DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(memory_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(memory_datasource_plugin);
 

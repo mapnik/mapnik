@@ -36,7 +36,7 @@
 #include <thread>
 
 DATASOURCE_PLUGIN_IMPL(tiles_datasource_plugin, tiles_datasource);
-DATASOURCE_PLUGIN_EXPORT(tiles_datasource_plugin);
+DATASOURCE_PLUGIN_EXPORT(tiles);
 DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(tiles_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(tiles_datasource_plugin);
 

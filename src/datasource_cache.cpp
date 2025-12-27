@@ -25,16 +25,18 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/datasource_plugin.hpp>
+#include <mapnik/filesystem.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/plugin.hpp>
 #include <mapnik/util/fs.hpp>
-
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/fusion/adapted/struct.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
@@ -106,7 +108,8 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #ifdef __GNUC__
     __extension__
 #endif
-      datasource_plugin* create_datasource = reinterpret_cast<datasource_plugin*>(itr->second->get_symbol("plugin"));
+
+      datasource_plugin const* create_datasource = itr->second->get_plugin();
 
     if (!create_datasource)
     {
@@ -219,6 +222,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
 #ifdef MAPNIK_THREADSAFE
     std::lock_guard<std::recursive_mutex> lock(instance_mutex_);
 #endif
+    bool status = false;
     try
     {
         if (!mapnik::util::exists(filename))
@@ -226,28 +230,41 @@ bool datasource_cache::register_datasource(std::string const& filename)
             MAPNIK_LOG_ERROR(datasource_cache) << "Cannot load '" << filename << "' (plugin does not exist)";
             return false;
         }
-        std::shared_ptr<PluginInfo> plugin = std::make_shared<PluginInfo>(filename, "datasource_name");
-        if (plugin->valid())
+
+        namespace x3 = boost::spirit::x3;
+        std::vector<std::string> handle_names;
+        std::string stem = fs::path(filename).stem().string();
+        if (!x3::parse(stem.begin(), stem.end(), +x3::char_("a-zA-Z_") % x3::lit('+'), handle_names))
         {
-            if (plugin->name().empty())
+            MAPNIK_LOG_ERROR(datasource_cache) << "Cannot load '" << filename << "' (Unexpected plugin name)";
+            return false;
+        }
+
+        for (auto const& name : handle_names)
+        {
+            std::shared_ptr<PluginInfo> plugin = std::make_shared<PluginInfo>(filename, name + "_plugin");
+            if (plugin->valid())
             {
-                MAPNIK_LOG_ERROR(datasource_cache)
-                  << "Problem loading plugin library '" << filename << "' (plugin is lacking compatible interface)";
+                if (plugin->name().empty())
+                {
+                    MAPNIK_LOG_ERROR(datasource_cache)
+                      << "Problem loading plugin library '" << filename << "' (plugin is lacking compatible interface)";
+                }
+                else
+                {
+                    if (plugins_.emplace(plugin->name(), plugin).second)
+                    {
+                        MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Registered=" << plugin->name();
+                        status = true;
+                    }
+                }
             }
             else
             {
-                if (plugins_.emplace(plugin->name(), plugin).second)
-                {
-                    MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Registered=" << plugin->name();
-                    return true;
-                }
+                MAPNIK_LOG_ERROR(datasource_cache)
+                  << "Problem loading plugin library: " << filename
+                  << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
             }
-        }
-        else
-        {
-            MAPNIK_LOG_ERROR(datasource_cache)
-              << "Problem loading plugin library: " << filename
-              << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
         }
     }
     catch (std::exception const& ex)
@@ -255,7 +272,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
         MAPNIK_LOG_ERROR(datasource_cache)
           << "Exception caught while loading plugin library: " << filename << " (" << ex.what() << ")";
     }
-    return false;
+    return status;
 }
 
 } // namespace mapnik

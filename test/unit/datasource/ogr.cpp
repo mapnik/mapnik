@@ -29,7 +29,7 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/datasource_cache.hpp>
-#include "../../../plugins/input/ogr/ogr_utils.hpp"
+#include "../../../plugins/input/gdal+ogr/ogr_utils.hpp"
 
 inline std::vector<ogr_utils::option_ptr> split_options(std::string const& options)
 {

@@ -24,8 +24,9 @@
  *
  *****************************************************************************/
 
-#include "../postgis/connection_manager.hpp"
-#include "../postgis/asyncresultset.hpp"
+#include "connection_manager.hpp"
+#include "asyncresultset.hpp"
+#include "cursorresultset.hpp"
 #include "pgraster_datasource.hpp"
 #include "pgraster_featureset.hpp"
 
@@ -52,7 +53,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <sstream>
 
 DATASOURCE_PLUGIN_IMPL(pgraster_datasource_plugin, pgraster_datasource);
-DATASOURCE_PLUGIN_EXPORT(pgraster_datasource_plugin);
+DATASOURCE_PLUGIN_EXPORT(pgraster);
 DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(pgraster_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(pgraster_datasource_plugin);
 

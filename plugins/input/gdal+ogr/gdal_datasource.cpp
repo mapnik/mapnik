@@ -43,7 +43,8 @@ using mapnik::layer_descriptor;
 using mapnik::query;
 
 DATASOURCE_PLUGIN_IMPL(gdal_datasource_plugin, gdal_datasource);
-DATASOURCE_PLUGIN_EXPORT(gdal_datasource_plugin);
+DATASOURCE_PLUGIN_EXPORT(gdal);
+
 void gdal_datasource_plugin::after_load() const
 {
     GDALAllRegister();
