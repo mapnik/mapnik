@@ -6,6 +6,20 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.2.0
+
+Released December 30th, 2025
+
+(Packaged from [](https://github.com/mapnik/mapnik/commit/))
+
+- Multiple datasources per plug-in to minimize binary size (`https://github.com/mapnik/mapnik/pull/4542)
+   gdal.input + ogr.input => gdal+ogr.input
+   postgis.input + pgraster.input => postgis+pgraster.input
+
+- tiles.input - use Mapnik/$(MAPNIK_VERSION_STRING) as "User-Agent" 41ce2a9eb2119ec2d5bc7d6f3d3f8f5b9b081cb7
+- tiles.input - vector tile bounding box intersection test (performance) 9fae6a6eb88425d06542e272a74f3ede5141b0d4
+
+
 ## Mapnik 4.1.4
 
 Released November 6th, 2025
