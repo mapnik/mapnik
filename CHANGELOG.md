@@ -10,7 +10,7 @@ For a complete change history, see the git log.
 
 Released December 30th, 2025
 
-(Packaged from [](https://github.com/mapnik/mapnik/commit/))
+(Packaged from [3d1e81398](https://github.com/mapnik/mapnik/commit/3d1e81398))
 
 - Multiple datasources per plug-in to minimize binary size (`https://github.com/mapnik/mapnik/pull/4542)
    gdal.input + ogr.input => gdal+ogr.input
