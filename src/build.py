@@ -55,7 +55,6 @@ enabled_imaging_libraries = []
 
 
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
-system = 'boost_system%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
 
 
@@ -65,7 +64,6 @@ lib_env['LIBS'] = [regex]
 
 if int(env['CXX_STD']) < 17 or env['USE_BOOST_FILESYSTEM']:
     lib_env['LIBS'].append(filesystem)
-    lib_env['LIBS'].append(system)
 
 if env['COVERAGE']:
     lib_env.Append(LINKFLAGS='--coverage')
