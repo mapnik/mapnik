@@ -11,6 +11,7 @@
 
 #include <functional>
 #include <map>
+#include <cmath>
 
 namespace {
 
@@ -108,7 +109,15 @@ TEST_CASE("expressions")
     TRY_CHECK(parse_and_dump("pi") == "3.14159");
     TRY_CHECK(parse_and_dump("deg_to_rad") == "0.0174533");
     TRY_CHECK(parse_and_dump("rad_to_deg") == "57.2958");
-
+    // div by zero
+    TRY_CHECK(eval("1 / 0") == mapnik::value_null());
+    TRY_CHECK(eval("pi / 0") == mapnik::value_null());
+    TRY_CHECK(eval("1 / 0.0") == mapnik::value_null());
+    // modulus
+    TRY_CHECK(eval("3 % 2") == 1);
+    TRY_CHECK(eval("int((pi % 3) * 100000)") == 14159);
+    TRY_CHECK(eval("1 % 0") == mapnik::value_null());
+    TRY_CHECK(eval("pi % 0") == mapnik::value_null());
     // ascii attribute name
     TRY_CHECK(eval(" [foo]='bar' ") == true);
 
