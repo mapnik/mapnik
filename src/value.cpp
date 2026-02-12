@@ -386,6 +386,8 @@ struct mod
     template<typename T>
     value_type operator()(T lhs, T rhs) const
     {
+        if (rhs == 0)
+            return value_type();
         return lhs % rhs;
     }
 
@@ -395,15 +397,24 @@ struct mod
 
     value_type operator()(value_double lhs, value_integer rhs) const
     {
+        if (rhs == 0)
+            return value_type();
         return std::fmod(lhs, static_cast<value_double>(rhs));
     }
 
     value_type operator()(value_integer lhs, value_double rhs) const
     {
+        if (rhs == 0)
+            return value_type();
         return std::fmod(static_cast<value_double>(lhs), rhs);
     }
 
-    value_type operator()(value_double lhs, value_double rhs) const { return std::fmod(lhs, rhs); }
+    value_type operator()(value_double lhs, value_double rhs) const
+    {
+        if (rhs == 0)
+            return value_type();
+        return std::fmod(lhs, rhs);
+    }
 };
 
 template<typename V>
