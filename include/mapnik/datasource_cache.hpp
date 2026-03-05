@@ -50,7 +50,7 @@ class MAPNIK_DECL datasource_cache : public singleton<datasource_cache, CreateSt
   public:
     bool plugin_registered(std::string const& plugin_name) const;
     std::vector<std::string> plugin_names() const;
-    std::string plugin_directories();
+    std::vector<std::string> plugin_directories() const;
     bool register_datasources(std::string const& path, bool recurse = false);
     bool register_datasource(std::string const& path);
     std::shared_ptr<datasource> create(parameters const& params);

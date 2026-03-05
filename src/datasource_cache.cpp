@@ -93,7 +93,8 @@ datasource_ptr datasource_cache::create(parameters const& params)
             }
             else
             {
-                s += " (searched for datasource plugins in '" + plugin_directories() + "')";
+                s +=
+                  " (searched for datasource plugins in '" + boost::algorithm::join(plugin_directories_, ", ") + "')";
             }
             throw config_error(s);
         }
@@ -119,12 +120,12 @@ datasource_ptr datasource_cache::create(parameters const& params)
     return create_datasource->create(params);
 }
 
-std::string datasource_cache::plugin_directories()
+std::vector<std::string> datasource_cache::plugin_directories() const
 {
 #ifdef MAPNIK_THREADSAFE
     std::lock_guard<std::recursive_mutex> lock(instance_mutex_);
 #endif
-    return boost::algorithm::join(plugin_directories_, ", ");
+    return std::vector<std::string>(plugin_directories_.begin(), plugin_directories_.end());
 }
 
 bool datasource_cache::plugin_registered(std::string const& plugin_name) const
