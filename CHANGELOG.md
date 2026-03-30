@@ -6,6 +6,22 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.2.2
+
+Released March 30th, 2026
+
+(Packaged from [23567fcef](https://github.com/mapnik/mapnik/commit/23567fcef))
+
+- SCons build - remove boost_system
+- Fix "modulo by zero" exceptions  by returning `mapnik::value_null` when rhs is zero (cosistent with `div` implementation)
+  (including specialisations using `std::fmod` which return NAN if rhs is zero https://en.cppreference.com/w/cpp/numeric/math/fmod) (ref #4545)
+- Return vector<string> from plugin_directories method
+- pgraster.input - fix stderr messages
+- Fix warning - identifier '_case' preceded by whitespace in a literal operator declaration is deprecated
+- Update vcpkg to 2026.03.18
+- Update github actions (node24) https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
+
 ## Mapnik 4.2.1
 
 Released January 28th, 2026
