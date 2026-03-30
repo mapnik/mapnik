@@ -15,7 +15,7 @@ env:
   USERNAME: mapnik
   VCPKG_EXE: ${{ github.workspace }}/vcpkg/vcpkg
   FEED_URL: https://nuget.pkg.github.com/mapnik/index.json
-  VCPKG_RELEASE: 2025.09.17
+  VCPKG_RELEASE: 2026.03.18
   VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/mapnik/index.json,readwrite"
 
 jobs:
