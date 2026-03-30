@@ -113,7 +113,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
         if (max_async_connections_ > pool_max_size_)
         {
             std::ostringstream err;
-            err << "PostGIS Plugin: Error: 'max_async_connections (" << max_async_connections_
+            err << "PGRaster Plugin: Error: 'max_async_connections (" << max_async_connections_
                 << ") must be <= max_size(" << pool_max_size_ << ")";
             throw mapnik::datasource_exception(err.str());
         }
@@ -400,7 +400,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                         // throw for cases like a numeric primary key, which is invalid
                         // as it should be floating point (int numerics are useless)
                         std::ostringstream err;
-                        err << "PostGIS Plugin: Error: '" << rs_key->getValue(0) << "' on table '" << parsed_table_
+                        err << "PGRaster Plugin: Error: '" << rs_key->getValue(0) << "' on table '" << parsed_table_
                             << "' is not a valid integer primary key field\n";
                         throw mapnik::datasource_exception(err.str());
                     }
@@ -408,7 +408,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                 else if (result_rows > 1)
                 {
                     std::ostringstream err;
-                    err << "PostGIS Plugin: Error: '" << "multi column primary key detected but is not supported";
+                    err << "PGRaster Plugin: Error: '" << "multi column primary key detected but is not supported";
                     throw mapnik::datasource_exception(err.str());
                 }
             }
@@ -419,7 +419,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
         // but still not known at this point, then throw
         if (*autodetect_key_field && key_field_.empty())
         {
-            throw mapnik::datasource_exception("PostGIS Plugin: Error: primary key required"
+            throw mapnik::datasource_exception("PGRaster Plugin: Error: primary key required"
                                                " but could not be detected for table '" +
                                                parsed_table_ +
                                                "', please supply 'key_field'"
@@ -810,7 +810,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q, proces
         if (geometryColumn_.empty())
         {
             std::ostringstream s_error;
-            s_error << "PostGIS: geometry name lookup failed for table '";
+            s_error << "PGRaster: geometry name lookup failed for table '";
 
             if (!parsed_schema_.empty())
             {
@@ -975,7 +975,7 @@ featureset_ptr pgraster_datasource::features_at_point(coord2d const& pt, double 
             if (geometryColumn_.empty())
             {
                 std::ostringstream s_error;
-                s_error << "PostGIS: geometry name lookup failed for table '";
+                s_error << "PGRaster: geometry name lookup failed for table '";
 
                 if (!parsed_schema_.empty())
                 {
@@ -1074,7 +1074,7 @@ box2d<double> pgraster_datasource::envelope() const
             if (col.empty())
             {
                 std::ostringstream s_error;
-                s_error << "PostGIS: unable to query the layer extent of table '";
+                s_error << "PGRaster: unable to query the layer extent of table '";
 
                 if (!sch.empty())
                 {
@@ -1093,7 +1093,7 @@ box2d<double> pgraster_datasource::envelope() const
                 if (tab.empty())
                 {
                     std::ostringstream s_error;
-                    s_error << "PostGIS: unable to query the layer extent as "
+                    s_error << "PGRaster: unable to query the layer extent as "
                             << "we couldn't determine the raster table name.\n"
                             << "Please provide either an 'extent' parameter to skip this query, "
                             << "a 'raster_table' parameter, or do not set 'estimate_extent'";
