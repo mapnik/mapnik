@@ -58,7 +58,7 @@ namespace mapnik {
 namespace svg {
 
 using util::name_to_int;
-using util::operator"" _case;
+using util::operator""_case;
 } // namespace svg
 } // namespace mapnik
 

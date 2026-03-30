@@ -84,7 +84,7 @@ using boost::tokenizer;
 namespace mapnik {
 using std::optional;
 using util::name_to_int;
-using util::operator"" _case;
+using util::operator""_case;
 
 class map_parser : util::noncopyable
 {
