@@ -50,7 +50,7 @@ runs:
         tar -vzcf visual-test-results.tar.gz visual-test-result
 
     - name: Upload visual test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: runner.os != 'macOS'
       with:
         name: ${{ inputs.cmake-preset }}-visual-tests-${{ github.sha }}
@@ -77,12 +77,12 @@ runs:
 
     - name: Upload coverage to Codecov (Linux & macOS)
       if: runner.os != 'Windows'
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v6
       with:
         files: build/coverage.info
 
     - name: Upload coverage to Codecov (Windows)
       if: runner.os == 'Windows'
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v6
       with:
         files: ctest.cov,build/out/mapnik-test-visual.cov
