@@ -31,7 +31,6 @@
       ]
     },
     "boost-spirit",
-    "boost-system",
     "cairo",
     "cairomm",
     {
