@@ -169,7 +169,7 @@ if(CMAKE_CXX_STANDARD VERSION_LESS 17)
     set(USE_BOOST_FILESYSTEM ON CACHE BOOL "Use boost::filesystem" FORCE)
 endif()
 if(USE_BOOST_FILESYSTEM)
-    mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS filesystem system)
+    mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS filesystem OPTIONAL_COMPONENTS system)
 endif()
 
 list(APPEND MAPNIK_COMPILE_DEFS BOOST_REGEX_HAS_ICU)
