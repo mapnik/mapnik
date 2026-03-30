@@ -53,7 +53,7 @@ jobs:
         run: cmake --build --preset ${{ env.PRESET }} --target package
 
       - name: Upload mapnik debian package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.PRESET }}-deb
           path: build/mapnik-*.deb

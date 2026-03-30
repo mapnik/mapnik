@@ -50,7 +50,7 @@ runs:
         tar -vzcf visual-test-results.tar.gz visual-test-result
 
     - name: Upload visual test results
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       if: runner.os != 'macOS'
       with:
         name: ${{ inputs.cmake-preset }}-visual-tests-${{ github.sha }}
