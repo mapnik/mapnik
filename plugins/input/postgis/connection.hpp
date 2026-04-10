@@ -199,6 +199,13 @@ class Connection
     PGresult* getResult()
     {
         PGresult* result = PQgetResult(conn_);
+        // NULL means all async results consumed; connection is idle.
+        // Clear pending_ so AsyncResultSet::close() returns the
+        // connection to the pool instead of destroying it.
+        // Note: if a caller abandons an AsyncResultSet before fully
+        // draining results, pending_ stays true and close() will
+        // still tear down the connection — that's intentional.
+        if (!result) pending_ = false;
         return result;
     }
 
