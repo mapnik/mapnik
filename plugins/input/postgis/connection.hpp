@@ -205,7 +205,8 @@ class Connection
         // Note: if a caller abandons an AsyncResultSet before fully
         // draining results, pending_ stays true and close() will
         // still tear down the connection — that's intentional.
-        if (!result) pending_ = false;
+        if (!result)
+            pending_ = false;
         return result;
     }
 
