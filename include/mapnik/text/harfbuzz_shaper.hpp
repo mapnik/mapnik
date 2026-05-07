@@ -345,6 +345,11 @@ struct harfbuzz_shaper
                     {
                         c.push_back({face, glyphs[i], positions[i]});
                     }
+                    else if (c.front().face != face)
+                    {
+                        c.clear();
+                        c.push_back({face, glyphs[i], positions[i]});
+                    }
                     else if (c.front().glyph.codepoint == 0)
                     {
                         c.front() = {face, glyphs[i], positions[i]};
