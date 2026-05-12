@@ -318,6 +318,8 @@ struct harfbuzz_shaper
                 unsigned cluster = 0;
                 bool in_cluster = false;
                 std::vector<unsigned> clusters;
+                std::vector<std::vector<glyph_face_info>> current_clusters;
+                current_clusters.resize(text.length());
 
                 for (unsigned i = 0; i < num_glyphs; ++i)
                 {
