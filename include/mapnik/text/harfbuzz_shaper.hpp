@@ -345,6 +345,28 @@ struct harfbuzz_shaper
                     current_clusters[cluster]
                         .push_back({face, glyphs[i], positions[i]});
                 }
+                for (unsigned cluster_id = 0;
+                    cluster_id < current_clusters.size();
+                    ++cluster_id)
+                {
+                    auto const& cluster_glyphs = current_clusters[cluster_id];
+
+                    if (cluster_glyphs.empty())
+                        continue;
+                    bool valid = true;
+                    for (auto const& info : cluster_glyphs)
+                    {
+                        if (info.glyph.codepoint == 0)
+                        {
+                            valid = false;
+                            break;
+                        }
+                    }
+                    if (valid)
+                    {
+                        glyphinfos[cluster_id] = cluster_glyphs;
+                    }
+                }
                 bool all_set = true;
                 for (auto c_id : clusters)
                 {
