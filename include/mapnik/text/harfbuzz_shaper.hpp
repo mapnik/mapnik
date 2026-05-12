@@ -366,6 +366,10 @@ struct harfbuzz_shaper
                     {
                         glyphinfos[cluster_id] = cluster_glyphs;
                     }
+                    else if (glyphinfos[cluster_id].empty())
+                    {
+                        glyphinfos[cluster_id] = cluster_glyphs;
+                    }
                 }
                 bool all_set = true;
                 for (auto c_id : clusters)
