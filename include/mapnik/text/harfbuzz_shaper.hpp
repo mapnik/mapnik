@@ -342,12 +342,9 @@ struct harfbuzz_shaper
                     {
                         glyphinfos.resize(cluster + 1);
                     }
-                    current_clusters[cluster]
-                        .push_back({face, glyphs[i], positions[i]});
+                    current_clusters[cluster].push_back({face, glyphs[i], positions[i]});
                 }
-                for (unsigned cluster_id = 0;
-                    cluster_id < current_clusters.size();
-                    ++cluster_id)
+                for (unsigned cluster_id = 0; cluster_id < current_clusters.size(); ++cluster_id)
                 {
                     auto const& cluster_glyphs = current_clusters[cluster_id];
 
