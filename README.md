@@ -15,7 +15,7 @@ Mapnik is an open source toolkit for developing mapping applications. At the cor
 
 Mapnik is basically a collection of geographic objects like maps, layers, datasources, features, and geometries. The library doesn't rely on any OS specific "windowing systems" and it can be deployed to any server environment. It is intended to play fair in a multi-threaded environment and is aimed primarily, but not exclusively, at web-based development.
 
-For further information see [http://mapnik.org](http://mapnik.org) and also our [wiki documentation](https://github.com/mapnik/mapnik/wiki).
+For further information see [mapnik.org](https://mapnik.org/) and also our [wiki documentation](https://github.com/mapnik/mapnik/wiki).
 
 # Installation
 
