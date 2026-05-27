@@ -28,12 +28,15 @@
 #include <mapnik/text/text_line.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/text/font_feature_settings.hpp>
+#include <mapnik/text/font_coverage.hpp>
 #include <mapnik/text/itemizer.hpp>
 #include <mapnik/safe_cast.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
 // stl
+#include <algorithm>
 #include <list>
+#include <limits>
 #include <type_traits>
 
 #include <mapnik/warning.hpp>
@@ -249,58 +252,49 @@ struct harfbuzz_shaper
             face_set_ptr face_set = font_manager.get_face_set(text_item.format_->face_name, text_item.format_->fontset);
             double size = text_item.format_->text_size * scale_factor;
             face_set->set_unscaled_character_sizes();
-            std::size_t num_faces = face_set->size();
+
 
             font_feature_settings const& ff_settings = text_item.format_->ff_settings;
             int ff_count = safe_cast<int>(ff_settings.count());
 
-            // rendering information for a single glyph
-            struct glyph_face_info
+            auto script = detail::_icu_script_to_script(text_item.script);
+            bool rtl = text_item.dir == UBIDI_RTL;
+            hb_direction_t direction = rtl ? HB_DIRECTION_RTL : HB_DIRECTION_LTR;
+            hb_language_t hb_lang;
+            bool lang_from_script = false;
+            if (lang)
             {
-                face_ptr face;
-                hb_glyph_info_t glyph;
-                hb_glyph_position_t position;
-            };
+                hb_lang = hb_language_from_string(lang->c_str(), -1);
+            }
+            else
+            {
+                hb_lang = detail::script_to_language(script);
+                lang_from_script = true;
+            }
 
-            // this table is filled with information for rendering each glyph, so that
+
+            // this table is filled with information for rendering each glyph cluster, so that
             // several font faces can be used in a single text_item
-            std::size_t pos = 0;
+            using glyph_face_info = detail::glyph_face_info;
+            detail::font_coverage coverage(text_item.start, text_item.end);
             std::vector<std::vector<glyph_face_info>> glyphinfos;
-
-            glyphinfos.resize(text.length());
+            std::size_t pos = 0;
+            std::size_t num_faces = face_set->size();
             for (auto const& face : *face_set)
             {
                 ++pos;
-                hb_buffer_clear_contents(buffer.get());
-                hb_buffer_add_utf16(buffer.get(),
-                                    detail::uchar_to_utf16(text.getBuffer()),
-                                    text.length(),
-                                    text_item.start,
-                                    static_cast<int>(text_item.end - text_item.start));
-                hb_buffer_set_direction(buffer.get(),
-                                        (text_item.dir == UBIDI_RTL) ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
+                bool last_face = pos == num_faces;
 
-                hb_font_t* font(hb_ft_font_create(face->get_face(), nullptr));
-                auto script = detail::_icu_script_to_script(text_item.script);
-                hb_language_t hb_lang;
-                if (lang)
+                if (lang_from_script)
                 {
-                    hb_lang = hb_language_from_string(lang->c_str(), -1);
-                }
-                else
-                {
-                    hb_lang = detail::script_to_language(script);
                     MAPNIK_LOG_DEBUG(harfbuzz_shaper)
                       << "RUN:[" << text_item.start << "," << text_item.end << "]"
                       << " LANGUAGE:" << ((hb_lang != nullptr) ? hb_language_to_string(hb_lang) : "unknown")
                       << " SCRIPT:" << script << "(" << text_item.script << ") "
                       << uscript_getShortName(text_item.script) << " FONT:" << face->family_name();
                 }
-                if (hb_lang != HB_LANGUAGE_INVALID)
-                {
-                    hb_buffer_set_language(buffer.get(), hb_lang); // set most common language for the run based script
-                }
-                hb_buffer_set_script(buffer.get(), script);
+
+                hb_font_t* font(hb_ft_font_create(face->get_face(), nullptr));
 
                 // https://github.com/mapnik/test-data-visual/pull/25
 #if HB_VERSION_MAJOR > 0
@@ -308,109 +302,175 @@ struct harfbuzz_shaper
                 hb_ft_font_set_load_flags(font, FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING);
 #endif
 #endif
+
+                struct shaped_cluster
+                {
+                    unsigned start;
+                    unsigned end;
+                    bool covered;
+                    std::vector<glyph_face_info> glyphs;
+                };
+                constexpr unsigned in_progress_cluster_end = std::numeric_limits<unsigned>::max();
+
+                hb_buffer_clear_contents(buffer.get());
+                hb_buffer_add_utf16(buffer.get(),
+                                    detail::uchar_to_utf16(text.getBuffer()),
+                                    text.length(),
+                                    text_item.start,
+                                    static_cast<int>(text_item.end - text_item.start));
+                hb_buffer_set_direction(buffer.get(), direction);
+
+                if (hb_lang != HB_LANGUAGE_INVALID)
+                {
+                    hb_buffer_set_language(buffer.get(), hb_lang); // set most common language for the run based script
+                }
+                hb_buffer_set_script(buffer.get(), script);
+
                 hb_shape(font, buffer.get(), ff_settings.get_features(), ff_count);
-                hb_font_destroy(font);
 
                 unsigned num_glyphs = hb_buffer_get_length(buffer.get());
                 hb_glyph_info_t* glyphs = hb_buffer_get_glyph_infos(buffer.get(), &num_glyphs);
                 hb_glyph_position_t* positions = hb_buffer_get_glyph_positions(buffer.get(), &num_glyphs);
-
-                unsigned cluster = 0;
-                bool in_cluster = false;
-                std::vector<unsigned> clusters;
-
-                for (unsigned i = 0; i < num_glyphs; ++i)
+                if (!num_glyphs)
                 {
-                    if (i == 0)
-                    {
-                        cluster = glyphs[0].cluster;
-                        clusters.push_back(cluster);
-                    }
-                    if (cluster != glyphs[i].cluster)
-                    {
-                        cluster = glyphs[i].cluster;
-                        clusters.push_back(cluster);
-                        in_cluster = false;
-                    }
-                    else if (i != 0)
-                    {
-                        in_cluster = true;
-                    }
-                    if (glyphinfos.size() <= cluster)
-                    {
-                        glyphinfos.resize(cluster + 1);
-                    }
-                    auto& c = glyphinfos[cluster];
-                    if (c.empty())
-                    {
-                        c.push_back({face, glyphs[i], positions[i]});
-                    }
-                    else if (c.front().face != face)
-                    {
-                        c.clear();
-                        c.push_back({face, glyphs[i], positions[i]});
-                    }
-                    else if (c.front().glyph.codepoint == 0)
-                    {
-                        c.front() = {face, glyphs[i], positions[i]};
-                    }
-                    else if (in_cluster)
-                    {
-                        c.push_back({face, glyphs[i], positions[i]});
-                    }
-                }
-                bool all_set = true;
-                for (auto c_id : clusters)
-                {
-                    auto const& c = glyphinfos[c_id];
-                    if (c.empty() || c.front().glyph.codepoint == 0)
-                    {
-                        all_set = false;
-                        break;
-                    }
-                }
-                if (!all_set && (pos < num_faces))
-                {
-                    // Try next font in fontset
+                    hb_font_destroy(font);
                     continue;
                 }
-                double max_glyph_height = 0;
-                for (auto const& c_id : clusters)
+
+                std::deque<shaped_cluster> clusters;
+
+                // The fallback bookkeeping below relies on HarfBuzz cluster ids staying
+                // tied to the original UTF-16 indices seeded by hb_buffer_add_utf16(...).
+                // Distinct cluster values therefore identify the first code unit of each
+                // shaped cluster within the full text_item range.
+                //
+                // We also assume HarfBuzz emits all glyphs for one cluster contiguously
+                // and that cluster ids are monotonic in output order.
+                //
+                // LTR: glyph order matches text order, so cluster ids increase.
+                // RTL: glyph order is reversed, but cluster ids still refer to the same
+                // logical UTF-16 cells, so they decrease in output order.
+                //
+                // In both cases each distinct HarfBuzz cluster id marks the first UTF-16
+                // code unit of a shaped cluster, and the next distinct id closes the
+                // previous half-open source range.
+                //
+                // For example, ids 0 -> 3 -> 6 describe logical ranges [0,3), [3,6),
+                // and [6,text_item.end), regardless of whether HarfBuzz reported them in
+                // LTR order (0, 3, 6) or RTL order (6, 3, 0).
+                //
+                // The one cluster whose end is still unknown
+                // keeps the temporary `in_progress_cluster_end` marker until the loop
+                // finishes, then it is closed with text_item.end.
+                //
+                // Boundary population while walking shaped glyphs:
+                //
+                // LTR:
+                //   utf16 cells        | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+                //   hb cluster ids     | 0 | 3 | 6 |
+                //   deque state        | [0,open) |
+                //   see next id = 3      -> close back() with end = 3
+                //   deque state        | [0,3) | [3,open) |
+                //   see next id = 6      -> close back() with end = 6
+                //   deque state        | [0,3) | [3,6) | [6,open) |
+                //   loop ends           -> close the remaining open cluster with text_item.end
+                //   final              | [0,3) | [3,6) | [6,8) |
+                //
+                // RTL:
+                //   utf16 cells        | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+                //   hb cluster ids     | 6 | 3 | 0 |
+                //   deque state        | [6,open) |
+                //   see next id = 3      -> new earlier cluster ends at front().start = 6
+                //   push_front([3,6))
+                //   deque state        | [3,6) | [6,open) |
+                //   see next id = 0      -> new earlier cluster ends at front().start = 3
+                //   push_front([0,3))
+                //   deque state        | [0,3) | [3,6) | [6,open) |
+                //   loop ends           -> close the remaining open cluster with text_item.end
+                //   final              | [0,3) | [3,6) | [6,8) |
+                for (unsigned i = 0; i < num_glyphs; ++i)
                 {
-                    auto const& c = glyphinfos[c_id];
-                    for (auto const& info : c)
+                    auto const cluster_start = glyphs[i].cluster;
+                    bool const new_cluster = clusters.empty() || (rtl ? clusters.front().start : clusters.back().start) != cluster_start;
+                    if (new_cluster)
                     {
-                        auto const& gpos = info.position;
-                        auto const& glyph = info.glyph;
-                        unsigned char_index = glyph.cluster;
-                        glyph_info g(glyph.codepoint, char_index, text_item.format_);
-                        if (info.glyph.codepoint != 0)
-                            g.face = info.face;
-                        else
-                            g.face = face;
-                        if (g.face->glyph_dimensions(g))
+                        unsigned cluster_end = in_progress_cluster_end;
+                        if (!clusters.empty())
                         {
-                            g.scale_multiplier = g.face->get_face()->units_per_EM > 0
-                                                   ? (size / g.face->get_face()->units_per_EM)
-                                                   : (size / 2048.0);
-                            // Overwrite default advance with better value provided by HarfBuzz
-                            g.unscaled_advance = gpos.x_advance;
-                            g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
-                            double tmp_height = g.height();
-                            if (g.face->is_color())
-                            {
-                                tmp_height = g.ymax();
-                            }
-                            if (tmp_height > max_glyph_height)
-                                max_glyph_height = tmp_height;
-                            width_map[char_index] += g.advance();
-                            line.add_glyph(std::move(g), scale_factor);
+                            if (rtl)
+                                cluster_end = clusters.front().start;
+                            else
+                                clusters.back().end = cluster_start;
                         }
+                        shaped_cluster cluster = {cluster_start, cluster_end, true, {}};
+                        if (rtl)
+                            clusters.push_front(std::move(cluster));
+                        else
+                            clusters.push_back(std::move(cluster));
+                    }
+                    auto& cluster = rtl ? clusters.front() : clusters.back();
+                    cluster.covered = cluster.covered && glyphs[i].codepoint != 0;
+                    cluster.glyphs.push_back({face, glyphs[i], positions[i]});
+                }
+                if (!clusters.empty())
+                {
+                    assert(clusters.back().end == in_progress_cluster_end);
+                    clusters.back().end = text_item.end;
+                }
+                coverage.begin_try_cover_pass();
+                for (auto& cluster : clusters)
+                {
+                    if (!last_face && !cluster.covered)
+                        continue;
+
+                    auto const glyphinfo_index = glyphinfos.size();
+                    if (!coverage.try_cover(cluster.start, cluster.end, glyphinfo_index))
+                        continue;
+
+                    glyphinfos.push_back(std::move(cluster.glyphs));
+                }
+                coverage.finish_try_cover_pass();
+                hb_font_destroy(font);
+
+                if (coverage.fully_covered())
+                    break;
+            }
+
+            double max_glyph_height = 0;
+            for (auto glyphinfo_itr = coverage.covering_begin(rtl);
+                 glyphinfo_itr != coverage.covering_end();
+                 ++glyphinfo_itr)
+            {
+                auto const glyphinfo_index = *glyphinfo_itr;
+                auto const& cluster = glyphinfos[glyphinfo_index];
+                for (auto const& info : cluster)
+                {
+                    auto const& gpos = info.position;
+                    auto const& glyph = info.glyph;
+                    unsigned char_index = glyph.cluster;
+                    glyph_info g(glyph.codepoint, char_index, text_item.format_);
+                    g.face = info.face;
+                    if (g.face->glyph_dimensions(g))
+                    {
+                        g.scale_multiplier = g.face->get_face()->units_per_EM > 0
+                                               ? (size / g.face->get_face()->units_per_EM)
+                                               : (size / 2048.0);
+                        // Overwrite default advance with better value provided by HarfBuzz
+                        g.unscaled_advance = gpos.x_advance;
+                        g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
+                        double tmp_height = g.height();
+                        if (g.face->is_color())
+                        {
+                            tmp_height = g.ymax();
+                        }
+                        if (tmp_height > max_glyph_height)
+                            max_glyph_height = tmp_height;
+                        width_map[char_index] += g.advance();
+                        line.add_glyph(std::move(g), scale_factor);
                     }
                 }
-                line.update_max_char_height(max_glyph_height);
-                break; // When we reach this point the current font had all glyphs.
             }
+            line.update_max_char_height(max_glyph_height);
         }
     }
 };
