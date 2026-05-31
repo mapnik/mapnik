@@ -318,6 +318,8 @@ struct harfbuzz_shaper
                 unsigned cluster = 0;
                 bool in_cluster = false;
                 std::vector<unsigned> clusters;
+                std::vector<std::vector<glyph_face_info>> current_clusters;
+                current_clusters.resize(text.length());
 
                 for (unsigned i = 0; i < num_glyphs; ++i)
                 {
@@ -340,23 +342,30 @@ struct harfbuzz_shaper
                     {
                         glyphinfos.resize(cluster + 1);
                     }
-                    auto& c = glyphinfos[cluster];
-                    if (c.empty())
+                    current_clusters[cluster].push_back({face, glyphs[i], positions[i]});
+                }
+                for (unsigned cluster_id = 0; cluster_id < current_clusters.size(); ++cluster_id)
+                {
+                    auto const& cluster_glyphs = current_clusters[cluster_id];
+
+                    if (cluster_glyphs.empty())
+                        continue;
+                    bool valid = true;
+                    for (auto const& info : cluster_glyphs)
                     {
-                        c.push_back({face, glyphs[i], positions[i]});
+                        if (info.glyph.codepoint == 0)
+                        {
+                            valid = false;
+                            break;
+                        }
                     }
-                    else if (c.front().face != face)
+                    if (valid)
                     {
-                        c.clear();
-                        c.push_back({face, glyphs[i], positions[i]});
+                        glyphinfos[cluster_id] = cluster_glyphs;
                     }
-                    else if (c.front().glyph.codepoint == 0)
+                    else if (glyphinfos[cluster_id].empty())
                     {
-                        c.front() = {face, glyphs[i], positions[i]};
-                    }
-                    else if (in_cluster)
-                    {
-                        c.push_back({face, glyphs[i], positions[i]});
+                        glyphinfos[cluster_id] = cluster_glyphs;
                     }
                 }
                 bool all_set = true;
