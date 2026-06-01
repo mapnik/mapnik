@@ -29,6 +29,7 @@
 #include <mapnik/datasource.hpp>
 #include "xyz_tiles.hpp"
 #include "mvt_io.hpp"
+#include "tiles_source.hpp"
 
 class vector_tiles_featureset : public mapnik::Featureset
 {
@@ -44,7 +45,8 @@ class vector_tiles_featureset : public mapnik::Featureset
                             std::string const& layer,
                             std::unordered_map<std::string, std::string>& tiles_cache,
                             std::size_t max_threads,
-                            std::size_t datasource_hash);
+                            std::size_t datasource_hash,
+                            mapnik::compression_type);
 
     virtual ~vector_tiles_featureset();
     mapnik::feature_ptr next();
@@ -78,6 +80,7 @@ class vector_tiles_featureset : public mapnik::Featureset
     std::size_t consumed_count_{0};
     std::size_t max_threads_;
     std::size_t datasource_hash_;
+    mapnik::compression_type tile_compression_ = mapnik::compression_type::NONE;
     bool next_tile();
     bool first_ = true;
     bool ssl_ = false;

@@ -39,7 +39,8 @@ vector_tiles_featureset::vector_tiles_featureset(std::string const& tiles_locati
                                                  std::string const& layer,
                                                  std::unordered_map<std::string, std::string>& tiles_cache,
                                                  std::size_t max_threads,
-                                                 std::size_t datasource_hash)
+                                                 std::size_t datasource_hash,
+                                                 mapnik::compression_type tile_compression)
     : tiles_location_(tiles_location),
       context_(ctx),
       zoom_(zoom),
@@ -55,7 +56,8 @@ vector_tiles_featureset::vector_tiles_featureset(std::string const& tiles_locati
       queue_(QUEUE_SIZE_),
       stash_(ioc_, targets_, queue_),
       max_threads_(max_threads),
-      datasource_hash_(datasource_hash)
+      datasource_hash_(datasource_hash),
+      tile_compression_(tile_compression)
 {
     try
     {
@@ -211,7 +213,15 @@ bool vector_tiles_featureset::next_tile()
             else if (tile.data && !tile.data->empty())
             {
                 std::string decompressed;
-                mapnik::vector_tile_impl::zlib_decompress((*tile.data).data(), (*tile.data).size(), decompressed);
+                if (tile_compression_ == mapnik::compression_type::GZIP)
+                {
+                    mapnik::vector_tile_impl::zlib_decompress((*tile.data).data(), (*tile.data).size(), decompressed);
+                }
+                else if (tile_compression_ == mapnik::compression_type::NONE)
+                {
+                    decompressed = {(*tile.data).data(), (*tile.data).size()};
+                }
+
                 tiles_cache_.emplace(datasource_key, decompressed);
                 vector_tile_.reset(new mvt_io(std::move(decompressed), context_, tile.x, tile.y, zoom_, layer_));
                 return true;

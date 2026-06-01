@@ -100,6 +100,7 @@ class mbtiles_source : public tiles_source
 
     mapnik::box2d<double> const& extent() const { return extent_; }
 
+    compression_type tile_compression() const { return compression_type::GZIP; }
     std::string get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
     {
         std::string sql =
