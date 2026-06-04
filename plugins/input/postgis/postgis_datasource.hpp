@@ -41,6 +41,7 @@
 
 // stl
 #include <memory>
+#include <optional>
 #include <regex>
 #include <vector>
 #include <string>
@@ -84,6 +85,7 @@ class postgis_datasource : public datasource
     std::string populate_tokens(std::string const& sql,
                                 double scale_denom,
                                 box2d<double> const& env,
+                                box2d<double> const& unbuffered_env,
                                 double pixel_width,
                                 double pixel_height,
                                 mapnik::attributes const& vars,

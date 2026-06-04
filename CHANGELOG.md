@@ -6,6 +6,14 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Unreleased
+
+- Add `!unbuffered_bbox!` SQL token to the `postgis` and `pgraster` plugins.
+  It expands to the metatile boundary — the same extent as `!bbox!` but
+  without `buffer-size` padding. Clipped to `!bbox!` so it is never larger.
+  Containment via `ST_Covers(!unbuffered_bbox!, way)` is guaranteed when
+  the map SRS and the layer SRS are the same.
+
 ## Mapnik 4.2.2
 
 Released March 30th, 2026

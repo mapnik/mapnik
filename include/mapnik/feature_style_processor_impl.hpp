@@ -245,6 +245,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
     processor_context_ptr current_ctx = ds->get_context(ctx_map);
     proj_transform const* proj_trans_ptr = proj_transform_cache::get(mat.proj0_.params(), mat.proj1_.params());
     box2d<double> query_ext = extent;            // unbuffered
+    box2d<double> unbuffered_query_ext = extent; // metatile, reprojected below for !unbuffered_bbox!
     box2d<double> buffered_query_ext(query_ext); // buffered
 
     double buffer_padding = 2.0 * scale * p.scale_factor();
@@ -354,6 +355,12 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
         }
     }
 
+    // !unbuffered_bbox! is the metatile boundary forward-projected into the
+    // layer SRS, then intersected with the final !bbox! so it can never be
+    // larger than !bbox!.
+    proj_trans_ptr->forward(unbuffered_query_ext, PROJ_ENVELOPE_POINTS);
+    unbuffered_query_ext = unbuffered_query_ext.intersect(layer_ext);
+
     std::vector<rule_cache>& rule_caches = mat.rule_caches_;
     attribute_collector collector(names);
 
@@ -398,7 +405,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
     double qh = query_ext.height() > 0 ? query_ext.height() : 1;
     query::resolution_type res(width / qw, height / qh);
 
-    query q(layer_ext, res, scale_denom, extent);
+    query q(layer_ext, res, scale_denom, unbuffered_query_ext);
     q.set_variables(p.variables());
 
     if (p.attribute_collection_policy() == COLLECT_ALL)

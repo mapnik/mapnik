@@ -509,18 +509,14 @@ std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 
 std::string postgis_datasource::populate_tokens(std::string const& sql) const
 {
-    return populate_tokens(sql,
-                           FLT_MAX,
-                           box2d<double>(-FLT_MAX, -FLT_MAX, FLT_MAX, FLT_MAX),
-                           0,
-                           0,
-                           mapnik::attributes{},
-                           false);
+    box2d<double> const world(-FLT_MAX, -FLT_MAX, FLT_MAX, FLT_MAX);
+    return populate_tokens(sql, FLT_MAX, world, world, 0, 0, mapnik::attributes{}, false);
 }
 
 std::string postgis_datasource::populate_tokens(std::string const& sql,
                                                 double scale_denom,
                                                 box2d<double> const& env,
+                                                box2d<double> const& unbuffered_env,
                                                 double pixel_width,
                                                 double pixel_height,
                                                 mapnik::attributes const& vars,
@@ -558,6 +554,10 @@ std::string postgis_datasource::populate_tokens(std::string const& sql,
         {
             populated_sql << sql_bbox(env);
             intersect = false;
+        }
+        else if (boost::algorithm::equals(m1, "unbuffered_bbox"))
+        {
+            populated_sql << sql_bbox(unbuffered_env);
         }
         else if (boost::algorithm::equals(m1, "pixel_height"))
         {
@@ -870,7 +870,8 @@ featureset_ptr postgis_datasource::features_with_context(query const& q, process
             }
         }
 
-        std::string table_with_bbox = populate_tokens(table_, scale_denom, box, px_gw, px_gh, q.variables());
+        std::string table_with_bbox =
+          populate_tokens(table_, scale_denom, box, q.get_unbuffered_bbox(), px_gw, px_gh, q.variables());
 
         s << " FROM " << table_with_bbox;
 
@@ -952,7 +953,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             }
 
             box2d<double> box(pt.x - tol, pt.y - tol, pt.x + tol, pt.y + tol);
-            std::string table_with_bbox = populate_tokens(table_, FLT_MAX, box, 0, 0, mapnik::attributes{});
+            std::string table_with_bbox = populate_tokens(table_, FLT_MAX, box, box, 0, 0, mapnik::attributes{});
 
             s << " FROM " << table_with_bbox;
 
