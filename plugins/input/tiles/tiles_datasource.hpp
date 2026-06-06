@@ -31,6 +31,7 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/datasource_plugin.hpp>
+#include "tiles_source.hpp"
 // boost
 #include <boost/json.hpp>
 // stl
@@ -45,7 +46,6 @@ DATASOURCE_PLUGIN_DEF(tiles_datasource_plugin, tiles);
 namespace mapnik {
 
 using zxy_type = std::tuple<std::uint8_t, std::uint32_t, std::uint32_t>;
-class tiles_source; // fwd decl
 
 } // namespace mapnik
 
@@ -76,6 +76,7 @@ class tiles_datasource : public mapnik::datasource
     mapnik::box2d<double> extent_;
     std::int64_t minzoom_ = 0;
     std::int64_t maxzoom_ = 14;
+    mapnik::compression_type tile_compression_ = mapnik::compression_type::NONE;
     std::size_t max_threads_ = 4;
     std::optional<std::string> layer_name_;
     mapnik::layer_descriptor desc_;

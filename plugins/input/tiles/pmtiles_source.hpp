@@ -37,8 +37,6 @@
 
 namespace mapnik {
 
-enum class compression_type : std::uint8_t { UNKNOWN = 0x0, NONE = 0x1, GZIP = 0x2, BROTLI = 0x3, ZSTD = 0x4 };
-
 enum class tile_type : std::uint8_t { UNKNOWN = 0x00, MVT = 0x01, PNG = 0x02, JPEG = 0x03, WEBP = 0x04, AVIF = 0x05 };
 
 struct entryv3
@@ -456,7 +454,7 @@ class pmtiles_source : public tiles_source,
     std::uint8_t maxzoom_ = 14;
     mapnik::box2d<double> extent_;
     compression_type internal_compression_;
-    compression_type tile_compression_;
+    compression_type tile_compression_ = compression_type::UNKNOWN;
     tile_type type_;
 
     std::pair<std::uint64_t, std::uint32_t> get_tile_position(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
@@ -512,6 +510,8 @@ class pmtiles_source : public tiles_source,
     std::uint8_t maxzoom() const { return maxzoom_; }
 
     mapnik::box2d<double> const& extent() const { return extent_; }
+
+    compression_type tile_compression() const { return tile_compression_; }
 
     std::string get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
     {

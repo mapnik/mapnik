@@ -28,6 +28,8 @@
 
 namespace mapnik {
 
+enum class compression_type : std::uint8_t { UNKNOWN = 0x0, NONE = 0x1, GZIP = 0x2, BROTLI = 0x3, ZSTD = 0x4 };
+
 class tiles_source
 {
   public:
@@ -35,6 +37,7 @@ class tiles_source
     virtual std::uint8_t maxzoom() const = 0;
     virtual mapnik::box2d<double> const& extent() const = 0;
     virtual boost::json::value metadata() const = 0;
+    virtual compression_type tile_compression() const = 0;
     virtual std::string get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y) const = 0;
     virtual std::string
       get_tile_raw(std::uint8_t z, std::uint32_t x, std::uint32_t y) const = 0; // don't decompress, return raw data.
