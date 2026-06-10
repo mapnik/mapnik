@@ -28,13 +28,18 @@
 #include <mapnik/text/text_line.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/text/font_feature_settings.hpp>
+#include <mapnik/text/clusters_container.hpp>
+#include <mapnik/text/font_coverage.hpp>
 #include <mapnik/text/itemizer.hpp>
 #include <mapnik/safe_cast.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
 // stl
+#include <cassert>
+#include <algorithm>
 #include <list>
-#include <type_traits>
+#include <limits>
+#include <optional>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -254,53 +259,48 @@ struct harfbuzz_shaper
             font_feature_settings const& ff_settings = text_item.format_->ff_settings;
             int ff_count = safe_cast<int>(ff_settings.count());
 
-            // rendering information for a single glyph
+            auto script = detail::_icu_script_to_script(text_item.script);
+            bool rtl = text_item.dir == UBIDI_RTL;
+            hb_direction_t direction = rtl ? HB_DIRECTION_RTL : HB_DIRECTION_LTR;
+            hb_language_t hb_lang;
+            bool lang_from_script = false;
+            if (lang)
+            {
+                hb_lang = hb_language_from_string(lang->c_str(), -1);
+            }
+            else
+            {
+                hb_lang = detail::script_to_language(script);
+                lang_from_script = true;
+            }
+
+            // this table is filled with information for rendering each glyph cluster, so that
+            // several font faces can be used in a single text_item
+            std::size_t pos = 0;
             struct glyph_face_info
             {
                 face_ptr face;
                 hb_glyph_info_t glyph;
                 hb_glyph_position_t position;
             };
-
-            // this table is filled with information for rendering each glyph, so that
-            // several font faces can be used in a single text_item
-            std::size_t pos = 0;
-            std::vector<std::vector<glyph_face_info>> glyphinfos;
-
-            glyphinfos.resize(text.length());
+            using glyph_cluster = std::vector<glyph_face_info>;
+            detail::font_coverage coverage(text_item.start, text_item.end);
+            std::vector<glyph_cluster> glyphinfos;
+            glyphinfos.reserve(length);
             for (auto const& face : *face_set)
             {
-                ++pos;
-                hb_buffer_clear_contents(buffer.get());
-                hb_buffer_add_utf16(buffer.get(),
-                                    detail::uchar_to_utf16(text.getBuffer()),
-                                    text.length(),
-                                    text_item.start,
-                                    static_cast<int>(text_item.end - text_item.start));
-                hb_buffer_set_direction(buffer.get(),
-                                        (text_item.dir == UBIDI_RTL) ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
-
-                hb_font_t* font(hb_ft_font_create(face->get_face(), nullptr));
-                auto script = detail::_icu_script_to_script(text_item.script);
-                hb_language_t hb_lang;
-                if (lang)
+                if (lang_from_script)
                 {
-                    hb_lang = hb_language_from_string(lang->c_str(), -1);
-                }
-                else
-                {
-                    hb_lang = detail::script_to_language(script);
                     MAPNIK_LOG_DEBUG(harfbuzz_shaper)
                       << "RUN:[" << text_item.start << "," << text_item.end << "]"
                       << " LANGUAGE:" << ((hb_lang != nullptr) ? hb_language_to_string(hb_lang) : "unknown")
                       << " SCRIPT:" << script << "(" << text_item.script << ") "
                       << uscript_getShortName(text_item.script) << " FONT:" << face->family_name();
                 }
-                if (hb_lang != HB_LANGUAGE_INVALID)
-                {
-                    hb_buffer_set_language(buffer.get(), hb_lang); // set most common language for the run based script
-                }
-                hb_buffer_set_script(buffer.get(), script);
+
+                ++pos;
+                bool last_face = pos == num_faces;
+                hb_font_t* font(hb_ft_font_create(face->get_face(), nullptr));
 
                 // https://github.com/mapnik/test-data-visual/pull/25
 #if HB_VERSION_MAJOR > 0
@@ -308,95 +308,160 @@ struct harfbuzz_shaper
                 hb_ft_font_set_load_flags(font, FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING);
 #endif
 #endif
-                hb_shape(font, buffer.get(), ff_settings.get_features(), ff_count);
-                hb_font_destroy(font);
 
-                unsigned num_glyphs = hb_buffer_get_length(buffer.get());
-                hb_glyph_info_t* glyphs = hb_buffer_get_glyph_infos(buffer.get(), &num_glyphs);
-                hb_glyph_position_t* positions = hb_buffer_get_glyph_positions(buffer.get(), &num_glyphs);
-
-                unsigned cluster = 0;
-                bool in_cluster = false;
-                std::vector<unsigned> clusters;
-                std::vector<std::vector<glyph_face_info>> current_clusters;
-                current_clusters.resize(text.length());
-
-                for (unsigned i = 0; i < num_glyphs; ++i)
+                struct shaped_cluster
                 {
-                    if (i == 0)
-                    {
-                        cluster = glyphs[0].cluster;
-                        clusters.push_back(cluster);
-                    }
-                    if (cluster != glyphs[i].cluster)
-                    {
-                        cluster = glyphs[i].cluster;
-                        clusters.push_back(cluster);
-                        in_cluster = false;
-                    }
-                    else if (i != 0)
-                    {
-                        in_cluster = true;
-                    }
-                    if (glyphinfos.size() <= cluster)
-                    {
-                        glyphinfos.resize(cluster + 1);
-                    }
-                    current_clusters[cluster].push_back({face, glyphs[i], positions[i]});
-                }
-                for (unsigned cluster_id = 0; cluster_id < current_clusters.size(); ++cluster_id)
-                {
-                    auto const& cluster_glyphs = current_clusters[cluster_id];
+                    unsigned start;
+                    unsigned end;
+                    bool covered;
+                    glyph_cluster glyphs;
+                };
+                constexpr unsigned open_cluster_end = std::numeric_limits<unsigned>::max();
+                detail::clusters_container<shaped_cluster> clusters;
 
-                    if (cluster_glyphs.empty())
+                while (coverage.has_current_uncovered())
+                {
+                    auto const range = coverage.pop_current_uncovered_front();
+
+                    hb_buffer_clear_contents(buffer.get());
+                    hb_buffer_add_utf16(buffer.get(),
+                                        detail::uchar_to_utf16(text.getBuffer()),
+                                        text.length(),
+                                        range.start,
+                                        static_cast<int>(range.end - range.start));
+                    hb_buffer_set_direction(buffer.get(), direction);
+
+                    if (hb_lang != HB_LANGUAGE_INVALID)
+                    {
+                        hb_buffer_set_language(buffer.get(),
+                                               hb_lang); // set most common language for the run based script
+                    }
+                    hb_buffer_set_script(buffer.get(), script);
+
+                    hb_shape(font, buffer.get(), ff_settings.get_features(), ff_count);
+
+                    unsigned num_glyphs = hb_buffer_get_length(buffer.get());
+                    hb_glyph_info_t* glyphs = hb_buffer_get_glyph_infos(buffer.get(), &num_glyphs);
+                    hb_glyph_position_t* positions = hb_buffer_get_glyph_positions(buffer.get(), &num_glyphs);
+                    if (!num_glyphs)
+                    {
+                        coverage.push_uncovered(range.start, range.end);
                         continue;
-                    bool valid = true;
-                    for (auto const& info : cluster_glyphs)
+                    }
+
+                    clusters.reset(num_glyphs);
+                    assert(num_glyphs < open_cluster_end);
+
+                    // The fallback bookkeeping below relies on HarfBuzz cluster ids staying
+                    // tied to the original UTF-16 indices seeded by hb_buffer_add_utf16(...).
+                    // Distinct cluster values therefore identify the first code unit of each
+                    // shaped cluster within the full text_item range.
+                    //
+                    // We also assume HarfBuzz emits all glyphs for one cluster contiguously
+                    // and that cluster ids are monotonic in output order.
+                    //
+                    // LTR: glyph order matches text order, so cluster ids increase.
+                    // RTL: glyph order is reversed, but cluster ids still refer to the same
+                    // logical UTF-16 cells, so they decrease in output order.
+                    //
+                    // In both cases each distinct HarfBuzz cluster id marks the first UTF-16
+                    // code unit of a shaped cluster. For example, ids 0 -> 3 -> 6 describe
+                    // logical ranges [0,3), [3,6), and [6,range.end), regardless of whether
+                    // HarfBuzz reported them in LTR order (0, 3, 6) or RTL order (6, 3, 0).
+                    //
+                    if (!rtl)
                     {
-                        if (info.glyph.codepoint == 0)
+                        //   utf16 cells        | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+                        //   hb cluster ids     | 0 | 3 | 6 |
+                        //   buffer state       | [0,open) |
+                        //   see next id = 3      -> close back() with end = 3
+                        //   buffer state       | [0,3) | [3,open) |
+                        //   see next id = 6      -> close back() with end = 6
+                        //   buffer state       | [0,3) | [3,6) | [6,open) |
+                        //   loop ends           -> close the remaining open cluster with range.end
+                        //   final              | [0,3) | [3,6) | [6,8) |
+                        for (unsigned i = 0; i < num_glyphs; ++i)
                         {
-                            valid = false;
-                            break;
+                            auto const cluster_start = glyphs[i].cluster;
+                            bool const new_cluster = clusters.empty() || clusters.back().start != cluster_start;
+                            if (new_cluster)
+                            {
+                                if (!clusters.empty())
+                                    clusters.back().end = cluster_start;
+                                shaped_cluster cluster = {cluster_start, open_cluster_end, true, {}};
+                                clusters.push_back(std::move(cluster));
+                            }
+                            auto& cluster = clusters.back();
+                            cluster.covered = cluster.covered && glyphs[i].codepoint != 0;
+                            cluster.glyphs.push_back({face, glyphs[i], positions[i]});
+                        }
+                        if (!clusters.empty())
+                            clusters.back().end = range.end;
+                    }
+                    else
+                    {
+                        //   utf16 cells        | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+                        //   hb cluster ids     | 6 | 3 | 0 |
+                        //   buffer state       | [6,8) |
+                        //   see next id = 3      -> new earlier cluster ends at front().start = 6
+                        //   push_front([3,6))
+                        //   buffer state       | [3,6) | [6,8) |
+                        //   see next id = 0      -> new earlier cluster ends at front().start = 3
+                        //   push_front([0,3))
+                        //   buffer state       | [0,3) | [3,6) | [6,8) |
+                        //   loop ends           -> no cluster remains open
+                        //   final              | [0,3) | [3,6) | [6,8) |
+                        for (unsigned i = 0; i < num_glyphs; ++i)
+                        {
+                            auto const cluster_start = glyphs[i].cluster;
+                            bool const new_cluster = clusters.empty() || clusters.front().start != cluster_start;
+                            if (new_cluster)
+                            {
+                                unsigned cluster_end = range.end;
+                                if (!clusters.empty())
+                                    cluster_end = clusters.front().start;
+                                shaped_cluster cluster = {cluster_start, cluster_end, true, {}};
+                                clusters.push_front(std::move(cluster));
+                            }
+                            auto& cluster = clusters.front();
+                            cluster.covered = cluster.covered && glyphs[i].codepoint != 0;
+                            cluster.glyphs.push_back({face, glyphs[i], positions[i]});
                         }
                     }
-                    if (valid)
+                    coverage.reserve(clusters.size());
+                    for (auto& cluster : clusters)
                     {
-                        glyphinfos[cluster_id] = cluster_glyphs;
-                    }
-                    else if (glyphinfos[cluster_id].empty())
-                    {
-                        glyphinfos[cluster_id] = cluster_glyphs;
-                    }
-                }
-                bool all_set = true;
-                for (auto c_id : clusters)
-                {
-                    auto const& c = glyphinfos[c_id];
-                    if (c.empty() || c.front().glyph.codepoint == 0)
-                    {
-                        all_set = false;
-                        break;
+                        if (!cluster.covered && !last_face)
+                        {
+                            coverage.push_uncovered(cluster.start, cluster.end);
+                            continue;
+                        }
+
+                        glyphinfos.push_back(std::move(cluster.glyphs));
+                        coverage.cover(cluster.start, cluster.end, glyphinfos.size() - 1);
                     }
                 }
-                if (!all_set && (pos < num_faces))
+                hb_font_destroy(font);
+                if (!coverage.fully_covered() && !last_face)
                 {
+                    coverage.advance_uncovered_ranges();
                     // Try next font in fontset
                     continue;
                 }
+
                 double max_glyph_height = 0;
-                for (auto const& c_id : clusters)
+                for (auto glyphinfo_itr = coverage.covering_begin(rtl); glyphinfo_itr != coverage.covering_end(rtl);
+                     ++glyphinfo_itr)
                 {
-                    auto const& c = glyphinfos[c_id];
-                    for (auto const& info : c)
+                    auto const glyphinfo_index = *glyphinfo_itr;
+                    auto const& cluster = glyphinfos[glyphinfo_index];
+                    for (auto const& info : cluster)
                     {
                         auto const& gpos = info.position;
                         auto const& glyph = info.glyph;
                         unsigned char_index = glyph.cluster;
                         glyph_info g(glyph.codepoint, char_index, text_item.format_);
-                        if (info.glyph.codepoint != 0)
-                            g.face = info.face;
-                        else
-                            g.face = face;
+                        g.face = info.face;
                         if (g.face->glyph_dimensions(g))
                         {
                             g.scale_multiplier = g.face->get_face()->units_per_EM > 0

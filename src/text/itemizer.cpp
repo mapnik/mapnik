@@ -142,30 +142,7 @@ void text_itemizer::itemize_script()
     ScriptRun runs(text_.getBuffer(), text_.length());
     while (runs.next())
     {
-        UScriptCode code = runs.getScriptCode();
-        unsigned start = runs.getScriptStart();
-        unsigned end = runs.getScriptEnd();
-
-        unsigned current_pos = start;
-
-        while (current_pos < end)
-        {
-            UChar32 c = text_.char32At(current_pos);
-            unsigned next_pos = text_.moveIndex32(current_pos, 1);
-
-            UScriptCode usc = u_ispunct(c) ? USCRIPT_COMMON : code;
-
-            if (!script_runs_.empty() && script_runs_.back().data == usc && script_runs_.back().end == current_pos)
-            {
-                script_runs_.back().end = next_pos;
-            }
-            else
-            {
-                script_runs_.emplace_back(usc, current_pos, next_pos);
-            }
-
-            current_pos = next_pos;
-        }
+        script_runs_.emplace_back(runs.getScriptCode(), runs.getScriptStart(), runs.getScriptEnd());
     }
 }
 
