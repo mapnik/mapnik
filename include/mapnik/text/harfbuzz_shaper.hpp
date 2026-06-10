@@ -28,16 +28,18 @@
 #include <mapnik/text/text_line.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/text/font_feature_settings.hpp>
+#include <mapnik/text/clusters_container.hpp>
 #include <mapnik/text/font_coverage.hpp>
 #include <mapnik/text/itemizer.hpp>
 #include <mapnik/safe_cast.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
 // stl
+#include <cassert>
 #include <algorithm>
 #include <list>
 #include <limits>
-#include <type_traits>
+#include <optional>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -272,16 +274,21 @@ struct harfbuzz_shaper
                 lang_from_script = true;
             }
 
-
             // this table is filled with information for rendering each glyph cluster, so that
             // several font faces can be used in a single text_item
             std::size_t pos = 0;
-            using glyph_face_info = detail::glyph_face_info;
+            struct glyph_face_info
+            {
+                face_ptr face;
+                hb_glyph_info_t glyph;
+                hb_glyph_position_t position;
+            };
+            using glyph_cluster = std::vector<glyph_face_info>;
             detail::font_coverage coverage(text_item.start, text_item.end);
-            std::vector<std::vector<glyph_face_info>> glyphinfos;
+            std::vector<glyph_cluster> glyphinfos;
+            glyphinfos.reserve(length);
             for (auto const& face : *face_set)
             {
-
                 if (lang_from_script)
                 {
                     MAPNIK_LOG_DEBUG(harfbuzz_shaper)
@@ -307,9 +314,10 @@ struct harfbuzz_shaper
                     unsigned start;
                     unsigned end;
                     bool covered;
-                    std::vector<glyph_face_info> glyphs;
+                    glyph_cluster glyphs;
                 };
-                constexpr unsigned in_progress_cluster_end = std::numeric_limits<unsigned>::max();
+                constexpr unsigned open_cluster_end = std::numeric_limits<unsigned>::max();
+                detail::clusters_container<shaped_cluster> clusters;
 
                 while (coverage.has_current_uncovered())
                 {
@@ -325,7 +333,8 @@ struct harfbuzz_shaper
 
                     if (hb_lang != HB_LANGUAGE_INVALID)
                     {
-                        hb_buffer_set_language(buffer.get(), hb_lang); // set most common language for the run based script
+                        hb_buffer_set_language(buffer.get(),
+                                               hb_lang); // set most common language for the run based script
                     }
                     hb_buffer_set_script(buffer.get(), script);
 
@@ -340,7 +349,8 @@ struct harfbuzz_shaper
                         continue;
                     }
 
-                    std::deque<shaped_cluster> clusters;
+                    clusters.reset(num_glyphs);
+                    assert(num_glyphs < open_cluster_end);
 
                     // The fallback bookkeeping below relies on HarfBuzz cluster ids staying
                     // tied to the original UTF-16 indices seeded by hb_buffer_add_utf16(...).
@@ -355,71 +365,70 @@ struct harfbuzz_shaper
                     // logical UTF-16 cells, so they decrease in output order.
                     //
                     // In both cases each distinct HarfBuzz cluster id marks the first UTF-16
-                    // code unit of a shaped cluster, and the next distinct id closes the
-                    // previous half-open source range.
+                    // code unit of a shaped cluster. For example, ids 0 -> 3 -> 6 describe
+                    // logical ranges [0,3), [3,6), and [6,range.end), regardless of whether
+                    // HarfBuzz reported them in LTR order (0, 3, 6) or RTL order (6, 3, 0).
                     //
-                    // For example, ids 0 -> 3 -> 6 describe logical ranges [0,3), [3,6),
-                    // and [6,range.end), regardless of whether HarfBuzz reported them in
-                    // LTR order (0, 3, 6) or RTL order (6, 3, 0).
-                    //
-                    // The one cluster whose end is still unknown
-                    // keeps the temporary `in_progress_cluster_end` marker until the loop
-                    // finishes, then it is closed with range.end.
-                    //
-                    // Boundary population while walking shaped glyphs:
-                    //
-                    // LTR:
-                    //   utf16 cells        | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
-                    //   hb cluster ids     | 0 | 3 | 6 |
-                    //   deque state        | [0,open) |
-                    //   see next id = 3      -> close back() with end = 3
-                    //   deque state        | [0,3) | [3,open) |
-                    //   see next id = 6      -> close back() with end = 6
-                    //   deque state        | [0,3) | [3,6) | [6,open) |
-                    //   loop ends           -> close the remaining open cluster with range.end
-                    //   final              | [0,3) | [3,6) | [6,8) |
-                    //
-                    // RTL:
-                    //   utf16 cells        | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
-                    //   hb cluster ids     | 6 | 3 | 0 |
-                    //   deque state        | [6,open) |
-                    //   see next id = 3      -> new earlier cluster ends at front().start = 6
-                    //   push_front([3,6))
-                    //   deque state        | [3,6) | [6,open) |
-                    //   see next id = 0      -> new earlier cluster ends at front().start = 3
-                    //   push_front([0,3))
-                    //   deque state        | [0,3) | [3,6) | [6,open) |
-                    //   loop ends           -> close the remaining open cluster with range.end
-                    //   final              | [0,3) | [3,6) | [6,8) |
-                    for (unsigned i = 0; i < num_glyphs; ++i)
+                    if (!rtl)
                     {
-                        auto const cluster_start = glyphs[i].cluster;
-                        bool const new_cluster = clusters.empty() || (rtl ? clusters.front().start : clusters.back().start) != cluster_start;
-                        if (new_cluster)
+                        //   utf16 cells        | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+                        //   hb cluster ids     | 0 | 3 | 6 |
+                        //   buffer state       | [0,open) |
+                        //   see next id = 3      -> close back() with end = 3
+                        //   buffer state       | [0,3) | [3,open) |
+                        //   see next id = 6      -> close back() with end = 6
+                        //   buffer state       | [0,3) | [3,6) | [6,open) |
+                        //   loop ends           -> close the remaining open cluster with range.end
+                        //   final              | [0,3) | [3,6) | [6,8) |
+                        for (unsigned i = 0; i < num_glyphs; ++i)
                         {
-                            unsigned cluster_end = in_progress_cluster_end;
-                            if (!clusters.empty())
+                            auto const cluster_start = glyphs[i].cluster;
+                            bool const new_cluster = clusters.empty() || clusters.back().start != cluster_start;
+                            if (new_cluster)
                             {
-                                if (rtl)
-                                    cluster_end = clusters.front().start;
-                                else
+                                if (!clusters.empty())
                                     clusters.back().end = cluster_start;
-                            }
-                            shaped_cluster cluster = {cluster_start, cluster_end, true, {}};
-                            if (rtl)
-                                clusters.push_front(std::move(cluster));
-                            else
+                                shaped_cluster cluster = {cluster_start, open_cluster_end, true, {}};
                                 clusters.push_back(std::move(cluster));
+                            }
+                            auto& cluster = clusters.back();
+                            cluster.covered = cluster.covered && glyphs[i].codepoint != 0;
+                            cluster.glyphs.push_back({face, glyphs[i], positions[i]});
                         }
-                        auto& cluster = rtl ? clusters.front() : clusters.back();
-                        cluster.covered = cluster.covered && glyphs[i].codepoint != 0;
-                        cluster.glyphs.push_back({face, glyphs[i], positions[i]});
+                        if (!clusters.empty())
+                            clusters.back().end = range.end;
                     }
-                    if (!clusters.empty())
+                    else
                     {
-                        assert(clusters.back().end == in_progress_cluster_end);
-                        clusters.back().end = range.end;
+                        //   utf16 cells        | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+                        //   hb cluster ids     | 6 | 3 | 0 |
+                        //   buffer state       | [6,8) |
+                        //   see next id = 3      -> new earlier cluster ends at front().start = 6
+                        //   push_front([3,6))
+                        //   buffer state       | [3,6) | [6,8) |
+                        //   see next id = 0      -> new earlier cluster ends at front().start = 3
+                        //   push_front([0,3))
+                        //   buffer state       | [0,3) | [3,6) | [6,8) |
+                        //   loop ends           -> no cluster remains open
+                        //   final              | [0,3) | [3,6) | [6,8) |
+                        for (unsigned i = 0; i < num_glyphs; ++i)
+                        {
+                            auto const cluster_start = glyphs[i].cluster;
+                            bool const new_cluster = clusters.empty() || clusters.front().start != cluster_start;
+                            if (new_cluster)
+                            {
+                                unsigned cluster_end = range.end;
+                                if (!clusters.empty())
+                                    cluster_end = clusters.front().start;
+                                shaped_cluster cluster = {cluster_start, cluster_end, true, {}};
+                                clusters.push_front(std::move(cluster));
+                            }
+                            auto& cluster = clusters.front();
+                            cluster.covered = cluster.covered && glyphs[i].codepoint != 0;
+                            cluster.glyphs.push_back({face, glyphs[i], positions[i]});
+                        }
                     }
+                    coverage.reserve(clusters.size());
                     for (auto& cluster : clusters)
                     {
                         if (!cluster.covered && !last_face)
@@ -441,8 +450,7 @@ struct harfbuzz_shaper
                 }
 
                 double max_glyph_height = 0;
-                for (auto glyphinfo_itr = coverage.covering_begin(rtl);
-                     glyphinfo_itr != coverage.covering_end(rtl);
+                for (auto glyphinfo_itr = coverage.covering_begin(rtl); glyphinfo_itr != coverage.covering_end(rtl);
                      ++glyphinfo_itr)
                 {
                     auto const glyphinfo_index = *glyphinfo_itr;

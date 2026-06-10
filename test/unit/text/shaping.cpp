@@ -328,8 +328,7 @@ TEST_CASE("ligature shaping")
     {
         mapnik::font_feature_settings ff_settings;
         ff_settings.append(mapnik::font_feature_liga_off);
-        std::vector<std::pair<unsigned, unsigned>> expected =
-          {{80, 0}, {568, 1}, {71, 2}, {74, 3}, {68, 4}, {70, 5}};
+        std::vector<std::pair<unsigned, unsigned>> expected = {{80, 0}, {568, 1}, {71, 2}, {74, 3}, {68, 4}, {70, 5}};
         test_shaping(fontset, fm, expected, "office", ff_settings);
     }
 }
@@ -364,8 +363,8 @@ TEST_CASE("font fallback shaping")
 
     SECTION("sinhala cluster falls back past arabic font")
     {
-        auto fontset = make_fontset(
-          "sinhala-fallback", {"Noto Sans Regular", "XB Zar Regular", "Noto Sans Sinhala Subset Regular"});
+        auto fontset =
+          make_fontset("sinhala-fallback", {"Noto Sans Regular", "XB Zar Regular", "Noto Sans Sinhala Subset Regular"});
         test_shaping_face_spans(fontset,
                                 fm,
                                 from_u8string(u8"Hello ශ්‍රී ලංකා").c_str(),
@@ -395,11 +394,14 @@ TEST_CASE("font fallback shaping")
 
     SECTION("khmer stacked fallback interleaves accepted ranges")
     {
-        auto fontset = make_fontset(
-          "khmer-interleaved-fallback", {"Khmer Fallback Probe Regular", "Khmer Fallback Full Regular"});
+        auto fontset =
+          make_fontset("khmer-interleaved-fallback", {"Khmer Fallback Probe Regular", "Khmer Fallback Full Regular"});
         auto text = from_u8string(u8"បប្គប");
         test_shaping_face_spans(
-          fontset, fm, text.c_str(), {{0, 1, "Khmer Fallback Probe"}, {1, 3, "Khmer Fallback Full"}, {3, 5, "Khmer Fallback Probe"}});
+          fontset,
+          fm,
+          text.c_str(),
+          {{0, 1, "Khmer Fallback Probe"}, {1, 3, "Khmer Fallback Full"}, {3, 5, "Khmer Fallback Probe"}});
     }
 
     SECTION("khmer mark cluster falls back past partial coverage")
@@ -413,8 +415,8 @@ TEST_CASE("font fallback shaping")
     SECTION("myanmar kinzi cluster falls back past partial coverage")
     {
         // Derived from Myanmar kinzi-style clusters used in HarfBuzz shaping tests.
-        auto fontset = make_fontset(
-          "myanmar-stacked-fallback", {"Myanmar Fallback Probe Regular", "Myanmar Fallback Full Regular"});
+        auto fontset =
+          make_fontset("myanmar-stacked-fallback", {"Myanmar Fallback Probe Regular", "Myanmar Fallback Full Regular"});
         test_shaping_face_spans(fontset, fm, from_u8string(u8"င်္ခ").c_str(), {{0, 4, "Myanmar Fallback Full"}});
     }
 
@@ -430,11 +432,10 @@ TEST_CASE("font fallback shaping")
     SECTION("bus stop label keeps ligature cluster on regular face")
     {
         // Derived from the OSM Carto bus-stop label "Bénestroff − Centre".
-        auto fontset = make_fontset(
-          "benestroff-bus-stop-fallback",
-          {"Benestroff Sans Test Regular",
-           "Benestroff Symbols Test Symbols Regular",
-           "Benestroff Symbols Test Minus Regular"});
+        auto fontset = make_fontset("benestroff-bus-stop-fallback",
+                                    {"Benestroff Sans Test Regular",
+                                     "Benestroff Symbols Test Symbols Regular",
+                                     "Benestroff Symbols Test Minus Regular"});
         auto text = from_u8string(u8"Bénestroff − Centre");
         test_shaping_face_spans(fontset,
                                 fm,

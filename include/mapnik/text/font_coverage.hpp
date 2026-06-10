@@ -23,25 +23,15 @@
 #ifndef MAPNIK_TEXT_FONT_COVERAGE_HPP
 #define MAPNIK_TEXT_FONT_COVERAGE_HPP
 
-#include <mapnik/text/face.hpp>
-
 #include <harfbuzz/hb.h>
 
 #include <cassert>
-#include <deque>
 #include <limits>
 #include <utility>
 #include <vector>
 
 namespace mapnik {
 namespace detail {
-
-struct glyph_face_info
-{
-    face_ptr face;
-    hb_glyph_info_t glyph;
-    hb_glyph_position_t position;
-};
 
 struct font_coverage
 {
@@ -114,8 +104,7 @@ struct font_coverage
                     // Skip duplicate entries so iteration emits each contiguous covering
                     // glyph cluster exactly once. For example, [7, 7, x, 9, 9, 9, 12]
                     // yields 7, 9, 12 in forward order; `x` is the uncovered marker.
-                    if (next_coverage_offset_ > 1 &&
-                        owner_->coverage_[next_coverage_offset_ - 2] == covering_index)
+                    if (next_coverage_offset_ > 1 && owner_->coverage_[next_coverage_offset_ - 2] == covering_index)
                         continue;
                     current_covering_index_ = covering_index;
                     return;
@@ -159,21 +148,24 @@ struct font_coverage
             current_uncovered_ranges_.push_back({start_, end_});
     }
 
-    bool fully_covered() const { return current_uncovered_ranges_.empty() && next_uncovered_ranges_.empty(); }
+    bool fully_covered() const
+    {
+        return current_uncovered_offset_ >= current_uncovered_ranges_.size() && next_uncovered_ranges_.empty();
+    }
 
-    bool has_current_uncovered() const { return !current_uncovered_ranges_.empty(); }
+    bool has_current_uncovered() const { return current_uncovered_offset_ < current_uncovered_ranges_.size(); }
 
     range pop_current_uncovered_front()
     {
-        assert(!current_uncovered_ranges_.empty());
-        auto range = current_uncovered_ranges_.front();
-        current_uncovered_ranges_.pop_front();
+        assert(has_current_uncovered());
+        auto range = current_uncovered_ranges_[current_uncovered_offset_++];
         return range;
     }
 
     void advance_uncovered_ranges()
     {
         current_uncovered_ranges_.swap(next_uncovered_ranges_);
+        current_uncovered_offset_ = 0;
         next_uncovered_ranges_.clear();
     }
 
@@ -204,6 +196,8 @@ struct font_coverage
         next_uncovered_ranges_.push_back(new_range);
     }
 
+    void reserve(std::size_t uncovered_range_count) { next_uncovered_ranges_.reserve(uncovered_range_count); }
+
     void cover(unsigned start, unsigned end, std::size_t glyphinfo_index)
     {
         if (start >= end)
@@ -224,8 +218,9 @@ struct font_coverage
   private:
     unsigned start_;
     unsigned end_;
-    std::deque<range> current_uncovered_ranges_;
-    std::deque<range> next_uncovered_ranges_;
+    std::vector<range> current_uncovered_ranges_;
+    std::size_t current_uncovered_offset_ = 0;
+    std::vector<range> next_uncovered_ranges_;
     std::vector<std::size_t> coverage_;
 };
 
