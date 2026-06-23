@@ -209,6 +209,7 @@ void tiles_datasource::init(mapnik::parameters const& params)
         minzoom_ = source_ptr_->minzoom();
         maxzoom_ = source_ptr_->maxzoom();
         extent_ = source_ptr_->extent();
+        tile_compression_ = source_ptr_->tile_compression();
         auto metadata = source_ptr_->metadata();
         init_metadata(metadata);
     }
@@ -351,7 +352,8 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
                                                              *layer_name_,
                                                              tiles_cache,
                                                              max_threads_,
-                                                             datasource_hash);
+                                                             datasource_hash,
+                                                             tile_compression_);
         }
         else
         {
@@ -408,7 +410,8 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
                                                          *layer_name_,
                                                          tile_cache(),
                                                          max_threads_,
-                                                         datasource_hash);
+                                                         datasource_hash,
+                                                         tile_compression_);
     }
     return mapnik::featureset_ptr();
 }
