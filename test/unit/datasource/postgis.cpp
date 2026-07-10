@@ -337,8 +337,7 @@ TEST_CASE("postgis")
             auto feature = featureset->next();
             CHECKED_IF(feature != nullptr)
             {
-                CHECK(feature->get("buffered").to_string() ==
-                      "POLYGON((-10 -10,-10 110,110 110,110 -10,-10 -10))");
+                CHECK(feature->get("buffered").to_string() == "POLYGON((-10 -10,-10 110,110 110,110 -10,-10 -10))");
                 CHECK(feature->get("unbuffered").to_string() == "POLYGON((0 0,0 100,100 100,100 0,0 0))");
             }
         }
