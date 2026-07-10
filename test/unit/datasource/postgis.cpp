@@ -312,6 +312,37 @@ TEST_CASE("postgis")
             REQUIRE(ext.maxy() == 4);
         }
 
+        SECTION("Postgis !unbuffered_bbox! yields the pre-buffer extent")
+        {
+            mapnik::parameters params(base_params);
+            // !bbox! expands to the buffered render extent; !unbuffered_bbox!
+            // expands to the extent before Mapnik's buffer-size padding -- i.e.
+            // the exact (meta)tile boundary. Expose both as WKT to compare.
+            params["table"] = "(SELECT gid, geom,"
+                              " ST_AsText(!bbox!) as buffered,"
+                              " ST_AsText(!unbuffered_bbox!) as unbuffered"
+                              " FROM public.test LIMIT 1) as data";
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(ds != nullptr);
+
+            // Mimic a layer rendered with a non-zero buffer-size: the query's
+            // buffered bbox is larger than its unbuffered bbox.
+            mapnik::box2d<double> unbuffered(0, 0, 100, 100);
+            mapnik::box2d<double> buffered(-10, -10, 110, 110);
+            mapnik::query qry(buffered, mapnik::query::resolution_type(1.0, 1.0), 1.0, unbuffered);
+            qry.add_property_name("buffered");
+            qry.add_property_name("unbuffered");
+
+            auto featureset = ds->features(qry);
+            auto feature = featureset->next();
+            CHECKED_IF(feature != nullptr)
+            {
+                CHECK(feature->get("buffered").to_string() ==
+                      "POLYGON((-10 -10,-10 110,110 110,110 -10,-10 -10))");
+                CHECK(feature->get("unbuffered").to_string() == "POLYGON((0 0,0 100,100 100,100 0,0 0))");
+            }
+        }
+
         SECTION("Postgis substitutes numeric !tokens! always with decimal point")
         {
             mapnik::parameters params(base_params);
