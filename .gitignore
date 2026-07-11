@@ -63,3 +63,9 @@ build
 .vs
 
 CMakeUserPresets.json
+
+# editor backup file patterns
+*~
+.*.swp
+\#*#
+.\#*
