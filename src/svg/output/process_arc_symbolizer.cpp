@@ -34,6 +34,7 @@
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/proj_transform.hpp>
+#include <mapnik/renderer_common/arc_symbolizer_properties.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/math.hpp>
 #include <mapnik/util/noncopyable.hpp>
@@ -97,34 +98,20 @@ struct svg_arc_renderer : util::noncopyable
     svg_arc_renderer(OutputIterator& out,
                      view_transform const& tr,
                      proj_transform const& prj_trans,
-                     double radius,
-                     double start_angle,
-                     double end_angle,
-                     bool has_fill,
+                     arc_symbolizer_properties const& props,
                      svg::path_output_attributes const& fill_attributes,
-                     bool has_arc_stroke,
                      svg::path_output_attributes const& arc_attributes,
-                     bool has_radius_stroke,
                      svg::path_output_attributes const& radius_attributes)
         : out_(out),
           tr_(tr),
           prj_trans_(prj_trans),
-          radius_(radius),
-          has_fill_(has_fill),
+          props_(props),
           fill_attributes_(fill_attributes),
-          has_arc_stroke_(has_arc_stroke),
           arc_attributes_(arc_attributes),
-          has_radius_stroke_(has_radius_stroke),
           radius_attributes_(radius_attributes),
           emitted_(false)
     {
-        // Sweep angles in radians, clockwise from north, wrap-around handled
-        // (e.g. 350 -> 10 degrees). Equal angles mean a full circle, as
-        // charted for all-round lights.
-        double a0 = util::radians(start_angle);
-        double a1 = util::radians(end_angle);
-        if (a1 <= a0)
-            a1 += util::tau;
+        auto [a0, a1] = props_.sweep();
 
         // All per-vertex geometry is the centre point plus fixed offsets;
         // precompute the offsets once. The sweep is split into sub-arcs of at
@@ -139,7 +126,7 @@ struct svg_arc_renderer : util::noncopyable
         {
             arc_offsets_.push_back(arc_offset(a0 + span * (static_cast<double>(i) / segs)));
         }
-        util::to_string(radius_str_, radius_);
+        util::to_string(radius_str_, props_.radius);
     }
 
     template<typename Adapter>
@@ -163,7 +150,10 @@ struct svg_arc_renderer : util::noncopyable
   private:
     // Offset of the point on the arc at angle a (bearing clockwise from
     // north, screen space with y pointing down) relative to the centre.
-    std::pair<double, double> arc_offset(double a) const { return {radius_ * std::sin(a), -radius_ * std::cos(a)}; }
+    std::pair<double, double> arc_offset(double a) const
+    {
+        return {props_.radius * std::sin(a), -props_.radius * std::cos(a)};
+    }
 
     // The curved part of the arc as elliptical-arc ("A") commands, assuming
     // the current point is already at the arc start. sweep-flag=1 matches our
@@ -196,11 +186,11 @@ struct svg_arc_renderer : util::noncopyable
 
     void render_one(double cx, double cy)
     {
-        if (radius_ <= 0.0)
+        if (props_.radius <= 0.0)
             return;
 
         // Closed pie wedge (center -> arc start, arc, arc end -> center), used for fill.
-        if (has_fill_)
+        if (props_.has_fill)
         {
             std::string d = "M ";
             append_coord(d, cx, cy);
@@ -212,7 +202,7 @@ struct svg_arc_renderer : util::noncopyable
         }
 
         // The two radius spokes from the center to the arc endpoints.
-        if (has_radius_stroke_)
+        if (props_.has_radius_stroke)
         {
             auto const& end_offset = arc_offsets_.back();
             std::string d = "M ";
@@ -227,7 +217,7 @@ struct svg_arc_renderer : util::noncopyable
         }
 
         // The curved arc line.
-        if (has_arc_stroke_)
+        if (props_.has_arc_stroke)
         {
             std::string d = "M ";
             append_coord(d, cx + start_offset_.first, cy + start_offset_.second);
@@ -239,12 +229,9 @@ struct svg_arc_renderer : util::noncopyable
     OutputIterator& out_;
     view_transform const& tr_;
     proj_transform const& prj_trans_;
-    double radius_;
-    bool has_fill_;
+    arc_symbolizer_properties const& props_;
     svg::path_output_attributes fill_attributes_;
-    bool has_arc_stroke_;
     svg::path_output_attributes arc_attributes_;
-    bool has_radius_stroke_;
     svg::path_output_attributes radius_attributes_;
     std::pair<double, double> start_offset_;
     std::vector<std::pair<double, double>> arc_offsets_;
@@ -257,70 +244,24 @@ struct svg_arc_renderer : util::noncopyable
 template<typename T>
 void svg_renderer<T>::process(arc_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans)
 {
-    double const radius = get<double>(sym, keys::radius, feature, common_.vars_, 0.0) * common_.scale_factor_;
-    double const start_angle = get<double>(sym, keys::start_angle, feature, common_.vars_, 0.0);
-    double const end_angle = get<double>(sym, keys::end_angle, feature, common_.vars_, 360.0);
-
-    bool const has_fill = has_key(sym, keys::fill);
-    color const fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128, 128, 128));
-    double const fill_opacity = get<double>(sym, keys::fill_opacity, feature, common_.vars_, 1.0);
-
-    bool const has_stroke = has_key(sym, keys::stroke);
-    color const stroke = get<mapnik::color>(sym, keys::stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
-    double const stroke_width_raw = get<double>(sym, keys::stroke_width, feature, common_.vars_, 0.0);
-    double const stroke_width = stroke_width_raw * common_.scale_factor_;
-    double const stroke_opacity = get<double>(sym, keys::stroke_opacity, feature, common_.vars_, 1.0);
-
-    bool const has_arc_stroke = has_key(sym, keys::arc_stroke) || has_stroke;
-    color const arc_stroke = has_key(sym, keys::arc_stroke)
-                           ? get<mapnik::color>(sym, keys::arc_stroke, feature, common_.vars_, mapnik::color(0, 0, 0))
-                           : stroke;
-    double const arc_stroke_width_raw = has_key(sym, keys::arc_stroke_width)
-                           ? get<double>(sym, keys::arc_stroke_width, feature, common_.vars_, 0.0)
-                           : stroke_width_raw;
-    double const arc_stroke_width = arc_stroke_width_raw * common_.scale_factor_;
-    double const arc_stroke_opacity = has_key(sym, keys::arc_stroke_opacity)
-                                    ? get<double>(sym, keys::arc_stroke_opacity, feature, common_.vars_, 1.0)
-                                    : stroke_opacity;
-
-    bool const has_radius_stroke = has_key(sym, keys::radius_stroke) || has_stroke;
-    color const radius_stroke = has_key(sym, keys::radius_stroke)
-                              ? get<mapnik::color>(sym, keys::radius_stroke, feature, common_.vars_, mapnik::color(0, 0, 0))
-                              : stroke;
-    double const radius_stroke_width_raw = has_key(sym, keys::radius_stroke_width)
-                                         ? get<double>(sym, keys::radius_stroke_width, feature, common_.vars_, 0.0)
-                                         : stroke_width_raw;
-    double const radius_stroke_width = radius_stroke_width_raw * common_.scale_factor_;
-    double const radius_stroke_opacity = has_key(sym, keys::radius_stroke_opacity)
-                                       ? get<double>(sym, keys::radius_stroke_opacity, feature, common_.vars_, 1.0)
-                                       : stroke_opacity;
+    arc_symbolizer_properties const props(sym, feature, common_.vars_, common_.scale_factor_);
 
     svg::path_output_attributes fill_attributes;
-    fill_attributes.set_fill_color(detail::opaque(fill));
-    fill_attributes.set_fill_opacity(detail::combined_opacity(fill, fill_opacity));
+    fill_attributes.set_fill_color(detail::opaque(props.fill));
+    fill_attributes.set_fill_opacity(detail::combined_opacity(props.fill, props.fill_opacity));
 
     svg::path_output_attributes arc_attributes;
-    arc_attributes.set_stroke_color(detail::opaque(arc_stroke));
-    arc_attributes.set_stroke_opacity(detail::combined_opacity(arc_stroke, arc_stroke_opacity));
-    arc_attributes.set_stroke_width(arc_stroke_width);
+    arc_attributes.set_stroke_color(detail::opaque(props.arc_stroke));
+    arc_attributes.set_stroke_opacity(detail::combined_opacity(props.arc_stroke, props.arc_stroke_opacity));
+    arc_attributes.set_stroke_width(props.arc_stroke_width);
 
     svg::path_output_attributes radius_attributes;
-    radius_attributes.set_stroke_color(detail::opaque(radius_stroke));
-    radius_attributes.set_stroke_opacity(detail::combined_opacity(radius_stroke, radius_stroke_opacity));
-    radius_attributes.set_stroke_width(radius_stroke_width);
+    radius_attributes.set_stroke_color(detail::opaque(props.radius_stroke));
+    radius_attributes.set_stroke_opacity(detail::combined_opacity(props.radius_stroke, props.radius_stroke_opacity));
+    radius_attributes.set_stroke_width(props.radius_stroke_width);
 
-    detail::svg_arc_renderer<T> apply(output_iterator_,
-                                      common_.t_,
-                                      prj_trans,
-                                      radius,
-                                      start_angle,
-                                      end_angle,
-                                      has_fill,
-                                      fill_attributes,
-                                      has_arc_stroke,
-                                      arc_attributes,
-                                      has_radius_stroke,
-                                      radius_attributes);
+    detail::svg_arc_renderer<T>
+      apply(output_iterator_, common_.t_, prj_trans, props, fill_attributes, arc_attributes, radius_attributes);
     mapnik::util::apply_visitor(geometry::vertex_processor<detail::svg_arc_renderer<T>>(apply), feature.get_geometry());
     if (apply.emitted())
     {

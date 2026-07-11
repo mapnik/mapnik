@@ -1,0 +1,132 @@
+/*****************************************************************************
+ *
+ * This file is part of Mapnik (c++ mapping toolkit)
+ *
+ * Copyright (C) 2025 Artem Pavlenko
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *****************************************************************************/
+
+#ifndef MAPNIK_RENDERER_COMMON_ARC_SYMBOLIZER_PROPERTIES_HPP
+#define MAPNIK_RENDERER_COMMON_ARC_SYMBOLIZER_PROPERTIES_HPP
+
+#include <mapnik/color.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/symbolizer.hpp>
+#include <mapnik/symbolizer_keys.hpp>
+#include <mapnik/util/math.hpp>
+
+#include <utility>
+
+namespace mapnik {
+
+// Style attributes of an arc_symbolizer, evaluated once per feature and
+// shared by the agg, cairo and svg backend implementations so the fallback
+// rules stay identical across renderers.
+//
+// The arc-stroke-* and radius-stroke-* attributes fall back to the general
+// stroke-* attributes, so a plain stroke styles both the curved arc line and
+// the radius spokes while either group can be overridden individually. The
+// has_* flags tell whether the respective part should be drawn at all.
+//
+// Widths and the radius are already multiplied by the renderer's scale factor.
+struct arc_symbolizer_properties
+{
+    arc_symbolizer_properties(arc_symbolizer const& sym,
+                              feature_impl const& feature,
+                              attributes const& vars,
+                              double scale_factor)
+    {
+        radius = get<double>(sym, keys::radius, feature, vars, 0.0) * scale_factor;
+        start_angle = get<double>(sym, keys::start_angle, feature, vars, 0.0);
+        end_angle = get<double>(sym, keys::end_angle, feature, vars, 360.0);
+
+        // fill attributes
+        has_fill = has_key(sym, keys::fill);
+        fill = get<mapnik::color>(sym, keys::fill, feature, vars, mapnik::color(128, 128, 128));
+        fill_opacity = get<double>(sym, keys::fill_opacity, feature, vars, 1.0);
+
+        // default stroke attributes
+        has_stroke = has_key(sym, keys::stroke);
+        stroke = get<mapnik::color>(sym, keys::stroke, feature, vars, mapnik::color(0, 0, 0));
+        double const stroke_width_raw = get<double>(sym, keys::stroke_width, feature, vars, 1.0);
+        stroke_width = stroke_width_raw * scale_factor;
+        stroke_opacity = get<double>(sym, keys::stroke_opacity, feature, vars, 1.0);
+
+        // arc stroke attributes -- using default stroke attributes as fallback
+        has_arc_stroke = has_key(sym, keys::arc_stroke) || has_stroke;
+        arc_stroke = has_key(sym, keys::arc_stroke)
+                       ? get<mapnik::color>(sym, keys::arc_stroke, feature, vars, mapnik::color(0, 0, 0))
+                       : stroke;
+        arc_stroke_width = has_key(sym, keys::arc_stroke_width)
+                             ? get<double>(sym, keys::arc_stroke_width, feature, vars, 1.0) * scale_factor
+                             : stroke_width;
+        arc_stroke_opacity = has_key(sym, keys::arc_stroke_opacity)
+                               ? get<double>(sym, keys::arc_stroke_opacity, feature, vars, 1.0)
+                               : stroke_opacity;
+
+        // radius spoke stroke attributes -- using default stroke attributes as fallback
+        has_radius_stroke = has_key(sym, keys::radius_stroke) || has_stroke;
+        radius_stroke = has_key(sym, keys::radius_stroke)
+                          ? get<mapnik::color>(sym, keys::radius_stroke, feature, vars, mapnik::color(0, 0, 0))
+                          : stroke;
+        radius_stroke_width = has_key(sym, keys::radius_stroke_width)
+                                ? get<double>(sym, keys::radius_stroke_width, feature, vars, 1.0) * scale_factor
+                                : stroke_width;
+        radius_stroke_opacity = has_key(sym, keys::radius_stroke_opacity)
+                                  ? get<double>(sym, keys::radius_stroke_opacity, feature, vars, 1.0)
+                                  : stroke_opacity;
+    }
+
+    // Sweep angles in radians, clockwise from north, with wrap-around handled
+    // (e.g. 350 -> 10 degrees). Equal angles mean a full circle, as charted
+    // for all-round lights. Returns {a0, a1} with a1 > a0.
+    std::pair<double, double> sweep() const
+    {
+        double a0 = util::radians(start_angle);
+        double a1 = util::radians(end_angle);
+        if (a1 <= a0)
+            a1 += util::tau;
+        return {a0, a1};
+    }
+
+    double radius;
+    double start_angle;
+    double end_angle;
+
+    bool has_fill;
+    color fill;
+    double fill_opacity;
+
+    bool has_stroke;
+    color stroke;
+    double stroke_width;
+    double stroke_opacity;
+
+    bool has_arc_stroke;
+    color arc_stroke;
+    double arc_stroke_width;
+    double arc_stroke_opacity;
+
+    bool has_radius_stroke;
+    color radius_stroke;
+    double radius_stroke_width;
+    double radius_stroke_opacity;
+};
+
+} // namespace mapnik
+
+#endif // MAPNIK_RENDERER_COMMON_ARC_SYMBOLIZER_PROPERTIES_HPP
