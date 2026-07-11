@@ -138,13 +138,21 @@ struct render_arc_symbolizer
             context_.fill();
         }
 
-        // The curved arc line is always drawn solid.
-        if (has_stroke_)
+        // Draw the radius spokes
+        if (has_radius_stroke_)
+        {
+            build_radius_lines(cx, cy);
+            context_.set_line_width(radius_stroke_width_);
+            context_.set_color(radius_stroke_, radius_stroke_opacity_);
+            context_.stroke();
+        }
+
+        // Draw the curved arc line
+        if (has_arc_stroke_)
         {
             append_arc(cx, cy);
-            build_radius_lines(cx, cy);
-            context_.set_line_width(stroke_width_);
-            context_.set_color(stroke_, stroke_opacity_);
+            context_.set_line_width(arc_stroke_width_);
+            context_.set_color(arc_stroke_, arc_stroke_opacity_);
             context_.stroke();
         }
     }
@@ -187,27 +195,43 @@ void cairo_renderer<T>::process(arc_symbolizer const& sym,
     double const start_angle = get<double>(sym, keys::start_angle, feature, common_.vars_, 0.0);
     double const end_angle = get<double>(sym, keys::end_angle, feature, common_.vars_, 360.0);
 
+    // fill attributes
     bool const has_fill = has_key(sym, keys::fill);
     color const fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128, 128, 128));
     double const fill_opacity = get<double>(sym, keys::fill_opacity, feature, common_.vars_, 1.0);
 
+    // default stroke attributes
     bool const has_stroke = has_key(sym, keys::stroke);
     color const stroke = get<mapnik::color>(sym, keys::stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
     double const stroke_width_raw = get<double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
     double const stroke_width = stroke_width_raw * common_.scale_factor_;
     double const stroke_opacity = get<double>(sym, keys::stroke_opacity, feature, common_.vars_, 1.0);
 
-    bool const has_arc_stroke = has_key(sym, keys::arc_stroke);
-    color const arc_stroke = get<mapnik::color>(sym, keys::arc_stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
-    double const arc_stroke_width_raw = get<double>(sym, keys::arc_stroke_width, feature, common_.vars_, 1.0);
-    double const arc_stroke_width = stroke_width_raw * common_.scale_factor_;
-    double const arc_stroke_opacity = get<double>(sym, keys::arc_stroke_opacity, feature, common_.vars_, 1.0);
+    // arc stroke attributes -- using default stroke attributes as fallback
+    bool const has_arc_stroke = has_key(sym, keys::arc_stroke) || has_stroke;
+    color const arc_stroke = has_key(sym, keys::arc_stroke)
+                           ? get<mapnik::color>(sym, keys::arc_stroke, feature, common_.vars_, mapnik::color(0, 0, 0))
+                           : stroke;
+    double const arc_stroke_width_raw = has_key(sym, keys::arc_stroke_width)
+                           ? get<double>(sym, keys::arc_stroke_width, feature, common_.vars_, 1.0)
+                           : stroke_width_raw;
+    double const arc_stroke_width = arc_stroke_width_raw * common_.scale_factor_;
+    double const arc_stroke_opacity = has_key(sym, keys::arc_stroke_opacity)
+                                    ? get<double>(sym, keys::arc_stroke_opacity, feature, common_.vars_, 1.0)
+                                    : stroke_opacity;
 
-    bool const has_radius_stroke = has_key(sym, keys::radius_stroke);
-    color const radius_stroke = get<mapnik::color>(sym, keys::radius_stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
-    double const radius_stroke_width_raw = get<double>(sym, keys::radius_stroke_width, feature, common_.vars_, 1.0);
-    double const radius_stroke_width = stroke_width_raw * common_.scale_factor_;
-    double const radius_stroke_opacity = get<double>(sym, keys::radius_stroke_opacity, feature, common_.vars_, 1.0);
+    // radius stroke attributes -- using default stroke attributes as fallback
+    bool const has_radius_stroke = has_key(sym, keys::radius_stroke) || has_stroke;
+    color const radius_stroke = has_key(sym, keys::radius_stroke)
+                              ? get<mapnik::color>(sym, keys::radius_stroke, feature, common_.vars_, mapnik::color(0, 0, 0))
+                              : stroke;
+    double const radius_stroke_width_raw = has_key(sym, keys::radius_stroke_width)
+                           ? get<double>(sym, keys::radius_stroke_width, feature, common_.vars_, 1.0)
+                           : stroke_width_raw;
+    double const radius_stroke_width = radius_stroke_width_raw * common_.scale_factor_;
+    double const radius_stroke_opacity = has_key(sym, keys::radius_stroke_opacity)
+                                       ? get<double>(sym, keys::radius_stroke_opacity, feature, common_.vars_, 1.0)
+                                       : stroke_opacity;
 
     cairo_save_restore guard(context_);
 
