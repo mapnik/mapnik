@@ -272,6 +272,12 @@ void cairo_context::curve_to(double ct1_x, double ct1_y, double ct2_x, double ct
     check_object_status_and_throw_exception(*this);
 }
 
+void cairo_context::arc(double xc, double yc, double radius, double angle1, double angle2)
+{
+    cairo_arc(cairo_.get(), xc, yc, radius, angle1, angle2);
+    check_object_status_and_throw_exception(*this);
+}
+
 void cairo_context::close_path()
 {
     cairo_close_path(cairo_.get());

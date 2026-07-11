@@ -360,6 +360,7 @@ if env['HAS_CAIRO']:
     cairo/process_point_symbolizer.cpp
     cairo/process_raster_symbolizer.cpp
     cairo/process_building_symbolizer.cpp
+    cairo/process_arc_symbolizer.cpp
     """)
 
 for cpp in enabled_imaging_libraries:

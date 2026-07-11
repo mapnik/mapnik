@@ -268,6 +268,7 @@ if(USE_CAIRO)
         cairo/cairo_context.cpp
         cairo/cairo_render_vector.cpp
         cairo/cairo_renderer.cpp
+        cairo/process_arc_symbolizer.cpp
         cairo/process_building_symbolizer.cpp
         cairo/process_debug_symbolizer.cpp
         cairo/process_group_symbolizer.cpp
