@@ -95,6 +95,7 @@ class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<Out
      */
     void process(line_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
     void process(polygon_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(arc_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
     // unimplemented
     void process(point_symbolizer const&, mapnik::feature_impl&, proj_transform const&) {}
     void process(line_pattern_symbolizer const&, mapnik::feature_impl&, proj_transform const&) {}
