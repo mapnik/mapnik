@@ -195,11 +195,17 @@ struct render_arc_symbolizer : util::noncopyable
             agg::render_scanlines(ras_, sl, ren_);
         }
 
-        if (has_stroke_)
-        {
+	if (has_radius_stroke_)
+	{
             agg::path_storage path;
-            build_wedge(path, cx, cy);
-	    stroke_and_render(path, sl, stroke_, stroke_width_);
+            build_radius_lines(path, cx, cy);
+	    stroke_and_render(path, sl, radius_stroke_, radius_stroke_width_);
+	}
+
+        if (has_arc_stroke_)
+        {
+            agg::arc a = make_arc(cx, cy);
+            stroke_and_render(a, sl, arc_stroke_, arc_stroke_width_);
         }
     }
 
@@ -246,27 +252,41 @@ void agg_renderer<T0, T1>::process(arc_symbolizer const& sym,
     double const start_angle = get<double>(sym, keys::start_angle, feature, common_.vars_, 0.0);
     double const end_angle = get<double>(sym, keys::end_angle, feature, common_.vars_, 360.0);
 
+    // fill attributes
     bool const has_fill = has_key(sym, keys::fill);
     color const& fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128, 128, 128));
     double const fill_opacity = get<double>(sym, keys::fill_opacity, feature, common_.vars_, 1.0);
-
+    // default stroke attributes
     bool const has_stroke = has_key(sym, keys::stroke);
     color const& stroke = get<mapnik::color>(sym, keys::stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
     double const stroke_width_raw = get<double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
     double const stroke_width = stroke_width_raw * common_.scale_factor_;
     double const stroke_opacity = get<double>(sym, keys::stroke_opacity, feature, common_.vars_, 1.0);
 
-    bool const has_arc_stroke = has_key(sym, keys::arc_stroke);
-    color const& arc_stroke = get<mapnik::color>(sym, keys::arc_stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
-    double const arc_stroke_width_raw = get<double>(sym, keys::arc_stroke_width, feature, common_.vars_, 1.0);
-    double const arc_stroke_width = stroke_width_raw * common_.scale_factor_;
-    double const arc_stroke_opacity = get<double>(sym, keys::arc_stroke_opacity, feature, common_.vars_, 1.0);
+    // arc stroke attributes -- using default stroke attributes as fallback
+    bool const has_arc_stroke = has_key(sym, keys::arc_stroke) || has_stroke;
+    color const& arc_stroke = has_key(sym, keys::arc_stroke)
+                            ? get<mapnik::color>(sym, keys::arc_stroke, feature, common_.vars_, mapnik::color(0, 0, 0))
+                            : stroke;
+    double const arc_stroke_width_raw = has_key(sym, keys::arc_stroke_width)
+                                      ? get<double>(sym, keys::arc_stroke_width, feature, common_.vars_, 1.0)
+                                      : stroke_width_raw;
+    double const arc_stroke_width = arc_stroke_width_raw * common_.scale_factor_;
+    double const arc_stroke_opacity = has_key(sym, keys::arc_stroke_opacity)
+                                    ? get<double>(sym, keys::arc_stroke_opacity, feature, common_.vars_, 1.0)
+                                    : stroke_opacity;
 
-    bool const has_radius_stroke = has_key(sym, keys::radius_stroke);
-    color const& radius_stroke = get<mapnik::color>(sym, keys::radius_stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
-    double const radius_stroke_width_raw = get<double>(sym, keys::radius_stroke_width, feature, common_.vars_, 1.0);
-    double const radius_stroke_width = stroke_width_raw * common_.scale_factor_;
-    double const radius_stroke_opacity = get<double>(sym, keys::radius_stroke_opacity, feature, common_.vars_, 1.0);
+    bool const has_radius_stroke = has_key(sym, keys::radius_stroke) || has_stroke;
+    color const& radius_stroke = has_key(sym, keys::radius_stroke)
+                               ? get<mapnik::color>(sym, keys::radius_stroke, feature, common_.vars_, mapnik::color(0, 0, 0))
+                               : stroke;
+    double const radius_stroke_width_raw = has_key(sym, keys::radius_stroke_width)
+                                         ? get<double>(sym, keys::radius_stroke_width, feature, common_.vars_, 1.0)
+                                         : stroke_width_raw;
+    double const radius_stroke_width = radius_stroke_width_raw * common_.scale_factor_;
+    double const radius_stroke_opacity = has_key(sym, keys::radius_stroke_opacity)
+                                       ? get<double>(sym, keys::radius_stroke_opacity, feature, common_.vars_, 1.0)
+                                       : stroke_opacity;
 
     ras_ptr->reset();
     if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
@@ -296,9 +316,9 @@ void agg_renderer<T0, T1>::process(arc_symbolizer const& sym,
     agg::rgba8 stroke_col =
       agg::rgba8_pre(stroke.red(), stroke.green(), stroke.blue(), int(stroke.alpha() * stroke_opacity));
     agg::rgba8 arc_stroke_col =
-      agg::rgba8_pre(arc_stroke.red(), arc_stroke.green(), arc_stroke.blue(), int(arc_stroke.alpha() * stroke_opacity));
+      agg::rgba8_pre(arc_stroke.red(), arc_stroke.green(), arc_stroke.blue(), int(arc_stroke.alpha() * arc_stroke_opacity));
     agg::rgba8 radius_stroke_col =
-      agg::rgba8_pre(radius_stroke.red(), radius_stroke.green(), radius_stroke.blue(), int(radius_stroke.alpha() * stroke_opacity));
+      agg::rgba8_pre(radius_stroke.red(), radius_stroke.green(), radius_stroke.blue(), int(radius_stroke.alpha() * radius_stroke_opacity));
 
     using render_arc_symbolizer_type =
       detail::render_arc_symbolizer<rasterizer, renderer_type, agg_text_renderer<T0>, renderer_common, proj_transform>;
