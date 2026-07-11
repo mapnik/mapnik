@@ -155,13 +155,25 @@ struct render_arc_symbolizer
     double radius_;
     double start_angle_;
     double end_angle_;
+
     color fill_;
     double fill_opacity_;
     bool has_fill_;
+
     color stroke_;
     double stroke_width_;
     double stroke_opacity_;
     bool has_stroke_;
+
+    color arc_stroke_;
+    double arc_stroke_width_;
+    double arc_stroke_opacity_;
+    bool has_arc_stroke_;
+
+    color radius_stroke_;
+    double radius_stroke_width_;
+    double radius_stroke_opacity_;
+    bool has_radius_stroke_;
 };
 
 } // namespace detail
@@ -185,6 +197,18 @@ void cairo_renderer<T>::process(arc_symbolizer const& sym,
     double const stroke_width = stroke_width_raw * common_.scale_factor_;
     double const stroke_opacity = get<double>(sym, keys::stroke_opacity, feature, common_.vars_, 1.0);
 
+    bool const has_arc_stroke = has_key(sym, keys::arc_stroke);
+    color const arc_stroke = get<mapnik::color>(sym, keys::arc_stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
+    double const arc_stroke_width_raw = get<double>(sym, keys::arc_stroke_width, feature, common_.vars_, 1.0);
+    double const arc_stroke_width = stroke_width_raw * common_.scale_factor_;
+    double const arc_stroke_opacity = get<double>(sym, keys::arc_stroke_opacity, feature, common_.vars_, 1.0);
+
+    bool const has_radius_stroke = has_key(sym, keys::radius_stroke);
+    color const radius_stroke = get<mapnik::color>(sym, keys::radius_stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
+    double const radius_stroke_width_raw = get<double>(sym, keys::radius_stroke_width, feature, common_.vars_, 1.0);
+    double const radius_stroke_width = stroke_width_raw * common_.scale_factor_;
+    double const radius_stroke_opacity = get<double>(sym, keys::radius_stroke_opacity, feature, common_.vars_, 1.0);
+
     cairo_save_restore guard(context_);
 
     detail::render_arc_symbolizer apply{context_,
@@ -199,7 +223,15 @@ void cairo_renderer<T>::process(arc_symbolizer const& sym,
                                         stroke,
                                         stroke_width,
                                         stroke_opacity,
-                                        has_stroke};
+                                        has_stroke,
+                                        arc_stroke,
+                                        arc_stroke_width,
+                                        arc_stroke_opacity,
+                                        has_arc_stroke,
+                                        radius_stroke,
+                                        radius_stroke_width,
+                                        radius_stroke_opacity,
+                                        has_radius_stroke};
     mapnik::util::apply_visitor(geometry::vertex_processor<detail::render_arc_symbolizer>(apply),
                                 feature.get_geometry());
 }

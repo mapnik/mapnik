@@ -226,8 +226,19 @@ void svg_renderer<T>::process(arc_symbolizer const& sym, mapnik::feature_impl& f
     color const stroke = get<mapnik::color>(sym, keys::stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
     double const stroke_width_raw = get<double>(sym, keys::stroke_width, feature, common_.vars_, 0.0);
     double const stroke_width = stroke_width_raw * common_.scale_factor_;
-    //    double const stroke_width = has_stroke ? stroke_width_raw * common_.scale_factor_ : 0;
     double const stroke_opacity = get<double>(sym, keys::stroke_opacity, feature, common_.vars_, 1.0);
+
+    bool const has_arc_stroke = has_key(sym, keys::arc_stroke);
+    color const arc_stroke = get<mapnik::color>(sym, keys::arc_stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
+    double const arc_stroke_width_raw = get<double>(sym, keys::arc_stroke_width, feature, common_.vars_, 0.0);
+    double const arc_stroke_width = stroke_width_raw * common_.scale_factor_;
+    double const arc_stroke_opacity = get<double>(sym, keys::arc_stroke_opacity, feature, common_.vars_, 1.0);
+
+    bool const has_radius_stroke = has_key(sym, keys::radius_stroke);
+    color const radius_stroke = get<mapnik::color>(sym, keys::radius_stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
+    double const radius_stroke_width_raw = get<double>(sym, keys::radius_stroke_width, feature, common_.vars_, 0.0);
+    double const radius_stroke_width = stroke_width_raw * common_.scale_factor_;
+    double const radius_stroke_opacity = get<double>(sym, keys::radius_stroke_opacity, feature, common_.vars_, 1.0);
 
     svg::path_output_attributes arc_attributes;
     arc_attributes.set_fill_color(detail::opaque(fill));

@@ -28,7 +28,9 @@ std::string const arc_xml = R"xml(<?xml version="1.0" encoding="utf-8"?>
     <Rule>
       <ArcSymbolizer radius="20" start-angle="45" end-angle="135"
                      fill="rgb(255,0,0)" fill-opacity="0.5"
-                     stroke="rgb(0,0,255)" stroke-width="2" stroke-opacity="0.8"
+                     stroke="rgb(0,0,255)" stroke-width="2" stroke-opacity="0.7"
+                     arc-stroke="rgb(0,255,0)" arc-stroke-width="3" arc-stroke-opacity="0.8"
+                     radius-stroke="rgb(255,0,0)" radius-stroke-width="4" radius-stroke-opacity="0.9"
                      />
     </Rule>
   </Style>
@@ -53,7 +55,11 @@ void check_arc(arc_symbolizer const& sym)
     REQUIRE(get<double>(sym, keys::end_angle) == Approx(135.0));
     REQUIRE(get<double>(sym, keys::fill_opacity) == Approx(0.5));
     REQUIRE(get<double>(sym, keys::stroke_width) == Approx(2.0));
-    REQUIRE(get<double>(sym, keys::stroke_opacity) == Approx(0.8));
+    REQUIRE(get<double>(sym, keys::stroke_opacity) == Approx(0.7));
+    REQUIRE(get<double>(sym, keys::arc_stroke_width) == Approx(3.0));
+    REQUIRE(get<double>(sym, keys::arc_stroke_opacity) == Approx(0.8));
+    REQUIRE(get<double>(sym, keys::radius_stroke_width) == Approx(4.0));
+    REQUIRE(get<double>(sym, keys::radius_stroke_opacity) == Approx(0.9));
 
     color const fill = get<mapnik::color>(sym, keys::fill);
     REQUIRE(fill.red() == 255);
@@ -64,6 +70,16 @@ void check_arc(arc_symbolizer const& sym)
     REQUIRE(stroke.red() == 0);
     REQUIRE(stroke.green() == 0);
     REQUIRE(stroke.blue() == 255);
+
+    color const arc_stroke = get<mapnik::color>(sym, keys::arc_stroke);
+    REQUIRE(arc_stroke.red() == 0);
+    REQUIRE(arc_stroke.green() == 255);
+    REQUIRE(arc_stroke.blue() == 0);
+
+    color const radius_stroke = get<mapnik::color>(sym, keys::radius_stroke);
+    REQUIRE(radius_stroke.red() == 255);
+    REQUIRE(radius_stroke.green() == 0);
+    REQUIRE(radius_stroke.blue() == 0);
 }
 
 } // namespace

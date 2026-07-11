@@ -98,6 +98,12 @@ enum class keys : std::uint8_t {
     radius,
     start_angle,
     end_angle,
+    arc_stroke,
+    arc_stroke_width,
+    arc_stroke_opacity,
+    radius_stroke,
+    radius_stroke_width,
+    radius_stroke_opacity,
     MAX_SYMBOLIZER_KEY
 };
 

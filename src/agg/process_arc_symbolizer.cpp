@@ -76,7 +76,13 @@ struct render_arc_symbolizer : util::noncopyable
                           agg::rgba8 const& fill,
                           bool has_stroke,
                           agg::rgba8 const& stroke,
-                          double stroke_width)
+                          double stroke_width,
+                          bool has_arc_stroke,
+                          agg::rgba8 const& arc_stroke,
+                          double arc_stroke_width,
+                          bool has_radius_stroke,
+                          agg::rgba8 const& radius_stroke,
+                          double radius_stroke_width)
         : ras_(ras),
           ren_(ren),
           common_(common),
@@ -88,7 +94,13 @@ struct render_arc_symbolizer : util::noncopyable
           fill_(fill),
           has_stroke_(has_stroke),
           stroke_(stroke),
-          stroke_width_(stroke_width)
+          stroke_width_(stroke_width),
+          has_arc_stroke_(has_arc_stroke),
+          arc_stroke_(arc_stroke),
+          arc_stroke_width_(arc_stroke_width),
+          has_radius_stroke_(has_radius_stroke),
+          radius_stroke_(radius_stroke),
+          radius_stroke_width_(radius_stroke_width)
     {}
 
     template<typename Adapter>
@@ -215,6 +227,12 @@ struct render_arc_symbolizer : util::noncopyable
     bool has_stroke_;
     agg::rgba8 stroke_;
     double stroke_width_;
+    bool has_arc_stroke_;
+    agg::rgba8 arc_stroke_;
+    double arc_stroke_width_;
+    bool has_radius_stroke_;
+    agg::rgba8 radius_stroke_;
+    double radius_stroke_width_;
 };
 
 } // namespace detail
@@ -237,6 +255,18 @@ void agg_renderer<T0, T1>::process(arc_symbolizer const& sym,
     double const stroke_width_raw = get<double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
     double const stroke_width = stroke_width_raw * common_.scale_factor_;
     double const stroke_opacity = get<double>(sym, keys::stroke_opacity, feature, common_.vars_, 1.0);
+
+    bool const has_arc_stroke = has_key(sym, keys::arc_stroke);
+    color const& arc_stroke = get<mapnik::color>(sym, keys::arc_stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
+    double const arc_stroke_width_raw = get<double>(sym, keys::arc_stroke_width, feature, common_.vars_, 1.0);
+    double const arc_stroke_width = stroke_width_raw * common_.scale_factor_;
+    double const arc_stroke_opacity = get<double>(sym, keys::arc_stroke_opacity, feature, common_.vars_, 1.0);
+
+    bool const has_radius_stroke = has_key(sym, keys::radius_stroke);
+    color const& radius_stroke = get<mapnik::color>(sym, keys::radius_stroke, feature, common_.vars_, mapnik::color(0, 0, 0));
+    double const radius_stroke_width_raw = get<double>(sym, keys::radius_stroke_width, feature, common_.vars_, 1.0);
+    double const radius_stroke_width = stroke_width_raw * common_.scale_factor_;
+    double const radius_stroke_opacity = get<double>(sym, keys::radius_stroke_opacity, feature, common_.vars_, 1.0);
 
     ras_ptr->reset();
     if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
@@ -265,6 +295,10 @@ void agg_renderer<T0, T1>::process(arc_symbolizer const& sym,
     agg::rgba8 fill_col = agg::rgba8_pre(fill.red(), fill.green(), fill.blue(), int(fill.alpha() * fill_opacity));
     agg::rgba8 stroke_col =
       agg::rgba8_pre(stroke.red(), stroke.green(), stroke.blue(), int(stroke.alpha() * stroke_opacity));
+    agg::rgba8 arc_stroke_col =
+      agg::rgba8_pre(arc_stroke.red(), arc_stroke.green(), arc_stroke.blue(), int(arc_stroke.alpha() * stroke_opacity));
+    agg::rgba8 radius_stroke_col =
+      agg::rgba8_pre(radius_stroke.red(), radius_stroke.green(), radius_stroke.blue(), int(radius_stroke.alpha() * stroke_opacity));
 
     using render_arc_symbolizer_type =
       detail::render_arc_symbolizer<rasterizer, renderer_type, agg_text_renderer<T0>, renderer_common, proj_transform>;
@@ -279,7 +313,13 @@ void agg_renderer<T0, T1>::process(arc_symbolizer const& sym,
                                      fill_col,
                                      has_stroke,
                                      stroke_col,
-                                     stroke_width);
+                                     stroke_width,
+                                     has_arc_stroke,
+                                     arc_stroke_col,
+                                     arc_stroke_width,
+                                     has_radius_stroke,
+                                     radius_stroke_col,
+                                     radius_stroke_width);
     mapnik::util::apply_visitor(geometry::vertex_processor<render_arc_symbolizer_type>(apply), feature.get_geometry());
 }
 

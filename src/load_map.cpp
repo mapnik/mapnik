@@ -1116,13 +1116,22 @@ void map_parser::parse_arc_symbolizer(rule& rule, xml_node const& node)
 	set_symbolizer_property<symbolizer_base, double>(sym, keys::radius, node);
         set_symbolizer_property<symbolizer_base, double>(sym, keys::start_angle, node);
         set_symbolizer_property<symbolizer_base, double>(sym, keys::end_angle, node);
-        // stroke of the arc line
-        set_symbolizer_property<symbolizer_base, color>(sym, keys::stroke, node);
-        set_symbolizer_property<symbolizer_base, double>(sym, keys::stroke_width, node);
-        set_symbolizer_property<symbolizer_base, double>(sym, keys::stroke_opacity, node);
         // fill of the arc wedge
         set_symbolizer_property<symbolizer_base, color>(sym, keys::fill, node);
         set_symbolizer_property<symbolizer_base, double>(sym, keys::fill_opacity, node);
+        // stroke of the arc wedge outline
+        set_symbolizer_property<symbolizer_base, color>(sym, keys::stroke, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::stroke_width, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::stroke_opacity, node);
+        // stroke of the arc line, overrides general wedge outline
+        set_symbolizer_property<symbolizer_base, color>(sym, keys::arc_stroke, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::arc_stroke_width, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::arc_stroke_opacity, node);
+        // stroke of the radius lines, overrides general wedge outline
+        set_symbolizer_property<symbolizer_base, color>(sym, keys::radius_stroke, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::radius_stroke_width, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::radius_stroke_opacity, node);
+	
         rule.append(std::move(sym));
     }
     catch (config_error const& ex)
