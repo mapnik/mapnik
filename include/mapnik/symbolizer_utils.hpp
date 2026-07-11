@@ -128,6 +128,12 @@ struct symbolizer_traits<dot_symbolizer>
     static char const* name() { return "DotSymbolizer"; }
 };
 
+template<>
+struct symbolizer_traits<arc_symbolizer>
+{
+    static char const* name() { return "ArcSymbolizer"; }
+};
+
 // symbolizer name impl
 namespace detail {
 

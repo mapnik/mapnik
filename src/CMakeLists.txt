@@ -175,6 +175,7 @@ target_sources(mapnik PRIVATE
 )
 target_sources(mapnik PRIVATE
     agg/agg_renderer.cpp
+    agg/process_arc_symbolizer.cpp
     agg/process_building_symbolizer.cpp
     agg/process_debug_symbolizer.cpp
     agg/process_dot_symbolizer.cpp

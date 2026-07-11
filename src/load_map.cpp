@@ -44,6 +44,8 @@
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/text/placements/registry.hpp>
 #include <mapnik/text/placements/dummy.hpp>
+#include <mapnik/text/formatting/text.hpp>
+#include <mapnik/text/properties_util.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
@@ -127,6 +129,7 @@ class map_parser : util::noncopyable
     void parse_group_symbolizer(rule& rule, xml_node const& node);
     void parse_debug_symbolizer(rule& rule, xml_node const& node);
     void parse_dot_symbolizer(rule& rule, xml_node const& node);
+    void parse_arc_symbolizer(rule& rule, xml_node const& node);
     void parse_group_rule(group_symbolizer_properties& prop, xml_node const& node);
     void parse_simple_layout(group_symbolizer_properties& prop, xml_node const& node);
     void parse_pair_layout(group_symbolizer_properties& prop, xml_node const& node);
@@ -166,6 +169,7 @@ struct allow_overlap_visitor
     bool operator()(group_symbolizer const&) { return false; }
     bool operator()(debug_symbolizer const&) { return true; } // Requires the quadtree
     bool operator()(dot_symbolizer const&) { return false; }
+    bool operator()(arc_symbolizer const&) { return false; }
 };
 
 // If all symbolizers declare 'allow_overlap: true' (their placement is independent
@@ -1022,6 +1026,10 @@ void map_parser::parse_symbolizers(rule& rule, xml_node const& node)
                 parse_dot_symbolizer(rule, sym_node);
                 sym_node.set_processed(true);
                 break;
+            case "ArcSymbolizer"_case:
+                parse_arc_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
 
             default:
                 break;
@@ -1098,6 +1106,32 @@ void map_parser::parse_dot_symbolizer(rule& rule, xml_node const& node)
         throw;
     }
 }
+
+void map_parser::parse_arc_symbolizer(rule& rule, xml_node const& node)
+{
+    try
+    {
+        arc_symbolizer sym;
+	// arc geometry
+	set_symbolizer_property<symbolizer_base, double>(sym, keys::radius, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::start_angle, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::end_angle, node);
+        // stroke of the arc line
+        set_symbolizer_property<symbolizer_base, color>(sym, keys::stroke, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::stroke_width, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::stroke_opacity, node);
+        // fill of the arc wedge
+        set_symbolizer_property<symbolizer_base, color>(sym, keys::fill, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::fill_opacity, node);
+        rule.append(std::move(sym));
+    }
+    catch (config_error const& ex)
+    {
+        ex.append_context(node);
+        throw;
+    }
+}
+
 
 void map_parser::parse_markers_symbolizer(rule& rule, xml_node const& node)
 {

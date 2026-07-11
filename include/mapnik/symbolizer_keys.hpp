@@ -95,6 +95,9 @@ enum class keys : std::uint8_t {
     ff_settings,
     extend,
     line_pattern,
+    radius,
+    start_angle,
+    end_angle,
     MAX_SYMBOLIZER_KEY
 };
 
