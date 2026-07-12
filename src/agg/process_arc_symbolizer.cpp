@@ -168,13 +168,45 @@ struct render_arc_symbolizer : util::noncopyable
         {
             agg::path_storage path;
             build_radius_lines(path, cx, cy);
-            stroke_and_render(path, sl, radius_stroke_col_, props_.radius_stroke_width);
+            if (!props_.radius_dash.empty())
+            {
+                agg::conv_dash<agg::path_storage> dash(path);
+                for (auto const& d : props_.radius_dash)
+                {
+                    dash.add_dash(d.first * common_.scale_factor_, d.second * common_.scale_factor_);
+                }
+                if (props_.radius_dash_offset != 0.0)
+                {
+                    dash.dash_start(props_.radius_dash_offset * common_.scale_factor_);
+                }
+                stroke_and_render(dash, sl, radius_stroke_col_, props_.radius_stroke_width);
+            }
+            else
+            {
+                stroke_and_render(path, sl, radius_stroke_col_, props_.radius_stroke_width);
+            }
         }
 
         if (props_.has_arc_stroke)
         {
-            agg::arc a = make_arc(cx, cy);
-            stroke_and_render(a, sl, arc_stroke_col_, props_.arc_stroke_width);
+            agg::arc arc = make_arc(cx, cy);
+            if (!props_.arc_dash.empty())
+            {
+              agg::path_storage path;
+              path.concat_path(arc);
+                agg::conv_dash<agg::path_storage> dash(path);
+                for (auto const& d : props_.arc_dash)
+                {
+                    dash.add_dash(d.first * common_.scale_factor_, d.second * common_.scale_factor_);
+                }
+                if (props_.arc_dash_offset != 0.0)
+                {
+                    dash.dash_start(props_.arc_dash_offset * common_.scale_factor_);
+                }
+                stroke_and_render(dash, sl, arc_stroke_col_, props_.arc_stroke_width);
+            } else {
+                stroke_and_render(arc, sl, arc_stroke_col_, props_.arc_stroke_width);
+            }
         }
     }
 
