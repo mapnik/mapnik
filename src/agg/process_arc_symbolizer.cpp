@@ -168,45 +168,54 @@ struct render_arc_symbolizer : util::noncopyable
         {
             agg::path_storage path;
             build_radius_lines(path, cx, cy);
-            if (!props_.radius_dash.empty())
-            {
-                agg::conv_dash<agg::path_storage> dash(path);
-                for (auto const& d : props_.radius_dash)
-                {
-                    dash.add_dash(d.first * common_.scale_factor_, d.second * common_.scale_factor_);
-                }
-                if (props_.radius_dash_offset != 0.0)
-                {
-                    dash.dash_start(props_.radius_dash_offset * common_.scale_factor_);
-                }
-                stroke_and_render(dash, sl, radius_stroke_col_, props_.radius_stroke_width);
-            }
-            else
-            {
-                stroke_and_render(path, sl, radius_stroke_col_, props_.radius_stroke_width);
-            }
+            dash_stroke_and_render(path,
+                                   sl,
+                                   radius_stroke_col_,
+                                   props_.radius_stroke_width,
+                                   props_.radius_dash,
+                                   props_.radius_dash_offset);
         }
 
         if (props_.has_arc_stroke)
         {
             agg::arc arc = make_arc(cx, cy);
-            if (!props_.arc_dash.empty())
+            agg::path_storage path;
+            path.concat_path(arc);
+            dash_stroke_and_render(path,
+                                   sl,
+                                   arc_stroke_col_,
+                                   props_.arc_stroke_width,
+                                   props_.arc_dash,
+                                   props_.arc_dash_offset);
+        }
+    }
+
+    // Stroke the path with the given width/color and render, applying the
+    // dash pattern (dash/gap lengths and offset in unscaled pixels) first
+    // unless it is empty.
+    void dash_stroke_and_render(agg::path_storage& path,
+                                agg::scanline_u8& sl,
+                                agg::rgba8 const& col,
+                                double width,
+                                dash_array const& dashes,
+                                double dash_offset)
+    {
+        if (!dashes.empty())
+        {
+            agg::conv_dash<agg::path_storage> dash(path);
+            for (auto const& d : dashes)
             {
-              agg::path_storage path;
-              path.concat_path(arc);
-                agg::conv_dash<agg::path_storage> dash(path);
-                for (auto const& d : props_.arc_dash)
-                {
-                    dash.add_dash(d.first * common_.scale_factor_, d.second * common_.scale_factor_);
-                }
-                if (props_.arc_dash_offset != 0.0)
-                {
-                    dash.dash_start(props_.arc_dash_offset * common_.scale_factor_);
-                }
-                stroke_and_render(dash, sl, arc_stroke_col_, props_.arc_stroke_width);
-            } else {
-                stroke_and_render(arc, sl, arc_stroke_col_, props_.arc_stroke_width);
+                dash.add_dash(d.first * common_.scale_factor_, d.second * common_.scale_factor_);
             }
+            if (dash_offset != 0.0)
+            {
+                dash.dash_start(dash_offset * common_.scale_factor_);
+            }
+            stroke_and_render(dash, sl, col, width);
+        }
+        else
+        {
+            stroke_and_render(path, sl, col, width);
         }
     }
 
