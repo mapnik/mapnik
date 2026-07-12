@@ -177,9 +177,14 @@ struct svg_arc_renderer : util::noncopyable
     {
         namespace karma = boost::spirit::karma;
         static svg::svg_path_attributes_grammar<OutputIterator> const attributes_grammar;
+        static svg::svg_path_dash_array_grammar<OutputIterator> const dash_array_grammar;
         karma::lit_type lit;
         karma::string_type kstring;
         karma::generate(out_, lit("<path d=\"") << kstring << lit("\" "), d);
+        // unlike generate_path_impl we skip the dash array entirely when it is
+        // empty, so solid paths carry no stroke-dasharray="" attribute
+        if (!attributes.stroke_dasharray().empty())
+            karma::generate(out_, dash_array_grammar << lit(" "), attributes.stroke_dasharray());
         karma::generate(out_, attributes_grammar << lit("/>\n"), attributes);
         emitted_ = true;
     }
@@ -246,6 +251,16 @@ void svg_renderer<T>::process(arc_symbolizer const& sym, mapnik::feature_impl& f
 {
     arc_symbolizer_properties const props(sym, feature, common_.vars_, common_.scale_factor_);
 
+    // dash lengths in props are unscaled; svg emits final pixel lengths, so
+    // apply the scale factor here like the (pre-scaled) stroke widths
+    auto scale_dashes = [&](dash_array const& dashes) {
+        dash_array scaled;
+        scaled.reserve(dashes.size());
+        for (auto const& d : dashes)
+            scaled.emplace_back(d.first * common_.scale_factor_, d.second * common_.scale_factor_);
+        return scaled;
+    };
+
     svg::path_output_attributes fill_attributes;
     fill_attributes.set_fill_color(detail::opaque(props.fill));
     fill_attributes.set_fill_opacity(detail::combined_opacity(props.fill, props.fill_opacity));
@@ -254,11 +269,15 @@ void svg_renderer<T>::process(arc_symbolizer const& sym, mapnik::feature_impl& f
     arc_attributes.set_stroke_color(detail::opaque(props.arc_stroke));
     arc_attributes.set_stroke_opacity(detail::combined_opacity(props.arc_stroke, props.arc_stroke_opacity));
     arc_attributes.set_stroke_width(props.arc_stroke_width);
+    arc_attributes.set_stroke_dasharray(scale_dashes(props.arc_dash));
+    arc_attributes.set_stroke_dashoffset(props.arc_dash_offset * common_.scale_factor_);
 
     svg::path_output_attributes radius_attributes;
     radius_attributes.set_stroke_color(detail::opaque(props.radius_stroke));
     radius_attributes.set_stroke_opacity(detail::combined_opacity(props.radius_stroke, props.radius_stroke_opacity));
     radius_attributes.set_stroke_width(props.radius_stroke_width);
+    radius_attributes.set_stroke_dasharray(scale_dashes(props.radius_dash));
+    radius_attributes.set_stroke_dashoffset(props.radius_dash_offset * common_.scale_factor_);
 
     detail::svg_arc_renderer<T>
       apply(output_iterator_, common_.t_, prj_trans, props, fill_attributes, arc_attributes, radius_attributes);
