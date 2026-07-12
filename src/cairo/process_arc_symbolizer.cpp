@@ -130,6 +130,9 @@ struct render_arc_symbolizer
         // Draw the radius spokes
         if (props_.has_radius_stroke)
         {
+            cairo_save_restore guard(context_);
+            if (!props_.radius_dash.empty())
+                context_.set_dash(props_.radius_dash, common_.scale_factor_);
             build_radius_lines(cx, cy);
             context_.set_line_width(props_.radius_stroke_width);
             context_.set_color(props_.radius_stroke, props_.radius_stroke_opacity);
@@ -139,6 +142,9 @@ struct render_arc_symbolizer
         // Draw the curved arc line
         if (props_.has_arc_stroke)
         {
+            cairo_save_restore guard(context_);
+            if (!props_.arc_dash.empty())
+                context_.set_dash(props_.arc_dash, common_.scale_factor_);
             append_arc(cx, cy);
             context_.set_line_width(props_.arc_stroke_width);
             context_.set_color(props_.arc_stroke, props_.arc_stroke_opacity);
