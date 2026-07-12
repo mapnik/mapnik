@@ -157,13 +157,13 @@ static property_meta_type const key_meta[const_max_key] = {
   property_meta_type{"arc-stroke", nullptr, property_types::target_color},
   property_meta_type{"arc-stroke-width", nullptr, property_types::target_double},
   property_meta_type{"arc-stroke-opacity", nullptr, property_types::target_double},
-  property_meta_type{"arc_stroke-dashoffset", nullptr, property_types::target_double},
-  property_meta_type{"arc_stroke-dasharray", nullptr, property_types::target_dash_array},
+  property_meta_type{"arc-stroke-dasharray", nullptr, property_types::target_dash_array},
+  property_meta_type{"arc-stroke-dashoffset", nullptr, property_types::target_double},
   property_meta_type{"radius-stroke", nullptr, property_types::target_color},
   property_meta_type{"radius-stroke-width", nullptr, property_types::target_double},
   property_meta_type{"radius-stroke-opacity", nullptr, property_types::target_double},
-  property_meta_type{"radius-stroke-dashoffset", nullptr, property_types::target_double},
   property_meta_type{"radius-stroke-dasharray", nullptr, property_types::target_dash_array},
+  property_meta_type{"radius-stroke-dashoffset", nullptr, property_types::target_double},
 };
 
 property_meta_type const& get_meta(mapnik::keys key)
