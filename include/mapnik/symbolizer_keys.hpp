@@ -101,9 +101,13 @@ enum class keys : std::uint8_t {
     arc_stroke,
     arc_stroke_width,
     arc_stroke_opacity,
+    arc_stroke_dasharray,
+    arc_stroke_dashoffset,
     radius_stroke,
     radius_stroke_width,
     radius_stroke_opacity,
+    radius_stroke_dasharray,
+    radius_stroke_dashoffset,
     MAX_SYMBOLIZER_KEY
 };
 

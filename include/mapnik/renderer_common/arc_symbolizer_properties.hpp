@@ -65,6 +65,10 @@ struct arc_symbolizer_properties
         double const stroke_width_raw = get<double>(sym, keys::stroke_width, feature, vars, 1.0);
         stroke_width = stroke_width_raw * scale_factor;
         stroke_opacity = get<double>(sym, keys::stroke_opacity, feature, vars, 1.0);
+	auto stroke_dash_opt = get_optional<dash_array>(sym, keys::stroke_dasharray, feature, vars);
+	if (stroke_dash_opt)
+	  stroke_dash = *stroke_dash_opt;
+	stroke_dash_offset = get<double>(sym, keys::stroke_dashoffset, feature, vars, 0.0);
 
         // arc stroke attributes -- using default stroke attributes as fallback
         has_arc_stroke = has_key(sym, keys::arc_stroke) || has_stroke;
@@ -77,6 +81,14 @@ struct arc_symbolizer_properties
         arc_stroke_opacity = has_key(sym, keys::arc_stroke_opacity)
                                ? get<double>(sym, keys::arc_stroke_opacity, feature, vars, 1.0)
                                : stroke_opacity;
+	auto arc_dash_opt = has_key(sym, keys::arc_stroke_dasharray)
+                             ? get_optional<dash_array>(sym, keys::arc_stroke_dasharray, feature, vars)
+	                     : stroke_dash_opt ;
+	if (arc_dash_opt)
+	  arc_dash = *arc_dash_opt;
+	arc_dash_offset = has_key(sym, keys::arc_stroke_dashoffset)
+	                ? get<double>(sym, keys::arc_stroke_dashoffset, feature, vars, 0.0)
+	                : stroke_dash_offset;
 
         // radius spoke stroke attributes -- using default stroke attributes as fallback
         has_radius_stroke = has_key(sym, keys::radius_stroke) || has_stroke;
@@ -89,6 +101,14 @@ struct arc_symbolizer_properties
         radius_stroke_opacity = has_key(sym, keys::radius_stroke_opacity)
                                   ? get<double>(sym, keys::radius_stroke_opacity, feature, vars, 1.0)
                                   : stroke_opacity;
+	auto radius_dash_opt = has_key(sym, keys::radius_stroke_dasharray)
+                             ? get_optional<dash_array>(sym, keys::radius_stroke_dasharray, feature, vars)
+	                     : stroke_dash_opt ;
+	if (radius_dash_opt)
+	  radius_dash = *radius_dash_opt;
+	radius_dash_offset = has_key(sym, keys::radius_stroke_dashoffset)
+	                   ? get<double>(sym, keys::radius_stroke_dashoffset, feature, vars, 0.0)
+	                   : stroke_dash_offset;
     }
 
     // Sweep angles in radians, clockwise from north, with wrap-around handled
@@ -115,16 +135,22 @@ struct arc_symbolizer_properties
     color stroke;
     double stroke_width;
     double stroke_opacity;
+    dash_array stroke_dash;
+    double stroke_dash_offset;
 
     bool has_arc_stroke;
     color arc_stroke;
     double arc_stroke_width;
     double arc_stroke_opacity;
+    dash_array arc_dash;
+    double arc_dash_offset;
 
     bool has_radius_stroke;
     color radius_stroke;
     double radius_stroke_width;
     double radius_stroke_opacity;
+    dash_array radius_dash;
+    double radius_dash_offset;
 };
 
 } // namespace mapnik
