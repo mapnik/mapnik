@@ -36,32 +36,32 @@ namespace spirit {
 namespace x3 {
 namespace traits {
 
-//use std::optional<mapnik::expr_node>
+// use std::optional<mapnik::expr_node>
 
-template <>
-struct is_optional<std::optional<mapnik::expr_node>>
-    : mpl::true_
+template<>
+struct is_optional<std::optional<mapnik::expr_node>> : mpl::true_
 {};
 
-template <>
+template<>
 struct build_optional<mapnik::expr_node>
 {
     using type = std::optional<mapnik::expr_node>;
 };
 
-template <>
-struct build_optional<std::optional<mapnik::expr_node> >
+template<>
+struct build_optional<std::optional<mapnik::expr_node>>
 {
-    using type =  std::optional<mapnik::expr_node>;
+    using type = std::optional<mapnik::expr_node>;
 };
 
+template<>
+struct optional_value<std::optional<mapnik::expr_node>> : mpl::identity<mapnik::expr_node>
+{};
 
-template <>
-struct optional_value<std::optional<mapnik::expr_node> >
-    : mpl::identity<mapnik::expr_node> {};
-
-
-}}}}
+} // namespace traits
+} // namespace x3
+} // namespace spirit
+} // namespace boost
 
 namespace mapnik {
 namespace grammar {

@@ -42,7 +42,6 @@ BOOST_FUSION_ADAPT_STRUCT(mapnik::skewX_node, (mapnik::expr_node, angle_))
 // skewY
 BOOST_FUSION_ADAPT_STRUCT(mapnik::skewY_node, (mapnik::expr_node, angle_))
 
-
 namespace boost {
 namespace spirit {
 namespace x3 {
@@ -90,11 +89,11 @@ namespace ascii = boost::spirit::x3::ascii;
 // the order provided.  The individual transform definitions are
 // separated by whitespace and/or a comma.
 
+using boost::fusion::at_c;
 using x3::double_;
 using x3::lit;
 using x3::no_case;
 using x3::no_skip;
-using boost::fusion::at_c;
 
 auto const create_expr_node = [](auto const& ctx) {
     _val(ctx) = _attr(ctx);
@@ -127,7 +126,7 @@ auto const construct_scale = [](auto const& ctx) {
 
 auto const construct_rotate = [](auto const& ctx) {
     auto const& attr = _attr(ctx);
-    auto const& a =  at_c<0>(attr);
+    auto const& a = at_c<0>(attr);
     auto const& sx = at_c<1>(attr); // optional
     auto const& sy = at_c<2>(attr); // optional
     _val(ctx) = mapnik::rotate_node(a, sx, sy);

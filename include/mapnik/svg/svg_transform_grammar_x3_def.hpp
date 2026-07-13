@@ -44,32 +44,32 @@ namespace spirit {
 namespace x3 {
 namespace traits {
 
-//use std::optional<double>
+// use std::optional<double>
 
-template <>
-struct is_optional<std::optional<double>>
-    : mpl::true_
+template<>
+struct is_optional<std::optional<double>> : mpl::true_
 {};
 
-template <>
+template<>
 struct build_optional<double>
 {
     using type = std::optional<double>;
 };
 
-template <>
-struct build_optional<std::optional<double> >
+template<>
+struct build_optional<std::optional<double>>
 {
-    using type =  std::optional<double>;
+    using type = std::optional<double>;
 };
 
+template<>
+struct optional_value<std::optional<double>> : mpl::identity<double>
+{};
 
-template <>
-struct optional_value<std::optional<double> >
-    : mpl::identity<double> {};
-
-
-}}}}
+} // namespace traits
+} // namespace x3
+} // namespace spirit
+} // namespace boost
 
 namespace mapnik {
 namespace svg {
@@ -77,10 +77,10 @@ namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
+using boost::fusion::at_c;
 using x3::double_;
 using x3::lit;
 using x3::no_case;
-using boost::fusion::at_c;
 
 template<typename Context>
 agg::trans_affine& extract_transform(Context const& ctx)
