@@ -26,7 +26,7 @@
 #ifndef Q_MOC_RUN
 #include <mapnik/map.hpp>
 #endif
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 class LayerListModel : public QAbstractListModel
 {
@@ -38,7 +38,7 @@ class LayerListModel : public QAbstractListModel
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     bool setData(QModelIndex const& index, QVariant const& value, int role = Qt::EditRole);
     Qt::ItemFlags flags(QModelIndex const& index) const;
-    boost::optional<mapnik::layer&> map_layer(int i);
+    std::optional<std::reference_wrapper<mapnik::layer>> map_layer(int i);
 
   private:
     std::shared_ptr<mapnik::Map> map_;

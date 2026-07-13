@@ -553,7 +553,7 @@ void map_parser::parse_style(Map& map, xml_node const& node)
 
         if (!map.insert_style(name, std::move(style)))
         {
-            boost::optional<feature_type_style const&> dupe = map.find_style(name);
+            std::optional<std::reference_wrapper<feature_type_style const>> dupe = map.find_style(name);
             if (strict_)
             {
                 if (dupe)

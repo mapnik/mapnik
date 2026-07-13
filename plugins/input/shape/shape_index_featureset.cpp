@@ -71,14 +71,14 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
                                     filterT,
                                     boost::interprocess::ibufferstream,
                                     mapnik::box2d<typename filterT::value_type>>::query(filter,
-                                                                                        index->file(),
+                                                                                        index->get().file(),
                                                                                         positions_);
 #else
         mapnik::util::spatial_index<mapnik::detail::node,
                                     filterT,
                                     std::ifstream,
                                     mapnik::box2d<typename filterT::value_type>>::query(filter,
-                                                                                        index->file(),
+                                                                                        index->get().file(),
                                                                                         positions_);
 #endif
     }

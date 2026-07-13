@@ -39,9 +39,6 @@
 #include <mapnik/value/types.hpp>
 #include <mapnik/datasource_plugin.hpp>
 
-// boost
-#include <boost/optional.hpp>
-
 // stl
 #include <optional>
 #include <regex>

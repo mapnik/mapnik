@@ -233,13 +233,13 @@ void Map::remove_style(std::string const& name)
     styles_.erase(name);
 }
 
-boost::optional<feature_type_style const&> Map::find_style(std::string const& name) const
+std::optional<std::reference_wrapper<feature_type_style const>> Map::find_style(std::string const& name) const
 {
     std::map<std::string, feature_type_style>::const_iterator itr = styles_.find(name);
     if (itr != styles_.end())
-        return boost::optional<feature_type_style const&>(itr->second);
+        return std::optional<std::reference_wrapper<feature_type_style const>>(itr->second);
     else
-        return boost::optional<feature_type_style const&>();
+        return std::optional<std::reference_wrapper<feature_type_style const>>();
 }
 
 bool Map::insert_fontset(std::string const& name, font_set const& fontset)
@@ -260,13 +260,13 @@ bool Map::insert_fontset(std::string const& name, font_set&& fontset)
     return fontsets_.emplace(name, std::move(fontset)).second;
 }
 
-boost::optional<font_set const&> Map::find_fontset(std::string const& name) const
+std::optional<std::reference_wrapper<font_set const>> Map::find_fontset(std::string const& name) const
 {
     std::map<std::string, font_set>::const_iterator itr = fontsets_.find(name);
     if (itr != fontsets_.end())
-        return boost::optional<font_set const&>(itr->second);
+        return std::optional<std::reference_wrapper<font_set const>>(itr->second);
     else
-        return boost::optional<font_set const&>();
+        return std::optional<std::reference_wrapper<font_set const>>();
 }
 
 std::map<std::string, font_set> const& Map::fontsets() const

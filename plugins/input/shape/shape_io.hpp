@@ -26,12 +26,11 @@
 // stl
 #include <memory>
 #include <ios>
+#include <optional>
 // mapnik
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/spatial_index.hpp>
-// boost
-#include <boost/optional.hpp>
 //
 #include "dbfile.hpp"
 #include "shapefile.hpp"
@@ -63,11 +62,11 @@ struct shape_io : mapnik::util::noncopyable
     shape_file& shx();
     dbf_file& dbf();
 
-    inline boost::optional<shape_file&> index()
+    inline std::optional<std::reference_wrapper<shape_file>> index()
     {
         if (index_)
-            return boost::optional<shape_file&>(*index_);
-        return boost::optional<shape_file&>();
+            return std::optional<std::reference_wrapper<shape_file>>(*index_);
+        return std::optional<std::reference_wrapper<shape_file>>();
     }
 
     inline bool has_index() const

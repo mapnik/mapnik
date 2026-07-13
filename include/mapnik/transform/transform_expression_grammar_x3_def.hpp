@@ -34,13 +34,21 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
+#include <typeinfo>
+#include <iostream>
 // skewX
 BOOST_FUSION_ADAPT_STRUCT(mapnik::skewX_node, (mapnik::expr_node, angle_))
 
 // skewY
 BOOST_FUSION_ADAPT_STRUCT(mapnik::skewY_node, (mapnik::expr_node, angle_))
 
-// Following specializations are required to avoid trasferring mapnik::skewX/Y nodes as underlying expressions
+
+namespace boost {
+namespace spirit {
+namespace x3 {
+namespace traits {
+
+// Following specializations are required to avoid transferring mapnik::skewX/Y nodes as underlying expressions
 //
 // template <typename Source, typename Dest>
 // inline void
@@ -50,10 +58,6 @@ BOOST_FUSION_ADAPT_STRUCT(mapnik::skewY_node, (mapnik::expr_node, angle_))
 // }
 // which will fail to compile with latest (more strict) `mapbox::variant` (boost_1_61)
 
-namespace boost {
-namespace spirit {
-namespace x3 {
-namespace traits {
 template<>
 inline void move_to<mapnik::skewX_node, mapnik::detail::transform_node>(mapnik::skewX_node&& src,
                                                                         mapnik::detail::transform_node& dst)
@@ -90,6 +94,7 @@ using x3::double_;
 using x3::lit;
 using x3::no_case;
 using x3::no_skip;
+using boost::fusion::at_c;
 
 auto const create_expr_node = [](auto const& ctx) {
     _val(ctx) = _attr(ctx);
@@ -97,34 +102,34 @@ auto const create_expr_node = [](auto const& ctx) {
 
 auto const construct_matrix = [](auto const& ctx) {
     auto const& attr = _attr(ctx);
-    auto const& a = boost::fusion::at<boost::mpl::int_<0>>(attr);
-    auto const& b = boost::fusion::at<boost::mpl::int_<1>>(attr);
-    auto const& c = boost::fusion::at<boost::mpl::int_<2>>(attr);
-    auto const& d = boost::fusion::at<boost::mpl::int_<3>>(attr);
-    auto const& e = boost::fusion::at<boost::mpl::int_<4>>(attr);
-    auto const& f = boost::fusion::at<boost::mpl::int_<5>>(attr);
+    auto const& a = at_c<0>(attr);
+    auto const& b = at_c<1>(attr);
+    auto const& c = at_c<2>(attr);
+    auto const& d = at_c<3>(attr);
+    auto const& e = at_c<4>(attr);
+    auto const& f = at_c<5>(attr);
     _val(ctx) = mapnik::matrix_node(a, b, c, d, e, f);
 };
 
 auto const construct_translate = [](auto const& ctx) {
     auto const& attr = _attr(ctx);
-    auto const& dx = boost::fusion::at<boost::mpl::int_<0>>(attr);
-    auto const& dy = boost::fusion::at<boost::mpl::int_<1>>(attr); // optional
+    auto const& dx = at_c<0>(attr);
+    auto const& dy = at_c<1>(attr); // optional
     _val(ctx) = mapnik::translate_node(dx, dy);
 };
 
 auto const construct_scale = [](auto const& ctx) {
     auto const& attr = _attr(ctx);
-    auto const& sx = boost::fusion::at<boost::mpl::int_<0>>(attr);
-    auto const& sy = boost::fusion::at<boost::mpl::int_<1>>(attr); // optional
+    auto const& sx = at_c<0>(attr);
+    auto const& sy = at_c<1>(attr); // optional
     _val(ctx) = mapnik::scale_node(sx, sy);
 };
 
 auto const construct_rotate = [](auto const& ctx) {
     auto const& attr = _attr(ctx);
-    auto const& a = boost::fusion::at<boost::mpl::int_<0>>(attr);
-    auto const& sx = boost::fusion::at<boost::mpl::int_<1>>(attr); // optional
-    auto const& sy = boost::fusion::at<boost::mpl::int_<2>>(attr); // optional
+    auto const& a =  at_c<0>(attr);
+    auto const& sx = at_c<1>(attr); // optional
+    auto const& sy = at_c<2>(attr); // optional
     _val(ctx) = mapnik::rotate_node(a, sx, sy);
 };
 

@@ -45,6 +45,7 @@ BOOST_FUSION_ADAPT_STRUCT(mapnik::binary_function_call,
                           (mapnik::binary_function_impl, fun)(mapnik::binary_function_call::argument_type,
                                                               arg1)(mapnik::binary_function_call::argument_type, arg2))
 
+
 namespace mapnik {
 namespace grammar {
 
