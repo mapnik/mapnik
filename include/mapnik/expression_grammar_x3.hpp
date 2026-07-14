@@ -31,6 +31,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
+#include <optional>
+
 namespace boost {
 namespace spirit {
 namespace x3 {

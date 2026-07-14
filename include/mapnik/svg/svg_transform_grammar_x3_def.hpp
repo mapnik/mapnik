@@ -38,6 +38,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include <agg_trans_affine.h>
 MAPNIK_DISABLE_WARNING_POP
+// stl
+#include <optional>
 
 namespace boost {
 namespace spirit {
