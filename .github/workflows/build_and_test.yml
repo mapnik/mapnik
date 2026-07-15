@@ -23,8 +23,8 @@ jobs:
     name: Check Source Code
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - uses: pre-commit/action@v3.0.1
