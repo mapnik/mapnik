@@ -21,7 +21,7 @@ env:
 jobs:
   checkSource:
     name: Check Source Code
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
@@ -41,7 +41,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-22.04
+          - ubuntu-24.04
           - macos-26
           - windows-2022
         cxx-standard:
