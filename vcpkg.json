@@ -70,11 +70,11 @@
     "protozero",
     {
       "name": "sqlite3",
+      "version": "3.52.0"
       "features": [
         "rtree"
       ]
     },
-    "sqlite3",
     "tiff",
     "zlib"
   ]
