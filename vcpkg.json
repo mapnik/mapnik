@@ -74,7 +74,6 @@
         "rtree"
       ]
     },
-    "sqlite3",
     "tiff",
     "zlib"
   ]
