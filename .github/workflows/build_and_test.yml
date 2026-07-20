@@ -15,16 +15,16 @@ env:
   USERNAME: mapnik
   VCPKG_EXE: ${{ github.workspace }}/vcpkg/vcpkg
   FEED_URL: https://nuget.pkg.github.com/mapnik/index.json
-  VCPKG_RELEASE: e5de5b82777c3be4f935f5dbcc7c413e91851d06
+  VCPKG_RELEASE: a51bb4d1434e6d0927ff79db8033bed8522b85df
   VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/mapnik/index.json,readwrite"
 
 jobs:
   checkSource:
     name: Check Source Code
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
       - uses: pre-commit/action@v3.0.1
@@ -41,7 +41,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-24.04
+          - ubuntu-22.04
           - macos-26
           - windows-2022
         cxx-standard:
@@ -63,16 +63,16 @@ jobs:
           fi
 
       - name: Checkout Mapnik
-        uses: actions/checkout@v7
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
       - name: Checkout vcpkg
-        uses: actions/checkout@v7
+        uses: actions/checkout@v5
         with:
           path: vcpkg
           ref: ${{ env.VCPKG_RELEASE }}
-          repository: mapnik/vcpkg
+          repository: microsoft/vcpkg
 
       - name: Install required system packages
         shell: bash
