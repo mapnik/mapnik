@@ -311,18 +311,18 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
         // https://github.com/mapnik/mapnik/issues/1477
         for (std::string const& style_name : style_names)
         {
-            boost::optional<feature_type_style const&> style = m_.find_style(style_name);
+            std::optional<std::reference_wrapper<feature_type_style const>> style = m_.find_style(style_name);
             if (!style)
             {
                 continue;
             }
 
-            if (style->comp_op() || style->image_filters().size() > 0)
+            if (style->get().comp_op() || style->get().image_filters().size() > 0)
             {
-                if (style->active(scale_denom))
+                if (style->get().active(scale_denom))
                 {
                     // we'll have to handle compositing ops
-                    active_styles.push_back(&(*style));
+                    active_styles.push_back(&style->get());
                 }
             }
         }
@@ -367,7 +367,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
     // iterate through all named styles collecting active styles and attribute names
     for (std::string const& style_name : style_names)
     {
-        boost::optional<feature_type_style const&> style = m_.find_style(style_name);
+        std::optional<std::reference_wrapper<feature_type_style const>> style = m_.find_style(style_name);
         if (!style)
         {
             MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: Style=" << style_name
@@ -376,7 +376,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
             continue;
         }
 
-        std::vector<rule> const& style_rules = style->get_rules();
+        std::vector<rule> const& style_rules = style->get().get_rules();
         bool active_rules = false;
         rule_cache rc;
         for (rule const& r : style_rules)
@@ -391,7 +391,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
         if (active_rules)
         {
             rule_caches.push_back(std::move(rc));
-            active_styles.push_back(&(*style));
+            active_styles.push_back(&style->get());
         }
     }
 

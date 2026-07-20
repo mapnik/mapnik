@@ -32,12 +32,11 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/datasource_plugin.hpp>
-// boost
-#include <boost/optional.hpp>
 
 // stl
 #include <vector>
 #include <string>
+#include <optional>
 
 // gdal
 #include <gdal_priv.h>

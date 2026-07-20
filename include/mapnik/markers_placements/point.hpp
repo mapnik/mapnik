@@ -66,7 +66,11 @@ class markers_point_placement : public markers_basic_placement
 
         if (this->locator_.type() == geometry::geometry_types::LineString)
         {
-            if (!label::middle_point(this->locator_, x, y, use_angle_ ? boost::optional<double&>(angle) : boost::none))
+            if (!label::middle_point(this->locator_,
+                                     x,
+                                     y,
+                                     use_angle_ ? std::optional<std::reference_wrapper<double>>(angle)
+                                                : std::optional<std::reference_wrapper<double>>{}))
             {
                 this->done_ = true;
                 return false;

@@ -372,7 +372,7 @@ T xml_node::get_attr(std::string const& name) const
 
 std::string const& xml_node::get_text() const
 {
-    // FIXME : return boost::optional<std::string const&>
+    // FIXME : return std::optional<std::reference_wrapper<std::string>>
     if (children_.empty())
     {
         if (is_text_)

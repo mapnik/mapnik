@@ -38,6 +38,40 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include <agg_trans_affine.h>
 MAPNIK_DISABLE_WARNING_POP
+// stl
+#include <optional>
+
+namespace boost {
+namespace spirit {
+namespace x3 {
+namespace traits {
+
+// use std::optional<double>
+
+template<>
+struct is_optional<std::optional<double>> : mpl::true_
+{};
+
+template<>
+struct build_optional<double>
+{
+    using type = std::optional<double>;
+};
+
+template<>
+struct build_optional<std::optional<double>>
+{
+    using type = std::optional<double>;
+};
+
+template<>
+struct optional_value<std::optional<double>> : mpl::identity<double>
+{};
+
+} // namespace traits
+} // namespace x3
+} // namespace spirit
+} // namespace boost
 
 namespace mapnik {
 namespace svg {
@@ -45,6 +79,7 @@ namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
+using boost::fusion::at_c;
 using x3::double_;
 using x3::lit;
 using x3::no_case;
@@ -58,21 +93,21 @@ agg::trans_affine& extract_transform(Context const& ctx)
 auto const matrix_action = [](auto const& ctx) {
     auto& tr = extract_transform(ctx);
     auto const& attr = _attr(ctx);
-    auto a = boost::fusion::at_c<0>(attr);
-    auto b = boost::fusion::at_c<1>(attr);
-    auto c = boost::fusion::at_c<2>(attr);
-    auto d = boost::fusion::at_c<3>(attr);
-    auto e = boost::fusion::at_c<4>(attr);
-    auto f = boost::fusion::at_c<5>(attr);
+    auto a = at_c<0>(attr);
+    auto b = at_c<1>(attr);
+    auto c = at_c<2>(attr);
+    auto d = at_c<3>(attr);
+    auto e = at_c<4>(attr);
+    auto f = at_c<5>(attr);
     tr = agg::trans_affine(a, b, c, d, e, f) * tr;
 };
 
 auto const rotate_action = [](auto const& ctx) {
     auto& tr = extract_transform(ctx);
     auto const& attr = _attr(ctx);
-    auto a = boost::fusion::at_c<0>(attr);
-    auto cx = boost::fusion::at_c<1>(attr) ? *boost::fusion::at_c<1>(attr) : 0.0;
-    auto cy = boost::fusion::at_c<2>(attr) ? *boost::fusion::at_c<2>(attr) : 0.0;
+    auto a = at_c<0>(attr);
+    auto cx = at_c<1>(attr) ? *at_c<1>(attr) : 0.0;
+    auto cy = at_c<2>(attr) ? *at_c<2>(attr) : 0.0;
     if (cx == 0.0 && cy == 0.0)
     {
         tr = agg::trans_affine_rotation(agg::deg2rad(a)) * tr;
@@ -89,8 +124,8 @@ auto const rotate_action = [](auto const& ctx) {
 auto const translate_action = [](auto const& ctx) {
     auto& tr = extract_transform(ctx);
     auto const& attr = _attr(ctx);
-    auto tx = boost::fusion::at_c<0>(attr);
-    auto ty = boost::fusion::at_c<1>(attr);
+    auto tx = at_c<0>(attr);
+    auto ty = at_c<1>(attr);
     if (ty)
         tr = agg::trans_affine_translation(tx, *ty) * tr;
     else
@@ -100,8 +135,8 @@ auto const translate_action = [](auto const& ctx) {
 auto const scale_action = [](auto const& ctx) {
     auto& tr = extract_transform(ctx);
     auto const& attr = _attr(ctx);
-    auto sx = boost::fusion::at_c<0>(attr);
-    auto sy = boost::fusion::at_c<1>(attr);
+    auto sx = at_c<0>(attr);
+    auto sy = at_c<1>(attr);
     if (sy)
         tr = agg::trans_affine_scaling(sx, *sy) * tr;
     else

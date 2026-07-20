@@ -34,11 +34,10 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
-#include <boost/optional/optional_fwd.hpp>
-
 // stl
 #include <memory>
 #include <vector>
+#include <optional>
 #include <string>
 
 namespace mapnik {
@@ -189,7 +188,7 @@ class MAPNIK_DECL Map : boost::equality_comparable<Map>
      *  @param name The name of the style.
      *  @return The style if found. If not found return the default map style.
      */
-    boost::optional<feature_type_style const&> find_style(std::string const& name) const;
+    std::optional<std::reference_wrapper<feature_type_style const>> find_style(std::string const& name) const;
 
     /*! \brief Insert a fontset into the map by copying.
      *  @param name The name of the fontset.
@@ -211,7 +210,7 @@ class MAPNIK_DECL Map : boost::equality_comparable<Map>
      *  @param name The name of the fontset.
      *  @return The fontset if found. If not found return the default map fontset.
      */
-    boost::optional<font_set const&> find_fontset(std::string const& name) const;
+    std::optional<std::reference_wrapper<font_set const>> find_fontset(std::string const& name) const;
 
     /*! \brief Get all fontsets
      * @return Const reference to fontsets

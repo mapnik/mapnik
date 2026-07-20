@@ -111,13 +111,13 @@ Qt::ItemFlags LayerListModel::flags(QModelIndex const& index) const
     return flags;
 }
 
-boost::optional<mapnik::layer&> LayerListModel::map_layer(int i)
+std::optional<std::reference_wrapper<mapnik::layer>> LayerListModel::map_layer(int i)
 {
     if (map_)
     {
         std::vector<mapnik::layer>& layers = const_cast<std::vector<mapnik::layer>&>(map_->layers());
         if (i < int(layers.size()))
-            return boost::optional<mapnik::layer&>(layers[i]);
+            return std::optional<std::reference_wrapper<mapnik::layer>>(layers[i]);
     }
-    return boost::optional<mapnik::layer&>();
+    return std::optional<std::reference_wrapper<mapnik::layer>>();
 }

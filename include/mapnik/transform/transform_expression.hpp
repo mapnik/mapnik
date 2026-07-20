@@ -34,7 +34,6 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
 #include <boost/fusion/include/at.hpp>
 #include <boost/fusion/include/vector.hpp>
 MAPNIK_DISABLE_WARNING_POP
@@ -42,6 +41,7 @@ MAPNIK_DISABLE_WARNING_POP
 // stl
 #include <vector>
 #include <memory>
+#include <optional>
 
 namespace mapnik {
 
@@ -91,7 +91,7 @@ struct translate_node
 
     translate_node() = default;
 
-    translate_node(expr_node const& tx, boost::optional<expr_node> const& ty)
+    translate_node(expr_node const& tx, std::optional<expr_node> const& ty)
         : tx_(tx),
           ty_(ty ? expr_node(*ty) : value_null())
     {}
@@ -104,7 +104,7 @@ struct scale_node
 
     scale_node() = default;
 
-    scale_node(expr_node const& sx, boost::optional<expr_node> const& sy)
+    scale_node(expr_node const& sx, std::optional<expr_node> const& sy)
         : sx_(sx),
           sy_(sy ? expr_node(*sy) : value_null())
     {}
@@ -130,13 +130,13 @@ struct rotate_node
           cy_(cy)
     {}
 
-    rotate_node(expr_node const& angle, boost::optional<expr_node> const& cx, boost::optional<expr_node> const& cy)
+    rotate_node(expr_node const& angle, std::optional<expr_node> const& cx, std::optional<expr_node> const& cy)
         : angle_(angle),
           cx_(cx ? expr_node(*cx) : value_null()),
           cy_(cy ? expr_node(*cy) : value_null())
     {}
 
-    rotate_node(expr_node const& angle, boost::optional<coords_type> const& center)
+    rotate_node(expr_node const& angle, std::optional<coords_type> const& center)
         : angle_(angle)
     {
         if (center)

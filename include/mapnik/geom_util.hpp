@@ -34,12 +34,12 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
+#include <optional>
 
 // boost
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
@@ -299,7 +299,7 @@ bool hit_test_first(PathType& path, double x, double y)
 namespace label {
 
 template<typename PathType>
-bool middle_point(PathType& path, double& x, double& y, boost::optional<double&> angle = boost::none)
+bool middle_point(PathType& path, double& x, double& y, std::optional<std::reference_wrapper<double>> angle = {})
 {
     double x0 = 0;
     double y0 = 0;
@@ -330,7 +330,7 @@ bool middle_point(PathType& path, double& x, double& y, boost::optional<double&>
             y = y0 + (y1 - y0) * r;
             if (angle)
             {
-                *angle = atan2(y1 - y0, x1 - x0);
+                angle->get() = atan2(y1 - y0, x1 - x0);
             }
             break;
         }
