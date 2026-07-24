@@ -6,13 +6,23 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
-## Unreleased
+## Mapnik 4.3.0
 
+Released July 24th, 2026
+
+(Packaged from [xxxxxxx](https://github.com/mapnik/mapnik/commit/xxxxx))
+
+- Fix PostGIS async connection pool churn (#4520)
+- Rendering complex Unicode sequences across multiple fonts in a fontset (PR #4554)(PR #4556)
+- tiles.input - better auto VT compression inference.
+- Use C++ port of polylabel v2.1.0 (https://github.com/mapnik/polylabel)
 - Add `!unbuffered_bbox!` SQL token to the `postgis` and `pgraster` plugins.
   It expands to the metatile boundary — the same extent as `!bbox!` but
   without `buffer-size` padding. Clipped to `!bbox!` so it is never larger.
   Containment via `ST_Covers(!unbuffered_bbox!, way)` is guaranteed when
   the map SRS and the layer SRS are the same.
+- Replace remaining boost::optional<T> with std::optional<T> (triggers ABIs changes).
+  NOTE: revisit implementation when std::optional<T&> becomes available (c++26).
 
 ## Mapnik 4.2.2
 
