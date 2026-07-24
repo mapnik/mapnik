@@ -10,7 +10,7 @@ For a complete change history, see the git log.
 
 Released July 24th, 2026
 
-(Packaged from [xxxxxxx](https://github.com/mapnik/mapnik/commit/xxxxx))
+(Packaged from [2b7d513a0](https://github.com/mapnik/mapnik/commit/2b7d513a0))
 
 - Fix PostGIS async connection pool churn (#4520)
 - Rendering complex Unicode sequences across multiple fonts in a fontset (PR #4554)(PR #4556)
