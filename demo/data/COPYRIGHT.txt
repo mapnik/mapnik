@@ -1,3 +1,80 @@
 © 2003. Government of Canada with permission from Natural Resources Canada
 
-Original License: http://geogratis.cgdi.gc.ca/geogratis/en/licence.jsp
+
+Geogratis Licence Agreement For Unrestricted Use Of Digital Data
+
+This is a legal agreement between you ("Licensee") and Her Majesty the Queen in Right of Canada ("Canada"), as represented by the Minister of Natural Resources Canada. BY ACCESSING, DOWNLOADING, PRINTING OR USING THE DATA, INFORMATION AND MATERIALS BEING PROVIDED WITH, OR ACCESSIBLE PURSUANT TO THIS AGREEMENT, YOU ARE AGREEING TO BE BOUND BY THE TERMS OF THIS AGREEMENT.IF YOU DO NOT AGREE TO THE TERMS OF THIS AGREEMENT, YOU MUST IMMEDIATELY DISPOSE OF ANY SUCH DATA, INFORMATION, MATERIALS AND ANY DERIVED PRODUCTS.
+
+        WHEREAS Canada is the owner of the data (the "Data") accessible pursuant to the terms and conditions of this Agreement;
+
+        AND WHEREAS the Licensee wishes to obtain certain rights to the Data, on terms and conditions herein contained;
+
+        AND WHEREAS Canada represents that it has full authority to grant the rights desired by the Licensee on the terms and conditions herein contained;
+
+        AND WHEREAS the parties hereto are desirous of entering into a licence agreement on the basis herein set forth.
+
+NOW, THEREFORE, in consideration of the covenants contained in this Agreement, the parties agree as follows:
+
+1.0 DEFINITIONS
+
+        Canada's Data means any and all Data, the Intellectual Property Rights of which vest with Canada.
+
+        Data means any digital data, meta-data, or documentation subject to the terms and conditions of this Agreement.
+
+        Derivative Products means any product, system, sub-system, device, component, material or software that incorporates or uses any part of the Data.
+
+        Intellectual Property Rights means any intellectual property right recognised by law, including any intellectual property right protected through legislation, such as that governing, but not limited to, copyright and patents.
+
+2.0 LICENCE GRANT
+
+        Subject to this Agreement, Canada hereby grants to the Licensee a non-exclusive, fully paid, royalty-free right and licence to exercise all Intellectual Property Rights in the Data. This includes the right to use, incorporate, sublicense (with further right of sublicensing), modify, improve, further develop, and distribute the Data; and to manufacture and / or distribute Derivative Products.
+
+        The Intellectual Property Rights arising from any modification, improvement, development or translation of the Data, or from the manufacture of Derivative Products, effected by or for the Licensee, shall vest in the Licensee or in such person as the Licensee shall decide.
+
+3.0 PROTECTION AND ACKNOWLEDGEMENT OF SOURCE
+
+        Use of the Data shall not be construed as an endorsement by Canada of any Derivative Products.
+
+        The Licensee shall identify the source of the Data, in the following manner, where any of the Data are redistributed, or contained within Derivative Products:
+
+        "© Department of Natural Resources Canada. All rights reserved."
+
+4.0 WARRANTY, LIABILITY, INDEMNITY
+
+        Canada makes no representation or warranty of any kind with respect to the accuracy, usefulness, novelty, validity, scope, completeness or currency of the Data and expressly disclaims any implied warranty of merchantability or fitness for a particular purpose of the Data. Canada does not ensure or warrant compatibility with past, current or future versions of any browser to access the site's Data.
+
+        The Licensee shall have no recourse against Canada, whether by way of any suit or action, for any loss, liability, damage or cost that the Licensee may suffer or incur at any time, by reason of the Licensee's possession or use of the Data.
+
+        The Licensee shall indemnify Canada and its officers, employees, agents and contractors from all claims alleging loss, costs, expenses, damages or injuries (including injuries resulting in death) arising out of the Licensee's possession or use of the Data.
+
+        The Licensee shall license all persons or parties who obtain Data or Derivative Products from the Licensee the right to use the Data or Derivative Products by way of a license agreement, and that agreement shall impose upon these persons or parties the same terms and conditions as those contained in section 4.0 of this Agreement.
+
+        The Licensee's liability to indemnify Canada under this Agreement shall not affect or prejudice Canada from exercising any other rights under law.
+
+5.0 TERM
+
+        This Agreement is effective as of the date and time of acceptance (Eastern Time) and shall remain in effect for a period of one (1) year, subject to subsection 5.2 and section 6.0 below.
+
+        At the end of the first term, this Agreement shall automatically be extended for successive one (1) year terms, subject to section 6.0 below.
+
+6.0 TERMINATION
+
+        Notwithstanding section 5.0, this Agreement shall terminate:
+            automatically and without notice, if the Licensee commits or permits a breach of any of its covenants or obligations under this Agreement;
+            upon written notice of termination by the Licensee at any time, and such termination shall take effect thirty (30) days after the receipt by Canada of such notice; or
+            upon mutual agreement of the parties.
+
+        Upon the termination for whatever reason of this Agreement, the Licensee's obligations under section 4.0 shall survive; and the Licensee's rights under section 2.0 shall immediately cease.
+
+        Upon the termination for whatever reason of this Agreement, the Licensee shall delete or destroy all Data acquired under this Agreement immediately or within a reasonable timeframe where the Data is required to complete orders of Derivative Products made before the termination date of this Agreement.
+
+7.0 GENERAL
+
+        Applicable Law
+        This Agreement shall be construed and enforced in accordance with, and the rights of the parties shall be governed by, the laws of Ontario and Canada as applicable. The parties hereto attorn to the jurisdiction of the Superior Court of the Province of Ontario.
+
+        Entire Agreement
+        This Agreement constitutes the entire agreement between the parties with respect to its subject matter. This Agreement may only be amended in writing, signed by both parties, which expressly states the intention to amend this Agreement.
+
+        Dispute Resolution
+        If a dispute arises concerning this Agreement, the parties shall attempt to resolve the matter by negotiation.
