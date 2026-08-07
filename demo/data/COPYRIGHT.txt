@@ -1,5 +1,4 @@
-© 2003. Government of Canada with permission from Natural Resources Canada
-
+Â© 2003. Government of Canada with permission from Natural Resources Canada
 
 Geogratis Licence Agreement For Unrestricted Use Of Digital Data
 
@@ -37,7 +36,7 @@ NOW, THEREFORE, in consideration of the covenants contained in this Agreement, t
 
         The Licensee shall identify the source of the Data, in the following manner, where any of the Data are redistributed, or contained within Derivative Products:
 
-        "© Department of Natural Resources Canada. All rights reserved."
+        "Â© Department of Natural Resources Canada. All rights reserved."
 
 4.0 WARRANTY, LIABILITY, INDEMNITY
 
