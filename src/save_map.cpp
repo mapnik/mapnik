@@ -97,7 +97,7 @@ void serialize_text_placements(ptree& node, text_placements_ptr const& p, bool e
     }
 }
 
-// ArcSymbolizer lable text attributs, basically inherited from TextSymbolizer
+// ArcSymbolizer label text attributes, basically inherited from TextSymbolizer
 // but using an explicit text- prefix to avoid name clashes
 void serialize_arc_text(ptree& node, text_placements_ptr const& p, bool explicit_defaults)
 {
