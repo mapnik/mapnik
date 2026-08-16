@@ -284,6 +284,7 @@ source = Split(
     config_error.cpp
     color_factory.cpp
     renderer_common.cpp
+    renderer_common/arc_text_placement.cpp
     renderer_common/render_group_symbolizer.cpp
     renderer_common/render_markers_symbolizer.cpp
     renderer_common/render_pattern.cpp

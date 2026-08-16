@@ -206,6 +206,7 @@ target_sources(mapnik PRIVATE
 )
 
 target_sources(mapnik PRIVATE
+    renderer_common/arc_text_placement.cpp
     renderer_common/pattern_alignment.cpp
     renderer_common/render_group_symbolizer.cpp
     renderer_common/render_markers_symbolizer.cpp
