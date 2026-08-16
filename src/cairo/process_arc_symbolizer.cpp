@@ -150,12 +150,29 @@ struct render_arc_symbolizer
             context_.set_color(props_.arc_stroke, props_.arc_stroke_opacity);
             context_.stroke();
         }
+
+        // Label bent along the outside of the arc, or running radially outward
+        // when the arc is too short for it. Colours and halo come from the
+        // glyph formats.
+        if (layout_)
+        {
+            // add_text switches the cairo operator, so keep that scoped
+            cairo_save_restore guard(context_);
+            auto [a0, a1] = props_.sweep();
+            glyph_positions_ptr glyphs =
+              place_arc_text(*layout_, cx, cy, props_.radius, a0, a1, props_.text_offset, common_.scale_factor_);
+            if (glyphs)
+                context_.add_text(*glyphs, face_manager_, comp_op_, src_over, common_.scale_factor_);
+        }
     }
 
     cairo_context& context_;
     renderer_common const& common_;
     proj_transform const& prj_trans_;
     arc_symbolizer_properties const& props_;
+    text_layout const* layout_;
+    cairo_face_manager& face_manager_;
+    composite_mode_e comp_op_;
 };
 
 } // namespace detail
@@ -166,10 +183,20 @@ void cairo_renderer<T>::process(arc_symbolizer const& sym,
                                 proj_transform const& prj_trans)
 {
     arc_symbolizer_properties const props(sym, feature, common_.vars_, common_.scale_factor_);
+    composite_mode_e const comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+
+    // Shape the optional label once here; it is placed per arc centre below.
+    arc_text_layout const label(sym, feature, common_.vars_, common_.font_manager_, common_.scale_factor_);
 
     cairo_save_restore guard(context_);
 
-    detail::render_arc_symbolizer apply{context_, common_, prj_trans, props};
+    detail::render_arc_symbolizer apply{context_,
+                                        common_,
+                                        prj_trans,
+                                        props,
+                                        label ? &label.get() : nullptr,
+                                        face_manager_,
+                                        comp_op};
     mapnik::util::apply_visitor(geometry::vertex_processor<detail::render_arc_symbolizer>(apply),
                                 feature.get_geometry());
 }
