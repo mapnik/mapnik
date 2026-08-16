@@ -1137,7 +1137,56 @@ void map_parser::parse_arc_symbolizer(rule& rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base, double>(sym, keys::radius_stroke_opacity, node);
         set_symbolizer_property<symbolizer_base, dash_array>(sym, keys::radius_stroke_dasharray, node);
         set_symbolizer_property<symbolizer_base, double>(sym, keys::radius_stroke_dashoffset, node);
-	
+
+	// optional label text attributes
+	// all but text-offset is basically inherited from TextSymbolizer settings
+        auto const text = node.get_opt_attr<expression_ptr>("text");
+        if (text)
+        {
+            auto placements = std::make_shared<text_placements_dummy>();
+            format_properties& fmt = placements->defaults.format_defaults;
+            set_property_from_xml<double>(fmt.text_size, "text-size", node);
+            set_property_from_xml<color>(fmt.fill, "text-fill", node);
+            set_property_from_xml<double>(fmt.text_opacity, "text-opacity", node);
+            set_property_from_xml<color>(fmt.halo_fill, "text-halo-fill", node);
+            set_property_from_xml<double>(fmt.halo_radius, "text-halo-radius", node);
+            set_property_from_xml<double>(fmt.halo_opacity, "text-halo-opacity", node);
+            set_property_from_xml<double>(fmt.character_spacing, "text-character-spacing", node);
+            set_property_from_xml<text_transform_e>(fmt.text_transform, "text-transform", node);
+            set_property_from_xml<font_feature_settings>(fmt.ff_settings, "text-font-feature-settings", node);
+
+            auto const face_name = node.get_opt_attr<std::string>("text-face-name");
+            if (face_name)
+                fmt.face_name = *face_name;
+            auto const fontset_name = node.get_opt_attr<std::string>("text-fontset-name");
+            if (fontset_name)
+            {
+                std::map<std::string, font_set>::const_iterator itr = fontsets_.find(*fontset_name);
+                if (itr == fontsets_.end())
+                {
+                    throw config_error("Unable to find any fontset named '" + *fontset_name + "'", node);
+                }
+                fmt.fontset = itr->second;
+            }
+            if (!fmt.face_name.empty() && fmt.fontset)
+            {
+                throw config_error("Can't have both text-face-name and text-fontset-name", node);
+            }
+            if (fmt.face_name.empty() && !fmt.fontset)
+            {
+                throw config_error("Must have text-face-name or text-fontset-name when text is set", node);
+            }
+            if (strict_ && !fmt.fontset)
+            {
+                ensure_font_face(fmt.face_name);
+            }
+
+            placements->defaults.set_format_tree(std::make_shared<formatting::text_node>(*text));
+            put<text_placements_ptr>(sym, keys::text_placements_, placements);
+            // radial gap between the arc line and the label
+            set_symbolizer_property<symbolizer_base, double>(sym, keys::text_offset, node);
+        }
+
         rule.append(std::move(sym));
     }
     catch (config_error const& ex)
@@ -1146,7 +1195,6 @@ void map_parser::parse_arc_symbolizer(rule& rule, xml_node const& node)
         throw;
     }
 }
-
 
 void map_parser::parse_markers_symbolizer(rule& rule, xml_node const& node)
 {

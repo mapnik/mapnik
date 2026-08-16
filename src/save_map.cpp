@@ -35,6 +35,8 @@
 #include <mapnik/text/placements/simple.hpp>
 #include <mapnik/text/placements/list.hpp>
 #include <mapnik/text/placements/dummy.hpp>
+#include <mapnik/text/formatting/text.hpp>
+#include <mapnik/text/properties_util.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/image_filter.hpp>
@@ -93,6 +95,45 @@ void serialize_text_placements(ptree& node, text_placements_ptr const& p, bool e
             dfl2 = &(list->get(i));
         }
     }
+}
+
+// ArcSymbolizer lable text attributs, basically inherited from TextSymbolizer
+// but using an explicit text- prefix to avoid name clashes
+void serialize_arc_text(ptree& node, text_placements_ptr const& p, bool explicit_defaults)
+{
+    auto text = dynamic_cast<formatting::text_node*>(p->defaults.format_tree().get());
+    if (text && text->get_text())
+    {
+        set_attr(node, "text", mapnik::to_expression_string(*text->get_text()));
+    }
+    format_properties const& fmt = p->defaults.format_defaults;
+    format_properties const dfl;
+    if (fmt.fontset)
+    {
+        set_attr(node, "text-fontset-name", fmt.fontset->get_name());
+    }
+    if (!fmt.face_name.empty() || explicit_defaults)
+    {
+        set_attr(node, "text-face-name", fmt.face_name);
+    }
+    if (!(fmt.text_size == dfl.text_size) || explicit_defaults)
+        serialize_property("text-size", fmt.text_size, node);
+    if (!(fmt.fill == dfl.fill) || explicit_defaults)
+        serialize_property("text-fill", fmt.fill, node);
+    if (!(fmt.text_opacity == dfl.text_opacity) || explicit_defaults)
+        serialize_property("text-opacity", fmt.text_opacity, node);
+    if (!(fmt.halo_fill == dfl.halo_fill) || explicit_defaults)
+        serialize_property("text-halo-fill", fmt.halo_fill, node);
+    if (!(fmt.halo_radius == dfl.halo_radius) || explicit_defaults)
+        serialize_property("text-halo-radius", fmt.halo_radius, node);
+    if (!(fmt.halo_opacity == dfl.halo_opacity) || explicit_defaults)
+        serialize_property("text-halo-opacity", fmt.halo_opacity, node);
+    if (!(fmt.character_spacing == dfl.character_spacing) || explicit_defaults)
+        serialize_property("text-character-spacing", fmt.character_spacing, node);
+    if (!(fmt.text_transform == dfl.text_transform) || explicit_defaults)
+        serialize_property("text-transform", fmt.text_transform, node);
+    if (!(fmt.ff_settings == dfl.ff_settings) || explicit_defaults)
+        serialize_property("text-font-feature-settings", fmt.ff_settings, node);
 }
 
 void serialize_raster_colorizer(ptree& sym_node, raster_colorizer_ptr const& colorizer, bool explicit_defaults)
@@ -234,6 +275,26 @@ class serialize_symbolizer
     {
         ptree& sym_node = rule_.push_back(ptree::value_type(symbolizer_traits<Symbolizer>::name(), ptree()))->second;
         serialize_symbolizer_properties(sym_node, sym);
+    }
+
+    void operator()(arc_symbolizer const& sym)
+    {
+        ptree& sym_node =
+          rule_.push_back(ptree::value_type(symbolizer_traits<arc_symbolizer>::name(), ptree()))->second;
+        for (auto const& prop : sym.properties)
+        {
+            if (prop.first == keys::text_placements_)
+            {
+                serialize_arc_text(sym_node, util::get<text_placements_ptr>(prop.second), explicit_defaults_);
+            }
+            else
+            {
+                util::apply_visitor(serialize_symbolizer_property<property_meta_type>(get_meta(prop.first),
+                                                                                      sym_node,
+                                                                                      explicit_defaults_),
+                                    prop.second);
+            }
+        }
     }
 
   private:
