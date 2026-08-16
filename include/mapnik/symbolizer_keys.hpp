@@ -108,6 +108,7 @@ enum class keys : std::uint8_t {
     radius_stroke_opacity,
     radius_stroke_dasharray,
     radius_stroke_dashoffset,
+    text_offset,
     MAX_SYMBOLIZER_KEY
 };
 
