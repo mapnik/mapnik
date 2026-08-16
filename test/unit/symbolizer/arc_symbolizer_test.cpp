@@ -12,6 +12,8 @@
 #include <mapnik/value/types.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/expression_string.hpp>
+#include <mapnik/text/placements/base.hpp>
+#include <mapnik/text/formatting/text.hpp>
 
 #include <string>
 
@@ -34,6 +36,11 @@ std::string const arc_xml = R"xml(<?xml version="1.0" encoding="utf-8"?>
                      arc-stroke-dasharray="6,6" arc-stroke-dashoffset="0.6"
                      radius-stroke="rgb(255,0,0)" radius-stroke-width="4" radius-stroke-opacity="0.9"
                      radius-stroke-dasharray="7,7" radius-stroke-dashoffset="0.7"
+                     text="[label]" text-face-name="DejaVu Sans Book"
+                     text-size="12" text-fill="rgb(10,20,30)" text-opacity="0.4"
+                     text-halo-fill="rgb(40,50,60)" text-halo-radius="1.5" text-halo-opacity="0.3"
+                     text-character-spacing="2" text-transform="uppercase"
+                     text-offset="4"
                      />
     </Rule>
   </Style>
@@ -44,8 +51,9 @@ arc_symbolizer const& first_arc(Map const& m)
 {
     auto style = m.find_style("arcs");
     REQUIRE(bool(style));
-    REQUIRE(style->get_rules().size() == 1);
-    auto const& sym = style->get_rules().front().get_symbolizers().front();
+    feature_type_style const& fts = style->get();
+    REQUIRE(fts.get_rules().size() == 1);
+    auto const& sym = fts.get_rules().front().get_symbolizers().front();
     // exercises symbolizer_traits<arc_symbolizer>
     REQUIRE(symbolizer_name(sym) == "ArcSymbolizer");
     return util::get<arc_symbolizer>(sym);
@@ -104,6 +112,36 @@ void check_arc(arc_symbolizer const& sym)
     REQUIRE(get<double>(sym, keys::radius_stroke_opacity) == Approx(0.9));
     check_dash(sym, keys::radius_stroke_dasharray, 7.0, 7.0);
     REQUIRE(get<double>(sym, keys::radius_stroke_dashoffset) == Approx(0.7));
+
+    // label test: the text-* attributes are mapped onto the standard text
+    // format properties and stored as text placements
+    REQUIRE(get<double>(sym, keys::text_offset) == Approx(4.0));
+    text_placements_ptr const placements = get<text_placements_ptr>(sym, keys::text_placements_);
+    REQUIRE(bool(placements));
+
+    auto const text = dynamic_cast<formatting::text_node*>(placements->defaults.format_tree().get());
+    REQUIRE(text != nullptr);
+    REQUIRE(to_expression_string(*text->get_text()) == "[label]");
+
+    format_properties const& fmt = placements->defaults.format_defaults;
+    REQUIRE(fmt.face_name == "DejaVu Sans Book");
+    REQUIRE(util::get<value_double>(fmt.text_size) == Approx(12.0));
+    REQUIRE(util::get<value_double>(fmt.text_opacity) == Approx(0.4));
+    REQUIRE(util::get<value_double>(fmt.halo_radius) == Approx(1.5));
+    REQUIRE(util::get<value_double>(fmt.halo_opacity) == Approx(0.3));
+    REQUIRE(util::get<value_double>(fmt.character_spacing) == Approx(2.0));
+    REQUIRE(util::get<enumeration_wrapper>(fmt.text_transform).value ==
+            static_cast<int>(text_transform_enum::UPPERCASE));
+
+    color const text_fill = util::get<color>(fmt.fill);
+    REQUIRE(text_fill.red() == 10);
+    REQUIRE(text_fill.green() == 20);
+    REQUIRE(text_fill.blue() == 30);
+
+    color const halo_fill = util::get<color>(fmt.halo_fill);
+    REQUIRE(halo_fill.red() == 40);
+    REQUIRE(halo_fill.green() == 50);
+    REQUIRE(halo_fill.blue() == 60);
 }
 
 } // namespace
