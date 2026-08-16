@@ -109,6 +109,10 @@ struct arc_symbolizer_properties
 	radius_dash_offset = has_key(sym, keys::radius_stroke_dashoffset)
 	                   ? get<double>(sym, keys::radius_stroke_dashoffset, feature, vars, 0.0)
 	                   : stroke_dash_offset;
+
+        // label attributes -- the text itself and its formatting live in the
+        // text_placements_ property, only the radial gap is a plain attribute
+        text_offset = get<double>(sym, keys::text_offset, feature, vars, 2.0) * scale_factor;
     }
 
     // Sweep angles in radians, clockwise from north, with wrap-around handled
@@ -151,6 +155,8 @@ struct arc_symbolizer_properties
     double radius_stroke_opacity;
     dash_array radius_dash;
     double radius_dash_offset;
+
+    double text_offset;
 };
 
 } // namespace mapnik
