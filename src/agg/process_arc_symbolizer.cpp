@@ -73,7 +73,9 @@ struct render_arc_symbolizer : util::noncopyable
                           arc_symbolizer_properties const& props,
                           agg::rgba8 const& fill_col,
                           agg::rgba8 const& arc_stroke_col,
-                          agg::rgba8 const& radius_stroke_col)
+                          agg::rgba8 const& radius_stroke_col,
+                          text_layout const* layout,
+                          TextRenderer* text_ren)
         : ras_(ras),
           ren_(ren),
           common_(common),
@@ -81,7 +83,9 @@ struct render_arc_symbolizer : util::noncopyable
           props_(props),
           fill_col_(fill_col),
           arc_stroke_col_(arc_stroke_col),
-          radius_stroke_col_(radius_stroke_col)
+          radius_stroke_col_(radius_stroke_col),
+          layout_(layout),
+          text_ren_(text_ren)
     {}
 
     template<typename Adapter>
@@ -188,6 +192,18 @@ struct render_arc_symbolizer : util::noncopyable
                                    props_.arc_dash,
                                    props_.arc_dash_offset);
         }
+
+        // Label bent along the outside of the arc, or running radially outward
+        // when the arc is too short for it. Colours and halo come from the
+        // glyph formats.
+        if (layout_ && text_ren_)
+        {
+            auto [a0, a1] = props_.sweep();
+            glyph_positions_ptr glyphs =
+              place_arc_text(*layout_, cx, cy, props_.radius, a0, a1, props_.text_offset, common_.scale_factor_);
+            if (glyphs)
+                text_ren_->render(*glyphs);
+        }
     }
 
     // Stroke the path with the given width/color and render, applying the
@@ -239,6 +255,8 @@ struct render_arc_symbolizer : util::noncopyable
     agg::rgba8 fill_col_;
     agg::rgba8 arc_stroke_col_;
     agg::rgba8 radius_stroke_col_;
+    text_layout const* layout_;
+    TextRenderer* text_ren_;
 };
 
 } // namespace detail
@@ -249,6 +267,9 @@ void agg_renderer<T0, T1>::process(arc_symbolizer const& sym,
                                    proj_transform const& prj_trans)
 {
     arc_symbolizer_properties const props(sym, feature, common_.vars_, common_.scale_factor_);
+
+    // Shape the optional label once here; it is placed per arc centre below.
+    arc_text_layout const label(sym, feature, common_.vars_, common_.font_manager_, common_.scale_factor_);
 
     ras_ptr->reset();
     if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
@@ -281,10 +302,31 @@ void agg_renderer<T0, T1>::process(arc_symbolizer const& sym,
     agg::rgba8 const arc_stroke_col = premultiply(props.arc_stroke, props.arc_stroke_opacity);
     agg::rgba8 const radius_stroke_col = premultiply(props.radius_stroke, props.radius_stroke_opacity);
 
+    // The label is rendered straight into the buffer rather than through the
+    // rasterizer above, so it only needs to exist when there is a label.
+    std::optional<agg_text_renderer<T0>> text_ren;
+    if (label)
+    {
+        text_ren.emplace(current_buffer,
+                         halo_rasterizer_enum::HALO_RASTERIZER_FULL,
+                         comp_op,
+                         src_over,
+                         common_.scale_factor_,
+                         common_.font_manager_.get_stroker());
+    }
+
     using render_arc_symbolizer_type =
       detail::render_arc_symbolizer<rasterizer, renderer_type, agg_text_renderer<T0>, renderer_common, proj_transform>;
-    render_arc_symbolizer_type
-      apply(*ras_ptr, ren, common_, prj_trans, props, fill_col, arc_stroke_col, radius_stroke_col);
+    render_arc_symbolizer_type apply(*ras_ptr,
+                                     ren,
+                                     common_,
+                                     prj_trans,
+                                     props,
+                                     fill_col,
+                                     arc_stroke_col,
+                                     radius_stroke_col,
+                                     label ? &label.get() : nullptr,
+                                     text_ren ? &*text_ren : nullptr);
     mapnik::util::apply_visitor(geometry::vertex_processor<render_arc_symbolizer_type>(apply), feature.get_geometry());
 }
 
