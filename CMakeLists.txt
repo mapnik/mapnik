@@ -57,7 +57,7 @@ mapnik_option(USE_MULTITHREADED "enables the multithreaded features (threadsafe)
 mapnik_option(USE_NO_ATEXIT "disable atexit" OFF)
 mapnik_option(USE_NO_DLCLOSE "disable dlclose" OFF)
 mapnik_option(USE_DEBUG_OUTPUT "enables some debug messages for development" OFF)
-mapnik_option(USE_NDEBUG "define NDEBUG for non-Debug builds. Turning this off makes mapbox::variant dispatch non-inlinable and is drastically slower - see below." ON)
+mapnik_option(USE_NDEBUG "defines NDEBUG for non-Debug builds. Turning this off makes mapbox::variant dispatch non-inlinable and much slower" ON)
 mapnik_option(USE_LOG "enables logging output. See log severity level." OFF)
 # 0 = debug
 # 1 = warn
@@ -296,41 +296,20 @@ if(USE_DEBUG_OUTPUT)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_DEBUG)
 endif()
 
-# NDEBUG does much more for mapnik than disable assert(). mapbox::variant annotates
-# every visit()/dispatcher::apply()/recursive_wrapper::get() with VARIANT_INLINE, which
-# expands to __attribute__((noinline)) when NDEBUG is *not* defined, and to nothing when
-# it is. mapnik's expression AST, mapnik::value and all geometry visitation go through
-# mapbox::variant, so an optimised build without NDEBUG cannot inline its own hottest
-# dispatch path: ~6x slower rule-filter evaluation, and ~3.7x slower on a real
-# openstreetmap-carto z10 tile (25s -> 94s).
+# NDEBUG does more for mapnik than disable assert(): mapbox::variant tags every
+# visit()/dispatcher::apply()/recursive_wrapper::get() with VARIANT_INLINE, which expands to
+# __attribute__((noinline)) when NDEBUG is not defined. mapnik's expression AST, mapnik::value
+# and all geometry visitation go through mapbox::variant, so an optimised build without NDEBUG
+# cannot inline its own hottest dispatch path (ref #4571).
 #
-# CMake only supplies -DNDEBUG via CMAKE_<LANG>_FLAGS_<CONFIG>, i.e. for the Release,
-# RelWithDebInfo and MinSizeRel configurations. A single-config build that leaves
-# CMAKE_BUILD_TYPE empty or pins it to None gets no NDEBUG at all - which is exactly
-# what Debian's `dh --buildsystem=cmake` does (it configures -DCMAKE_BUILD_TYPE=None so
-# that dpkg-buildflags owns the compiler flags, and dpkg-buildflags supplies -O2 but
-# never NDEBUG). So define it here rather than relying on the configuration name.
-#
-# This lands in MAPNIK_COMPILE_DEFS, which is also what libmapnik.pc advertises, so
-# consumers compiling their own translation units against mapnik's headers inherit it
-# too - they hit the same VARIANT_INLINE penalty otherwise.
+# CMake only supplies -DNDEBUG via CMAKE_<LANG>_FLAGS_<CONFIG>, so a build that leaves
+# CMAKE_BUILD_TYPE empty or pins it to None - as Debian's `dh --buildsystem=cmake` does - never
+# gets it. Define it here instead of relying on the configuration name. Multi-config generators
+# pick the configuration at build time, where CMAKE_<LANG>_FLAGS_<CONFIG> already handles this.
 get_property(MAPNIK_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 string(TOUPPER "${CMAKE_BUILD_TYPE}" MAPNIK_BUILD_TYPE_UPPER)
-if(MAPNIK_IS_MULTI_CONFIG)
-    # Config is chosen at build time; CMAKE_<LANG>_FLAGS_<CONFIG> already handles NDEBUG
-    # per configuration, and CMAKE_BUILD_TYPE is meaningless here.
-elseif(MAPNIK_BUILD_TYPE_UPPER STREQUAL "DEBUG")
-    message(STATUS "Debug build: leaving NDEBUG undefined (assertions on, mapbox::variant dispatch not inlined)")
-elseif(USE_NDEBUG)
+if(USE_NDEBUG AND NOT MAPNIK_IS_MULTI_CONFIG AND NOT MAPNIK_BUILD_TYPE_UPPER STREQUAL "DEBUG")
     list(APPEND MAPNIK_COMPILE_DEFS NDEBUG)
-else()
-    message(WARNING
-        "USE_NDEBUG is OFF for a non-Debug build (CMAKE_BUILD_TYPE='${CMAKE_BUILD_TYPE}'). "
-        "Unless -DNDEBUG is supplied some other way, mapbox::variant's VARIANT_INLINE becomes "
-        "__attribute__((noinline)) and libmapnik will be several times slower on any "
-        "expression-heavy style, regardless of the optimisation level. Packagers: append "
-        "-DNDEBUG to CPPFLAGS, or leave USE_NDEBUG ON."
-    )
 endif()
 
 if(USE_LOG)
