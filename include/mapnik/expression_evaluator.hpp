@@ -36,6 +36,57 @@
 
 namespace mapnik {
 
+namespace detail {
+
+template<typename Tag>
+struct ustring_compare
+{
+    static constexpr bool enabled = false;
+};
+
+template<>
+struct ustring_compare<mapnik::tags::equal_to>
+{
+    static constexpr bool enabled = true;
+
+    static bool apply(value_unicode_string const& a, value_unicode_string const& b) { return a == b; }
+
+    template<typename V>
+    static bool apply_value(V const& lhs, value_unicode_string const& rhs)
+    {
+        if (lhs.template is<value_unicode_string>())
+        {
+            return lhs.template get_unchecked<value_unicode_string>() == rhs;
+        }
+        return false;
+    }
+};
+
+template<>
+struct ustring_compare<mapnik::tags::not_equal_to>
+{
+    static constexpr bool enabled = true;
+
+    static bool apply(value_unicode_string const& a, value_unicode_string const& b) { return a != b; }
+
+    // Preserve value's asymmetric null/empty-string comparison.
+    template<typename V>
+    static bool apply_value(V const& lhs, value_unicode_string const& rhs)
+    {
+        if (lhs.template is<value_unicode_string>())
+        {
+            return lhs.template get_unchecked<value_unicode_string>() != rhs;
+        }
+        if (lhs.template is<value_null>())
+        {
+            return !rhs.isEmpty();
+        }
+        return true;
+    }
+};
+
+} // namespace detail
+
 template<typename T0, typename T1, typename T2>
 struct evaluate
 {
@@ -117,6 +168,24 @@ struct evaluate
         typename make_op<Tag>::type operation;
         value_type const* lhs = borrow(x.left);
         value_type const* rhs = borrow(x.right);
+
+        if constexpr (detail::ustring_compare<Tag>::enabled)
+        {
+            if (lhs && !rhs && x.right.template is<value_unicode_string>())
+            {
+                return value_type(detail::ustring_compare<Tag>::apply_value(
+                  *lhs,
+                  x.right.template get_unchecked<value_unicode_string>()));
+            }
+            if (rhs && !lhs && rhs->template is<value_unicode_string>() &&
+                x.left.template is<value_unicode_string>())
+            {
+                return value_type(
+                  detail::ustring_compare<Tag>::apply(x.left.template get_unchecked<value_unicode_string>(),
+                                                      rhs->template get_unchecked<value_unicode_string>()));
+            }
+        }
+
         if (lhs)
         {
             if (rhs)
