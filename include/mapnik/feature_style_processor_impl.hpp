@@ -612,9 +612,8 @@ void feature_style_processor<Processor>::render_style(Processor& p,
         for (rule const* r : rc.get_if_rules())
         {
             expression_ptr const& expr = r->get_filter();
-            value_type result =
-              util::apply_visitor(evaluate<feature_impl, value_type, attributes>(*feature, vars), *expr);
-            if (result.to_bool())
+            if (util::apply_visitor(evaluate_boolean<feature_impl, value_type, attributes>(*feature, vars),
+                                    *expr))
             {
                 was_painted = true;
                 do_else = false;

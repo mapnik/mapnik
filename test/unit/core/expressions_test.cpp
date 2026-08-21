@@ -48,6 +48,14 @@ mapnik::value evaluate_string(mapnik::feature_ptr const& feature, std::string co
     return evaluate(*feature, *expr);
 }
 
+bool evaluate_boolean_string(mapnik::feature_ptr const& feature, std::string const& str)
+{
+    auto expr = mapnik::parse_expression(str);
+    return mapnik::util::apply_visitor(
+      mapnik::evaluate_boolean<mapnik::feature_impl, mapnik::value_type, mapnik::attributes>(*feature, {}),
+      *expr);
+}
+
 std::string parse_and_dump(std::string const& str)
 {
     auto expr = mapnik::parse_expression(str);
@@ -76,6 +84,7 @@ TEST_CASE("expressions")
 
     auto feature = make_test_feature(1, "POINT(100 200)", prop);
     auto eval = std::bind(evaluate_string, feature, _1);
+    auto eval_bool = std::bind(evaluate_boolean_string, feature, _1);
     auto approx = Approx::custom().epsilon(1e-6);
 
     // primary expressions
@@ -174,6 +183,8 @@ TEST_CASE("expressions")
     // logical
     TRY_CHECK(eval(" [int] = 123 and [double] = 1.23456 && [bool] = true and [null] = null && [foo] = 'bar' ") == true);
     TRY_CHECK(eval(" [int] = 456 or [foo].match('foo') || length([foo]) = 3 ") == true);
+    TRY_CHECK(eval_bool("[foo] = 'bar' and [int] > 100"));
+    TRY_CHECK(eval_bool("not ([foo] = 'missing' or length([foo]) != 3)"));
     TRY_CHECK(eval(" not true  and not true  ") == false); // (not true) and (not true)
     TRY_CHECK(eval(" not false and not true  ") == false); // (not false) and (not true)
     TRY_CHECK(eval(" not true  or  not false ") == true);  // (not true) or (not false)

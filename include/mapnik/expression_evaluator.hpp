@@ -85,6 +85,28 @@ struct ustring_compare<mapnik::tags::not_equal_to>
     }
 };
 
+template<typename Tag>
+struct is_comparison_tag : std::false_type
+{};
+template<>
+struct is_comparison_tag<mapnik::tags::less> : std::true_type
+{};
+template<>
+struct is_comparison_tag<mapnik::tags::less_equal> : std::true_type
+{};
+template<>
+struct is_comparison_tag<mapnik::tags::greater> : std::true_type
+{};
+template<>
+struct is_comparison_tag<mapnik::tags::greater_equal> : std::true_type
+{};
+template<>
+struct is_comparison_tag<mapnik::tags::equal_to> : std::true_type
+{};
+template<>
+struct is_comparison_tag<mapnik::tags::not_equal_to> : std::true_type
+{};
+
 } // namespace detail
 
 template<typename T0, typename T1, typename T2>
@@ -99,8 +121,7 @@ struct evaluate
           vars_(v)
     {}
 
-    using attribute_reference =
-      decltype(std::declval<feature_type const&>().get(std::declval<std::string const&>()));
+    using attribute_reference = decltype(std::declval<feature_type const&>().get(std::declval<std::string const&>()));
     static constexpr bool borrowable_attributes =
       std::is_lvalue_reference_v<attribute_reference> && std::is_same_v<std::decay_t<attribute_reference>, value_type>;
 
@@ -163,7 +184,7 @@ struct evaluate
     }
 
     template<typename Tag>
-    value_type operator()(binary_node<Tag> const& x) const
+    bool compare(binary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type operation;
         value_type const* lhs = borrow(x.left);
@@ -173,16 +194,14 @@ struct evaluate
         {
             if (lhs && !rhs && x.right.template is<value_unicode_string>())
             {
-                return value_type(detail::ustring_compare<Tag>::apply_value(
+                return detail::ustring_compare<Tag>::apply_value(
                   *lhs,
-                  x.right.template get_unchecked<value_unicode_string>()));
+                  x.right.template get_unchecked<value_unicode_string>());
             }
-            if (rhs && !lhs && rhs->template is<value_unicode_string>() &&
-                x.left.template is<value_unicode_string>())
+            if (rhs && !lhs && rhs->template is<value_unicode_string>() && x.left.template is<value_unicode_string>())
             {
-                return value_type(
-                  detail::ustring_compare<Tag>::apply(x.left.template get_unchecked<value_unicode_string>(),
-                                                      rhs->template get_unchecked<value_unicode_string>()));
+                return detail::ustring_compare<Tag>::apply(x.left.template get_unchecked<value_unicode_string>(),
+                                                           rhs->template get_unchecked<value_unicode_string>());
             }
         }
 
@@ -198,6 +217,30 @@ struct evaluate
     }
 
     template<typename Tag>
+    value_type operator()(binary_node<Tag> const& x) const
+    {
+        if constexpr (detail::is_comparison_tag<Tag>::value)
+        {
+            return value_type(compare(x));
+        }
+        else
+        {
+            typename make_op<Tag>::type operation;
+            value_type const* lhs = borrow(x.left);
+            value_type const* rhs = borrow(x.right);
+            if (lhs)
+            {
+                if (rhs)
+                    return operation(*lhs, *rhs);
+                return operation(*lhs, util::apply_visitor(*this, x.right));
+            }
+            if (rhs)
+                return operation(util::apply_visitor(*this, x.left), *rhs);
+            return operation(util::apply_visitor(*this, x.left), util::apply_visitor(*this, x.right));
+        }
+    }
+
+    template<typename Tag>
     value_type operator()(unary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type func;
@@ -208,10 +251,7 @@ struct evaluate
         return func(util::apply_visitor(*this, x.expr));
     }
 
-    value_type operator()(unary_node<tags::logical_not> const& x) const
-    {
-        return !eval_to_bool(x.expr);
-    }
+    value_type operator()(unary_node<tags::logical_not> const& x) const { return !eval_to_bool(x.expr); }
 
     value_type operator()(regex_match_node const& x) const
     {
@@ -240,6 +280,56 @@ struct evaluate
 
     feature_type const& feature_;
     variable_type const& vars_;
+};
+
+// Evaluates an expression for its truth value without materialising intermediate values.
+template<typename T0, typename T1, typename T2>
+struct evaluate_boolean
+{
+    using feature_type = T0;
+    using value_type = T1;
+    using variable_type = T2;
+    using result_type = value_bool;
+
+    explicit evaluate_boolean(feature_type const& f, variable_type const& v)
+        : eval_(f, v)
+    {}
+
+    result_type apply(expr_node const& node) const
+    {
+        if (value_type const* v = eval_.borrow(node))
+        {
+            return v->to_bool();
+        }
+        return util::apply_visitor(*this, node);
+    }
+
+    result_type operator()(binary_node<tags::logical_and> const& x) const { return apply(x.left) && apply(x.right); }
+
+    result_type operator()(binary_node<tags::logical_or> const& x) const { return apply(x.left) || apply(x.right); }
+
+    result_type operator()(unary_node<tags::logical_not> const& x) const { return !apply(x.expr); }
+
+    template<typename Tag>
+    result_type operator()(binary_node<Tag> const& x) const
+    {
+        if constexpr (detail::is_comparison_tag<Tag>::value)
+        {
+            return eval_.compare(x);
+        }
+        else
+        {
+            return eval_(x).to_bool();
+        }
+    }
+
+    template<typename T>
+    result_type operator()(T const& node) const
+    {
+        return eval_(node).to_bool();
+    }
+
+    evaluate<T0, T1, T2> eval_;
 };
 
 } // namespace mapnik
