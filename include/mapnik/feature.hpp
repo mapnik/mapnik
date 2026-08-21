@@ -38,6 +38,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <ostream>   // for basic_ostream, operator<<, etc
 #include <sstream>   // for basic_stringstream
 #include <stdexcept> // for out_of_range
@@ -73,17 +74,31 @@ class context : private util::noncopyable
     {
         size_type index = mapping_.size();
         mapping_.emplace(name, index);
+        lookup_.emplace(name, index);
         return index;
     }
 
-    inline void add(key_type const& name, size_type index) { mapping_.emplace(name, index); }
+    inline void add(key_type const& name, size_type index)
+    {
+        mapping_.emplace(name, index);
+        lookup_.emplace(name, index);
+    }
 
     inline size_type size() const { return mapping_.size(); }
     inline const_iterator begin() const { return mapping_.begin(); }
     inline const_iterator end() const { return mapping_.end(); }
 
+    static constexpr size_type npos = static_cast<size_type>(-1);
+
+    inline size_type find_index(key_type const& name) const
+    {
+        auto itr = lookup_.find(name);
+        return (itr != lookup_.end()) ? itr->second : npos;
+    }
+
   private:
     map_type mapping_;
+    std::unordered_map<key_type, size_type> lookup_;
 };
 
 using context_type = context<std::map<std::string, std::size_t>>;
@@ -125,10 +140,10 @@ class MAPNIK_DECL feature_impl : private util::noncopyable
 
     inline void put(context_type::key_type const& key, value&& val)
     {
-        context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end() && itr->second < data_.size())
+        context_type::size_type const index = ctx_->find_index(key);
+        if (index != context_type::npos && index < data_.size())
         {
-            data_[itr->second] = std::move(val);
+            data_[index] = std::move(val);
         }
         else
         {
@@ -138,10 +153,10 @@ class MAPNIK_DECL feature_impl : private util::noncopyable
 
     inline void put_new(context_type::key_type const& key, value&& val)
     {
-        context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end() && itr->second < data_.size())
+        context_type::size_type const index = ctx_->find_index(key);
+        if (index != context_type::npos && index < data_.size())
         {
-            data_[itr->second] = std::move(val);
+            data_[index] = std::move(val);
         }
         else
         {
@@ -151,13 +166,13 @@ class MAPNIK_DECL feature_impl : private util::noncopyable
         }
     }
 
-    inline bool has_key(context_type::key_type const& key) const { return (ctx_->mapping_.count(key) == 1); }
+    inline bool has_key(context_type::key_type const& key) const { return ctx_->find_index(key) != context_type::npos; }
 
     inline value_type const& get(context_type::key_type const& key) const
     {
-        context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end())
-            return get(itr->second);
+        context_type::size_type const index = ctx_->find_index(key);
+        if (index != context_type::npos)
+            return get(index);
         else
             return default_feature_value;
     }
