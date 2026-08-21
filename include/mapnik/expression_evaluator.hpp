@@ -31,6 +31,9 @@
 #include <mapnik/util/variant.hpp>
 #include <mapnik/feature.hpp>
 
+// stl
+#include <type_traits>
+
 namespace mapnik {
 
 template<typename T0, typename T1, typename T2>
@@ -44,6 +47,32 @@ struct evaluate
         : feature_(f),
           vars_(v)
     {}
+
+    using attribute_reference =
+      decltype(std::declval<feature_type const&>().get(std::declval<std::string const&>()));
+    static constexpr bool borrowable_attributes =
+      std::is_lvalue_reference_v<attribute_reference> && std::is_same_v<std::decay_t<attribute_reference>, value_type>;
+
+    value_type const* borrow(expr_node const& node) const
+    {
+        if constexpr (borrowable_attributes)
+        {
+            if (node.template is<attribute>())
+            {
+                return &feature_.get(node.template get_unchecked<attribute>().name());
+            }
+        }
+        return nullptr;
+    }
+
+    value_bool eval_to_bool(expr_node const& node) const
+    {
+        if (value_type const* v = borrow(node))
+        {
+            return v->to_bool();
+        }
+        return util::apply_visitor(*this, node).to_bool();
+    }
 
     value_type operator()(value_integer val) const { return val; }
 
@@ -74,18 +103,28 @@ struct evaluate
 
     value_type operator()(binary_node<tags::logical_and> const& x) const
     {
-        return (util::apply_visitor(*this, x.left).to_bool()) && (util::apply_visitor(*this, x.right).to_bool());
+        return eval_to_bool(x.left) && eval_to_bool(x.right);
     }
 
     value_type operator()(binary_node<tags::logical_or> const& x) const
     {
-        return (util::apply_visitor(*this, x.left).to_bool()) || (util::apply_visitor(*this, x.right).to_bool());
+        return eval_to_bool(x.left) || eval_to_bool(x.right);
     }
 
     template<typename Tag>
     value_type operator()(binary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type operation;
+        value_type const* lhs = borrow(x.left);
+        value_type const* rhs = borrow(x.right);
+        if (lhs)
+        {
+            if (rhs)
+                return operation(*lhs, *rhs);
+            return operation(*lhs, util::apply_visitor(*this, x.right));
+        }
+        if (rhs)
+            return operation(util::apply_visitor(*this, x.left), *rhs);
         return operation(util::apply_visitor(*this, x.left), util::apply_visitor(*this, x.right));
     }
 
@@ -93,12 +132,16 @@ struct evaluate
     value_type operator()(unary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type func;
+        if (value_type const* v = borrow(x.expr))
+        {
+            return func(*v);
+        }
         return func(util::apply_visitor(*this, x.expr));
     }
 
     value_type operator()(unary_node<tags::logical_not> const& x) const
     {
-        return !(util::apply_visitor(*this, x.expr).to_bool());
+        return !eval_to_bool(x.expr);
     }
 
     value_type operator()(regex_match_node const& x) const
