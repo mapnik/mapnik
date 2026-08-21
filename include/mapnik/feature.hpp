@@ -133,6 +133,12 @@ class MAPNIK_DECL feature_impl : private util::noncopyable
     }
 
     template<typename T>
+    inline void put(std::size_t index, T const& val)
+    {
+        put(index, value(val));
+    }
+
+    template<typename T>
     inline void put_new(context_type::key_type const& key, T const& val)
     {
         put_new(key, value(val));
@@ -148,6 +154,18 @@ class MAPNIK_DECL feature_impl : private util::noncopyable
         else
         {
             throw std::out_of_range(std::string("Key does not exist: '") + key + "'");
+        }
+    }
+
+    inline void put(std::size_t index, value&& val)
+    {
+        if (index < data_.size())
+        {
+            data_[index] = std::move(val);
+        }
+        else
+        {
+            throw std::out_of_range("Attribute index does not exist");
         }
     }
 

@@ -64,6 +64,21 @@ std::string parse_and_dump(std::string const& str)
 
 } // namespace
 
+TEST_CASE("feature attributes can be assigned by index")
+{
+    auto ctx = std::make_shared<mapnik::context_type>();
+    std::size_t const first = ctx->push("first");
+    std::size_t const second = ctx->push("second");
+    mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, 1));
+
+    feature->put(first, mapnik::value_integer(12));
+    feature->put(second, mapnik::value_unicode_string("value"));
+
+    CHECK(feature->get("first").to_int() == 12);
+    CHECK(feature->get("second").to_string() == "value");
+    CHECK_THROWS(feature->put(ctx->size(), mapnik::value_integer(0)));
+}
+
 TEST_CASE("expressions")
 {
     using namespace std::placeholders;
