@@ -24,29 +24,78 @@
 #define MAPNIK_RULE_CACHE_HPP
 
 // mapnik
+#include <mapnik/expression_node.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 // stl
+#include <string>
+#include <unordered_map>
 #include <vector>
-#include <type_traits>
 
 namespace mapnik {
 
 class rule_cache : private util::noncopyable
 {
+  private:
+    struct precondition
+    {
+        std::string name;
+        value expected;
+    };
+
+    static bool extract_precondition(expr_node const& node, precondition& result)
+    {
+        if (node.is<binary_node<tags::equal_to>>())
+        {
+            auto const& equality = node.get_unchecked<binary_node<tags::equal_to>>();
+            if (equality.left.is<attribute>() && equality.right.is<value_unicode_string>())
+            {
+                result.name = equality.left.get_unchecked<attribute>().name();
+                result.expected = value(equality.right.get_unchecked<value_unicode_string>());
+                return true;
+            }
+            if (equality.right.is<attribute>() && equality.left.is<value_unicode_string>())
+            {
+                result.name = equality.right.get_unchecked<attribute>().name();
+                result.expected = value(equality.left.get_unchecked<value_unicode_string>());
+                return true;
+            }
+            return false;
+        }
+        if (node.is<binary_node<tags::logical_and>>())
+        {
+            auto const& conjunction = node.get_unchecked<binary_node<tags::logical_and>>();
+            return extract_precondition(conjunction.left, result) || extract_precondition(conjunction.right, result);
+        }
+        return false;
+    }
+
   public:
     using rule_ptrs = std::vector<rule const*>;
+    using rule_indices = std::vector<std::size_t>;
+    using precondition_values = std::unordered_map<value, rule_indices>;
+
+    struct precondition_group
+    {
+        std::string name;
+        precondition_values rules;
+    };
+
     rule_cache()
         : if_rules_(),
           else_rules_(),
-          also_rules_()
+          also_rules_(),
+          rules_without_precondition_(),
+          precondition_groups_()
     {}
 
     rule_cache(rule_cache&& rhs) // move ctor
         : if_rules_(std::move(rhs.if_rules_)),
           else_rules_(std::move(rhs.else_rules_)),
-          also_rules_(std::move(rhs.also_rules_))
+          also_rules_(std::move(rhs.also_rules_)),
+          rules_without_precondition_(std::move(rhs.rules_without_precondition_)),
+          precondition_groups_(std::move(rhs.precondition_groups_))
     {}
 
     rule_cache& operator=(rule_cache&& rhs) // move assign
@@ -54,6 +103,8 @@ class rule_cache : private util::noncopyable
         std::swap(if_rules_, rhs.if_rules_);
         std::swap(else_rules_, rhs.else_rules_);
         std::swap(also_rules_, rhs.also_rules_);
+        std::swap(rules_without_precondition_, rhs.rules_without_precondition_);
+        std::swap(precondition_groups_, rhs.precondition_groups_);
         return *this;
     }
 
@@ -69,7 +120,26 @@ class rule_cache : private util::noncopyable
         }
         else
         {
+            std::size_t const index = if_rules_.size();
             if_rules_.push_back(&r);
+            precondition condition;
+            expression_ptr const& filter = r.get_filter();
+            if (!filter || !extract_precondition(*filter, condition))
+            {
+                rules_without_precondition_.push_back(index);
+                return;
+            }
+
+            for (precondition_group& group : precondition_groups_)
+            {
+                if (group.name == condition.name)
+                {
+                    group.rules[condition.expected].push_back(index);
+                    return;
+                }
+            }
+            precondition_groups_.push_back({condition.name, {}});
+            precondition_groups_.back().rules[condition.expected].push_back(index);
         }
     }
 
@@ -79,10 +149,16 @@ class rule_cache : private util::noncopyable
 
     rule_ptrs const& get_also_rules() const { return also_rules_; }
 
+    rule_indices const& get_rules_without_precondition() const { return rules_without_precondition_; }
+
+    std::vector<precondition_group> const& get_precondition_groups() const { return precondition_groups_; }
+
   private:
     rule_ptrs if_rules_;
     rule_ptrs else_rules_;
     rule_ptrs also_rules_;
+    rule_indices rules_without_precondition_;
+    std::vector<precondition_group> precondition_groups_;
 };
 
 } // namespace mapnik
