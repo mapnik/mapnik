@@ -48,6 +48,7 @@
 
 // stl
 #include <algorithm>
+#include <span>
 #include <vector>
 #include <stdexcept>
 
@@ -608,7 +609,7 @@ void feature_style_processor<Processor>::render_style(Processor& p,
     bool was_painted = false;
 
     rule_cache::rule_ptrs const& if_rules = rc.get_if_rules();
-    rule_cache::rule_indices const& rules_without_precondition = rc.get_rules_without_precondition();
+    std::span<std::size_t const> rules_without_precondition = rc.get_rules_without_precondition();
     using resolved_group = std::pair<std::size_t, rule_cache::precondition_values const*>;
     std::vector<resolved_group> precondition_groups;
     rule_cache::rule_indices candidates;
@@ -628,10 +629,10 @@ void feature_style_processor<Processor>::render_style(Processor& p,
             }
         }
 
-        rule_cache::rule_indices const* candidate_rules = nullptr;
+        std::span<std::size_t const> candidate_rules;
         if (precondition_groups.empty())
         {
-            candidate_rules = &rules_without_precondition;
+            candidate_rules = rules_without_precondition;
         }
         else if (precondition_groups.size() == 1 && rules_without_precondition.empty())
         {
@@ -641,7 +642,7 @@ void feature_style_processor<Processor>::render_style(Processor& p,
             auto const match = group.second->find(actual);
             if (match != group.second->end())
             {
-                candidate_rules = &match->second;
+                candidate_rules = match->second;
             }
         }
         else
@@ -659,36 +660,33 @@ void feature_style_processor<Processor>::render_style(Processor& p,
             }
             // Restore stylesheet order after merging groups.
             std::sort(candidates.begin(), candidates.end());
-            candidate_rules = &candidates;
+            candidate_rules = candidates;
         }
 
         bool do_else = true;
         bool do_also = false;
-        if (candidate_rules)
+        for (std::size_t index : candidate_rules)
         {
-            for (std::size_t index : *candidate_rules)
+            rule const* r = if_rules[index];
+            expression_ptr const& expr = r->get_filter();
+            if (util::apply_visitor(evaluate_boolean<feature_impl, value_type, attributes>(*feature, vars), *expr))
             {
-                rule const* r = if_rules[index];
-                expression_ptr const& expr = r->get_filter();
-                if (util::apply_visitor(evaluate_boolean<feature_impl, value_type, attributes>(*feature, vars), *expr))
+                was_painted = true;
+                do_else = false;
+                do_also = true;
+                rule::symbolizers const& symbols = r->get_symbolizers();
+                if (!p.process(symbols, *feature, prj_trans))
                 {
-                    was_painted = true;
-                    do_else = false;
-                    do_also = true;
-                    rule::symbolizers const& symbols = r->get_symbolizers();
-                    if (!p.process(symbols, *feature, prj_trans))
+                    for (symbolizer const& sym : symbols)
                     {
-                        for (symbolizer const& sym : symbols)
-                        {
-                            util::apply_visitor(symbolizer_dispatch<Processor>(p, *feature, prj_trans), sym);
-                        }
+                        util::apply_visitor(symbolizer_dispatch<Processor>(p, *feature, prj_trans), sym);
                     }
-                    if (style->get_filter_mode() == filter_mode_enum::FILTER_FIRST)
-                    {
-                        // Stop iterating over rules and proceed with next feature.
-                        do_also = false;
-                        break;
-                    }
+                }
+                if (style->get_filter_mode() == filter_mode_enum::FILTER_FIRST)
+                {
+                    // Stop iterating over rules and proceed with next feature.
+                    do_also = false;
+                    break;
                 }
             }
         }

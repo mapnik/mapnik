@@ -97,6 +97,16 @@ class context : private util::noncopyable
     }
 
   private:
+    inline key_type const* find_name(size_type index) const
+    {
+        for (auto const& entry : mapping_)
+        {
+            if (entry.second == index)
+                return &entry.first;
+        }
+        return nullptr;
+    }
+
     map_type mapping_;
     std::unordered_map<key_type, size_type> lookup_;
 };
@@ -165,7 +175,11 @@ class MAPNIK_DECL feature_impl : private util::noncopyable
         }
         else
         {
-            throw std::out_of_range("Attribute index does not exist");
+            if (context_type::key_type const* key = ctx_->find_name(index))
+            {
+                throw std::out_of_range(std::string("Key does not exist: '") + *key + "'");
+            }
+            throw std::out_of_range(std::string("Attribute index does not exist: '") + std::to_string(index) + "'");
         }
     }
 

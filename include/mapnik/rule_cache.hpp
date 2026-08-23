@@ -30,6 +30,7 @@
 
 // stl
 #include <string>
+#include <span>
 #include <unordered_map>
 #include <vector>
 
@@ -149,9 +150,9 @@ class rule_cache : private util::noncopyable
 
     rule_ptrs const& get_also_rules() const { return also_rules_; }
 
-    rule_indices const& get_rules_without_precondition() const { return rules_without_precondition_; }
+    std::span<std::size_t const> get_rules_without_precondition() const { return rules_without_precondition_; }
 
-    std::vector<precondition_group> const& get_precondition_groups() const { return precondition_groups_; }
+    std::span<precondition_group const> get_precondition_groups() const { return precondition_groups_; }
 
   private:
     rule_ptrs if_rules_;

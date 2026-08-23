@@ -76,7 +76,10 @@ TEST_CASE("feature attributes can be assigned by index")
 
     CHECK(feature->get("first").to_int() == 12);
     CHECK(feature->get("second").to_string() == "value");
-    CHECK_THROWS(feature->put(ctx->size(), mapnik::value_integer(0)));
+    CHECK_THROWS_WITH(feature->put(ctx->size(), mapnik::value_integer(0)), "Attribute index does not exist: '2'");
+
+    std::size_t const third = ctx->push("third");
+    CHECK_THROWS_WITH(feature->put(third, mapnik::value_integer(0)), "Key does not exist: 'third'");
 }
 
 TEST_CASE("expressions")
