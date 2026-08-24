@@ -47,6 +47,8 @@
 #include <mapnik/symbolizer_dispatch.hpp>
 
 // stl
+#include <algorithm>
+#include <span>
 #include <vector>
 #include <stdexcept>
 
@@ -605,16 +607,69 @@ void feature_style_processor<Processor>::render_style(Processor& p,
     mapnik::attributes vars = p.variables();
     feature_ptr feature;
     bool was_painted = false;
+
+    rule_cache::rule_ptrs const& if_rules = rc.get_if_rules();
+    std::span<std::size_t const> rules_without_precondition = rc.get_rules_without_precondition();
+    using resolved_group = std::pair<std::size_t, rule_cache::precondition_values const*>;
+    std::vector<resolved_group> precondition_groups;
+    rule_cache::rule_indices candidates;
+    context_type const* cached_context = nullptr;
+
     while ((feature = features->next()))
     {
+        context_type const* ctx = feature->context().get();
+        if (ctx != cached_context)
+        {
+            cached_context = ctx;
+            precondition_groups.clear();
+            precondition_groups.reserve(rc.get_precondition_groups().size());
+            for (rule_cache::precondition_group const& group : rc.get_precondition_groups())
+            {
+                precondition_groups.emplace_back(ctx->find_index(group.name), &group.rules);
+            }
+        }
+
+        std::span<std::size_t const> candidate_rules;
+        if (precondition_groups.empty())
+        {
+            candidate_rules = rules_without_precondition;
+        }
+        else if (precondition_groups.size() == 1 && rules_without_precondition.empty())
+        {
+            resolved_group const& group = precondition_groups.front();
+            value_type const& actual =
+              group.first == context_type::npos ? default_feature_value : feature->get(group.first);
+            auto const match = group.second->find(actual);
+            if (match != group.second->end())
+            {
+                candidate_rules = match->second;
+            }
+        }
+        else
+        {
+            candidates.assign(rules_without_precondition.begin(), rules_without_precondition.end());
+            for (resolved_group const& group : precondition_groups)
+            {
+                value_type const& actual =
+                  group.first == context_type::npos ? default_feature_value : feature->get(group.first);
+                auto const match = group.second->find(actual);
+                if (match != group.second->end())
+                {
+                    candidates.insert(candidates.end(), match->second.begin(), match->second.end());
+                }
+            }
+            // Restore stylesheet order after merging groups.
+            std::sort(candidates.begin(), candidates.end());
+            candidate_rules = candidates;
+        }
+
         bool do_else = true;
         bool do_also = false;
-        for (rule const* r : rc.get_if_rules())
+        for (std::size_t index : candidate_rules)
         {
+            rule const* r = if_rules[index];
             expression_ptr const& expr = r->get_filter();
-            value_type result =
-              util::apply_visitor(evaluate<feature_impl, value_type, attributes>(*feature, vars), *expr);
-            if (result.to_bool())
+            if (util::apply_visitor(evaluate_boolean<feature_impl, value_type, attributes>(*feature, vars), *expr))
             {
                 was_painted = true;
                 do_else = false;

@@ -23,6 +23,8 @@ struct rendering_result
 
     unsigned start_style_processing = 0;
     unsigned end_style_processing = 0;
+    std::size_t style_geometry_start = 0;
+    std::vector<std::size_t> style_geometry_counts;
 
     std::vector<mapnik::box2d<double>> layer_query_extents;
     std::vector<mapnik::geometry::geometry<double>> geometries;
@@ -51,9 +53,17 @@ class test_renderer : public mapnik::feature_style_processor<test_renderer>
 
     void end_layer_processing(mapnik::layer const& lay) { result_.end_layer_processing++; }
 
-    void start_style_processing(mapnik::feature_type_style const& st) { result_.start_style_processing++; }
+    void start_style_processing(mapnik::feature_type_style const& st)
+    {
+        result_.start_style_processing++;
+        result_.style_geometry_start = result_.geometries.size();
+    }
 
-    void end_style_processing(mapnik::feature_type_style const& st) { result_.end_style_processing++; }
+    void end_style_processing(mapnik::feature_type_style const& st)
+    {
+        result_.end_style_processing++;
+        result_.style_geometry_counts.push_back(result_.geometries.size() - result_.style_geometry_start);
+    }
 
     template<typename Symbolizer>
     void process(Symbolizer const& sym, mapnik::feature_impl& feature, mapnik::proj_transform const& prj_trans)
@@ -340,5 +350,77 @@ TEST_CASE("feature_style_processor")
         REQUIRE(datasource->query_count() == 1);
         CHECK(datasource->last_bbox() == clipped_extent);
         CHECK(datasource->last_unbuffered_bbox() == clipped_extent);
+    }
+
+    SECTION("rule indexing preserves filter behavior")
+    {
+        mapnik::parameters params;
+        params["type"] = "memory";
+        auto datasource = std::make_shared<mapnik::memory_datasource>(params);
+        auto context = std::make_shared<mapnik::context_type>();
+        auto feature = mapnik::feature_factory::create(context, 1);
+        feature->put_new("kind", mapnik::value_unicode_string("a"));
+        feature->put_new("other", mapnik::value_unicode_string("b"));
+        feature->set_geometry(mapnik::geometry::point<double>(1, 1));
+        datasource->push(feature);
+
+        auto make_rule = [](char const* filter, std::size_t symbol_count) {
+            mapnik::rule result;
+            if (filter)
+            {
+                result.set_filter(mapnik::parse_expression(filter));
+            }
+            for (std::size_t i = 0; i < symbol_count; ++i)
+            {
+                result.append(mapnik::line_symbolizer());
+            }
+            return result;
+        };
+
+        auto make_matching_style = [&](mapnik::filter_mode_e mode) {
+            mapnik::feature_type_style style;
+            style.set_filter_mode(mode);
+            style.add_rule(make_rule("[kind] = 'a'", 1));
+            style.add_rule(make_rule(nullptr, 2));
+            style.add_rule(make_rule("[other] = 'b'", 3));
+            return style;
+        };
+
+        mapnik::Map map(256, 256);
+        map.insert_style("all", make_matching_style(mapnik::filter_mode_enum::FILTER_ALL));
+        map.insert_style("first", make_matching_style(mapnik::filter_mode_enum::FILTER_FIRST));
+
+        mapnik::feature_type_style else_style;
+        else_style.add_rule(make_rule("[kind] = 'missing'", 1));
+        mapnik::rule else_rule = make_rule(nullptr, 4);
+        else_rule.set_else(true);
+        else_style.add_rule(std::move(else_rule));
+        map.insert_style("else", std::move(else_style));
+
+        mapnik::feature_type_style also_style;
+        also_style.add_rule(make_rule("[kind] = 'a'", 1));
+        mapnik::rule also_rule = make_rule(nullptr, 5);
+        also_rule.set_also(true);
+        also_style.add_rule(std::move(also_rule));
+        map.insert_style("also", std::move(also_style));
+
+        mapnik::layer layer("layer");
+        layer.set_datasource(datasource);
+        layer.add_style("all");
+        layer.add_style("first");
+        layer.add_style("else");
+        layer.add_style("also");
+        map.add_layer(layer);
+        map.zoom_to_box(mapnik::box2d<double>(0, 0, 2, 2));
+
+        rendering_result result;
+        test_renderer renderer(map, result);
+        renderer.apply();
+
+        REQUIRE(result.style_geometry_counts.size() == 4);
+        CHECK(result.style_geometry_counts[0] == 6);
+        CHECK(result.style_geometry_counts[1] == 1);
+        CHECK(result.style_geometry_counts[2] == 4);
+        CHECK(result.style_geometry_counts[3] == 6);
     }
 }

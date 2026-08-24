@@ -67,16 +67,16 @@ feature_ptr postgis_featureset::next()
     {
         // new feature
         unsigned pos = 1;
+        std::size_t attr_index = 0;
         feature_ptr feature;
 
         if (key_field_)
         {
-            std::string name = rs_->getFieldName(pos);
-
             // null feature id is not acceptable
             if (rs_->isNull(pos))
             {
-                MAPNIK_LOG_WARN(postgis) << "postgis_featureset: null value encountered for key_field: " << name;
+                MAPNIK_LOG_WARN(postgis) << "postgis_featureset: null value encountered for key_field: "
+                                         << rs_->getFieldName(pos);
                 continue;
             }
             // create feature with user driven id from attribute
@@ -102,7 +102,7 @@ feature_ptr postgis_featureset::next()
             feature = feature_factory::create(ctx_, val);
             if (key_field_as_attribute_)
             {
-                feature->put<mapnik::value_integer>(name, val);
+                feature->put<mapnik::value_integer>(attr_index++, val);
             }
             ++pos;
         }
@@ -135,14 +135,14 @@ feature_ptr postgis_featureset::next()
 
         totalGeomSize_ += size;
         unsigned num_attrs = ctx_->size() + 1;
-        if (!key_field_as_attribute_)
+        if (key_field_ && !key_field_as_attribute_)
         {
             num_attrs++;
         }
+
+        // SELECT columns and context entries are constructed in the same order.
         for (; pos < num_attrs; ++pos)
         {
-            std::string name = rs_->getFieldName(pos);
-
             // NOTE: we intentionally do not store null here
             // since it is equivalent to the attribute not existing
             if (!rs_->isNull(pos))
@@ -153,25 +153,25 @@ feature_ptr postgis_featureset::next()
                 {
                     case 16: // bool
                     {
-                        feature->put(name, (buf[0] != 0));
+                        feature->put(attr_index, (buf[0] != 0));
                         break;
                     }
 
                     case 23: // int4
                     {
-                        feature->put<mapnik::value_integer>(name, int4net(buf));
+                        feature->put<mapnik::value_integer>(attr_index, int4net(buf));
                         break;
                     }
 
                     case 21: // int2
                     {
-                        feature->put<mapnik::value_integer>(name, int2net(buf));
+                        feature->put<mapnik::value_integer>(attr_index, int2net(buf));
                         break;
                     }
 
                     case 20: // int8/BigInt
                     {
-                        feature->put<mapnik::value_integer>(name, int8net(buf));
+                        feature->put<mapnik::value_integer>(attr_index, int8net(buf));
                         break;
                     }
 
@@ -179,7 +179,7 @@ feature_ptr postgis_featureset::next()
                     {
                         float val;
                         float4net(val, buf);
-                        feature->put(name, static_cast<double>(val));
+                        feature->put(attr_index, static_cast<double>(val));
                         break;
                     }
 
@@ -187,7 +187,7 @@ feature_ptr postgis_featureset::next()
                     {
                         double val;
                         float8net(val, buf);
-                        feature->put(name, val);
+                        feature->put(attr_index, val);
                         break;
                     }
 
@@ -195,14 +195,14 @@ feature_ptr postgis_featureset::next()
                     case 1043: // varchar
                     case 705:  // literal
                     {
-                        feature->put(name, tr_->transcode(buf));
+                        feature->put(attr_index, tr_->transcode(buf));
                         break;
                     }
 
                     case 1042: // bpchar
                     {
                         std::string str = mapnik::util::trim_copy(buf);
-                        feature->put(name, tr_->transcode(str.c_str()));
+                        feature->put(attr_index, tr_->transcode(str.c_str()));
                         break;
                     }
 
@@ -212,7 +212,7 @@ feature_ptr postgis_featureset::next()
                         std::string str = numeric2string(buf);
                         if (mapnik::util::string2double(str, val))
                         {
-                            feature->put(name, val);
+                            feature->put(attr_index, val);
                         }
                         break;
                     }
@@ -224,6 +224,7 @@ feature_ptr postgis_featureset::next()
                     }
                 }
             }
+            ++attr_index;
         }
         return feature;
     }

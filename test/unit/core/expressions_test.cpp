@@ -48,6 +48,14 @@ mapnik::value evaluate_string(mapnik::feature_ptr const& feature, std::string co
     return evaluate(*feature, *expr);
 }
 
+bool evaluate_boolean_string(mapnik::feature_ptr const& feature, std::string const& str)
+{
+    auto expr = mapnik::parse_expression(str);
+    return mapnik::util::apply_visitor(
+      mapnik::evaluate_boolean<mapnik::feature_impl, mapnik::value_type, mapnik::attributes>(*feature, {}),
+      *expr);
+}
+
 std::string parse_and_dump(std::string const& str)
 {
     auto expr = mapnik::parse_expression(str);
@@ -55,6 +63,24 @@ std::string parse_and_dump(std::string const& str)
 }
 
 } // namespace
+
+TEST_CASE("feature attributes can be assigned by index")
+{
+    auto ctx = std::make_shared<mapnik::context_type>();
+    std::size_t const first = ctx->push("first");
+    std::size_t const second = ctx->push("second");
+    mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, 1));
+
+    feature->put(first, mapnik::value_integer(12));
+    feature->put(second, mapnik::value_unicode_string("value"));
+
+    CHECK(feature->get("first").to_int() == 12);
+    CHECK(feature->get("second").to_string() == "value");
+    CHECK_THROWS_WITH(feature->put(ctx->size(), mapnik::value_integer(0)), "Attribute index does not exist: '2'");
+
+    std::size_t const third = ctx->push("third");
+    CHECK_THROWS_WITH(feature->put(third, mapnik::value_integer(0)), "Key does not exist: 'third'");
+}
 
 TEST_CASE("expressions")
 {
@@ -76,6 +102,7 @@ TEST_CASE("expressions")
 
     auto feature = make_test_feature(1, "POINT(100 200)", prop);
     auto eval = std::bind(evaluate_string, feature, _1);
+    auto eval_bool = std::bind(evaluate_boolean_string, feature, _1);
     auto approx = Approx::custom().epsilon(1e-6);
 
     // primary expressions
@@ -174,6 +201,8 @@ TEST_CASE("expressions")
     // logical
     TRY_CHECK(eval(" [int] = 123 and [double] = 1.23456 && [bool] = true and [null] = null && [foo] = 'bar' ") == true);
     TRY_CHECK(eval(" [int] = 456 or [foo].match('foo') || length([foo]) = 3 ") == true);
+    TRY_CHECK(eval_bool("[foo] = 'bar' and [int] > 100"));
+    TRY_CHECK(eval_bool("not ([foo] = 'missing' or length([foo]) != 3)"));
     TRY_CHECK(eval(" not true  and not true  ") == false); // (not true) and (not true)
     TRY_CHECK(eval(" not false and not true  ") == false); // (not false) and (not true)
     TRY_CHECK(eval(" not true  or  not false ") == true);  // (not true) or (not false)
