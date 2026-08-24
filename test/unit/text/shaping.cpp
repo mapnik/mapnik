@@ -31,17 +31,16 @@ void test_shaping(mapnik::font_set const& fontset,
     mapnik::harfbuzz_shaper::shape_text(line, itemizer, width_map, fm, scale_factor, "");
 
     std::size_t index = 0;
-    if (debug) std::cerr << std::endl << str << std::endl;
+    if (debug)
+        std::cerr << std::endl << str << std::endl;
     for (auto const& g : line)
     {
         unsigned glyph_index, char_index;
         std::tie(glyph_index, char_index) = expected[index++];
         if (debug)
         {
-            std::cerr << "{" << glyph_index << "==" << g.glyph_index << ", "
-                      << char_index << "==" << g.char_index
-                      << ", " << g.face->family_name() << ":" << g.face->style_name()
-                      << "}" << std::endl;
+            std::cerr << "{" << glyph_index << "==" << g.glyph_index << ", " << char_index << "==" << g.char_index
+                      << ", " << g.face->family_name() << ":" << g.face->style_name() << "}" << std::endl;
         }
         else
         {
