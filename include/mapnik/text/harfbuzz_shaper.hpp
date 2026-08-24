@@ -359,11 +359,7 @@ struct harfbuzz_shaper
                             break;
                         }
                     }
-                    if (valid)
-                    {
-                        glyphinfos[cluster_id] = cluster_glyphs;
-                    }
-                    else if (glyphinfos[cluster_id].empty())
+                    if (valid && glyphinfos[cluster_id].empty())
                     {
                         glyphinfos[cluster_id] = cluster_glyphs;
                     }
