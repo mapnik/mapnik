@@ -57,6 +57,7 @@ mapnik_option(USE_MULTITHREADED "enables the multithreaded features (threadsafe)
 mapnik_option(USE_NO_ATEXIT "disable atexit" OFF)
 mapnik_option(USE_NO_DLCLOSE "disable dlclose" OFF)
 mapnik_option(USE_DEBUG_OUTPUT "enables some debug messages for development" OFF)
+mapnik_option(USE_NDEBUG "defines NDEBUG for non-Debug builds. Turning this off makes mapbox::variant dispatch non-inlinable and much slower" ON)
 mapnik_option(USE_LOG "enables logging output. See log severity level." OFF)
 # 0 = debug
 # 1 = warn
@@ -293,6 +294,22 @@ endif()
 
 if(USE_DEBUG_OUTPUT)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_DEBUG)
+endif()
+
+# NDEBUG does more for mapnik than disable assert(): mapbox::variant tags every
+# visit()/dispatcher::apply()/recursive_wrapper::get() with VARIANT_INLINE, which expands to
+# __attribute__((noinline)) when NDEBUG is not defined. mapnik's expression AST, mapnik::value
+# and all geometry visitation go through mapbox::variant, so an optimised build without NDEBUG
+# cannot inline its own hottest dispatch path (ref #4571).
+#
+# CMake only supplies -DNDEBUG via CMAKE_<LANG>_FLAGS_<CONFIG>, so a build that leaves
+# CMAKE_BUILD_TYPE empty or pins it to None - as Debian's `dh --buildsystem=cmake` does - never
+# gets it. Define it here instead of relying on the configuration name. Multi-config generators
+# pick the configuration at build time, where CMAKE_<LANG>_FLAGS_<CONFIG> already handles this.
+get_property(MAPNIK_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+string(TOUPPER "${CMAKE_BUILD_TYPE}" MAPNIK_BUILD_TYPE_UPPER)
+if(USE_NDEBUG AND NOT MAPNIK_IS_MULTI_CONFIG AND NOT MAPNIK_BUILD_TYPE_UPPER STREQUAL "DEBUG")
+    list(APPEND MAPNIK_COMPILE_DEFS NDEBUG)
 endif()
 
 if(USE_LOG)
