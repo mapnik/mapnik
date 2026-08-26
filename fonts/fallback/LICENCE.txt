@@ -1,0 +1,10 @@
+KhmerFallbackProbe.ttf and KhmerFallbackFull.ttf are derived from KhmerOS.ttf.
+
+KhmerOS is licensed under the GNU Lesser General Public License, version 2.1
+or later: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+MyanmarFallbackProbe.ttf and MyanmarFallbackFull.ttf are derived from
+NotoSansMyanmarUI-Regular.ttf.
+
+Noto Sans Myanmar is licensed under the SIL Open Font License, version 1.1:
+https://scripts.sil.org/OFL

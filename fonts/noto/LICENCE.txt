@@ -1,0 +1,2 @@
+NotoSansSinhala-Subset.ttf is licensed under the SIL Open Font License,
+version 1.1: https://scripts.sil.org/OFL

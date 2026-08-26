@@ -12,6 +12,38 @@
 #include <vector>
 #include <algorithm>
 
+namespace {
+
+std::size_t count_test_font_files(std::string const& dir)
+{
+    std::size_t count = 0;
+    for (std::string const& path : mapnik::util::list_directory(dir))
+    {
+        if (mapnik::util::is_directory(path))
+        {
+            count += count_test_font_files(path);
+            continue;
+        }
+        if (!mapnik::util::is_regular_file(path))
+            continue;
+
+        std::string const base = mapnik::util::basename(path);
+        if (!base.empty() && base.front() == '.')
+            continue;
+
+        auto const dot = base.find_last_of('.');
+        if (dot == std::string::npos)
+            continue;
+
+        std::string const ext = base.substr(dot);
+        if (ext == ".ttf" || ext == ".otf" || ext == ".ttc")
+            ++count;
+    }
+    return count;
+}
+
+} // namespace
+
 TEST_CASE("font")
 {
     mapnik::setup();
@@ -41,19 +73,20 @@ TEST_CASE("font")
 
             REQUIRE(mapnik::util::exists(fontdir));
             REQUIRE(mapnik::util::is_directory(fontdir));
+            auto const expected_font_count = count_test_font_files(fontdir);
 
             // test map cached fonts
             REQUIRE(m.register_fonts(fontdir, true));
-            REQUIRE(m.get_font_file_mapping().size() == 22);
+            REQUIRE(m.get_font_file_mapping().size() == expected_font_count);
             REQUIRE(m.load_fonts());
-            REQUIRE(m.get_font_memory_cache().size() == 22);
+            REQUIRE(m.get_font_memory_cache().size() == expected_font_count);
 
             // copy discards memory cache but not file mapping
             mapnik::Map m2(m);
             REQUIRE(m2.get_font_memory_cache().size() == 0);
-            REQUIRE(m2.get_font_file_mapping().size() == 22);
+            REQUIRE(m2.get_font_file_mapping().size() == expected_font_count);
             REQUIRE(m2.load_fonts());
-            REQUIRE(m2.get_font_memory_cache().size() == 22);
+            REQUIRE(m2.get_font_memory_cache().size() == expected_font_count);
 
             // test font-directory from XML
             mapnik::Map m3(1, 1);
@@ -119,7 +152,7 @@ TEST_CASE("font")
             // recurse to find all dejavu fonts
             REQUIRE(mapnik::freetype_engine::register_fonts(fontdir, true));
             face_names = mapnik::freetype_engine::face_names();
-            REQUIRE(face_names.size() == 22);
+            REQUIRE(face_names.size() == expected_font_count);
 
             // we should have re-registered 'DejaVu Sans Mono Bold Oblique' again,
             // but now at a new path
@@ -141,7 +174,7 @@ TEST_CASE("font")
             mapnik::Map m4(1, 1);
             REQUIRE(m4.register_fonts(fontdir, true));
             REQUIRE(m4.get_font_memory_cache().size() == 0);
-            REQUIRE(m4.get_font_file_mapping().size() == 22);
+            REQUIRE(m4.get_font_file_mapping().size() == expected_font_count);
             REQUIRE(!m4.load_fonts());
             REQUIRE(m4.get_font_memory_cache().size() == 0);
             REQUIRE(m4.register_fonts(dejavu_bold_oblique, false));
@@ -153,7 +186,7 @@ TEST_CASE("font")
             // https://github.com/mapnik/mapnik/issues/2274
             REQUIRE(mapnik::freetype_engine::register_font("test/data/fonts/NotoSans-Regular.ttc"));
             face_names = mapnik::freetype_engine::face_names();
-            REQUIRE(face_names.size() == 24);
+            REQUIRE(face_names.size() == expected_font_count + 2);
 
             // now blindly register as many system fonts as possible
             // the goal here to make sure we don't crash
@@ -166,7 +199,7 @@ TEST_CASE("font")
             // windows
             mapnik::freetype_engine::register_fonts("C:\\Windows\\Fonts", true);
             face_names = mapnik::freetype_engine::face_names();
-            REQUIRE(face_names.size() > 22);
+            REQUIRE(face_names.size() > expected_font_count);
         }
         catch (std::exception const& ex)
         {
