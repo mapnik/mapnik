@@ -38,7 +38,7 @@ inline bool parse_sort_by(std::string const& str, sort_by_type& result)
     auto apply_sort_by = [&](auto const& ctx) {
         result.first = _attr(ctx);
     };
-    auto apply_desc = [&](auto const& ctx) {
+    auto apply_desc = [&](auto const& /*ctx*/) {
         result.second = true;
     };
     if (!x3::phrase_parse(itr,
