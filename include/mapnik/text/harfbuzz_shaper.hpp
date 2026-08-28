@@ -316,7 +316,6 @@ struct harfbuzz_shaper
                 hb_glyph_position_t* positions = hb_buffer_get_glyph_positions(buffer.get(), &num_glyphs);
 
                 unsigned cluster = 0;
-                bool in_cluster = false;
                 std::vector<unsigned> clusters;
                 std::vector<std::vector<glyph_face_info>> current_clusters;
                 current_clusters.resize(text.length());
@@ -332,11 +331,6 @@ struct harfbuzz_shaper
                     {
                         cluster = glyphs[i].cluster;
                         clusters.push_back(cluster);
-                        in_cluster = false;
-                    }
-                    else if (i != 0)
-                    {
-                        in_cluster = true;
                     }
                     if (glyphinfos.size() <= cluster)
                     {
