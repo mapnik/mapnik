@@ -6,6 +6,23 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.3.1
+
+Released August 28th, 2026
+
+(Packaged from [xxx](https://github.com/mapnik/mapnik/commit/xxx))
+
+- CMake build - enable NDEBUG by default
+- Avoid copying expression attributes e1e6d31808877171d14c74d5974b923cce423595
+- Compare string literals directly d0ed0964ad9d6c23cee6171656b002d1304fff40
+- Hash feature attribute lookups d744e094b451a12b070173547f638b896d1386d8
+- Prioritize common expression nodes e981e4b43ed57aa209175626777735036f97cc88
+- Evaluate filters as booleans d59329887dc708612a670117e562070f15634b63
+- Index rules by filter value 508dd835252b5a523bffef076b6779b0c21e4588
+- Store PostGIS attributes by index 40c36ee0125a7056af617f607bda61e9eb21bf08
+- Correction for "Rendering complex Unicode sequences across multiple fonts in a fontset" PR #4574
+- Upgrade SCons to v4.11.1
+
 ## Mapnik 4.3.0
 
 Released July 24th, 2026
