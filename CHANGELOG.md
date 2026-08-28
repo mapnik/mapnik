@@ -10,7 +10,7 @@ For a complete change history, see the git log.
 
 Released August 28th, 2026
 
-(Packaged from [xxx](https://github.com/mapnik/mapnik/commit/xxx))
+(Packaged from [38c207ee0](https://github.com/mapnik/mapnik/commit/38c207ee0))
 
 - CMake build - enable NDEBUG by default
 - Avoid copying expression attributes e1e6d31808877171d14c74d5974b923cce423595
