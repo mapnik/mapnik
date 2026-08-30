@@ -1,0 +1,7 @@
+build
+.vs
+.vscode
+.git
+test
+scons
+CMakeUserPresets.json
