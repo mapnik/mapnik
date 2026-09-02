@@ -42,6 +42,7 @@ MAPNIK_DISABLE_WARNING_POP
 // stl
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace mapnik {
@@ -67,10 +68,19 @@ class MAPNIK_DECL font_face : util::noncopyable
     ~font_face();
 
   private:
+    struct glyph_metrics
+    {
+        double ymin;
+        double ymax;
+        double advance;
+        double line_height;
+    };
+
     bool init_color_font();
 
     FT_Face face_;
     bool const color_font_;
+    mutable std::unordered_map<unsigned, glyph_metrics> glyph_metrics_cache_;
 };
 using face_ptr = std::shared_ptr<font_face>;
 

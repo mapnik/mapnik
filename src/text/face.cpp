@@ -68,6 +68,17 @@ bool font_face::glyph_dimensions(glyph_info& glyph) const
     if (color_font_)
         FT_Select_Size(face_, 0);
     FT_Set_Transform(face_, 0, &pen);
+
+    auto const cached = glyph_metrics_cache_.find(glyph.glyph_index);
+    if (cached != glyph_metrics_cache_.end())
+    {
+        glyph.unscaled_ymin = cached->second.ymin;
+        glyph.unscaled_ymax = cached->second.ymax;
+        glyph.unscaled_advance = cached->second.advance;
+        glyph.unscaled_line_height = cached->second.line_height;
+        return true;
+    }
+
     FT_Int32 load_flags = FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING;
     if (color_font_)
         load_flags |= FT_LOAD_COLOR;
@@ -98,6 +109,10 @@ bool font_face::glyph_dimensions(glyph_info& glyph) const
         glyph.unscaled_ymax *= scale_multiplier;
         glyph.unscaled_advance *= scale_multiplier;
     }
+
+    glyph_metrics_cache_.emplace(
+      glyph.glyph_index,
+      glyph_metrics{glyph.unscaled_ymin, glyph.unscaled_ymax, glyph.unscaled_advance, glyph.unscaled_line_height});
 
     return true;
 }
