@@ -321,7 +321,8 @@ TEST_CASE("unicode transcoding")
     }
 
     mapnik::transcoder utf8("UTF-8");
-    CHECK(utf8.transcode("Qu\xC3\xA9" "bec") == mapnik::value_unicode_string(u"Qu\u00e9bec"));
+    CHECK(utf8.transcode("Qu\xC3\xA9"
+                         "bec") == mapnik::value_unicode_string(u"Qu\u00e9bec"));
 
     mapnik::transcoder latin1("ISO-8859-1");
     char const latin1_e_acute[] = {static_cast<char>(0xE9)};
