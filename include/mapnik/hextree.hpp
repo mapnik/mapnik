@@ -125,6 +125,13 @@ class hextree : private util::noncopyable
         }
     };
 
+    static std::uint64_t mean_sort_key(rgba const& color)
+    {
+        std::uint64_t const mean = color.a + color.r + color.g + color.b;
+        return (mean << 32) | (std::uint64_t(color.a) << 24) | (std::uint64_t(color.r) << 16) |
+               (std::uint64_t(color.g) << 8) | color.b;
+    }
+
     unsigned max_colors_;
     unsigned colors_;
     // flag indicating existance of invisible pixels (a < InsertPolicy::MIN_ALPHA)
@@ -133,6 +140,7 @@ class hextree : private util::noncopyable
     node* const root_;
     // working palette for quantization, sorted on mean(r,g,b,a) for easier searching NN
     std::vector<rgba> sorted_pal_;
+    std::vector<std::uint64_t> sorted_keys_;
     // index remaping of sorted_pal_ indexes to indexes of returned image palette
     std::vector<unsigned> pal_remap_;
     // rgba hashtable for quantization
@@ -261,9 +269,8 @@ class hextree : private util::noncopyable
             int dist, newdist;
 
             // find closest match based on mean of r,g,b,a
-            std::vector<rgba>::const_iterator pit =
-              std::lower_bound(sorted_pal_.begin(), sorted_pal_.end(), c, rgba::mean_sort_cmp());
-            ind = pit - sorted_pal_.begin();
+            auto pit = std::lower_bound(sorted_keys_.begin(), sorted_keys_.end(), mean_sort_key(c));
+            ind = pit - sorted_keys_.begin();
             if (ind == sorted_pal_.size())
                 ind--;
             dr = sorted_pal_[ind].r - c.r;
@@ -336,6 +343,12 @@ class hextree : private util::noncopyable
 
         // sort palette for binary searching in quantization
         std::sort(sorted_pal_.begin(), sorted_pal_.end(), rgba::mean_sort_cmp());
+        sorted_keys_.clear();
+        sorted_keys_.reserve(sorted_pal_.size());
+        for (rgba const& color : sorted_pal_)
+        {
+            sorted_keys_.push_back(mean_sort_key(color));
+        }
         // returned palette is rearanged, so that colors with a<255 are at the begining
         pal_remap_.resize(sorted_pal_.size());
         palette.clear();
