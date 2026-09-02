@@ -86,6 +86,7 @@ class buffer_stack
             --position_;
             mapnik::fill(*position_, 0); // fill with transparent colour
         }
+        position_->painted(false);
         return *position_;
     }
     bool in_range() const { return (position_ != buffers_.end()); }
