@@ -308,3 +308,26 @@ TEST_CASE("conversions")
         }
     }
 }
+
+TEST_CASE("unicode transcoding")
+{
+    for (char const* encoding : {"UTF-8", "ISO-8859-1", "US-ASCII"})
+    {
+        mapnik::transcoder tr(encoding);
+        CHECK(tr.transcode("Mapnik") == mapnik::value_unicode_string(u"Mapnik"));
+
+        char const embedded_null[] = {'A', '\0', 'B'};
+        CHECK(tr.transcode(embedded_null, 3) == mapnik::value_unicode_string(u"A\0B", 3));
+    }
+
+    mapnik::transcoder utf8("UTF-8");
+    CHECK(utf8.transcode("Qu\xC3\xA9" "bec") == mapnik::value_unicode_string(u"Qu\u00e9bec"));
+
+    mapnik::transcoder latin1("ISO-8859-1");
+    char const latin1_e_acute[] = {static_cast<char>(0xE9)};
+    CHECK(latin1.transcode(latin1_e_acute, 1) == mapnik::value_unicode_string(u"\u00e9"));
+
+    mapnik::transcoder utf16be("UTF-16BE");
+    char const utf16be_ab[] = {'\0', 'A', '\0', 'B'};
+    CHECK(utf16be.transcode(utf16be_ab, 4) == mapnik::value_unicode_string(u"AB"));
+}
