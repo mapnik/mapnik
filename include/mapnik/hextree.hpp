@@ -179,8 +179,12 @@ class hextree : private util::noncopyable
         }
     }
 
-    void insert(T const& data)
+    void insert(T const& data, unsigned count = 1)
     {
+        if (count == 0)
+        {
+            return;
+        }
         std::uint8_t a = preprocessAlpha(data.a);
         unsigned level = 0;
         node* cur_node = root_.get();
@@ -191,15 +195,16 @@ class hextree : private util::noncopyable
         }
         while (true)
         {
-            cur_node->pixel_count++;
-            cur_node->reds += gammaLUT_[data.r];
-            cur_node->greens += gammaLUT_[data.g];
-            cur_node->blues += gammaLUT_[data.b];
-            cur_node->alphas += a;
+            bool const new_color = cur_node->pixel_count == 0;
+            cur_node->pixel_count += count;
+            cur_node->reds += count * gammaLUT_[data.r];
+            cur_node->greens += count * gammaLUT_[data.g];
+            cur_node->blues += count * gammaLUT_[data.b];
+            cur_node->alphas += count * a;
 
             if (level == InsertPolicy::MAX_LEVELS)
             {
-                if (cur_node->pixel_count == 1)
+                if (new_color)
                 {
                     ++colors_;
                 }
