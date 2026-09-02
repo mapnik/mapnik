@@ -42,6 +42,7 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_any.hpp>
+#include <mapnik/safe_cast.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -57,9 +58,71 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
+#include <algorithm>
 #include <cmath>
 
 namespace mapnik {
+
+namespace {
+
+std::optional<box2d<int>> nonzero_extent(image_rgba8 const& image)
+{
+    int const width = safe_cast<int>(image.width());
+    int const height = safe_cast<int>(image.height());
+    int minx = width;
+    int miny = height;
+    int maxx = -1;
+    int maxy = -1;
+    for (int y = 0; y < height; ++y)
+    {
+        image_rgba8::pixel_type const* row = image.get_row(y);
+        int row_minx = 0;
+        while (row_minx + 8 <= width &&
+               (row[row_minx] | row[row_minx + 1] | row[row_minx + 2] | row[row_minx + 3] | row[row_minx + 4] |
+                row[row_minx + 5] | row[row_minx + 6] | row[row_minx + 7]) == 0)
+        {
+            row_minx += 8;
+        }
+        while (row_minx < width && row[row_minx] == 0)
+        {
+            ++row_minx;
+        }
+        if (row_minx == width)
+        {
+            continue;
+        }
+        int row_maxx = width;
+        while (row_maxx >= 8 && (row[row_maxx - 1] | row[row_maxx - 2] | row[row_maxx - 3] | row[row_maxx - 4] |
+                                 row[row_maxx - 5] | row[row_maxx - 6] | row[row_maxx - 7] | row[row_maxx - 8]) == 0)
+        {
+            row_maxx -= 8;
+        }
+        while (row[row_maxx - 1] == 0)
+        {
+            --row_maxx;
+        }
+        minx = std::min(minx, row_minx);
+        maxx = std::max(maxx, row_maxx - 1);
+        miny = std::min(miny, y);
+        maxy = y;
+    }
+    if (maxx < minx)
+    {
+        return std::nullopt;
+    }
+    return box2d<int>(minx, miny, maxx, maxy);
+}
+
+void clear_extent(image_rgba8& image, box2d<int> const& extent)
+{
+    std::size_t const length = extent.width() + 1;
+    for (int y = extent.miny(); y <= extent.maxy(); ++y)
+    {
+        std::fill_n(image.get_row(y, extent.minx()), length, 0);
+    }
+}
+
+} // namespace
 
 template<typename T0, typename T1>
 agg_renderer<T0, T1>::agg_renderer(Map const& m, T0& pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
@@ -286,10 +349,11 @@ void agg_renderer<T0, T1>::start_style_processing(feature_type_style const& st)
             {
                 inflated_buffer_ = std::make_unique<buffer_type>(target_width, target_height);
             }
-            else
+            else if (inflated_buffer_->painted())
             {
                 mapnik::fill(*inflated_buffer_, 0); // fill with transparent colour
             }
+            inflated_buffer_->painted(false);
             buffers_.emplace(*inflated_buffer_);
         }
         else
@@ -316,34 +380,65 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
     buffer_type& previous_buffer = buffers_.top().get();
     if (&current_buffer != &previous_buffer)
     {
-        bool blend_from = false;
-        if (st.image_filters().size() > 0)
+        bool const current_buffer_painted = current_buffer.painted();
+        bool const transparent_is_identity = !st.comp_op() || *st.comp_op() == src_over || *st.comp_op() == darken;
+        bool const skip_empty = !current_buffer.painted() && st.image_filters().empty() && transparent_is_identity;
+        if (!skip_empty)
         {
-            blend_from = true;
-            mapnik::filter::filter_visitor<buffer_type> visitor(current_buffer, common_.scale_factor_);
-            for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
+            bool blend_from = false;
+            if (st.image_filters().size() > 0)
             {
-                util::apply_visitor(visitor, filter_tag);
+                blend_from = true;
+                mapnik::filter::filter_visitor<buffer_type> visitor(current_buffer, common_.scale_factor_);
+                for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
+                {
+                    util::apply_visitor(visitor, filter_tag);
+                }
+                mapnik::premultiply_alpha(current_buffer);
             }
-            mapnik::premultiply_alpha(current_buffer);
-        }
-        if (st.comp_op())
-        {
-            composite(previous_buffer,
-                      current_buffer,
-                      *st.comp_op(),
-                      st.get_opacity(),
-                      -common_.t_.offset(),
-                      -common_.t_.offset());
-        }
-        else if (blend_from || st.get_opacity() < 1.0)
-        {
-            composite(previous_buffer,
-                      current_buffer,
-                      src_over,
-                      st.get_opacity(),
-                      -common_.t_.offset(),
-                      -common_.t_.offset());
+            std::optional<box2d<int>> extent;
+            if (transparent_is_identity)
+            {
+                extent = nonzero_extent(current_buffer);
+            }
+            if (extent && st.comp_op())
+            {
+                composite(previous_buffer,
+                          current_buffer,
+                          *st.comp_op(),
+                          *extent,
+                          st.get_opacity(),
+                          -common_.t_.offset(),
+                          -common_.t_.offset());
+            }
+            else if (extent && (blend_from || st.get_opacity() < 1.0))
+            {
+                composite(previous_buffer,
+                          current_buffer,
+                          src_over,
+                          *extent,
+                          st.get_opacity(),
+                          -common_.t_.offset(),
+                          -common_.t_.offset());
+            }
+            else if (!transparent_is_identity && st.comp_op())
+            {
+                composite(previous_buffer,
+                          current_buffer,
+                          *st.comp_op(),
+                          st.get_opacity(),
+                          -common_.t_.offset(),
+                          -common_.t_.offset());
+            }
+            previous_buffer.painted(previous_buffer.painted() || current_buffer_painted);
+            if (transparent_is_identity)
+            {
+                if (extent)
+                {
+                    clear_extent(current_buffer, *extent);
+                }
+                current_buffer.painted(false);
+            }
         }
         if (internal_buffers_.in_range() && &current_buffer == &internal_buffers_.top())
         {

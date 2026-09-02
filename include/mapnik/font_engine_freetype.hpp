@@ -34,6 +34,7 @@
 // stl
 #include <memory>
 #include <map>
+#include <unordered_map>
 #include <utility> // pair
 #include <vector>
 #include <optional>
@@ -46,6 +47,7 @@ class font_face_set;
 using face_set_ptr = std::unique_ptr<font_face_set>;
 class font_face;
 using face_ptr = std::shared_ptr<font_face>;
+struct harfbuzz_shaper;
 
 class MAPNIK_DECL freetype_engine : public singleton<freetype_engine, CreateUsingNew>,
                                     private util::noncopyable
@@ -114,14 +116,30 @@ class MAPNIK_DECL face_manager
     face_ptr get_face(std::string const& name);
     face_set_ptr get_face_set(std::string const& name);
     face_set_ptr get_face_set(font_set const& fset);
-    face_set_ptr get_face_set(std::string const& name, std::optional<font_set> fset);
+    face_set_ptr get_face_set(std::string const& name, std::optional<font_set> const& fset);
     stroker_ptr get_stroker() const { return stroker_; }
 
   private:
+    friend struct harfbuzz_shaper;
+
+    template<typename T>
+    T& get_shaper_cache()
+    {
+        if (!shaper_cache_)
+        {
+            shaper_cache_ = std::make_shared<T>();
+        }
+        return *static_cast<T*>(shaper_cache_.get());
+    }
+
     using face_cache = std::map<std::string, face_ptr>;
     using face_cache_ptr = std::shared_ptr<face_cache>;
+    using face_set_cache = std::unordered_map<std::string, std::pair<font_set, std::vector<face_ptr>>>;
+    using face_set_cache_ptr = std::shared_ptr<face_set_cache>;
 
     face_cache_ptr face_cache_;
+    face_set_cache_ptr face_set_cache_;
+    std::shared_ptr<void> shaper_cache_;
     font_library& library_;
     freetype_engine::font_file_mapping_type const& font_file_mapping_;
     freetype_engine::font_memory_cache_type const& font_memory_cache_;

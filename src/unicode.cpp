@@ -49,6 +49,53 @@ transcoder::transcoder(std::string const& encoding)
 
 mapnik::value_unicode_string transcoder::transcode(char const* data, std::int32_t length) const
 {
+    // These encodings map every byte below 0x80 to the code point of the
+    // same value, so pure-ASCII input can bypass the converter machinery.
+    UConverterType const type = ucnv_getType(conv_);
+    if (type == UCNV_UTF8 || type == UCNV_LATIN_1 || type == UCNV_US_ASCII)
+    {
+        std::int32_t len = 0;
+        bool ascii = true;
+        if (length < 0)
+        {
+            while (data[len] != '\0')
+            {
+                if (static_cast<unsigned char>(data[len]) >= 0x80u)
+                {
+                    ascii = false;
+                    break;
+                }
+                ++len;
+            }
+        }
+        else
+        {
+            len = length;
+            for (std::int32_t i = 0; i < len; ++i)
+            {
+                if (static_cast<unsigned char>(data[i]) >= 0x80u)
+                {
+                    ascii = false;
+                    break;
+                }
+            }
+        }
+        if (ascii)
+        {
+            mapnik::value_unicode_string ustr;
+            UChar* buf = ustr.getBuffer(len);
+            if (buf != nullptr)
+            {
+                for (std::int32_t i = 0; i < len; ++i)
+                {
+                    buf[i] = static_cast<UChar>(static_cast<unsigned char>(data[i]));
+                }
+                ustr.releaseBuffer(len);
+                return ustr;
+            }
+        }
+    }
+
     UErrorCode err = U_ZERO_ERROR;
 
     mapnik::value_unicode_string ustr(data, length, conv_, err);

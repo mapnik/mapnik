@@ -31,6 +31,7 @@ extern "C" {
 #include FT_GLYPH_H
 #include FT_TRUETYPE_TABLES_H
 }
+#include <harfbuzz/hb-ft.h>
 
 MAPNIK_DISABLE_WARNING_POP
 
@@ -51,13 +52,46 @@ bool font_face::init_color_font()
 
 bool font_face::set_character_sizes(double size)
 {
-    return (FT_Set_Char_Size(face_, 0, static_cast<FT_F26Dot6>(size * (1 << 6)), 0, 0) == 0);
+    return set_character_size(static_cast<FT_F26Dot6>(size * (1 << 6)));
 }
 
 bool font_face::set_unscaled_character_sizes()
 {
     FT_F26Dot6 char_height = face_->units_per_EM > 0 ? face_->units_per_EM : 2048.0;
-    return (FT_Set_Char_Size(face_, 0, char_height, 0, 0) == 0);
+    return set_character_size(char_height);
+}
+
+bool font_face::set_character_size(FT_F26Dot6 size)
+{
+    if (!color_font_ && character_size_is_set_ && character_size_ == size &&
+        character_scale_ == face_->size->metrics.y_scale)
+    {
+        return true;
+    }
+    if (FT_Set_Char_Size(face_, 0, size, 0, 0) != 0)
+    {
+        return false;
+    }
+    if (harfbuzz_font_)
+    {
+        hb_ft_font_changed(harfbuzz_font_);
+    }
+    if (!color_font_)
+    {
+        character_size_ = size;
+        character_scale_ = face_->size->metrics.y_scale;
+        character_size_is_set_ = true;
+    }
+    return true;
+}
+
+hb_font_t* font_face::get_harfbuzz_font()
+{
+    if (!harfbuzz_font_)
+    {
+        harfbuzz_font_ = hb_ft_font_create_referenced(face_);
+    }
+    return harfbuzz_font_;
 }
 
 bool font_face::glyph_dimensions(glyph_info& glyph) const
@@ -68,6 +102,17 @@ bool font_face::glyph_dimensions(glyph_info& glyph) const
     if (color_font_)
         FT_Select_Size(face_, 0);
     FT_Set_Transform(face_, 0, &pen);
+
+    auto const cached = glyph_metrics_cache_.find(glyph.glyph_index);
+    if (cached != glyph_metrics_cache_.end())
+    {
+        glyph.unscaled_ymin = cached->second.ymin;
+        glyph.unscaled_ymax = cached->second.ymax;
+        glyph.unscaled_advance = cached->second.advance;
+        glyph.unscaled_line_height = cached->second.line_height;
+        return true;
+    }
+
     FT_Int32 load_flags = FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING;
     if (color_font_)
         load_flags |= FT_LOAD_COLOR;
@@ -99,6 +144,10 @@ bool font_face::glyph_dimensions(glyph_info& glyph) const
         glyph.unscaled_advance *= scale_multiplier;
     }
 
+    glyph_metrics_cache_.emplace(
+      glyph.glyph_index,
+      glyph_metrics{glyph.unscaled_ymin, glyph.unscaled_ymax, glyph.unscaled_advance, glyph.unscaled_line_height});
+
     return true;
 }
 
@@ -106,6 +155,10 @@ font_face::~font_face()
 {
     MAPNIK_LOG_DEBUG(font_face) << "font_face: Clean up face \"" << family_name() << " " << style_name() << "\"";
 
+    if (harfbuzz_font_)
+    {
+        hb_font_destroy(harfbuzz_font_);
+    }
     FT_Done_Face(face_);
 }
 

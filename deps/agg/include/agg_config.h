@@ -30,13 +30,11 @@
 //---------------------------------------
 // 2. Default rendering_buffer type. Can be:
 //
-// Provides faster access for massive pixel operations, 
-// such as blur, image filtering:
-
-#define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
-// 
-// Provides cheaper creation and destruction (no mem allocs):
-// #define AGG_RENDERING_BUFFER row_accessor<int8u>
+// Provides faster row access for operations such as blur and image filtering:
+// #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
+//
+// Avoids allocating a row-pointer array for each short-lived buffer:
+#define AGG_RENDERING_BUFFER row_accessor<int8u>
 //
 // You can still use both of them simultaneouslyin your applications 
 // This #define is used only for default rendering_buffer type,

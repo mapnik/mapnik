@@ -39,6 +39,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 extern "C" {
 #include <png.h>
 }
+#include <algorithm>
 #include <set>
 #include <string>
 MAPNIK_DISABLE_WARNING_POP
@@ -590,9 +591,17 @@ void save_as_png8(T1& file,
         {
             mapnik::image_rgba8::pixel_type const* row = image.get_row(y);
             mapnik::image_gray8::pixel_type* row_out = reduced_image.get_row(y);
-            for (unsigned x = 0; x < width; ++x)
+            unsigned x = 0;
+            while (x < width)
             {
-                row_out[x] = tree.quantize(row[x]);
+                unsigned const val = row[x];
+                unsigned run_end = x + 1;
+                while (run_end < width && row[run_end] == val)
+                {
+                    ++run_end;
+                }
+                std::fill(row_out + x, row_out + run_end, tree.quantize(val));
+                x = run_end;
             }
         }
         save_as_png(file, palette, reduced_image, width, height, 8, alpha_table, opts);
@@ -653,10 +662,17 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
         for (unsigned y = 0; y < height; ++y)
         {
             typename T2::pixel_type const* row = image.get_row(y);
-            for (unsigned x = 0; x < width; ++x)
+            unsigned x = 0;
+            while (x < width)
             {
                 unsigned val = row[x];
-                tree.insert(mapnik::rgba(U2RED(val), U2GREEN(val), U2BLUE(val), U2ALPHA(val)));
+                unsigned run_end = x + 1;
+                while (run_end < width && row[run_end] == val)
+                {
+                    ++run_end;
+                }
+                tree.insert(mapnik::rgba(U2RED(val), U2GREEN(val), U2BLUE(val), U2ALPHA(val)), run_end - x);
+                x = run_end;
             }
         }
 
