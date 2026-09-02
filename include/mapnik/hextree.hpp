@@ -54,6 +54,12 @@ struct RGBAPolicy
 template<typename T, typename InsertPolicy = RGBAPolicy>
 class hextree : private util::noncopyable
 {
+#ifdef USE_DENSE_HASH_MAP
+    using color_hash_table = google::dense_hash_map<unsigned int, std::uint16_t>;
+#else
+    using color_hash_table = std::unordered_map<unsigned int, std::uint16_t>;
+#endif
+
     struct node
     {
         node()
@@ -144,7 +150,7 @@ class hextree : private util::noncopyable
     // index remaping of sorted_pal_ indexes to indexes of returned image palette
     std::vector<unsigned> pal_remap_;
     // rgba hashtable for quantization
-    mutable rgba_hash_table color_hashmap_;
+    mutable color_hash_table color_hashmap_;
     // gamma correction to prioritize dark colors (>1.0)
     double gamma_;
     // look up table for gamma correction
@@ -260,8 +266,16 @@ class hextree : private util::noncopyable
             return pal_remap_[has_holes_ ? 1 : 0];
         }
 
-        rgba_hash_table::iterator it = color_hashmap_.find(val);
-        if (it == color_hashmap_.end())
+        std::uint16_t* cached = nullptr;
+        if (val != 0)
+        {
+            std::uint16_t& entry = color_hashmap_[val];
+            if (entry != 0)
+            {
+                return pal_remap_[entry - 1];
+            }
+            cached = &entry;
+        }
         {
             rgba c(val);
             int dr, dg, db, da;
@@ -316,12 +330,10 @@ class hextree : private util::noncopyable
                     dist = newdist;
                 }
             }
-            // put found index in hash map
-            color_hashmap_[val] = ind;
-        }
-        else
-        {
-            ind = it->second;
+            if (cached)
+            {
+                *cached = ind + 1;
+            }
         }
 
         return pal_remap_[ind];
