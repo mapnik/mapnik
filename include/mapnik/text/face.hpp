@@ -45,6 +45,8 @@ MAPNIK_DISABLE_WARNING_POP
 #include <unordered_map>
 #include <vector>
 
+struct hb_font_t;
+
 namespace mapnik {
 
 class MAPNIK_DECL font_face : util::noncopyable
@@ -57,6 +59,8 @@ class MAPNIK_DECL font_face : util::noncopyable
     std::string style_name() const { return std::string(face_->style_name); }
 
     FT_Face get_face() const { return face_; }
+
+    hb_font_t* get_harfbuzz_font();
 
     bool set_character_sizes(double size);
     bool set_unscaled_character_sizes();
@@ -76,11 +80,13 @@ class MAPNIK_DECL font_face : util::noncopyable
         double line_height;
     };
 
+    bool set_character_size(FT_F26Dot6 size);
     bool init_color_font();
 
     FT_Face face_;
     bool const color_font_;
     mutable std::unordered_map<unsigned, glyph_metrics> glyph_metrics_cache_;
+    hb_font_t* harfbuzz_font_ = nullptr;
 };
 using face_ptr = std::shared_ptr<font_face>;
 

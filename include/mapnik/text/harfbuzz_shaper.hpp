@@ -280,7 +280,7 @@ struct harfbuzz_shaper
                 hb_buffer_set_direction(buffer.get(),
                                         (text_item.dir == UBIDI_RTL) ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
 
-                hb_font_t* font(hb_ft_font_create(face->get_face(), nullptr));
+                hb_font_t* font = face->get_harfbuzz_font();
                 auto script = detail::_icu_script_to_script(text_item.script);
                 hb_language_t hb_lang;
                 if (lang)
@@ -309,7 +309,6 @@ struct harfbuzz_shaper
 #endif
 #endif
                 hb_shape(font, buffer.get(), ff_settings.get_features(), ff_count);
-                hb_font_destroy(font);
 
                 unsigned num_glyphs = hb_buffer_get_length(buffer.get());
                 hb_glyph_info_t* glyphs = hb_buffer_get_glyph_infos(buffer.get(), &num_glyphs);
