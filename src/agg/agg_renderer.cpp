@@ -77,6 +77,12 @@ std::optional<box2d<int>> nonzero_extent(image_rgba8 const& image)
     {
         image_rgba8::pixel_type const* row = image.get_row(y);
         int row_minx = 0;
+        while (row_minx + 8 <= width &&
+               (row[row_minx] | row[row_minx + 1] | row[row_minx + 2] | row[row_minx + 3] | row[row_minx + 4] |
+                row[row_minx + 5] | row[row_minx + 6] | row[row_minx + 7]) == 0)
+        {
+            row_minx += 8;
+        }
         while (row_minx < width && row[row_minx] == 0)
         {
             ++row_minx;
@@ -85,13 +91,18 @@ std::optional<box2d<int>> nonzero_extent(image_rgba8 const& image)
         {
             continue;
         }
-        int row_maxx = width - 1;
-        while (row[row_maxx] == 0)
+        int row_maxx = width;
+        while (row_maxx >= 8 && (row[row_maxx - 1] | row[row_maxx - 2] | row[row_maxx - 3] | row[row_maxx - 4] |
+                                 row[row_maxx - 5] | row[row_maxx - 6] | row[row_maxx - 7] | row[row_maxx - 8]) == 0)
+        {
+            row_maxx -= 8;
+        }
+        while (row[row_maxx - 1] == 0)
         {
             --row_maxx;
         }
         minx = std::min(minx, row_minx);
-        maxx = std::max(maxx, row_maxx);
+        maxx = std::max(maxx, row_maxx - 1);
         miny = std::min(miny, y);
         maxy = y;
     }
