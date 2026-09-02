@@ -162,8 +162,7 @@ class hextree : private util::noncopyable
           has_holes_(false),
           root_(node_pool_.create()),
 #ifdef USE_DENSE_HASH_MAP
-          // TODO - test for any benefit to initializing at a larger size
-          color_hashmap_(),
+          color_hashmap_(2048),
 #endif
           trans_mode_(FULL_TRANSPARENCY)
     {
