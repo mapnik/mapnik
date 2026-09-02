@@ -34,6 +34,7 @@
 // stl
 #include <memory>
 #include <map>
+#include <unordered_map>
 #include <utility> // pair
 #include <vector>
 #include <optional>
@@ -133,8 +134,11 @@ class MAPNIK_DECL face_manager
 
     using face_cache = std::map<std::string, face_ptr>;
     using face_cache_ptr = std::shared_ptr<face_cache>;
+    using face_set_cache = std::unordered_map<std::string, std::pair<font_set, std::vector<face_ptr>>>;
+    using face_set_cache_ptr = std::shared_ptr<face_set_cache>;
 
     face_cache_ptr face_cache_;
+    face_set_cache_ptr face_set_cache_;
     std::shared_ptr<void> shaper_cache_;
     font_library& library_;
     freetype_engine::font_file_mapping_type const& font_file_mapping_;

@@ -43,6 +43,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 struct hb_font_t;
@@ -99,6 +100,9 @@ class MAPNIK_DECL font_face_set : private util::noncopyable
     using iterator = std::vector<face_ptr>::iterator;
     font_face_set(void)
         : faces_()
+    {}
+    explicit font_face_set(std::vector<face_ptr> faces)
+        : faces_(std::move(faces))
     {}
 
     void add(face_ptr face);

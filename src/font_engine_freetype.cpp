@@ -416,6 +416,7 @@ face_manager::face_manager(font_library& library,
                            freetype_engine::font_file_mapping_type const& font_file_mapping,
                            freetype_engine::font_memory_cache_type const& font_cache)
     : face_cache_(new face_cache()),
+      face_set_cache_(new face_set_cache()),
       library_(library),
       font_file_mapping_(font_file_mapping),
       font_memory_cache_(font_cache)
@@ -464,23 +465,37 @@ face_set_ptr face_manager::get_face_set(std::string const& name)
 face_set_ptr face_manager::get_face_set(font_set const& fset)
 {
     std::vector<std::string> const& names = fset.get_face_names();
-    face_set_ptr face_set = std::make_unique<font_face_set>();
+    auto cached = face_set_cache_->find(fset.get_name());
+    if (cached != face_set_cache_->end() && cached->second.first == fset)
+    {
+        return std::make_unique<font_face_set>(cached->second.second);
+    }
+
+    std::vector<face_ptr> faces;
+    faces.reserve(names.size());
+    bool complete = true;
     for (auto const& name : names)
     {
         face_ptr face = get_face(name);
         if (face)
         {
-            face_set->add(face);
+            faces.push_back(std::move(face));
         }
-#ifdef MAPNIK_LOG
         else
         {
+            complete = false;
+#ifdef MAPNIK_LOG
             MAPNIK_LOG_DEBUG(font_engine_freetype)
               << "Failed to find face '" << name << "' in font set '" << fset.get_name() << "'\n";
-        }
 #endif
+        }
     }
-    return face_set;
+    if (complete)
+    {
+        cached = face_set_cache_->insert_or_assign(fset.get_name(), std::make_pair(fset, std::move(faces))).first;
+        return std::make_unique<font_face_set>(cached->second.second);
+    }
+    return std::make_unique<font_face_set>(std::move(faces));
 }
 
 face_set_ptr face_manager::get_face_set(std::string const& name, std::optional<font_set> fset)
