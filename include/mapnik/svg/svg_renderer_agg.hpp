@@ -64,6 +64,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_span_interpolator_linear.h"
 MAPNIK_DISABLE_WARNING_POP
 
+#include <algorithm>
+#include <cmath>
 #include <ostream>
 
 namespace mapnik {
@@ -148,19 +150,13 @@ class renderer_agg : util::noncopyable
 
     {
         double adjusted_opacity = opacity * svg_group_.opacity; // adjust top level opacity
+        if (adjusted_opacity <= 0.0)
+        {
+            return;
+        }
         if (adjusted_opacity < 1.0)
         {
-            mapnik::image_rgba8 im(ren.width(), ren.height(), true, true);
-            agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
-            PixelFormat pixf(buf);
-            Renderer ren_g(pixf);
-            for (auto const& elem : svg_group_.elements)
-            {
-                mapbox::util::apply_visitor(
-                  group_renderer<Rasterizer, Scanline, Renderer>(*this, ras, sl, ren_g, mtx, symbol_bbox),
-                  elem);
-            }
-            ren.blend_from(ren_g.ren(), 0, 0, 0, unsigned(adjusted_opacity * 255));
+            render_opacity_group(ras, sl, ren, svg_group_, mtx, adjusted_opacity, symbol_bbox);
         }
         else
         {
@@ -171,6 +167,126 @@ class renderer_agg : util::noncopyable
                   elem);
             }
         }
+    }
+
+    struct opacity_bounds_visitor
+    {
+        opacity_bounds_visitor(VertexSource& source,
+                               agg::trans_affine const& mtx,
+                               box2d<double>& bounds,
+                               bool& found,
+                               double& padding)
+            : source_(source),
+              mtx_(mtx),
+              bounds_(bounds),
+              found_(found),
+              padding_(padding)
+        {}
+
+        void operator()(group const& g) const
+        {
+            for (auto const& elem : g.elements)
+            {
+                mapbox::util::apply_visitor(opacity_bounds_visitor(source_, mtx_, bounds_, found_, padding_), elem);
+            }
+        }
+
+        void operator()(path_attributes const& attr) const
+        {
+            if (!attr.visibility_flag)
+            {
+                return;
+            }
+            agg::trans_affine transform = attr.transform;
+            transform *= mtx_;
+            source_.rewind(attr.index);
+            unsigned command;
+            double x;
+            double y;
+            while (!agg::is_stop(command = source_.vertex(&x, &y)))
+            {
+                if (agg::is_vertex(command))
+                {
+                    transform.transform(&x, &y);
+                    if (found_)
+                    {
+                        bounds_.expand_to_include(x, y);
+                    }
+                    else
+                    {
+                        bounds_.init(x, y, x, y);
+                        found_ = true;
+                    }
+                }
+            }
+            if (!attr.stroke_flag && attr.stroke_gradient.get_gradient_type() == NO_GRADIENT)
+            {
+                return;
+            }
+            double const scale_bound = std::sqrt(transform.sx * transform.sx + transform.shx * transform.shx +
+                                                 transform.shy * transform.shy + transform.sy * transform.sy);
+            double const miter = std::max(1.0, attr.miter_limit);
+            padding_ = std::max(padding_, 0.5 * std::fabs(attr.stroke_width) * scale_bound * miter);
+        }
+
+        VertexSource& source_;
+        agg::trans_affine const& mtx_;
+        box2d<double>& bounds_;
+        bool& found_;
+        double& padding_;
+    };
+
+    template<typename Rasterizer, typename Scanline, typename Renderer>
+    void render_opacity_group(Rasterizer& ras,
+                              Scanline& sl,
+                              Renderer& ren,
+                              group const& g,
+                              agg::trans_affine const& mtx,
+                              double opacity,
+                              box2d<double> const& symbol_bbox)
+    {
+        if (opacity <= 0.0)
+        {
+            return;
+        }
+
+        box2d<double> bounds;
+        bool found = false;
+        double padding = 2.0;
+        opacity_bounds_visitor bounds_visitor(source_, mtx, bounds, found, padding);
+        bounds_visitor(g);
+        if (!found)
+        {
+            return;
+        }
+
+        int const x0 = std::max(ren.xmin(), static_cast<int>(std::floor(bounds.minx() - padding)));
+        int const y0 = std::max(ren.ymin(), static_cast<int>(std::floor(bounds.miny() - padding)));
+        int const x1 = std::min(ren.xmax() + 1, static_cast<int>(std::ceil(bounds.maxx() + padding)) + 1);
+        int const y1 = std::min(ren.ymax() + 1, static_cast<int>(std::ceil(bounds.maxy() + padding)) + 1);
+        if (x0 >= x1 || y0 >= y1)
+        {
+            return;
+        }
+
+        mapnik::image_rgba8 image(x1 - x0, y1 - y0, true, true);
+        agg::rendering_buffer buffer(image.bytes(), image.width(), image.height(), image.row_size());
+        PixelFormat pixfmt(buffer);
+        Renderer group_renderer_base(pixfmt);
+        agg::trans_affine local_mtx = mtx;
+        local_mtx.tx -= x0;
+        local_mtx.ty -= y0;
+        for (auto const& elem : g.elements)
+        {
+            mapbox::util::apply_visitor(group_renderer<Rasterizer, Scanline, Renderer>(*this,
+                                                                                       ras,
+                                                                                       sl,
+                                                                                       group_renderer_base,
+                                                                                       local_mtx,
+                                                                                       symbol_bbox),
+                                        elem);
+        }
+        ren.blend_from(group_renderer_base.ren(), 0, x0, y0, unsigned(opacity * 255));
     }
 
     template<typename Rasterizer, typename Scanline, typename Renderer>
@@ -306,17 +422,13 @@ class renderer_agg : util::noncopyable
         void operator()(group const& g) const
         {
             double opacity = g.opacity;
+            if (opacity <= 0.0)
+            {
+                return;
+            }
             if (opacity < 1.0)
             {
-                mapnik::image_rgba8 im(ren_.width(), ren_.height(), true, true);
-                agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
-                PixelFormat pixf(buf);
-                Renderer ren(pixf);
-                for (auto const& elem : g.elements)
-                {
-                    mapbox::util::apply_visitor(group_renderer(renderer_, ras_, sl_, ren, mtx_, symbol_bbox_), elem);
-                }
-                ren_.blend_from(ren.ren(), 0, 0, 0, unsigned(opacity * 255));
+                renderer_.render_opacity_group(ras_, sl_, ren_, g, mtx_, opacity, symbol_bbox_);
             }
             else
             {
