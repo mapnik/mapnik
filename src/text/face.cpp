@@ -63,6 +63,11 @@ bool font_face::set_unscaled_character_sizes()
 
 bool font_face::set_character_size(FT_F26Dot6 size)
 {
+    if (!color_font_ && character_size_is_set_ && character_size_ == size &&
+        character_scale_ == face_->size->metrics.y_scale)
+    {
+        return true;
+    }
     if (FT_Set_Char_Size(face_, 0, size, 0, 0) != 0)
     {
         return false;
@@ -70,6 +75,12 @@ bool font_face::set_character_size(FT_F26Dot6 size)
     if (harfbuzz_font_)
     {
         hb_ft_font_changed(harfbuzz_font_);
+    }
+    if (!color_font_)
+    {
+        character_size_ = size;
+        character_scale_ = face_->size->metrics.y_scale;
+        character_size_is_set_ = true;
     }
     return true;
 }

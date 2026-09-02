@@ -84,7 +84,10 @@ class MAPNIK_DECL font_face : util::noncopyable
     bool init_color_font();
 
     FT_Face face_;
+    FT_F26Dot6 character_size_ = 0;
+    FT_Fixed character_scale_ = 0;
     bool const color_font_;
+    bool character_size_is_set_ = false;
     mutable std::unordered_map<unsigned, glyph_metrics> glyph_metrics_cache_;
     hb_font_t* harfbuzz_font_ = nullptr;
 };
