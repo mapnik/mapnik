@@ -498,7 +498,7 @@ face_set_ptr face_manager::get_face_set(font_set const& fset)
     return std::make_unique<font_face_set>(std::move(faces));
 }
 
-face_set_ptr face_manager::get_face_set(std::string const& name, std::optional<font_set> fset)
+face_set_ptr face_manager::get_face_set(std::string const& name, std::optional<font_set> const& fset)
 {
     if (fset && fset->size() > 0)
     {
