@@ -102,6 +102,15 @@ std::optional<box2d<int>> nonzero_extent(image_rgba8 const& image)
     return box2d<int>(minx, miny, maxx, maxy);
 }
 
+void clear_extent(image_rgba8& image, box2d<int> const& extent)
+{
+    std::size_t const length = extent.width() + 1;
+    for (int y = extent.miny(); y <= extent.maxy(); ++y)
+    {
+        std::fill_n(image.get_row(y, extent.minx()), length, 0);
+    }
+}
+
 } // namespace
 
 template<typename T0, typename T1>
@@ -329,7 +338,7 @@ void agg_renderer<T0, T1>::start_style_processing(feature_type_style const& st)
             {
                 inflated_buffer_ = std::make_unique<buffer_type>(target_width, target_height);
             }
-            else
+            else if (inflated_buffer_->painted())
             {
                 mapnik::fill(*inflated_buffer_, 0); // fill with transparent colour
             }
@@ -360,6 +369,7 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
     buffer_type& previous_buffer = buffers_.top().get();
     if (&current_buffer != &previous_buffer)
     {
+        bool const current_buffer_painted = current_buffer.painted();
         bool const transparent_is_identity = !st.comp_op() || *st.comp_op() == src_over || *st.comp_op() == darken;
         bool const skip_empty = !current_buffer.painted() && st.image_filters().empty() && transparent_is_identity;
         if (!skip_empty)
@@ -409,7 +419,15 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
                           -common_.t_.offset(),
                           -common_.t_.offset());
             }
-            previous_buffer.painted(previous_buffer.painted() || current_buffer.painted());
+            previous_buffer.painted(previous_buffer.painted() || current_buffer_painted);
+            if (transparent_is_identity)
+            {
+                if (extent)
+                {
+                    clear_extent(current_buffer, *extent);
+                }
+                current_buffer.painted(false);
+            }
         }
         if (internal_buffers_.in_range() && &current_buffer == &internal_buffers_.top())
         {
