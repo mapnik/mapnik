@@ -30,6 +30,8 @@
 
 // stl
 #include <algorithm>
+#include <new>
+#include <type_traits>
 #include <vector>
 #include <set>
 #include <cmath>
@@ -67,18 +69,6 @@ class hextree : private util::noncopyable
             std::fill(children_, children_ + 16, nullptr);
         }
 
-        ~node()
-        {
-            for (unsigned i = 0; i < 16; ++i)
-            {
-                if (children_[i] != 0)
-                {
-                    delete children_[i];
-                    children_[i] = 0;
-                }
-            }
-        }
-
         bool is_leaf() const { return (children_count == 0); }
         node* children_[16];
         // sum of values for computing mean value using count or pixel_count
@@ -94,6 +84,32 @@ class hextree : private util::noncopyable
         double reduce_cost;
         // number of !=0 positions in children_ array
         std::uint8_t children_count;
+    };
+    static_assert(std::is_trivially_destructible<node>::value, "pooled nodes must be trivially destructible");
+
+    static constexpr std::size_t node_block_size = 256;
+    struct node_block
+    {
+        alignas(node) unsigned char data[sizeof(node) * node_block_size];
+    };
+
+    class node_pool
+    {
+      public:
+        node* create()
+        {
+            if (next_ == node_block_size)
+            {
+                blocks_.push_back(std::unique_ptr<node_block>(new node_block));
+                next_ = 0;
+            }
+            unsigned char* storage = blocks_.back()->data + sizeof(node) * next_++;
+            return ::new (static_cast<void*>(storage)) node();
+        }
+
+      private:
+        std::vector<std::unique_ptr<node_block>> blocks_;
+        std::size_t next_ = node_block_size;
     };
 
     // highest reduce_cost first
@@ -113,7 +129,8 @@ class hextree : private util::noncopyable
     unsigned colors_;
     // flag indicating existance of invisible pixels (a < InsertPolicy::MIN_ALPHA)
     bool has_holes_;
-    std::unique_ptr<node> const root_;
+    node_pool node_pool_;
+    node* const root_;
     // working palette for quantization, sorted on mean(r,g,b,a) for easier searching NN
     std::vector<rgba> sorted_pal_;
     // index remaping of sorted_pal_ indexes to indexes of returned image palette
@@ -135,7 +152,7 @@ class hextree : private util::noncopyable
         : max_colors_(max_colors),
           colors_(0),
           has_holes_(false),
-          root_(new node()),
+          root_(node_pool_.create()),
 #ifdef USE_DENSE_HASH_MAP
           // TODO - test for any benefit to initializing at a larger size
           color_hashmap_(),
@@ -187,7 +204,7 @@ class hextree : private util::noncopyable
         }
         std::uint8_t a = preprocessAlpha(data.a);
         unsigned level = 0;
-        node* cur_node = root_.get();
+        node* cur_node = root_;
         if (a < InsertPolicy::MIN_ALPHA)
         {
             has_holes_ = true;
@@ -215,7 +232,7 @@ class hextree : private util::noncopyable
             if (cur_node->children_[idx] == 0)
             {
                 cur_node->children_count++;
-                cur_node->children_[idx] = new node();
+                cur_node->children_[idx] = node_pool_.create();
             }
             cur_node = cur_node->children_[idx];
             ++level;
@@ -315,7 +332,7 @@ class hextree : private util::noncopyable
         assign_node_colors();
 
         sorted_pal_.reserve(colors_);
-        create_palette_rek(sorted_pal_, root_.get());
+        create_palette_rek(sorted_pal_, root_);
 
         // sort palette for binary searching in quantization
         std::sort(sorted_pal_.begin(), sorted_pal_.end(), rgba::mean_sort_cmp());
@@ -447,7 +464,7 @@ class hextree : private util::noncopyable
     // until all available colors are assigned to processed nodes
     void assign_node_colors()
     {
-        compute_cost(root_.get());
+        compute_cost(root_);
 
         int tries = 0;
 
@@ -456,7 +473,7 @@ class hextree : private util::noncopyable
         root_->count = root_->pixel_count;
 
         std::set<node*, node_rev_cmp> colored_leaves_heap;
-        colored_leaves_heap.insert(root_.get());
+        colored_leaves_heap.insert(root_);
         while ((!colored_leaves_heap.empty() && (colors_ < max_colors_) && (tries < 16)))
         {
             // select worst node to remove it from palette and replace with children
