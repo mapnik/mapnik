@@ -316,6 +316,8 @@ void agg_renderer<T0, T1>::end_layer_processing(layer const& lyr)
     {
         composite_mode_e comp_op = lyr.comp_op() ? *lyr.comp_op() : src_over;
         composite(previous_buffer, current_buffer, comp_op, lyr.get_opacity(), 0, 0);
+        // A parent layer may contain only pixels composited from its children.
+        previous_buffer.painted(previous_buffer.painted() || current_buffer.painted());
         internal_buffers_.pop();
     }
 }
@@ -380,7 +382,6 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
     buffer_type& previous_buffer = buffers_.top().get();
     if (&current_buffer != &previous_buffer)
     {
-        bool const current_buffer_painted = current_buffer.painted();
         bool const transparent_is_identity = !st.comp_op() || *st.comp_op() == src_over || *st.comp_op() == darken;
         bool const skip_empty = !current_buffer.painted() && st.image_filters().empty() && transparent_is_identity;
         if (!skip_empty)
@@ -395,6 +396,8 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
                     util::apply_visitor(visitor, filter_tag);
                 }
                 mapnik::premultiply_alpha(current_buffer);
+                // Filters can generate pixels even when no rule painted the buffer.
+                current_buffer.painted(true);
             }
             std::optional<box2d<int>> extent;
             if (transparent_is_identity)
@@ -430,7 +433,7 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
                           -common_.t_.offset(),
                           -common_.t_.offset());
             }
-            previous_buffer.painted(previous_buffer.painted() || current_buffer_painted);
+            previous_buffer.painted(previous_buffer.painted() || current_buffer.painted());
             if (transparent_is_identity)
             {
                 if (extent)
@@ -454,6 +457,7 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
             util::apply_visitor(visitor, filter_tag);
         }
         mapnik::premultiply_alpha(previous_buffer);
+        previous_buffer.painted(true);
     }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
 }

@@ -243,27 +243,43 @@ class renderer_agg : util::noncopyable
                               group const& g,
                               agg::trans_affine const& mtx,
                               double opacity,
-                              box2d<double> const& symbol_bbox)
+                              box2d<double> const& symbol_bbox,
+                              int offset_x = 0,
+                              int offset_y = 0)
     {
         if (opacity <= 0.0)
         {
             return;
         }
 
-        box2d<double> bounds;
-        bool found = false;
-        double padding = 2.0;
-        opacity_bounds_visitor bounds_visitor(source_, mtx, bounds, found, padding);
-        bounds_visitor(g);
-        if (!found)
+        // Cropping is safe only when transparent source pixels leave the destination unchanged.
+        bool crop = true;
+        if constexpr (requires { ren.ren().comp_op(); })
         {
-            return;
+            auto const comp_op = ren.ren().comp_op();
+            crop = comp_op == agg::comp_op_src_over || comp_op == agg::comp_op_darken;
         }
 
-        int const x0 = std::max(ren.xmin(), static_cast<int>(std::floor(bounds.minx() - padding)));
-        int const y0 = std::max(ren.ymin(), static_cast<int>(std::floor(bounds.miny() - padding)));
-        int const x1 = std::min(ren.xmax() + 1, static_cast<int>(std::ceil(bounds.maxx() + padding)) + 1);
-        int const y1 = std::min(ren.ymax() + 1, static_cast<int>(std::ceil(bounds.maxy() + padding)) + 1);
+        int x0 = 0;
+        int y0 = 0;
+        int x1 = ren.width();
+        int y1 = ren.height();
+        if (crop)
+        {
+            box2d<double> bounds;
+            bool found = false;
+            double padding = 2.0;
+            opacity_bounds_visitor bounds_visitor(source_, mtx, bounds, found, padding);
+            bounds_visitor(g);
+            if (!found)
+            {
+                return;
+            }
+            x0 = std::max(ren.xmin(), static_cast<int>(std::floor(bounds.minx() - padding)));
+            y0 = std::max(ren.ymin(), static_cast<int>(std::floor(bounds.miny() - padding)));
+            x1 = std::min(ren.xmax() + 1, static_cast<int>(std::ceil(bounds.maxx() + padding)) + 1);
+            y1 = std::min(ren.ymax() + 1, static_cast<int>(std::ceil(bounds.maxy() + padding)) + 1);
+        }
         if (x0 >= x1 || y0 >= y1)
         {
             return;
@@ -283,7 +299,9 @@ class renderer_agg : util::noncopyable
                                                                                        sl,
                                                                                        group_renderer_base,
                                                                                        local_mtx,
-                                                                                       symbol_bbox),
+                                                                                       symbol_bbox,
+                                                                                       offset_x + x0,
+                                                                                       offset_y + y0),
                                         elem);
         }
         ren.blend_from(group_renderer_base.ren(), 0, x0, y0, unsigned(opacity * 255));
@@ -297,13 +315,17 @@ class renderer_agg : util::noncopyable
                        Scanline& sl,
                        Renderer& ren,
                        agg::trans_affine const& mtx,
-                       box2d<double> const& symbol_bbox)
+                       box2d<double> const& symbol_bbox,
+                       int offset_x = 0,
+                       int offset_y = 0)
             : renderer_(renderer),
               ras_(ras),
               sl_(sl),
               ren_(ren),
               mtx_(mtx),
-              symbol_bbox_(symbol_bbox)
+              symbol_bbox_(symbol_bbox),
+              offset_x_(offset_x),
+              offset_y_(offset_y)
         {}
 
         void render_gradient(Rasterizer& ras,
@@ -356,6 +378,11 @@ class renderer_agg : util::noncopyable
                     if (grad.get_units() == OBJECT_BOUNDING_BOX)
                     {
                         bounding_rect_single(curved_trans, path_id, &bx1, &by1, &bx2, &by2);
+                        // Gradient normalization uses bounds in the original rendering coordinates.
+                        bx1 += offset_x_;
+                        bx2 += offset_x_;
+                        by1 += offset_y_;
+                        by2 += offset_y_;
                     }
                     transform.translate(-bx1 / scale, -by1 / scale);
                     transform.scale(scale / (bx2 - bx1), scale / (by2 - by1));
@@ -428,13 +455,15 @@ class renderer_agg : util::noncopyable
             }
             if (opacity < 1.0)
             {
-                renderer_.render_opacity_group(ras_, sl_, ren_, g, mtx_, opacity, symbol_bbox_);
+                renderer_.render_opacity_group(ras_, sl_, ren_, g, mtx_, opacity, symbol_bbox_, offset_x_, offset_y_);
             }
             else
             {
                 for (auto const& elem : g.elements)
                 {
-                    mapbox::util::apply_visitor(group_renderer(renderer_, ras_, sl_, ren_, mtx_, symbol_bbox_), elem);
+                    mapbox::util::apply_visitor(
+                      group_renderer(renderer_, ras_, sl_, ren_, mtx_, symbol_bbox_, offset_x_, offset_y_),
+                      elem);
                 }
             }
         }
@@ -599,6 +628,8 @@ class renderer_agg : util::noncopyable
         Renderer& ren_;
         agg::trans_affine const& mtx_;
         box2d<double> const& symbol_bbox_;
+        int offset_x_;
+        int offset_y_;
     };
 
 #if defined(GRID_RENDERER)
