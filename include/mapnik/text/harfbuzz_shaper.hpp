@@ -33,8 +33,12 @@
 #include <mapnik/font_engine_freetype.hpp>
 
 // stl
+#include <cstdint>
 #include <list>
+#include <string>
 #include <type_traits>
+#include <unordered_map>
+#include <vector>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -221,6 +225,102 @@ static hb_language_t script_to_language(hb_script_t script)
 
 struct harfbuzz_shaper
 {
+    // Glyph data emitted by HarfBuzz before applying the requested text size.
+    struct shaped_glyph
+    {
+        face_ptr face;
+        unsigned codepoint;
+        unsigned cluster;
+        int x_advance;
+        int x_offset;
+        int y_offset;
+    };
+
+    struct shaping_key
+    {
+        std::u16string text;
+        unsigned start;
+        unsigned end;
+        bool rtl;
+        int script;
+        bool has_lang;
+        std::string lang;
+        std::string face_name;
+        std::string fontset;
+        std::string features;
+
+        bool operator==(shaping_key const& other) const
+        {
+            return start == other.start && end == other.end && rtl == other.rtl && script == other.script &&
+                   text == other.text && has_lang == other.has_lang && lang == other.lang &&
+                   face_name == other.face_name && fontset == other.fontset && features == other.features;
+        }
+    };
+
+    struct shaping_key_hash
+    {
+        std::size_t operator()(shaping_key const& k) const
+        {
+            std::size_t seed = std::hash<std::u16string>()(k.text);
+            auto mix = [&seed](std::size_t v) {
+                seed ^= v + 0x9e3779b97f4a7c15ull + (seed << 6) + (seed >> 2);
+            };
+            mix(k.start);
+            mix(k.end);
+            mix(static_cast<std::size_t>(k.rtl));
+            mix(static_cast<std::size_t>(k.script));
+            mix(static_cast<std::size_t>(k.has_lang));
+            mix(std::hash<std::string>()(k.lang));
+            mix(std::hash<std::string>()(k.face_name));
+            mix(std::hash<std::string>()(k.fontset));
+            mix(std::hash<std::string>()(k.features));
+            return seed;
+        }
+    };
+
+    using shaping_cache = std::unordered_map<shaping_key, std::vector<shaped_glyph>, shaping_key_hash>;
+
+    static void append_u32(std::string& key, std::uint32_t value)
+    {
+        key.append(reinterpret_cast<char const*>(&value), sizeof(value));
+    }
+
+    static std::string fontset_key(std::optional<font_set> const& fset)
+    {
+        std::string key;
+        key.push_back(fset ? 1 : 0);
+        if (!fset)
+        {
+            return key;
+        }
+        std::size_t size = 1;
+        for (std::string const& name : fset->get_face_names())
+        {
+            size += sizeof(std::uint32_t) + name.size();
+        }
+        key.reserve(size);
+        for (std::string const& name : fset->get_face_names())
+        {
+            append_u32(key, static_cast<std::uint32_t>(name.size()));
+            key.append(name);
+        }
+        return key;
+    }
+
+    static std::string feature_key(font_feature_settings const& settings)
+    {
+        std::string key;
+        key.reserve(settings.count() * sizeof(hb_feature_t));
+        for (hb_feature_t const& feature : settings.features())
+        {
+            append_u32(key, feature.tag);
+            append_u32(key, feature.value);
+            append_u32(key, feature.start);
+            append_u32(key, feature.end);
+        }
+        return key;
+    }
+
     static void shape_text(text_line& line,
                            text_itemizer& itemizer,
                            std::map<unsigned, double>& width_map,
@@ -246,13 +346,68 @@ struct harfbuzz_shaper
         mapnik::value_unicode_string const& text = itemizer.text();
         for (auto const& text_item : list)
         {
-            face_set_ptr face_set = font_manager.get_face_set(text_item.format_->face_name, text_item.format_->fontset);
             double size = text_item.format_->text_size * scale_factor;
-            face_set->set_unscaled_character_sizes();
-            std::size_t num_faces = face_set->size();
 
             font_feature_settings const& ff_settings = text_item.format_->ff_settings;
             int ff_count = safe_cast<int>(ff_settings.count());
+
+            double max_glyph_height = 0;
+            auto emit_glyph = [&](shaped_glyph const& sg, bool ensure_sizes) {
+                glyph_info g(sg.codepoint, sg.cluster, text_item.format_);
+                g.face = sg.face;
+                if (ensure_sizes)
+                {
+                    g.face->set_unscaled_character_sizes();
+                }
+                if (g.face->glyph_dimensions(g))
+                {
+                    g.scale_multiplier = g.face->get_face()->units_per_EM > 0
+                                           ? (size / g.face->get_face()->units_per_EM)
+                                           : (size / 2048.0);
+                    // Overwrite default advance with better value provided by HarfBuzz
+                    g.unscaled_advance = sg.x_advance;
+                    g.offset.set(sg.x_offset * g.scale_multiplier, sg.y_offset * g.scale_multiplier);
+                    double tmp_height = g.height();
+                    if (g.face->is_color())
+                    {
+                        tmp_height = g.ymax();
+                    }
+                    if (tmp_height > max_glyph_height)
+                        max_glyph_height = tmp_height;
+                    width_map[sg.cluster] += g.advance();
+                    line.add_glyph(std::move(g), scale_factor);
+                }
+            };
+
+            shaping_cache& cache = font_manager.get_shaper_cache<shaping_cache>();
+            shaping_key key{std::u16string(reinterpret_cast<char16_t const*>(text.getBuffer()),
+                                           static_cast<std::size_t>(text.length())),
+                            text_item.start,
+                            text_item.end,
+                            text_item.dir == UBIDI_RTL,
+                            static_cast<int>(text_item.script),
+                            lang.has_value(),
+                            lang.value_or(std::string()),
+                            text_item.format_->face_name,
+                            fontset_key(text_item.format_->fontset),
+                            feature_key(ff_settings)};
+            auto cache_hit = cache.find(key);
+            if (cache_hit != cache.end())
+            {
+                for (shaped_glyph const& sg : cache_hit->second)
+                {
+                    emit_glyph(sg, true);
+                }
+                line.update_max_char_height(max_glyph_height);
+                continue;
+            }
+            constexpr std::size_t max_cache_entries = 65536;
+            bool const do_cache = cache.size() < max_cache_entries;
+            std::vector<shaped_glyph> shaped;
+
+            face_set_ptr face_set = font_manager.get_face_set(text_item.format_->face_name, text_item.format_->fontset);
+            face_set->set_unscaled_character_sizes();
+            std::size_t num_faces = face_set->size();
 
             // rendering information for a single glyph
             struct glyph_face_info
@@ -280,7 +435,7 @@ struct harfbuzz_shaper
                 hb_buffer_set_direction(buffer.get(),
                                         (text_item.dir == UBIDI_RTL) ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
 
-                hb_font_t* font(hb_ft_font_create(face->get_face(), nullptr));
+                hb_font_t* font = face->get_harfbuzz_font();
                 auto script = detail::_icu_script_to_script(text_item.script);
                 hb_language_t hb_lang;
                 if (lang)
@@ -309,7 +464,6 @@ struct harfbuzz_shaper
 #endif
 #endif
                 hb_shape(font, buffer.get(), ff_settings.get_features(), ff_count);
-                hb_font_destroy(font);
 
                 unsigned num_glyphs = hb_buffer_get_length(buffer.get());
                 hb_glyph_info_t* glyphs = hb_buffer_get_glyph_infos(buffer.get(), &num_glyphs);
@@ -376,41 +530,29 @@ struct harfbuzz_shaper
                     // Try next font in fontset
                     continue;
                 }
-                double max_glyph_height = 0;
                 for (auto const& c_id : clusters)
                 {
                     auto const& c = glyphinfos[c_id];
                     for (auto const& info : c)
                     {
-                        auto const& gpos = info.position;
-                        auto const& glyph = info.glyph;
-                        unsigned char_index = glyph.cluster;
-                        glyph_info g(glyph.codepoint, char_index, text_item.format_);
-                        if (info.glyph.codepoint != 0)
-                            g.face = info.face;
-                        else
-                            g.face = face;
-                        if (g.face->glyph_dimensions(g))
+                        shaped_glyph const sg{info.glyph.codepoint != 0 ? info.face : face,
+                                              info.glyph.codepoint,
+                                              info.glyph.cluster,
+                                              info.position.x_advance,
+                                              info.position.x_offset,
+                                              info.position.y_offset};
+                        emit_glyph(sg, false);
+                        if (do_cache)
                         {
-                            g.scale_multiplier = g.face->get_face()->units_per_EM > 0
-                                                   ? (size / g.face->get_face()->units_per_EM)
-                                                   : (size / 2048.0);
-                            // Overwrite default advance with better value provided by HarfBuzz
-                            g.unscaled_advance = gpos.x_advance;
-                            g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
-                            double tmp_height = g.height();
-                            if (g.face->is_color())
-                            {
-                                tmp_height = g.ymax();
-                            }
-                            if (tmp_height > max_glyph_height)
-                                max_glyph_height = tmp_height;
-                            width_map[char_index] += g.advance();
-                            line.add_glyph(std::move(g), scale_factor);
+                            shaped.push_back(sg);
                         }
                     }
                 }
                 line.update_max_char_height(max_glyph_height);
+                if (do_cache)
+                {
+                    cache.emplace(std::move(key), std::move(shaped));
+                }
                 break; // When we reach this point the current font had all glyphs.
             }
         }

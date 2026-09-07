@@ -27,12 +27,294 @@
 #include <mapnik/config.hpp>
 #include <cstring>
 #include <cmath>
+#include <type_traits>
 #include "agg_basics.h"
 #include "agg_color_rgba.h"
 #include "agg_rendering_buffer.h"
 
+#if defined(__SSE2__)
+#include <emmintrin.h>
+#elif defined(__ARM_NEON) || defined(__ARM_NEON__)
+#include <arm_neon.h>
+#endif
+
 namespace agg
 {
+
+#if defined(__SSE2__)
+namespace detail
+{
+    // Source-over on two RGBA pixels in 16-bit lanes.
+    template<unsigned AlphaIdx>
+    AGG_INLINE __m128i src_over_pair_u16(__m128i d16, __m128i s16)
+    {
+        const __m128i c255 = _mm_set1_epi16(0xFF);
+        __m128i a16 = _mm_shufflelo_epi16(s16, _MM_SHUFFLE(AlphaIdx, AlphaIdx, AlphaIdx, AlphaIdx));
+        a16 = _mm_shufflehi_epi16(a16, _MM_SHUFFLE(AlphaIdx, AlphaIdx, AlphaIdx, AlphaIdx));
+        __m128i d = _mm_mullo_epi16(d16, _mm_sub_epi16(c255, a16));
+        d = _mm_add_epi16(d, c255);
+        d = _mm_srli_epi16(d, 8);
+        d = _mm_add_epi16(d, s16);
+        return _mm_and_si128(d, c255);
+    }
+
+    // blend_solid_hspan with a covers array; handles a multiple of four
+    // pixels and returns how many were done, the caller finishes the tail.
+    template<unsigned AlphaIdx>
+    inline unsigned blend_solid_hspan_src_over_simd(int8u* p,
+                                                    const int8u* covers,
+                                                    unsigned len,
+                                                    const int8u* src_px,
+                                                    bool opaque)
+    {
+        const __m128i zero = _mm_setzero_si128();
+        const __m128i c255 = _mm_set1_epi16(0xFF);
+        int32u spx32;
+        std::memcpy(&spx32, src_px, 4);
+        const __m128i s8 = _mm_set1_epi32((int)spx32);
+        const __m128i s16 = _mm_unpacklo_epi8(s8, zero);
+        unsigned done = 0;
+        while (len - done >= 4)
+        {
+            int32u cw;
+            std::memcpy(&cw, covers + done, 4);
+            int8u* q = p + done * 4;
+            if (opaque && cw == 0xFFFFFFFFu)
+            {
+                _mm_storeu_si128((__m128i*)q, s8);
+                done += 4;
+                continue;
+            }
+            __m128i c16 = _mm_unpacklo_epi8(_mm_cvtsi32_si128((int)cw), zero);
+            c16 = _mm_unpacklo_epi16(c16, c16);
+            __m128i covlo = _mm_unpacklo_epi32(c16, c16); // c0 x4, c1 x4
+            __m128i covhi = _mm_unpackhi_epi32(c16, c16); // c2 x4, c3 x4
+            __m128i slo = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(s16, covlo), c255), 8);
+            __m128i shi = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(s16, covhi), c255), 8);
+            __m128i d8 = _mm_loadu_si128((const __m128i*)q);
+            __m128i outlo = src_over_pair_u16<AlphaIdx>(_mm_unpacklo_epi8(d8, zero), slo);
+            __m128i outhi = src_over_pair_u16<AlphaIdx>(_mm_unpackhi_epi8(d8, zero), shi);
+            _mm_storeu_si128((__m128i*)q, _mm_packus_epi16(outlo, outhi));
+            done += 4;
+        }
+        return done;
+    }
+
+    template<unsigned AlphaIdx>
+    inline unsigned blend_from_src_over_simd(int8u* pdst,
+                                             const int8u* psrc,
+                                             unsigned len,
+                                             unsigned cover)
+    {
+        const __m128i zero = _mm_setzero_si128();
+        const __m128i c255 = _mm_set1_epi16(0xFF);
+        const __m128i cov16 = _mm_set1_epi16((short)cover);
+        const unsigned alpha_lanes = 0x1111u << AlphaIdx;
+        unsigned done = 0;
+        while (len - done >= 4)
+        {
+            const int8u* qs = psrc + done * 4;
+            int8u* qd = pdst + done * 4;
+            __m128i s8 = _mm_loadu_si128((const __m128i*)qs);
+            if (_mm_movemask_epi8(_mm_cmpeq_epi8(s8, zero)) == 0xFFFF)
+            {
+                done += 4;
+                continue;
+            }
+            if (cover == 0xFF)
+            {
+                unsigned m = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(s8, _mm_set1_epi8((char)0xFF)));
+                if ((m & alpha_lanes) == alpha_lanes)
+                {
+                    _mm_storeu_si128((__m128i*)qd, s8);
+                    done += 4;
+                    continue;
+                }
+            }
+            __m128i slo = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(_mm_unpacklo_epi8(s8, zero), cov16), c255), 8);
+            __m128i shi = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(_mm_unpackhi_epi8(s8, zero), cov16), c255), 8);
+            __m128i d8 = _mm_loadu_si128((const __m128i*)qd);
+            __m128i outlo = src_over_pair_u16<AlphaIdx>(_mm_unpacklo_epi8(d8, zero), slo);
+            __m128i outhi = src_over_pair_u16<AlphaIdx>(_mm_unpackhi_epi8(d8, zero), shi);
+            _mm_storeu_si128((__m128i*)qd, _mm_packus_epi16(outlo, outhi));
+            done += 4;
+        }
+        return done;
+    }
+
+    template<unsigned AlphaIdx>
+    inline unsigned blend_hline_src_over_simd(int8u* p,
+                                              unsigned len,
+                                              const int8u* src_px,
+                                              unsigned cover)
+    {
+        int8u sc[4];
+        for (int k = 0; k < 4; ++k)
+        {
+            sc[k] = (int8u)((src_px[k] * cover + 255) >> 8);
+        }
+        int32u spx32;
+        std::memcpy(&spx32, sc, 4);
+        const __m128i s8 = _mm_set1_epi32((int)spx32);
+        unsigned done = 0;
+        if (sc[AlphaIdx] == 0xFF)
+        {
+            while (len - done >= 4)
+            {
+                _mm_storeu_si128((__m128i*)(p + done * 4), s8);
+                done += 4;
+            }
+            return done;
+        }
+        const __m128i zero = _mm_setzero_si128();
+        const __m128i s16 = _mm_unpacklo_epi8(s8, zero);
+        while (len - done >= 4)
+        {
+            int8u* q = p + done * 4;
+            __m128i d8 = _mm_loadu_si128((const __m128i*)q);
+            __m128i outlo = src_over_pair_u16<AlphaIdx>(_mm_unpacklo_epi8(d8, zero), s16);
+            __m128i outhi = src_over_pair_u16<AlphaIdx>(_mm_unpackhi_epi8(d8, zero), s16);
+            _mm_storeu_si128((__m128i*)q, _mm_packus_epi16(outlo, outhi));
+            done += 4;
+        }
+        return done;
+    }
+}
+#elif defined(__ARM_NEON) || defined(__ARM_NEON__)
+namespace detail
+{
+    template<unsigned AlphaIdx>
+    AGG_INLINE uint16x8_t src_over_pair_u16(uint16x8_t d16, uint16x8_t s16)
+    {
+        const uint16x8_t c255 = vdupq_n_u16(255);
+        uint16x8_t a16 = vcombine_u16(vdup_lane_u16(vget_low_u16(s16), AlphaIdx),
+                                     vdup_lane_u16(vget_high_u16(s16), AlphaIdx));
+        uint16x8_t d = vmulq_u16(d16, vsubq_u16(c255, a16));
+        d = vshrq_n_u16(vaddq_u16(d, c255), 8);
+        return vandq_u16(vaddq_u16(d, s16), c255);
+    }
+
+    AGG_INLINE uint8x16_t pack_rgba8(uint16x8_t lo, uint16x8_t hi)
+    {
+        return vcombine_u8(vmovn_u16(lo), vmovn_u16(hi));
+    }
+
+    AGG_INLINE uint16x8_t apply_cover(uint16x8_t values, uint16x8_t covers)
+    {
+        return vshrq_n_u16(vaddq_u16(vmulq_u16(values, covers), vdupq_n_u16(255)), 8);
+    }
+
+    template<unsigned AlphaIdx>
+    inline unsigned blend_solid_hspan_src_over_simd(int8u* p,
+                                                    const int8u* covers,
+                                                    unsigned len,
+                                                    const int8u* src_px,
+                                                    bool opaque)
+    {
+        int32u spx32;
+        std::memcpy(&spx32, src_px, 4);
+        const uint8x16_t s8 = vreinterpretq_u8_u32(vdupq_n_u32(spx32));
+        const uint16x8_t s16 = vmovl_u8(vget_low_u8(s8));
+        unsigned done = 0;
+        while (len - done >= 4)
+        {
+            int8u* q = p + done * 4;
+            if (opaque && covers[done] == 255 && covers[done + 1] == 255 &&
+                covers[done + 2] == 255 && covers[done + 3] == 255)
+            {
+                vst1q_u8(q, s8);
+                done += 4;
+                continue;
+            }
+            uint16x8_t covlo = vcombine_u16(vdup_n_u16(covers[done]), vdup_n_u16(covers[done + 1]));
+            uint16x8_t covhi = vcombine_u16(vdup_n_u16(covers[done + 2]), vdup_n_u16(covers[done + 3]));
+            uint16x8_t slo = apply_cover(s16, covlo);
+            uint16x8_t shi = apply_cover(s16, covhi);
+            uint8x16_t d8 = vld1q_u8(q);
+            uint16x8_t outlo = src_over_pair_u16<AlphaIdx>(vmovl_u8(vget_low_u8(d8)), slo);
+            uint16x8_t outhi = src_over_pair_u16<AlphaIdx>(vmovl_u8(vget_high_u8(d8)), shi);
+            vst1q_u8(q, pack_rgba8(outlo, outhi));
+            done += 4;
+        }
+        return done;
+    }
+
+    template<unsigned AlphaIdx>
+    inline unsigned blend_from_src_over_simd(int8u* pdst,
+                                             const int8u* psrc,
+                                             unsigned len,
+                                             unsigned cover)
+    {
+        const uint16x8_t cov16 = vdupq_n_u16(cover);
+        unsigned done = 0;
+        while (len - done >= 4)
+        {
+            const int8u* qs = psrc + done * 4;
+            int8u* qd = pdst + done * 4;
+            uint8x16_t s8 = vld1q_u8(qs);
+            uint64x2_t source_words = vreinterpretq_u64_u8(s8);
+            if (vgetq_lane_u64(source_words, 0) == 0 && vgetq_lane_u64(source_words, 1) == 0)
+            {
+                done += 4;
+                continue;
+            }
+            if (cover == 255 && vgetq_lane_u8(s8, AlphaIdx) == 255 &&
+                vgetq_lane_u8(s8, AlphaIdx + 4) == 255 && vgetq_lane_u8(s8, AlphaIdx + 8) == 255 &&
+                vgetq_lane_u8(s8, AlphaIdx + 12) == 255)
+            {
+                vst1q_u8(qd, s8);
+                done += 4;
+                continue;
+            }
+            uint16x8_t slo = apply_cover(vmovl_u8(vget_low_u8(s8)), cov16);
+            uint16x8_t shi = apply_cover(vmovl_u8(vget_high_u8(s8)), cov16);
+            uint8x16_t d8 = vld1q_u8(qd);
+            uint16x8_t outlo = src_over_pair_u16<AlphaIdx>(vmovl_u8(vget_low_u8(d8)), slo);
+            uint16x8_t outhi = src_over_pair_u16<AlphaIdx>(vmovl_u8(vget_high_u8(d8)), shi);
+            vst1q_u8(qd, pack_rgba8(outlo, outhi));
+            done += 4;
+        }
+        return done;
+    }
+
+    template<unsigned AlphaIdx>
+    inline unsigned blend_hline_src_over_simd(int8u* p,
+                                              unsigned len,
+                                              const int8u* src_px,
+                                              unsigned cover)
+    {
+        int8u sc[4];
+        for (int k = 0; k < 4; ++k)
+        {
+            sc[k] = (int8u)((src_px[k] * cover + 255) >> 8);
+        }
+        int32u spx32;
+        std::memcpy(&spx32, sc, 4);
+        const uint8x16_t s8 = vreinterpretq_u8_u32(vdupq_n_u32(spx32));
+        unsigned done = 0;
+        if (sc[AlphaIdx] == 255)
+        {
+            while (len - done >= 4)
+            {
+                vst1q_u8(p + done * 4, s8);
+                done += 4;
+            }
+            return done;
+        }
+        const uint16x8_t s16 = vmovl_u8(vget_low_u8(s8));
+        while (len - done >= 4)
+        {
+            int8u* q = p + done * 4;
+            uint8x16_t d8 = vld1q_u8(q);
+            uint16x8_t outlo = src_over_pair_u16<AlphaIdx>(vmovl_u8(vget_low_u8(d8)), s16);
+            uint16x8_t outhi = src_over_pair_u16<AlphaIdx>(vmovl_u8(vget_high_u8(d8)), s16);
+            vst1q_u8(q, pack_rgba8(outlo, outhi));
+            done += 4;
+        }
+        return done;
+    }
+}
+#endif
 
 //=========================================================multiplier_rgba
 template<class ColorT, class Order> struct multiplier_rgba
@@ -2844,6 +3126,25 @@ public:
     {
 
         value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + (x << 2);
+#if defined(__SSE2__) || defined(__ARM_NEON) || defined(__ARM_NEON__)
+        if constexpr (sizeof(value_type) == 1 && base_shift == 8 &&
+                      std::is_same_v<blender_type, comp_op_adaptor_rgba_pre<color_type, order_type>>)
+        {
+            if(m_comp_op == comp_op_src_over && len >= 4)
+            {
+                int8u spx[4];
+                spx[order_type::R] = (int8u)c.r;
+                spx[order_type::G] = (int8u)c.g;
+                spx[order_type::B] = (int8u)c.b;
+                spx[order_type::A] = (int8u)c.a;
+                unsigned done = detail::blend_hline_src_over_simd<order_type::A>(
+                    (int8u*)p, len, spx, cover);
+                p += done * 4;
+                len -= done;
+                if(len == 0) return;
+            }
+        }
+#endif
         do
         {
             blender_type::blend_pix(m_comp_op, p, c.r, c.g, c.b, c.a, cover);
@@ -2873,6 +3174,26 @@ public:
                            const color_type& c, const int8u* covers)
     {
         value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + (x << 2);
+#if defined(__SSE2__) || defined(__ARM_NEON) || defined(__ARM_NEON__)
+        if constexpr (sizeof(value_type) == 1 && base_shift == 8 &&
+                      std::is_same_v<blender_type, comp_op_adaptor_rgba_pre<color_type, order_type>>)
+        {
+            if(m_comp_op == comp_op_src_over && len >= 4)
+            {
+                int8u spx[4];
+                spx[order_type::R] = (int8u)c.r;
+                spx[order_type::G] = (int8u)c.g;
+                spx[order_type::B] = (int8u)c.b;
+                spx[order_type::A] = (int8u)c.a;
+                unsigned done = detail::blend_solid_hspan_src_over_simd<order_type::A>(
+                    (int8u*)p, covers, len, spx, c.a == base_mask);
+                p += done * 4;
+                covers += done;
+                len -= done;
+                if(len == 0) return;
+            }
+        }
+#endif
         do
         {
             blender_type::blend_pix(m_comp_op,
@@ -3087,6 +3408,26 @@ public:
                 incp = -4;
             }
 
+#if defined(__SSE2__) || defined(__ARM_NEON) || defined(__ARM_NEON__)
+            if constexpr (sizeof(value_type) == 1 && base_shift == 8 &&
+                          std::is_same_v<blender_type, comp_op_adaptor_rgba_pre<color_type, order_type>> &&
+                          src_order::R == order_type::R && src_order::G == order_type::G &&
+                          src_order::B == order_type::B && src_order::A == order_type::A)
+            {
+                // forward, non-overlapping ranges only (block loads/stores)
+                if(m_comp_op == comp_op_src_over && incp == 4 && len >= 4 &&
+                   (psrc + len * 4 <= (const value_type*)pdst ||
+                    (const value_type*)pdst + len * 4 <= psrc))
+                {
+                    unsigned done = detail::blend_from_src_over_simd<order_type::A>(
+                        (int8u*)pdst, (const int8u*)psrc, len, cover);
+                    psrc += done * 4;
+                    pdst += done * 4;
+                    len -= done;
+                    if(len == 0) return;
+                }
+            }
+#endif
             do
             {
                 blender_type::blend_pix(m_comp_op,

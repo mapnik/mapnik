@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/image.hpp>
 #include <mapnik/image_any.hpp>
 #include <mapnik/safe_cast.hpp>
@@ -116,9 +117,15 @@ to premultiply the background color used out of bounds.
 
 */
 
-template<>
-MAPNIK_DECL void
-  composite(image_rgba8& dst, image_rgba8 const& src, composite_mode_e mode, float opacity, int dx, int dy)
+namespace {
+
+void composite_rgba8(image_rgba8& dst,
+                     image_rgba8 const& src,
+                     composite_mode_e mode,
+                     float opacity,
+                     int dx,
+                     int dy,
+                     agg::rect_i const* src_extent)
 {
     using color = agg::rgba8;
     using order = agg::order_rgba;
@@ -147,7 +154,28 @@ MAPNIK_DECL void
     }
 #endif
     renderer_type ren(pixf);
-    ren.blend_from(pixf_mask, 0, dx, dy, safe_cast<agg::cover_type>(255 * opacity));
+    ren.blend_from(pixf_mask, src_extent, dx, dy, safe_cast<agg::cover_type>(255 * opacity));
+}
+
+} // namespace
+
+template<>
+MAPNIK_DECL void
+  composite(image_rgba8& dst, image_rgba8 const& src, composite_mode_e mode, float opacity, int dx, int dy)
+{
+    composite_rgba8(dst, src, mode, opacity, dx, dy, nullptr);
+}
+
+MAPNIK_DECL void composite(image_rgba8& dst,
+                           image_rgba8 const& src,
+                           composite_mode_e mode,
+                           box2d<int> const& src_extent,
+                           float opacity,
+                           int dx,
+                           int dy)
+{
+    agg::rect_i extent(src_extent.minx(), src_extent.miny(), src_extent.maxx(), src_extent.maxy());
+    composite_rgba8(dst, src, mode, opacity, dx, dy, &extent);
 }
 
 template<>

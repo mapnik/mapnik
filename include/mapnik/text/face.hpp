@@ -42,7 +42,11 @@ MAPNIK_DISABLE_WARNING_POP
 // stl
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
+
+struct hb_font_t;
 
 namespace mapnik {
 
@@ -57,6 +61,8 @@ class MAPNIK_DECL font_face : util::noncopyable
 
     FT_Face get_face() const { return face_; }
 
+    hb_font_t* get_harfbuzz_font();
+
     bool set_character_sizes(double size);
     bool set_unscaled_character_sizes();
 
@@ -67,10 +73,24 @@ class MAPNIK_DECL font_face : util::noncopyable
     ~font_face();
 
   private:
+    struct glyph_metrics
+    {
+        double ymin;
+        double ymax;
+        double advance;
+        double line_height;
+    };
+
+    bool set_character_size(FT_F26Dot6 size);
     bool init_color_font();
 
     FT_Face face_;
+    FT_F26Dot6 character_size_ = 0;
+    FT_Fixed character_scale_ = 0;
     bool const color_font_;
+    bool character_size_is_set_ = false;
+    mutable std::unordered_map<unsigned, glyph_metrics> glyph_metrics_cache_;
+    hb_font_t* harfbuzz_font_ = nullptr;
 };
 using face_ptr = std::shared_ptr<font_face>;
 
@@ -80,6 +100,9 @@ class MAPNIK_DECL font_face_set : private util::noncopyable
     using iterator = std::vector<face_ptr>::iterator;
     font_face_set(void)
         : faces_()
+    {}
+    explicit font_face_set(std::vector<face_ptr> faces)
+        : faces_(std::move(faces))
     {}
 
     void add(face_ptr face);

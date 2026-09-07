@@ -1,8 +1,11 @@
 
 #include "catch.hpp"
 
+#include <algorithm>
+#include <array>
 #include <iostream>
 #include <cstring>
+#include <random>
 #include <sstream>
 #include <string>
 #include "agg_color_rgba.h"
@@ -194,4 +197,170 @@ TEST_CASE("blending")
             REQUIRE(false);
         }
     }
+}
+
+namespace {
+
+constexpr std::size_t span_length = 13;
+constexpr std::size_t span_bytes = span_length * 4;
+using span_buffer = std::array<unsigned char, span_bytes>;
+using source_over_blender = agg::comp_op_adaptor_rgba_pre<color, order>;
+using source_over_pixfmt = agg::pixfmt_custom_blend_rgba<source_over_blender, agg::rendering_buffer>;
+
+void scalar_source_over(span_buffer& pixels, color const& source, unsigned cover)
+{
+    for (std::size_t i = 0; i < span_length; ++i)
+    {
+        agg::comp_op_rgba_src_over<color, order>::blend_pix(pixels.data() + i * 4,
+                                                            source.r,
+                                                            source.g,
+                                                            source.b,
+                                                            source.a,
+                                                            cover);
+    }
+}
+
+struct source_blender
+{
+    using color_type = color;
+    using order_type = order;
+    using value_type = color_type::value_type;
+
+    static void blend_pix(unsigned, value_type* p, unsigned r, unsigned g, unsigned b, unsigned a, unsigned cover)
+    {
+        agg::comp_op_rgba_src<color_type, order_type>::blend_pix(p, r, g, b, a, cover);
+    }
+};
+
+} // namespace
+
+TEST_CASE("source-over span blending matches scalar AGG")
+{
+    std::minstd_rand random(0x4d61704e);
+    auto random_byte = [&]() {
+        return static_cast<unsigned char>(random() & 0xff);
+    };
+
+    for (unsigned trial = 0; trial < 128; ++trial)
+    {
+        span_buffer initial;
+        span_buffer covers;
+        for (auto& value : initial)
+        {
+            value = random_byte();
+        }
+        for (auto& value : covers)
+        {
+            value = random_byte();
+        }
+        if (trial == 0)
+        {
+            covers.fill(255);
+        }
+
+        color source(random_byte(), random_byte(), random_byte(), random_byte());
+        if (trial == 0)
+        {
+            source.a = 255;
+        }
+        unsigned cover = trial == 0 ? 255 : random_byte();
+
+        INFO("trial " << trial);
+
+        {
+            span_buffer expected = initial;
+            scalar_source_over(expected, source, cover);
+            span_buffer actual = initial;
+            agg::rendering_buffer rbuf(actual.data(), span_length, 1, span_bytes);
+            source_over_pixfmt pixfmt(rbuf, agg::comp_op_src_over);
+            pixfmt.blend_hline(0, 0, span_length, source, cover);
+            CHECK(actual == expected);
+        }
+
+        {
+            span_buffer expected = initial;
+            for (std::size_t i = 0; i < span_length; ++i)
+            {
+                agg::comp_op_rgba_src_over<color, order>::blend_pix(expected.data() + i * 4,
+                                                                    source.r,
+                                                                    source.g,
+                                                                    source.b,
+                                                                    source.a,
+                                                                    covers[i]);
+            }
+            span_buffer actual = initial;
+            agg::rendering_buffer rbuf(actual.data(), span_length, 1, span_bytes);
+            source_over_pixfmt pixfmt(rbuf, agg::comp_op_src_over);
+            pixfmt.blend_solid_hspan(0, 0, span_length, source, covers.data());
+            CHECK(actual == expected);
+        }
+
+        {
+            std::array<unsigned char, span_bytes * 2> storage;
+            for (std::size_t i = 0; i < span_bytes; ++i)
+            {
+                storage[i] = random_byte();
+                storage[span_bytes + i] = initial[i];
+            }
+            if (trial == 0)
+            {
+                storage.fill(0);
+            }
+            if (trial == 1)
+            {
+                for (std::size_t i = 0; i < span_length; ++i)
+                {
+                    storage[i * 4 + 3] = 255;
+                }
+                cover = 255;
+            }
+            span_buffer expected = initial;
+            std::copy(storage.begin() + span_bytes, storage.end(), expected.begin());
+            for (std::size_t i = 0; i < span_length; ++i)
+            {
+                agg::comp_op_rgba_src_over<color, order>::blend_pix(expected.data() + i * 4,
+                                                                    storage[i * 4],
+                                                                    storage[i * 4 + 1],
+                                                                    storage[i * 4 + 2],
+                                                                    storage[i * 4 + 3],
+                                                                    cover);
+            }
+            agg::rendering_buffer source_rbuf(storage.data(), span_length, 1, span_bytes);
+            agg::pixfmt_rgba32_pre source_pixfmt(source_rbuf);
+            agg::rendering_buffer dest_rbuf(storage.data() + span_bytes, span_length, 1, span_bytes);
+            source_over_pixfmt dest_pixfmt(dest_rbuf, agg::comp_op_src_over);
+            dest_pixfmt.blend_from(source_pixfmt, 0, 0, 0, 0, span_length, cover);
+            CHECK(std::equal(expected.begin(), expected.end(), storage.begin() + span_bytes));
+        }
+    }
+}
+
+TEST_CASE("custom AGG blenders are not bypassed by span optimizations")
+{
+    using source_pixfmt = agg::pixfmt_custom_blend_rgba<source_blender, agg::rendering_buffer>;
+    span_buffer initial;
+    for (std::size_t i = 0; i < span_length; ++i)
+    {
+        initial[i * 4] = 255;
+        initial[i * 4 + 1] = 0;
+        initial[i * 4 + 2] = 0;
+        initial[i * 4 + 3] = 255;
+    }
+    color source(0, 0, 128, 128);
+    span_buffer expected = initial;
+    for (std::size_t i = 0; i < span_length; ++i)
+    {
+        agg::comp_op_rgba_src<color, order>::blend_pix(expected.data() + i * 4,
+                                                       source.r,
+                                                       source.g,
+                                                       source.b,
+                                                       source.a,
+                                                       255);
+    }
+
+    span_buffer actual = initial;
+    agg::rendering_buffer rbuf(actual.data(), span_length, 1, span_bytes);
+    source_pixfmt pixfmt(rbuf, agg::comp_op_src_over);
+    pixfmt.blend_hline(0, 0, span_length, source, 255);
+    CHECK(actual == expected);
 }

@@ -35,9 +35,151 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <functional>
 #include <vector>
 
 namespace mapnik {
+namespace detail {
+
+template<typename T>
+class collision_grid : util::noncopyable
+{
+    using item_index = std::uint32_t;
+    using result_type = std::vector<std::reference_wrapper<T>>;
+    struct cell_range
+    {
+        std::size_t min_x;
+        std::size_t min_y;
+        std::size_t max_x;
+        std::size_t max_y;
+    };
+
+  public:
+    using query_iterator = typename result_type::iterator;
+
+    explicit collision_grid(box2d<double> const& extent, double cell_size = 96.0)
+        : extent_(extent),
+          columns_(std::max<std::size_t>(1, static_cast<std::size_t>(std::ceil(extent.width() / cell_size)))),
+          rows_(std::max<std::size_t>(1, static_cast<std::size_t>(std::ceil(extent.height() / cell_size)))),
+          x_scale_(extent.width() > 0.0 ? columns_ / extent.width() : 0.0),
+          y_scale_(extent.height() > 0.0 ? rows_ / extent.height() : 0.0),
+          cells_(columns_ * rows_)
+    {
+        items_.reserve(256);
+        seen_.reserve(256);
+        query_result_.reserve(64);
+    }
+
+    void insert(T const& item, box2d<double> const& box)
+    {
+        cell_range range;
+        if (!get_cell_range(box, range))
+            return;
+
+        item_index index = static_cast<item_index>(items_.size());
+        items_.push_back(item);
+        seen_.push_back(0);
+        for (std::size_t y = range.min_y; y <= range.max_y; ++y)
+        {
+            for (std::size_t x = range.min_x; x <= range.max_x; ++x)
+            {
+                cells_[y * columns_ + x].push_back(index);
+            }
+        }
+    }
+
+    query_iterator query_in_box(box2d<double> const& box)
+    {
+        query_result_.clear();
+        cell_range range;
+        if (!get_cell_range(box, range))
+            return query_result_.begin();
+
+        if (++query_generation_ == 0)
+        {
+            std::fill(seen_.begin(), seen_.end(), 0);
+            query_generation_ = 1;
+        }
+        for (std::size_t y = range.min_y; y <= range.max_y; ++y)
+        {
+            for (std::size_t x = range.min_x; x <= range.max_x; ++x)
+            {
+                for (item_index index : cells_[y * columns_ + x])
+                {
+                    if (seen_[index] != query_generation_)
+                    {
+                        seen_[index] = query_generation_;
+                        query_result_.push_back(std::ref(items_[index]));
+                    }
+                }
+            }
+        }
+        return query_result_.begin();
+    }
+
+    query_iterator query_end() { return query_result_.end(); }
+
+    void clear()
+    {
+        query_result_.clear();
+        items_.clear();
+        for (auto& cell : cells_)
+        {
+            cell.clear();
+        }
+        seen_.clear();
+        query_generation_ = 0;
+    }
+
+    box2d<double> const& extent() const { return extent_; }
+
+  private:
+    bool get_cell_range(box2d<double> const& box, cell_range& range) const
+    {
+        if (!box.intersects(extent_))
+            return false;
+
+        auto column = [this](double x) {
+            double offset = (x - extent_.minx()) * x_scale_;
+            if (!(offset > 0.0))
+                return std::size_t{0};
+            if (offset >= columns_)
+                return columns_ - 1;
+            return static_cast<std::size_t>(offset);
+        };
+        auto row = [this](double y) {
+            double offset = (y - extent_.miny()) * y_scale_;
+            if (!(offset > 0.0))
+                return std::size_t{0};
+            if (offset >= rows_)
+                return rows_ - 1;
+            return static_cast<std::size_t>(offset);
+        };
+
+        range.min_x = column(box.minx());
+        range.min_y = row(box.miny());
+        range.max_x = column(box.maxx());
+        range.max_y = row(box.maxy());
+        return true;
+    }
+
+    box2d<double> extent_;
+    std::size_t columns_;
+    std::size_t rows_;
+    double x_scale_;
+    double y_scale_;
+    std::vector<std::vector<item_index>> cells_;
+    std::vector<T> items_;
+    std::vector<std::uint32_t> seen_;
+    result_type query_result_;
+    std::uint32_t query_generation_ = 0;
+};
+
+} // namespace detail
+
 // this needs to be tree structure
 // as a proof of a concept _only_ we use sequential scan
 
@@ -140,7 +282,7 @@ class label_collision_detector4 : util::noncopyable
     };
 
   private:
-    using tree_t = quad_tree<label>;
+    using tree_t = detail::collision_grid<label>;
     tree_t tree_;
 
   public:

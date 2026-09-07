@@ -13,6 +13,7 @@ void test_shaping(mapnik::font_set const& fontset,
                   mapnik::face_manager& fm,
                   std::vector<std::pair<unsigned, unsigned>> const& expected,
                   char const* str,
+                  double text_size = 32,
                   bool debug = false)
 {
     mapnik::transcoder tr("utf8");
@@ -20,7 +21,7 @@ void test_shaping(mapnik::font_set const& fontset,
     mapnik::text_itemizer itemizer;
     auto props = std::make_unique<mapnik::detail::evaluated_format_properties>();
     props->fontset = fontset;
-    props->text_size = 32;
+    props->text_size = text_size;
 
     double scale_factor = 1;
     auto ustr = tr.transcode(str);
@@ -107,5 +108,21 @@ TEST_CASE("shaping")
           {0, 9},   {3, 10}, {324, 22}, {100, 22}, {47, 21},  {9, 20},  {287, 19}, {16, 19}, {38, 18},
           {70, 17}, {8, 16}, {3, 15},   {324, 14}, {100, 14}, {24, 13}, {70, 12},  {8, 11}};
         test_shaping(fontset, fm, expected, from_u8string(u8"ⵃⴰⵢ ⵚⵉⵏⴰⵄⵉ الحي الصناعي").c_str());
+    }
+
+    {
+        // Repeat a fallback-font run at another size to exercise cache replay.
+        std::vector<std::pair<unsigned, unsigned>> expected = {{977, 0},
+                                                               {1094, 3},
+                                                               {1038, 4},
+                                                               {1168, 4},
+                                                               {9, 7},
+                                                               {3, 8},
+                                                               {1414, 9},
+                                                               {1458, 10},
+                                                               {1459, 11},
+                                                               {1460, 12},
+                                                               {1415, 13}};
+        test_shaping(fontset, fm, expected, from_u8string(u8"སྤུ་ཧྲེང (abc)").c_str(), 18);
     }
 }
