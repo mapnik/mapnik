@@ -612,13 +612,16 @@ void feature_style_processor<Processor>::render_style(Processor& p,
     std::vector<resolved_group> precondition_groups;
     rule_cache::rule_indices candidates;
     context_type const* cached_context = nullptr;
+    context_type::size_type cached_context_size = 0;
 
     while ((feature = features->next()))
     {
         context_type const* ctx = feature->context().get();
-        if (ctx != cached_context)
+        // Streaming datasources can add properties to a shared context between features.
+        if (ctx != cached_context || ctx->size() != cached_context_size)
         {
             cached_context = ctx;
+            cached_context_size = ctx->size();
             precondition_groups.clear();
             precondition_groups.reserve(rc.get_precondition_groups().size());
             for (rule_cache::precondition_group const& group : rc.get_precondition_groups())
