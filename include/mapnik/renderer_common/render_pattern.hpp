@@ -40,6 +40,11 @@ struct marker_svg;
 template<typename T>
 void render_pattern(marker_svg const& marker, agg::trans_affine const& tr, double opacity, T& image);
 
+// SVG pattern pixels depend on the source and evaluated image transform, not
+// on the polygon that will be filled with them. Images use opacity 1 here;
+// polygon opacity and compositing are applied afterward.
+std::shared_ptr<image_rgba8 const> rasterized_pattern(marker_svg const& marker, agg::trans_affine const& tr);
+
 } // namespace mapnik
 
 #endif // MAPNIK_RENDER_PATTERN_HPP
