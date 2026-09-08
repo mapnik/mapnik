@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include <mapnik/memory_datasource.hpp>
+#include <mapnik/datasource_cache.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/map.hpp>
@@ -350,6 +351,47 @@ TEST_CASE("feature_style_processor")
         REQUIRE(datasource->query_count() == 1);
         CHECK(datasource->last_bbox() == clipped_extent);
         CHECK(datasource->last_unbuffered_bbox() == clipped_extent);
+    }
+
+    SECTION("rule indexing follows properties discovered while reading GeoJSON")
+    {
+        if (!mapnik::datasource_cache::instance().plugin_registered("geojson"))
+        {
+            WARN("GeoJSON plugin is not available");
+            return;
+        }
+        for (bool cache_features : {false, true})
+        {
+            CAPTURE(cache_features);
+            mapnik::parameters params;
+            params["type"] = "geojson";
+            params["file"] = "test/unit/data/late-property.geojson";
+            params["cache_features"] = cache_features;
+
+            mapnik::Map map(256, 256, mapnik::MAPNIK_GEOGRAPHIC_PROJ);
+            mapnik::feature_type_style style;
+            mapnik::rule rule;
+            rule.set_filter(mapnik::parse_expression("[kind] = 'road'"));
+            rule.append(mapnik::markers_symbolizer{});
+            style.add_rule(std::move(rule));
+            map.insert_style("roads", std::move(style));
+
+            mapnik::layer layer("layer", map.srs());
+            layer.set_datasource(mapnik::datasource_cache::instance().create(params));
+            layer.add_style("roads");
+            map.add_layer(std::move(layer));
+            map.zoom_to_box(mapnik::box2d<double>(0, 0, 30, 30));
+
+            rendering_result result;
+            test_renderer renderer(map, result);
+            renderer.apply();
+
+            // Only the second feature defines kind, and it must match the rule.
+            REQUIRE(result.geometries.size() == 1);
+            auto const& point = result.geometries.front().get<mapnik::geometry::point<double>>();
+            CHECK(point.x == 20);
+            CHECK(point.y == 20);
+        }
     }
 
     SECTION("rule indexing preserves filter behavior")
