@@ -55,12 +55,22 @@ marker_cache::marker_cache()
 {
     insert_svg("ellipse",
                "<?xml version='1.0' standalone='no'?>"
-               "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
+               // viewBox is required so width/height (both '100%') resolve
+               // to real pixel dimensions instead of hitting svg_parser's
+               // "can't infer valid image dimensions" error path, which
+               // silently forced this built-in marker's dimensions to 0x0.
+               // Box is the rx=5/ry=5 ellipse (centered at the origin, so
+               // it spans -5..5 on each axis) padded by half the .5
+               // stroke-width on every side.
+               "<svg width='100%' height='100%' viewBox='-5.25 -5.25 10.5 10.5' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
                "<ellipse rx='5' ry='5' fill='#0000FF' stroke='black' stroke-width='.5'/>"
                "</svg>");
     insert_svg("arrow",
                "<?xml version='1.0' standalone='no'?>"
-               "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
+               // Same viewBox fix as "ellipse" above. Box encloses the
+               // path's own coordinate extent (x: 4.40..31.70, y: 1.50..13.56)
+               // padded for the .5 stroke-width.
+               "<svg width='100%' height='100%' viewBox='4 1 28 13' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
                "<path fill='#0000FF' stroke='black' stroke-width='.5' d='m 31.698405,7.5302648 -8.910967,-6.0263712 "
                "0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
                "</svg>");
@@ -178,7 +188,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
             {
                 for (auto const& msg : p.err_handler().error_messages())
                 {
-                    MAPNIK_LOG_ERROR(marker_cache) << msg;
+                    MAPNIK_LOG_ERROR(marker_cache) << msg << " (marker: '" << uri << "')";
                 }
             }
             // svg.arrange_orientations();
@@ -219,7 +229,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 {
                     for (auto const& msg : p.err_handler().error_messages())
                     {
-                        MAPNIK_LOG_ERROR(marker_cache) << msg;
+                        MAPNIK_LOG_ERROR(marker_cache) << msg << " (marker: '" << uri << "')";
                     }
                 }
                 // svg.arrange_orientations();
