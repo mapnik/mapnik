@@ -19,6 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+// stl
+#include <array>
+#include <list>
 // mapnik
 #include <mapnik/renderer_common/render_pattern.hpp>
 #include <mapnik/geometry/box2d.hpp>
@@ -73,6 +76,63 @@ void render_pattern<image_rgba8>(marker_svg const& marker,
       marker.get_data()->svg_group());
     rasterizer ras;
     svg_renderer.render(ras, sl, renb, mtx, opacity, bbox);
+}
+
+namespace {
+
+struct pattern_cache_entry
+{
+    // Retaining the source prevents a cleared marker-cache entry's address
+    // from being reused for a different SVG while these pixels are cached.
+    svg_path_ptr source;
+    std::array<double, 6> transform;
+    std::shared_ptr<image_rgba8 const> image;
+};
+
+struct pattern_cache
+{
+    std::list<pattern_cache_entry> entries;
+    std::size_t bytes = 0;
+};
+
+} // namespace
+
+std::shared_ptr<image_rgba8 const> rasterized_pattern(marker_svg const& marker, agg::trans_affine const& tr)
+{
+    // Workers can reuse patterns across metatiles without sharing mutable
+    // lookup state. Bound both pixel storage and metadata for dynamic styles.
+    static thread_local pattern_cache cache;
+    constexpr std::size_t max_bytes = 64 * 1024 * 1024;
+    constexpr std::size_t max_entries = 64;
+
+    auto source = marker.get_data();
+    std::array<double, 6> transform;
+    tr.store_to(transform.data());
+    for (auto it = cache.entries.begin(); it != cache.entries.end(); ++it)
+    {
+        if (it->source == source && it->transform == transform)
+        {
+            cache.entries.splice(cache.entries.begin(), cache.entries, it);
+            return cache.entries.front().image;
+        }
+    }
+
+    auto const bbox = source->bounding_box() * tr;
+    auto image = std::make_shared<image_rgba8>(bbox.width(), bbox.height());
+    render_pattern<image_rgba8>(marker, tr, 1.0, *image);
+    auto const bytes = std::size_t(image->width()) * image->height() * 4;
+    if (bytes <= max_bytes)
+    {
+        while (!cache.entries.empty() && (cache.bytes + bytes > max_bytes || cache.entries.size() >= max_entries))
+        {
+            auto const& old = cache.entries.back().image;
+            cache.bytes -= std::size_t(old->width()) * old->height() * 4;
+            cache.entries.pop_back();
+        }
+        cache.bytes += bytes;
+        cache.entries.push_front({std::move(source), transform, image});
+    }
+    return image;
 }
 
 } // namespace mapnik
