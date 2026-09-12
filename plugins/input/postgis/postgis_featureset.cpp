@@ -63,6 +63,9 @@ postgis_featureset::postgis_featureset(std::shared_ptr<IResultSet> const& rs,
 
 feature_ptr postgis_featureset::next()
 {
+    if (!rs_)
+        return feature_ptr();
+
     while (rs_->next())
     {
         // new feature
@@ -228,10 +231,13 @@ feature_ptr postgis_featureset::next()
         }
         return feature;
     }
+    rs_->close();
+    rs_.reset();
     return feature_ptr();
 }
 
 postgis_featureset::~postgis_featureset()
 {
-    rs_->close();
+    if (rs_)
+        rs_->close();
 }

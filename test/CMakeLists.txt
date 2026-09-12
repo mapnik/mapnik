@@ -37,6 +37,8 @@ add_executable(mapnik-test-unit
     ../plugins/input/ogr/ogr_utils.cpp
     unit/datasource/ogr.cpp
     unit/datasource/postgis.cpp
+    unit/datasource/postgis_featureset.cpp
+    ../plugins/input/postgis/postgis_featureset.cpp
     unit/datasource/shapeindex.cpp
     unit/datasource/spatial_index.cpp
     unit/datasource/topojson.cpp
