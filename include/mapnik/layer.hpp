@@ -173,12 +173,12 @@ class MAPNIK_DECL layer
     bool clear_label_cache() const;
 
     /*!
-     * @param cache_features Set whether this layer's features should be cached if used by multiple styles.
+     * @param cache_features Allow caching for multiple styles and sharing with compatible later layers.
      */
     void set_cache_features(bool cache_features);
 
     /*!
-     * @return whether this layer's features will be cached if used by multiple styles
+     * @return whether this layer permits caching and sharing its features
      */
     bool cache_features() const;
 
