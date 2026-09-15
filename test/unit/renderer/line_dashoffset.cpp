@@ -80,12 +80,11 @@ std::string line(std::string const& attributes)
 
 TEST_CASE("LineSymbolizer dash offsets", "[renderer][dashoffset]")
 {
-    auto renderer = GENERATE(std::string("agg")
 #if defined(HAVE_CAIRO)
-                               ,
-                             std::string("cairo")
+    auto renderer = GENERATE(std::string("agg"), std::string("cairo"));
+#else
+    auto renderer = GENERATE(std::string("agg"));
 #endif
-    );
     double scale = GENERATE(1.0, 2.0);
     bool expression = GENERATE(false, true);
     struct example
@@ -126,12 +125,11 @@ TEST_CASE("LineSymbolizer dash offsets", "[renderer][dashoffset]")
 
 TEST_CASE("LineSymbolizer dash offset edge cases", "[renderer][dashoffset]")
 {
-    auto renderer = GENERATE(std::string("agg")
 #if defined(HAVE_CAIRO)
-                               ,
-                             std::string("cairo")
+    auto renderer = GENERATE(std::string("agg"), std::string("cairo"));
+#else
+    auto renderer = GENERATE(std::string("agg"));
 #endif
-    );
     double scale = GENERATE(1.0, 2.0);
     CAPTURE(renderer, scale);
     auto red = mapnik::color("red").rgba();
