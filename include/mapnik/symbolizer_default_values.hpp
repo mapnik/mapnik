@@ -153,9 +153,9 @@ struct symbolizer_default<gamma_method_enum, keys::stroke_gamma_method>
 
 // stroke-dashoffset
 template<>
-struct symbolizer_default<value_integer, keys::stroke_dashoffset>
+struct symbolizer_default<value_double, keys::stroke_dashoffset>
 {
-    static value_integer value() { return 0; }
+    static value_double value() { return 0.0; }
 };
 
 // stroke-dasharray

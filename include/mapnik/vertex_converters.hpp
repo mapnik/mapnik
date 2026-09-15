@@ -55,6 +55,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <type_traits>
 #include <stdexcept>
 #include <array>
+#include <cmath>
 
 namespace mapnik {
 
@@ -144,9 +145,22 @@ struct converter_traits<T, mapnik::dash_tag>
         auto dash = get_optional<dash_array>(sym, keys::stroke_dasharray, feat, vars);
         if (dash)
         {
+            double dash_length = 0.0;
             for (auto const& d : *dash)
             {
                 geom.add_dash(d.first * scale_factor, d.second * scale_factor);
+                dash_length += d.first + d.second;
+            }
+            double dash_offset = get<value_double, keys::stroke_dashoffset>(sym, feat, vars);
+            if (dash_offset != 0.0 && dash_length > 0.0 && std::isfinite(dash_offset))
+            {
+                // AGG treats negative dash_start values as a request to continue
+                // the pattern across subpaths. Normalize to a positive phase
+                // instead, and avoid iterating over whole pattern repetitions.
+                dash_offset = std::fmod(dash_offset, dash_length);
+                if (dash_offset < 0.0)
+                    dash_offset += dash_length;
+                geom.dash_start(dash_offset * scale_factor);
             }
         }
     }

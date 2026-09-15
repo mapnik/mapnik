@@ -78,6 +78,7 @@ add_executable(mapnik-test-unit
     unit/projection/proj_transform.cpp
     unit/renderer/buffer_size_scale_factor.cpp
     unit/renderer/cairo_io.cpp
+    unit/renderer/line_dashoffset.cpp
     unit/renderer/feature_style_processor.cpp
     unit/renderer/layer_buffer.cpp
     unit/serialization/wkb_formats_test.cpp
