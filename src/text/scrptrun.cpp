@@ -122,7 +122,7 @@ UBool ScriptRun::sameScript(int32_t scriptOne, int32_t scriptTwo)
 
 UBool ScriptRun::next()
 {
-    int32_t startSP = parenSP; // used to find the first new open character
+    int32_t startSP = parenSP; // used to find the first script unresolved open character
     UErrorCode error = U_ZERO_ERROR;
 
     // if we've fallen off the end of the text, we're done
@@ -171,7 +171,6 @@ UBool ScriptRun::next()
                     parenStack[parenSP] = {pairIndex, scriptCode};
                 else
                     parenStack.emplace_back(pairIndex, scriptCode);
-                startSP = parenSP;
             }
             else if (parenSP >= 0)
             {
@@ -212,7 +211,11 @@ UBool ScriptRun::next()
             if (pairIndex >= 0 && (pairIndex & 1) != 0 && parenSP >= 0)
             {
                 parenSP -= 1;
-                startSP -= 1;
+
+                if (parenSP < startSP)
+                {
+                    startSP = parenSP;
+                }
             }
         }
         else
