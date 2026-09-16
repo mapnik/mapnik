@@ -102,7 +102,9 @@ jobs:
             for attempt in 1 2 3; do
               if choco install --yes --no-progress ninja OpenCppCoverage &&
                   ninja --version &&
-                  "C:/Program Files/OpenCppCoverage/OpenCppCoverage.exe" --help; then
+                  "C:/Program Files/OpenCppCoverage/OpenCppCoverage.exe" --quiet \
+                    --export_type "binary:${RUNNER_TEMP}/opencppcoverage-smoke.cov" \
+                    -- ninja --version; then
                 break
               fi
               if [ "${attempt}" -eq 3 ]; then
