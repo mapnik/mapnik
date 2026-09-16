@@ -1,7 +1,7 @@
 name: Build and Test
 
 permissions:
-  packages: write
+  contents: read
 
 on:
   push:
@@ -12,11 +12,8 @@ on:
       - "no-ci-*"
 
 env:
-  USERNAME: mapnik
-  VCPKG_EXE: ${{ github.workspace }}/vcpkg/vcpkg
-  FEED_URL: https://nuget.pkg.github.com/mapnik/index.json
   VCPKG_RELEASE: 7e9d43fdadc456cb9ef892bd12d27e32503f41fa
-  VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/mapnik/index.json,readwrite"
+  VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg-binary-cache,readwrite"
 
 jobs:
   checkSource:
@@ -89,7 +86,6 @@ jobs:
               gperf \
               lcov \
               libxxf86vm-dev \
-              mono-complete \
               ninja-build \
               postgresql-client
           elif [ "${RUNNER_OS}" == "macOS" ]; then
@@ -97,15 +93,27 @@ jobs:
               autoconf \
               autoconf-archive \
               automake \
-              mono \
               lcov \
               libtool \
               ninja
           elif [ "${RUNNER_OS}" == "Windows" ]; then
-            choco install \
-              ninja \
-              OpenCppCoverage
-            echo "C:\Program Files\OpenCppCoverage" >> ${GITHUB_PATH}
+            # Chocolatey can report success after a feed timeout without installing
+            # every package. Verify the executables before starting the build.
+            for attempt in 1 2 3; do
+              if choco install --yes --no-progress ninja OpenCppCoverage &&
+                  ninja --version &&
+                  "C:/Program Files/OpenCppCoverage/OpenCppCoverage.exe" --quiet \
+                    --export_type "binary:${RUNNER_TEMP}/opencppcoverage-smoke.cov" \
+                    -- ninja --version; then
+                break
+              fi
+              if [ "${attempt}" -eq 3 ]; then
+                echo "::error::Required Windows build and coverage tools are unavailable"
+                exit 1
+              fi
+              sleep 10
+            done
+            echo "C:\Program Files\OpenCppCoverage" >> "${GITHUB_PATH}"
           fi
 
       - name: Bootstrap vcpkg (Windows)
@@ -120,35 +128,27 @@ jobs:
         run: |
           ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
 
-      - name: Add NuGet sources (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          .$(${{ env.VCPKG_EXE }} fetch nuget) `
-            sources add `
-            -Source "${{ env.FEED_URL }}" `
-            -StorePasswordInClearText `
-            -Name GitHubPackages `
-            -UserName "${{ env.USERNAME }}" `
-            -Password "${{ secrets.VCPKG_CACHE_PAT }}"
-          .$(${{ env.VCPKG_EXE }} fetch nuget) `
-            setapikey "${{ secrets.VCPKG_CACHE_PAT }}" `
-            -Source "${{ env.FEED_URL }}"
-
-      - name: Add NuGet sources (*nix)
-        if: runner.os != 'Windows'
+      # Actions caches can be restored by fork PRs without repository secrets.
+      # Default-branch builds seed caches shared with other branches and fork PRs.
+      # Pushes to sibling feature branches cannot reuse each other's caches.
+      - name: Set up vcpkg binary cache
+        id: vcpkg-cache-config
         shell: bash
         run: |
-           mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
-                sources add \
-                -Source "${{ env.FEED_URL }}" \
-                -StorePasswordInClearText \
-                -Name GitHubPackages \
-                -UserName "${{ env.USERNAME }}" \
-                -Password "${{ secrets.VCPKG_CACHE_PAT }}"
-           mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
-                 setapikey "${{ secrets.VCPKG_CACHE_PAT }}" \
-                 -Source "${{ env.FEED_URL }}"
+          mkdir -p "${GITHUB_WORKSPACE}/vcpkg-binary-cache"
+          echo "image-version=${ImageVersion}" >> "${GITHUB_OUTPUT}"
+
+      - name: Restore vcpkg binary cache
+        id: vcpkg-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: vcpkg-binary-cache
+          # Refresh immutable caches when dependencies or runner toolchains change.
+          # vcpkg checks each package ABI before reusing a fallback cache entry.
+          key: vcpkg-${{ matrix.os }}-${{ runner.arch }}-cxx${{ matrix.cxx-standard }}-${{ env.VCPKG_RELEASE }}-${{ hashFiles('vcpkg.json', 'CMakePresets.json') }}-${{ steps.vcpkg-cache-config.outputs.image-version }}
+          restore-keys: |
+            vcpkg-${{ matrix.os }}-${{ runner.arch }}-cxx${{ matrix.cxx-standard }}-${{ env.VCPKG_RELEASE }}-${{ hashFiles('vcpkg.json', 'CMakePresets.json') }}-
+            vcpkg-${{ matrix.os }}-${{ runner.arch }}-cxx${{ matrix.cxx-standard }}-${{ env.VCPKG_RELEASE }}-
 
       - name: Enable Developer Command Prompt (Windows)
         uses: ilammy/msvc-dev-cmd@v1
@@ -180,6 +180,14 @@ jobs:
             -DUSE_MEMORY_MAPPED_FILE:BOOL=ON \
             -LA \
             --preset ${PRESET}
+
+      # Keep successfully installed dependencies even if Mapnik's build/tests fail.
+      - name: Save vcpkg binary cache
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: vcpkg-binary-cache
+          key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
 
       - name: Build
         shell: bash
