@@ -97,10 +97,21 @@ jobs:
               libtool \
               ninja
           elif [ "${RUNNER_OS}" == "Windows" ]; then
-            choco install \
-              ninja \
-              OpenCppCoverage
-            echo "C:\Program Files\OpenCppCoverage" >> ${GITHUB_PATH}
+            # Chocolatey can report success after a feed timeout without installing
+            # every package. Verify the executables before starting the build.
+            for attempt in 1 2 3; do
+              if choco install --yes --no-progress ninja OpenCppCoverage &&
+                  ninja --version &&
+                  "C:/Program Files/OpenCppCoverage/OpenCppCoverage.exe" --help; then
+                break
+              fi
+              if [ "${attempt}" -eq 3 ]; then
+                echo "::error::Required Windows build and coverage tools are unavailable"
+                exit 1
+              fi
+              sleep 10
+            done
+            echo "C:\Program Files\OpenCppCoverage" >> "${GITHUB_PATH}"
           fi
 
       - name: Bootstrap vcpkg (Windows)
@@ -116,6 +127,8 @@ jobs:
           ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
 
       # Actions caches can be restored by fork PRs without repository secrets.
+      # Default-branch builds seed caches shared with other branches and fork PRs.
+      # Pushes to sibling feature branches cannot reuse each other's caches.
       - name: Set up vcpkg binary cache
         id: vcpkg-cache-config
         shell: bash
