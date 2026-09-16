@@ -62,7 +62,8 @@ void cairo_renderer<T>::process(line_symbolizer const& sym,
     context_.set_line_width(width * common_.scale_factor_);
     if (dash)
     {
-        context_.set_dash(*dash, common_.scale_factor_);
+        value_double dash_offset = get<value_double, keys::stroke_dashoffset>(sym, feature, common_.vars_);
+        context_.set_dash(*dash, common_.scale_factor_, dash_offset);
     }
 
     agg::trans_affine tr;

@@ -291,6 +291,7 @@ class cairo_context : private util::noncopyable
     void set_miter_limit(double limit);
     void set_line_width(double width);
     void set_dash(dash_array const& dashes, double scale_factor);
+    void set_dash(dash_array const& dashes, double scale_factor, double dash_offset);
     void set_fill_rule(cairo_fill_rule_t fill_rule);
     void move_to(double x, double y);
     void curve_to(double ct1_x, double ct1_y, double ct2_x, double ct2_y, double end_x, double end_y);

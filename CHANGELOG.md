@@ -6,6 +6,11 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Unreleased
+
+- Honor `stroke-dashoffset` on line symbolizers in the AGG and Cairo renderers,
+  including negative offsets, expressions, and rendering scale factors.
+
 ## Mapnik 4.3.1
 
 Released August 28th, 2026
