@@ -1,0 +1,91 @@
+#!/bin/bash
+# Build a .deb whose file layout matches Debian's own mapnik packages
+# (libmapnik4.0 + libmapnik-dev + mapnik-utils), installed into /usr, so that it
+# can replace them.  The cmake flags are the ones from Debian's debian/rules for
+# mapnik 4.0.7+ds-1.
+#
+# MAPNIK_*_DIR are CACHE STRINGs defaulting to CMAKE_INSTALL_LIBDIR, so they are
+# NOT picked up from a cache that was first configured with a different libdir --
+# pass them explicitly.
+#
+# Debian 4.0.7 shipped gdal/ogr and postgis/pgraster as separate .input files.
+# This tree only wires up the combined gdal+ogr and postgis+pgraster targets in
+# plugins/input/CMakeLists.txt; USE_PLUGIN_INPUT_{GDAL,OGR,POSTGIS,PGRASTER} are
+# dead options here.  The combined plugins register the same "gdal", "ogr",
+# "postgis" and "pgraster" datasource types, so only the file names differ.
+set -e
+
+MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH)   # e.g. x86_64-linux-gnu
+LOCAL_SUFFIX=+arc1   # appended to the upstream version for the Debian package version
+
+# Debian's plugin dir is versioned: lib/<multiarch>/mapnik/<MAJOR.MINOR>/input.
+# Keep 4.0 to stay a drop-in for anything already configured against the distro
+# package; set it to 4.2 to follow this tree's own version instead.
+PLUGIN_ABI=4.0
+
+cmake -S . -B build-deb \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_CXX_FLAGS="-O2 -DNDEBUG" \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib/${MULTIARCH} \
+    -DMAPNIK_LIB_DIR=lib/${MULTIARCH} \
+    -DMAPNIK_ARCHIVE_DIR=lib/${MULTIARCH} \
+    -DMAPNIK_CMAKE_DIR=lib/${MULTIARCH}/cmake/mapnik \
+    -DMAPNIK_PKGCONF_DIR=lib/${MULTIARCH}/pkgconfig \
+    -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON \
+    -DBUILD_TESTING=OFF -DBUILD_BENCHMARK=OFF \
+    -DBUILD_DEMO_VIEWER=OFF -DBUILD_DEMO_CPP=OFF \
+    -DFONTS_INSTALL_DIR=share/fonts \
+    -DPLUGINS_INSTALL_DIR=lib/${MULTIARCH}/mapnik/${PLUGIN_ABI}/input \
+    -DUSE_EXTERNAL_MAPBOX_GEOMETRY=ON \
+    -DUSE_EXTERNAL_MAPBOX_POLYLABEL=ON \
+    -DUSE_EXTERNAL_MAPBOX_PROTOZERO=ON \
+    -DUSE_EXTERNAL_MAPBOX_VARIANT=ON \
+    -DUSE_PLUGIN_INPUT_GDAL_OGR=ON \
+    -DUSE_PLUGIN_INPUT_POSTGIS_PGRASTER=ON \
+    -DUSE_PLUGIN_INPUT_TILES=OFF
+
+# A compiler killed mid-run (reboot, OOM, Ctrl-C) leaves 0-byte .o files behind,
+# and make then considers them up to date -- the next run links and fails with
+# "undefined reference to typeinfo for ...".  Drop them before building.
+find build-deb -name '*.o' -size 0 -delete
+
+# Upstream version (from include/mapnik/version.hpp via CMake), e.g. 4.3.2
+UPSTREAM_VERSION=$(sed -n 's/^CMAKE_PROJECT_VERSION:STATIC=//p' build-deb/CMakeCache.txt)
+VERSION=${UPSTREAM_VERSION}${LOCAL_SUFFIX}
+
+# This tree needs >2 GB per compiler process and the VM has no swap, so don't
+# use all 8 cores by default.
+cmake --build build-deb -j${JOBS:-4}
+
+# Run against CPack's staging tree just before the .deb is rolled up:
+#  - Debian ships no fonts (libmapnik4.0 depends on fonts-dejavu-core instead),
+#    but upstream's install() drops the bundled DejaVu copies into share/fonts
+#  - /usr/bin/mapnik-plugin-base is a Debian addition, not an upstream file
+cat > build-deb/debian-compat-prune.cmake <<'PRUNE'
+set(_stage "${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
+file(REMOVE_RECURSE "${_stage}/usr/share/fonts")
+file(WRITE "${_stage}/usr/bin/mapnik-plugin-base"
+"#!/bin/sh
+
+inputdir=$(pkgconf --variable=plugins_dir libmapnik)
+
+echo $(dirname $inputdir/../)
+")
+file(CHMOD "${_stage}/usr/bin/mapnik-plugin-base"
+     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                 GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+PRUNE
+
+cd build-deb
+cpack -G DEB \
+    -D CPACK_PACKAGE_VERSION="${VERSION}" \
+    -D CPACK_DEBIAN_PACKAGE_SHLIBDEPS=ON \
+    -D CPACK_DEBIAN_PACKAGE_SECTION=libs \
+    -D "CPACK_DEBIAN_PACKAGE_CONFLICTS=libmapnik4.0, libmapnik-dev, mapnik-utils" \
+    -D "CPACK_DEBIAN_PACKAGE_REPLACES=libmapnik4.0, libmapnik-dev, mapnik-utils" \
+    -D "CPACK_DEBIAN_PACKAGE_PROVIDES=libmapnik4.0, libmapnik-dev, mapnik-utils" \
+    -D CPACK_PRE_BUILD_SCRIPTS="${PWD}/debian-compat-prune.cmake"
+
+# apt (not dpkg -i) so the Conflicts: against the distro packages is resolved
+sudo apt install ./mapnik-${UPSTREAM_VERSION}-Linux.deb && sudo ldconfig
