@@ -10,7 +10,7 @@ project(mapnik
     VERSION ${MAPNIK_MAJOR_VERSION}.${MAPNIK_MINOR_VERSION}.${MAPNIK_PATCH_VERSION}
     HOMEPAGE_URL "https://mapnik.org/"
     DESCRIPTION "Mapnik is an open source toolkit for developing mapping applications"
-    LANGUAGES CXX
+    LANGUAGES CXX C
 )
 message(STATUS "mapnik version: ${PROJECT_VERSION}")
 
