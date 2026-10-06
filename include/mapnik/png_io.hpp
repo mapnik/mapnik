@@ -430,6 +430,10 @@ void save_as_png(T& file,
     png_set_compression_level(png_ptr, opts.compression);
     png_set_compression_strategy(png_ptr, opts.strategy);
     png_set_compression_buffer_size(png_ptr, 32768);
+#ifdef PNG_CHECK_FOR_INVALID_INDEX_SUPPORTED
+    // indexes come from the palette's own quantizer; skip rescanning every row for out of range ones
+    png_set_check_for_invalid_index(png_ptr, 0);
+#endif
 
     png_set_IHDR(png_ptr,
                  info_ptr,
