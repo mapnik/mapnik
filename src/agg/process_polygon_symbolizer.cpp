@@ -52,7 +52,7 @@ void agg_renderer<T0, T1>::process(polygon_symbolizer const& sym,
                                    proj_transform const& prj_trans)
 {
     using vertex_converter_type =
-      vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
+      vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag, cull_poly_tag>;
 
     ras_ptr->reset();
     double const gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);

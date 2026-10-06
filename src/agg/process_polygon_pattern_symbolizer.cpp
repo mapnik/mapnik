@@ -110,7 +110,7 @@ struct agg_renderer_process_visitor_p
         }
 
         using vertex_converter_type =
-          vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
+          vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag, cull_poly_tag>;
         using pattern_type = agg_polygon_pattern<vertex_converter_type>;
 
         pattern_type pattern(image, common_, sym_, feature_, prj_trans_);
@@ -127,6 +127,8 @@ struct agg_renderer_process_visitor_p
 
         if (prj_trans_.equal() && pattern.clip_)
             pattern.converter_.set<clip_poly_tag>();
+        else
+            pattern.converter_.set<cull_poly_tag>();
 
         ras_ptr_->filling_rule(agg::fill_even_odd);
 

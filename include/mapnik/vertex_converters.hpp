@@ -39,6 +39,7 @@
 #include <mapnik/extend_converter.hpp>
 #include <mapnik/cull_line_converter.hpp>
 #include <mapnik/adaptive_smooth.hpp>
+#include <mapnik/cull_poly_converter.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -66,6 +67,8 @@ struct transform_tag
 struct clip_line_tag
 {};
 struct clip_poly_tag
+{};
+struct cull_poly_tag
 {};
 struct smooth_tag
 {};
@@ -279,6 +282,25 @@ struct converter_traits<T, mapnik::clip_poly_tag>
     {
         auto const& box = args.bbox;
         geom.clip_box(box.minx(), box.miny(), box.maxx(), box.maxy());
+    }
+};
+
+template<typename T>
+struct converter_traits<T, mapnik::cull_poly_tag>
+{
+    using geometry_type = T;
+    using conv_type = cull_poly<geometry_type>;
+
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
+    {
+        // the pixel area agg_renderer clips rasterization to (the view, grown on
+        // all sides by twice the style offset while rendering into an inflated
+        // buffer); the extra pixels keep vertices that round onto its border
+        double const inflate = 2.0 * args.tr.offset();
+        box2d<double> box(-inflate, -inflate, args.tr.width() + inflate, args.tr.height() + inflate);
+        box.pad(2.0);
+        geom.set_box(box);
     }
 };
 
