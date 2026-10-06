@@ -201,6 +201,7 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
                                                        smooth_tag,
                                                        offset_transform_tag,
                                                        dash_tag,
+                                                       cull_line_tag,
                                                        stroke_tag>;
         vertex_converter_type
           converter(clip_box, sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
@@ -222,7 +223,9 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
             converter.set<smooth_tag>(); // optional smooth converter
         if (has_key(sym, keys::stroke_dasharray))
             converter.set<dash_tag>();
-        converter.set<stroke_tag>(); // always stroke
+        if (!clip)
+            converter.set<cull_line_tag>(); // skip stroking what lies far outside
+        converter.set<stroke_tag>();        // always stroke
 
         using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer>;
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;

@@ -27,6 +27,7 @@
 #include <mapnik/debug.hpp>
 #endif
 #include <mapnik/config.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/util/math.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/vertex_cache.hpp>
@@ -82,6 +83,14 @@ struct offset_converter
         // far will we be looking for self-intersections
     }
 
+    // The output is culled to box for a stroker afterwards (see cull_line),
+    // so a path whose output cannot come near it is dropped without offsetting.
+    void cull_to(box2d<double> const& box)
+    {
+        cull_box_ = box;
+        cull_ = true;
+    }
+
     unsigned vertex(double* x, double* y)
     {
         if (offset_ == 0.0)
@@ -91,7 +100,14 @@ struct offset_converter
 
         if (status_ == initial)
         {
-            init_vertices();
+            if (cull_ && far_from_cull_box())
+            {
+                status_ = process; // no output
+            }
+            else
+            {
+                init_vertices();
+            }
         }
 
         if (pos_ >= vertices_.size())
@@ -157,6 +173,8 @@ struct offset_converter
     {
         geom_.rewind(0);
         vertices_.clear();
+        scanned_.clear();
+        scanned_pos_ = 0;
         status_ = initial;
         pos_ = 0;
     }
@@ -164,6 +182,85 @@ struct offset_converter
     void rewind(unsigned) { pos_ = 0; }
 
   private:
+
+    // Whether no segment of the output can touch cull_box_. The vertices made
+    // for a source vertex are within 10.05 * |offset| of it (displace2 moves by
+    // sqrt(1 + h * h) * |offset| with |h| < 10, or by at most
+    // 2 * sqrt(2) * |offset| when it clamps; the other joins by |offset|), and
+    // cutting a curl only ends a segment early on the same line, so every drawn
+    // segment stays that close to its source segment. (A cut can also move a
+    // subpath's first vertex elsewhere when the subpath is skipped entirely; a
+    // lone move_to draws nothing.) So it is enough that no source segment,
+    // including the closing segment of each ring, comes within
+    // 16 * |offset| + 2 of the box. Anything unusual (non-finite or huge
+    // coordinates, other commands) counts as near. The vertices read are kept
+    // for source_vertex().
+    bool far_from_cull_box()
+    {
+        double const reach = 16.0 * std::abs(offset_) + 2.0;
+        double const minx = cull_box_.minx() - reach;
+        double const miny = cull_box_.miny() - reach;
+        double const maxx = cull_box_.maxx() + reach;
+        double const maxy = cull_box_.maxy() + reach;
+        auto const touches = [&](double x0, double y0, double x1, double y1) {
+            return !(std::max(x0, x1) < minx || std::min(x0, x1) > maxx || std::max(y0, y1) < miny ||
+                     std::min(y0, y1) > maxy);
+        };
+        bool far = std::abs(offset_) < 1e6;
+        bool open = false;
+        double start_x = 0.0, start_y = 0.0, prev_x = 0.0, prev_y = 0.0;
+        while (far)
+        {
+            double x, y;
+            unsigned const cmd = geom_.vertex(&x, &y);
+            if (cmd == SEG_END)
+            {
+                break;
+            }
+            scanned_.emplace_back(x, y, cmd);
+            if (!(std::abs(x) < 1e15 && std::abs(y) < 1e15))
+            {
+                far = false;
+            }
+            else if (cmd == SEG_MOVETO)
+            {
+                far = !touches(x, y, x, y);
+                start_x = prev_x = x;
+                start_y = prev_y = y;
+                open = true;
+            }
+            else if (cmd == SEG_LINETO && open)
+            {
+                far = !touches(prev_x, prev_y, x, y);
+                prev_x = x;
+                prev_y = y;
+            }
+            else if (cmd == SEG_CLOSE && open)
+            {
+                far = !touches(prev_x, prev_y, start_x, start_y);
+                open = false;
+            }
+            else
+            {
+                far = false;
+            }
+        }
+        return far;
+    }
+
+    // The source, starting with the vertices far_from_cull_box() has read:
+    // sources need not support reading a path twice.
+    unsigned source_vertex(double* x, double* y)
+    {
+        if (scanned_pos_ < scanned_.size())
+        {
+            vertex2d const& v = scanned_[scanned_pos_++];
+            *x = v.x;
+            *y = v.y;
+            return v.cmd;
+        }
+        return geom_.vertex(x, y);
+    }
 
     static double explement_reflex_angle(double angle)
     {
@@ -371,7 +468,7 @@ struct offset_converter
         std::vector<vertex2d> close_points;
         bool is_polygon = false;
         std::size_t cpt = 0;
-        v0.cmd = geom_.vertex(&v0.x, &v0.y);
+        v0.cmd = source_vertex(&v0.x, &v0.y);
         v1 = v0;
         // PUSH INITIAL
         points.push_back(v0);
@@ -380,7 +477,7 @@ struct offset_converter
             return status_ = process;
         }
         start = v0;
-        while ((v0.cmd = geom_.vertex(&v0.x, &v0.y)) != SEG_END)
+        while ((v0.cmd = source_vertex(&v0.x, &v0.y)) != SEG_END)
         {
             if (v0.cmd == SEG_CLOSE)
             {
@@ -644,6 +741,10 @@ struct offset_converter
     double offset_;
     double threshold_;
     unsigned half_turn_segments_;
+    box2d<double> cull_box_;
+    bool cull_ = false;
+    std::vector<vertex2d> scanned_;
+    std::size_t scanned_pos_ = 0;
     status status_;
     size_t pos_;
     std::vector<vertex2d> vertices_;
