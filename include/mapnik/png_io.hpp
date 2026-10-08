@@ -42,6 +42,7 @@ extern "C" {
 #include <algorithm>
 #include <set>
 #include <string>
+#include <utility>
 MAPNIK_DISABLE_WARNING_POP
 
 #define MAX_OCTREE_LEVELS 4
@@ -659,6 +660,8 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
             tree.setGamma(opts.gamma);
         }
 
+        // runs of equal pixels, row by row (value, end): inserted into the tree now, quantized below
+        std::vector<std::pair<unsigned, unsigned>> runs;
         for (unsigned y = 0; y < height; ++y)
         {
             typename T2::pixel_type const* row = image.get_row(y);
@@ -672,6 +675,7 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
                     ++run_end;
                 }
                 tree.insert(mapnik::rgba(U2RED(val), U2GREEN(val), U2BLUE(val), U2ALPHA(val)), run_end - x);
+                runs.emplace_back(val, run_end);
                 x = run_end;
             }
         }
@@ -689,7 +693,28 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
             palette.emplace_back(c.r, c.g, c.b);
             alpha_table.push_back(c.a);
         }
-        save_as_png8<T1, T2, hextree<mapnik::rgba>>(file, image, tree, palette, alpha_table, opts);
+        if (palette.size() > 16)
+        {
+            // >16 && <=256 colors -> write 8-bit color depth
+            image_gray8 reduced_image(width, height);
+            auto run = runs.cbegin();
+            for (unsigned y = 0; y < height; ++y)
+            {
+                mapnik::image_gray8::pixel_type* row_out = reduced_image.get_row(y);
+                unsigned x = 0;
+                while (x < width)
+                {
+                    std::fill(row_out + x, row_out + run->second, tree.quantize(run->first));
+                    x = run->second;
+                    ++run;
+                }
+            }
+            save_as_png(file, palette, reduced_image, width, height, 8, alpha_table, opts);
+        }
+        else
+        {
+            save_as_png8<T1, T2, hextree<mapnik::rgba>>(file, image, tree, palette, alpha_table, opts);
+        }
     }
     else
     {
