@@ -30,6 +30,15 @@
 #include <mapnik/text/face.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_any.hpp>
+#include <mapnik/safe_cast.hpp>
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
+#include <mapnik/warning_ignore_agg.hpp>
+#include "agg_color_rgba.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_rendering_buffer.h"
+MAPNIK_DISABLE_WARNING_POP
+#include <algorithm>
 #include <mapnik/agg_rasterizer.hpp>
 
 #include <mapnik/warning.hpp>
@@ -335,14 +344,70 @@ void composite_bitmap(T& pixmap,
     int x_max = x + bitmap->width;
     int y_max = y + bitmap->rows;
 
-    for (int i = x, p = 0; i < x_max; ++i, ++p)
+    if constexpr (std::is_same_v<T, image_rgba8>)
     {
-        for (int j = y, q = 0; j < y_max; ++j, ++q)
+        // What composite_pixel() does for each pixel, with the color and the
+        // clipping worked out once per glyph and source-over blended directly.
+        using color_type = agg::rgba8;
+        using value_type = color_type::value_type;
+        using order_type = agg::order_rgba;
+        double const clamped_opacity = opacity < 0.0 ? 0.0 : (opacity > 1.0 ? 1.0 : opacity);
+        unsigned const ca = safe_cast<value_type>(((rgba >> 24u) & 0xff) * clamped_opacity);
+        unsigned const cb = (rgba >> 16u) & 0xff;
+        unsigned const cg = (rgba >> 8u) & 0xff;
+        unsigned const cr = rgba & 0xff;
+        unsigned const pr = (cr * ca + color_type::base_mask) >> color_type::base_shift;
+        unsigned const pg = (cg * ca + color_type::base_mask) >> color_type::base_shift;
+        unsigned const pb = (cb * ca + color_type::base_mask) >> color_type::base_shift;
+        auto const blend = agg::comp_op_table_rgba<color_type, order_type>::g_comp_op_func[comp_op];
+        bool const src_over = comp_op == mapnik::src_over;
+        int const i0 = std::max(x, 0);
+        int const i1 = std::min(x_max, static_cast<int>(pixmap.width()));
+        int const j0 = std::max(y, 0);
+        int const j1 = std::min(y_max, static_cast<int>(pixmap.height()));
+        if (src_over)
         {
-            unsigned gray = bitmap->buffer[q * bitmap->width + p];
-            if (gray)
+            // each row is a span of one color with the glyph's grays as covers (a zero cover leaves the pixel)
+            if (i0 < i1)
             {
-                mapnik::composite_pixel(pixmap, comp_op, i, j, rgba, gray, opacity);
+                agg::rendering_buffer buf(pixmap.bytes(), pixmap.width(), pixmap.height(), pixmap.row_size());
+                agg::pixfmt_custom_blend_rgba<agg::comp_op_adaptor_rgba_pre<color_type, order_type>,
+                                              agg::rendering_buffer>
+                  pixf(buf);
+                pixf.comp_op(agg::comp_op_src_over);
+                color_type const c(pr, pg, pb, ca);
+                for (int j = j0; j < j1; ++j)
+                {
+                    pixf.blend_solid_hspan(i0, j, i1 - i0, c, bitmap->buffer + (j - y) * bitmap->width + (i0 - x));
+                }
+            }
+            return;
+        }
+        for (int j = j0; j < j1; ++j)
+        {
+            unsigned char const* src = bitmap->buffer + (j - y) * bitmap->width;
+            value_type* row = reinterpret_cast<value_type*>(pixmap.get_row(j));
+            for (int i = i0; i < i1; ++i)
+            {
+                unsigned gray = src[i - x];
+                if (gray)
+                {
+                    blend(row + 4 * i, pr, pg, pb, ca, gray);
+                }
+            }
+        }
+    }
+    else
+    {
+        for (int i = x, p = 0; i < x_max; ++i, ++p)
+        {
+            for (int j = y, q = 0; j < y_max; ++j, ++q)
+            {
+                unsigned gray = bitmap->buffer[q * bitmap->width + p];
+                if (gray)
+                {
+                    mapnik::composite_pixel(pixmap, comp_op, i, j, rgba, gray, opacity);
+                }
             }
         }
     }

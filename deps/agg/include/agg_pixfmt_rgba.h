@@ -79,6 +79,11 @@ namespace detail
             int32u cw;
             std::memcpy(&cw, covers + done, 4);
             int8u* q = p + done * 4;
+            if (cw == 0)
+            {
+                done += 4; // no coverage: the pixels stay as they are
+                continue;
+            }
             if (opaque && cw == 0xFFFFFFFFu)
             {
                 _mm_storeu_si128((__m128i*)q, s8);
@@ -326,6 +331,11 @@ namespace detail
         while (len - done >= 4)
         {
             int8u* q = p + done * 4;
+            if ((covers[done] | covers[done + 1] | covers[done + 2] | covers[done + 3]) == 0)
+            {
+                done += 4; // no coverage: the pixels stay as they are
+                continue;
+            }
             if (opaque && covers[done] == 255 && covers[done + 1] == 255 &&
                 covers[done + 2] == 255 && covers[done + 3] == 255)
             {
