@@ -289,10 +289,9 @@ class serialize_symbolizer
             }
             else
             {
-                util::apply_visitor(serialize_symbolizer_property<property_meta_type>(get_meta(prop.first),
-                                                                                      sym_node,
-                                                                                      explicit_defaults_),
-                                    prop.second);
+                util::apply_visitor(
+                  serialize_symbolizer_property<property_meta_type>(get_meta(prop.first), sym_node, explicit_defaults_),
+                  prop.second);
             }
         }
     }

@@ -190,13 +190,8 @@ void cairo_renderer<T>::process(arc_symbolizer const& sym,
 
     cairo_save_restore guard(context_);
 
-    detail::render_arc_symbolizer apply{context_,
-                                        common_,
-                                        prj_trans,
-                                        props,
-                                        label ? &label.get() : nullptr,
-                                        face_manager_,
-                                        comp_op};
+    detail::render_arc_symbolizer
+      apply{context_, common_, prj_trans, props, label ? &label.get() : nullptr, face_manager_, comp_op};
     mapnik::util::apply_visitor(geometry::vertex_processor<detail::render_arc_symbolizer>(apply),
                                 feature.get_geometry());
 }

@@ -1112,8 +1112,8 @@ void map_parser::parse_arc_symbolizer(rule& rule, xml_node const& node)
     try
     {
         arc_symbolizer sym;
-	// arc geometry
-	set_symbolizer_property<symbolizer_base, double>(sym, keys::radius, node);
+        // arc geometry
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::radius, node);
         set_symbolizer_property<symbolizer_base, double>(sym, keys::start_angle, node);
         set_symbolizer_property<symbolizer_base, double>(sym, keys::end_angle, node);
         // fill of the arc wedge
@@ -1138,8 +1138,8 @@ void map_parser::parse_arc_symbolizer(rule& rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base, dash_array>(sym, keys::radius_stroke_dasharray, node);
         set_symbolizer_property<symbolizer_base, double>(sym, keys::radius_stroke_dashoffset, node);
 
-	// optional label text attributes
-	// all but text-offset is basically inherited from TextSymbolizer settings
+        // optional label text attributes
+        // all but text-offset is basically inherited from TextSymbolizer settings
         auto const text = node.get_opt_attr<expression_ptr>("text");
         if (text)
         {
