@@ -55,7 +55,8 @@ struct offset_converter
           status_(initial),
           pre_first_(vertex2d::no_init),
           pre_(vertex2d::no_init),
-          cur_(vertex2d::no_init)
+          cur_(vertex2d::no_init),
+          closing_joint_(0)
     {}
 
     enum status { initial, process };
@@ -118,6 +119,13 @@ struct offset_converter
         pre_ = (pos_ ? cur_ : pre_first_);
         cur_ = vertices_.at(pos_++);
 
+        if (cur_.cmd == SEG_MOVETO)
+        {
+            // the closing joint of the ring starting here (none for a line)
+            auto const joint = std::lower_bound(closing_joints_.begin(), closing_joints_.end(), pos_);
+            closing_joint_ = (joint == closing_joints_.end()) ? vertices_.size() : *joint;
+        }
+
         if (pos_ == vertices_.size())
         {
             return output_vertex(x, y);
@@ -137,6 +145,13 @@ struct offset_converter
             // End or beginning of a line or ring must not be filtered out
             // to not to join lines or rings together.
             if (u0.cmd == SEG_CLOSE || u0.cmd == SEG_MOVETO)
+            {
+                break;
+            }
+
+            // A ring's closing joint is built around the ring's first vertex, so its segments touch the
+            // segments emitted to and from that vertex. Taking that for a curl would skip the whole ring.
+            if ((cur_.cmd == SEG_MOVETO || pre_.cmd == SEG_MOVETO) && i + 1 >= closing_joint_)
             {
                 break;
             }
@@ -173,8 +188,10 @@ struct offset_converter
     {
         geom_.rewind(0);
         vertices_.clear();
+
         scanned_.clear();
         scanned_pos_ = 0;
+        closing_joints_.clear();
         status_ = initial;
         pos_ = 0;
     }
@@ -716,6 +733,10 @@ struct offset_converter
             }
             else
             {
+                if (v1.cmd == SEG_CLOSE)
+                {
+                    closing_joints_.push_back(vertices_.size());
+                }
                 if (bulge_steps == 0)
                 {
                     displace2(v1, v0, v2, angle_a, angle_b);
@@ -776,10 +797,13 @@ struct offset_converter
     status status_;
     size_t pos_;
     std::vector<vertex2d> vertices_;
+    // index in vertices_ of the first vertex of each ring's closing joint, the joint around its first vertex
+    std::vector<size_t> closing_joints_;
     vertex2d start_;
     vertex2d pre_first_;
     vertex2d pre_;
     vertex2d cur_;
+    size_t closing_joint_;
 };
 
 } // namespace mapnik
