@@ -40,6 +40,8 @@ extern "C" {
 #include <png.h>
 }
 #include <algorithm>
+#include <cstdint>
+#include <cstring>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -808,7 +810,19 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
             {
                 unsigned val = row[x];
                 unsigned run_end = x + 1;
-                while (run_end < width && row[run_end] == val)
+                // two pixels at a time, then the last one
+                std::uint64_t const two = (std::uint64_t(val) << 32) | val;
+                while (run_end + 1 < width)
+                {
+                    std::uint64_t next_two;
+                    std::memcpy(&next_two, row + run_end, sizeof(next_two));
+                    if (next_two != two)
+                    {
+                        break;
+                    }
+                    run_end += 2;
+                }
+                if (run_end < width && row[run_end] == val)
                 {
                     ++run_end;
                 }
