@@ -171,7 +171,6 @@ target_sources(mapnik PRIVATE
     ../deps/agg/src/agg_vcgen_markers_term.cpp
     ../deps/agg/src/agg_vcgen_stroke.cpp
     ../deps/agg/src/agg_vpgen_clip_polygon.cpp
-    ../deps/agg/src/agg_vpgen_clip_polyline.cpp
     ../deps/agg/src/agg_vpgen_segmentator.cpp
 )
 target_sources(mapnik PRIVATE
