@@ -179,6 +179,113 @@ namespace detail
         }
         return done;
     }
+
+    // Darken on two premultiplied RGBA pixels in 16-bit lanes:
+    //   Dca' = (min(Sca.Da, Dca.Sa) + Sca.(1 - Da) + Dca.(1 - Sa) + 255) >> 8
+    //   Da'  = Sa + Da - ((Sa.Da + 255) >> 8)
+    // each product fits 16 bits, their sum is added in 32-bit lanes; a pixel with Sa = 0 is left as it is.
+    template<unsigned AlphaIdx>
+    AGG_INLINE __m128i darken_pair_u16(__m128i d16, __m128i s16)
+    {
+        const __m128i zero = _mm_setzero_si128();
+        const __m128i c255 = _mm_set1_epi16(0xFF);
+        __m128i sa = _mm_shufflelo_epi16(s16, _MM_SHUFFLE(AlphaIdx, AlphaIdx, AlphaIdx, AlphaIdx));
+        sa = _mm_shufflehi_epi16(sa, _MM_SHUFFLE(AlphaIdx, AlphaIdx, AlphaIdx, AlphaIdx));
+        __m128i da = _mm_shufflelo_epi16(d16, _MM_SHUFFLE(AlphaIdx, AlphaIdx, AlphaIdx, AlphaIdx));
+        da = _mm_shufflehi_epi16(da, _MM_SHUFFLE(AlphaIdx, AlphaIdx, AlphaIdx, AlphaIdx));
+        __m128i sda = _mm_mullo_epi16(s16, da);
+        __m128i dsa = _mm_mullo_epi16(d16, sa);
+        __m128i lesser = _mm_sub_epi16(sda, _mm_subs_epu16(sda, dsa));
+        __m128i s1da = _mm_mullo_epi16(s16, _mm_sub_epi16(c255, da));
+        __m128i d1sa = _mm_mullo_epi16(d16, _mm_sub_epi16(c255, sa));
+        const __m128i c255_32 = _mm_set1_epi32(0xFF);
+        __m128i lo = _mm_add_epi32(_mm_add_epi32(_mm_unpacklo_epi16(lesser, zero), _mm_unpacklo_epi16(s1da, zero)),
+                                   _mm_add_epi32(_mm_unpacklo_epi16(d1sa, zero), c255_32));
+        __m128i hi = _mm_add_epi32(_mm_add_epi32(_mm_unpackhi_epi16(lesser, zero), _mm_unpackhi_epi16(s1da, zero)),
+                                   _mm_add_epi32(_mm_unpackhi_epi16(d1sa, zero), c255_32));
+        lo = _mm_and_si128(_mm_srli_epi32(lo, 8), c255_32);
+        hi = _mm_and_si128(_mm_srli_epi32(hi, 8), c255_32);
+        __m128i color = _mm_packs_epi32(lo, hi);
+        __m128i t = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(sa, da), c255), 8);
+        __m128i alpha = _mm_and_si128(_mm_sub_epi16(_mm_add_epi16(sa, da), t), c255);
+        const __m128i alpha_lanes = _mm_slli_epi64(_mm_set1_epi64x(0xFFFF), 16 * AlphaIdx);
+        __m128i out = _mm_or_si128(_mm_and_si128(alpha_lanes, alpha), _mm_andnot_si128(alpha_lanes, color));
+        __m128i keep = _mm_cmpeq_epi16(sa, zero);
+        return _mm_or_si128(_mm_and_si128(keep, d16), _mm_andnot_si128(keep, out));
+    }
+
+    template<unsigned AlphaIdx>
+    inline unsigned blend_from_darken_simd(int8u* pdst,
+                                           const int8u* psrc,
+                                           unsigned len,
+                                           unsigned cover)
+    {
+        const __m128i zero = _mm_setzero_si128();
+        const __m128i c255 = _mm_set1_epi16(0xFF);
+        const __m128i cov16 = _mm_set1_epi16((short)cover);
+        unsigned done = 0;
+        while (len - done >= 4)
+        {
+            const int8u* qs = psrc + done * 4;
+            int8u* qd = pdst + done * 4;
+            __m128i s8 = _mm_loadu_si128((const __m128i*)qs);
+            if (_mm_movemask_epi8(_mm_cmpeq_epi8(s8, zero)) == 0xFFFF)
+            {
+                done += 4;
+                continue;
+            }
+            __m128i slo = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(_mm_unpacklo_epi8(s8, zero), cov16), c255), 8);
+            __m128i shi = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(_mm_unpackhi_epi8(s8, zero), cov16), c255), 8);
+            __m128i d8 = _mm_loadu_si128((const __m128i*)qd);
+            __m128i outlo = darken_pair_u16<AlphaIdx>(_mm_unpacklo_epi8(d8, zero), slo);
+            __m128i outhi = darken_pair_u16<AlphaIdx>(_mm_unpackhi_epi8(d8, zero), shi);
+            _mm_storeu_si128((__m128i*)qd, _mm_packus_epi16(outlo, outhi));
+            done += 4;
+        }
+        return done;
+    }
+
+    // blend_color_hspan_alpha with source-over: colors (RGBA in pixel order) scaled by alpha, then by the cover
+    template<unsigned AlphaIdx>
+    inline unsigned blend_color_hspan_alpha_src_over_simd(int8u* p,
+                                                          const int8u* colors,
+                                                          unsigned len,
+                                                          unsigned alpha,
+                                                          const int8u* covers,
+                                                          unsigned cover)
+    {
+        const __m128i zero = _mm_setzero_si128();
+        const __m128i c255 = _mm_set1_epi16(0xFF);
+        const __m128i alpha16 = _mm_set1_epi16((short)alpha);
+        const __m128i cover16 = _mm_set1_epi16((short)cover);
+        unsigned done = 0;
+        while (len - done >= 4)
+        {
+            int8u* q = p + done * 4;
+            __m128i c8 = _mm_loadu_si128((const __m128i*)(colors + done * 4));
+            __m128i clo = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(_mm_unpacklo_epi8(c8, zero), alpha16), c255), 8);
+            __m128i chi = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(_mm_unpackhi_epi8(c8, zero), alpha16), c255), 8);
+            __m128i covlo = cover16;
+            __m128i covhi = cover16;
+            if (covers)
+            {
+                int32u cw;
+                std::memcpy(&cw, covers + done, 4);
+                __m128i c16 = _mm_unpacklo_epi8(_mm_cvtsi32_si128((int)cw), zero);
+                c16 = _mm_unpacklo_epi16(c16, c16);
+                covlo = _mm_unpacklo_epi32(c16, c16);
+                covhi = _mm_unpackhi_epi32(c16, c16);
+            }
+            __m128i slo = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(clo, covlo), c255), 8);
+            __m128i shi = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(chi, covhi), c255), 8);
+            __m128i d8 = _mm_loadu_si128((const __m128i*)q);
+            __m128i outlo = src_over_pair_u16<AlphaIdx>(_mm_unpacklo_epi8(d8, zero), slo);
+            __m128i outhi = src_over_pair_u16<AlphaIdx>(_mm_unpackhi_epi8(d8, zero), shi);
+            _mm_storeu_si128((__m128i*)q, _mm_packus_epi16(outlo, outhi));
+            done += 4;
+        }
+        return done;
+    }
 }
 #elif defined(__ARM_NEON) || defined(__ARM_NEON__)
 namespace detail
@@ -308,6 +415,95 @@ namespace detail
             uint8x16_t d8 = vld1q_u8(q);
             uint16x8_t outlo = src_over_pair_u16<AlphaIdx>(vmovl_u8(vget_low_u8(d8)), s16);
             uint16x8_t outhi = src_over_pair_u16<AlphaIdx>(vmovl_u8(vget_high_u8(d8)), s16);
+            vst1q_u8(q, pack_rgba8(outlo, outhi));
+            done += 4;
+        }
+        return done;
+    }
+
+    // Darken on two premultiplied RGBA pixels in 16-bit lanes (see the SSE2 version)
+    template<unsigned AlphaIdx>
+    AGG_INLINE uint16x8_t darken_pair_u16(uint16x8_t d16, uint16x8_t s16)
+    {
+        const uint16x8_t c255 = vdupq_n_u16(255);
+        uint16x8_t sa = vcombine_u16(vdup_lane_u16(vget_low_u16(s16), AlphaIdx),
+                                     vdup_lane_u16(vget_high_u16(s16), AlphaIdx));
+        uint16x8_t da = vcombine_u16(vdup_lane_u16(vget_low_u16(d16), AlphaIdx),
+                                     vdup_lane_u16(vget_high_u16(d16), AlphaIdx));
+        uint16x8_t lesser = vminq_u16(vmulq_u16(s16, da), vmulq_u16(d16, sa));
+        uint16x8_t s1da = vmulq_u16(s16, vsubq_u16(c255, da));
+        uint16x8_t d1sa = vmulq_u16(d16, vsubq_u16(c255, sa));
+        uint32x4_t lo = vaddq_u32(vaddl_u16(vget_low_u16(lesser), vget_low_u16(s1da)),
+                                  vaddl_u16(vget_low_u16(d1sa), vdup_n_u16(255)));
+        uint32x4_t hi = vaddq_u32(vaddl_u16(vget_high_u16(lesser), vget_high_u16(s1da)),
+                                  vaddl_u16(vget_high_u16(d1sa), vdup_n_u16(255)));
+        uint16x8_t color = vandq_u16(vcombine_u16(vmovn_u32(vshrq_n_u32(lo, 8)), vmovn_u32(vshrq_n_u32(hi, 8))), c255);
+        uint16x8_t t = vshrq_n_u16(vaddq_u16(vmulq_u16(sa, da), c255), 8);
+        uint16x8_t alpha = vandq_u16(vsubq_u16(vaddq_u16(sa, da), t), c255);
+        const uint16x8_t alpha_lanes = vreinterpretq_u16_u64(vdupq_n_u64(0xFFFFull << (16 * AlphaIdx)));
+        uint16x8_t out = vbslq_u16(alpha_lanes, alpha, color);
+        return vbslq_u16(vceqq_u16(sa, vdupq_n_u16(0)), d16, out);
+    }
+
+    template<unsigned AlphaIdx>
+    inline unsigned blend_from_darken_simd(int8u* pdst,
+                                           const int8u* psrc,
+                                           unsigned len,
+                                           unsigned cover)
+    {
+        const uint16x8_t cov16 = vdupq_n_u16(cover);
+        unsigned done = 0;
+        while (len - done >= 4)
+        {
+            const int8u* qs = psrc + done * 4;
+            int8u* qd = pdst + done * 4;
+            uint8x16_t s8 = vld1q_u8(qs);
+            uint64x2_t source_words = vreinterpretq_u64_u8(s8);
+            if (vgetq_lane_u64(source_words, 0) == 0 && vgetq_lane_u64(source_words, 1) == 0)
+            {
+                done += 4;
+                continue;
+            }
+            uint16x8_t slo = apply_cover(vmovl_u8(vget_low_u8(s8)), cov16);
+            uint16x8_t shi = apply_cover(vmovl_u8(vget_high_u8(s8)), cov16);
+            uint8x16_t d8 = vld1q_u8(qd);
+            uint16x8_t outlo = darken_pair_u16<AlphaIdx>(vmovl_u8(vget_low_u8(d8)), slo);
+            uint16x8_t outhi = darken_pair_u16<AlphaIdx>(vmovl_u8(vget_high_u8(d8)), shi);
+            vst1q_u8(qd, pack_rgba8(outlo, outhi));
+            done += 4;
+        }
+        return done;
+    }
+
+    template<unsigned AlphaIdx>
+    inline unsigned blend_color_hspan_alpha_src_over_simd(int8u* p,
+                                                          const int8u* colors,
+                                                          unsigned len,
+                                                          unsigned alpha,
+                                                          const int8u* covers,
+                                                          unsigned cover)
+    {
+        const uint16x8_t alpha16 = vdupq_n_u16(alpha);
+        const uint16x8_t cover16 = vdupq_n_u16(cover);
+        unsigned done = 0;
+        while (len - done >= 4)
+        {
+            int8u* q = p + done * 4;
+            uint8x16_t c8 = vld1q_u8(colors + done * 4);
+            uint16x8_t clo = apply_cover(vmovl_u8(vget_low_u8(c8)), alpha16);
+            uint16x8_t chi = apply_cover(vmovl_u8(vget_high_u8(c8)), alpha16);
+            uint16x8_t covlo = cover16;
+            uint16x8_t covhi = cover16;
+            if (covers)
+            {
+                covlo = vcombine_u16(vdup_n_u16(covers[done]), vdup_n_u16(covers[done + 1]));
+                covhi = vcombine_u16(vdup_n_u16(covers[done + 2]), vdup_n_u16(covers[done + 3]));
+            }
+            uint16x8_t slo = apply_cover(clo, covlo);
+            uint16x8_t shi = apply_cover(chi, covhi);
+            uint8x16_t d8 = vld1q_u8(q);
+            uint16x8_t outlo = src_over_pair_u16<AlphaIdx>(vmovl_u8(vget_low_u8(d8)), slo);
+            uint16x8_t outhi = src_over_pair_u16<AlphaIdx>(vmovl_u8(vget_high_u8(d8)), shi);
             vst1q_u8(q, pack_rgba8(outlo, outhi));
             done += 4;
         }
@@ -3285,6 +3481,24 @@ public:
                                  int8u cover)
     {
         value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + (x << 2);
+#if defined(__SSE2__) || defined(__ARM_NEON) || defined(__ARM_NEON__)
+        // colors are r, g, b, a structs: block loads match the pixels when those are in RGBA order
+        if constexpr (sizeof(value_type) == 1 && base_shift == 8 && sizeof(color_type) == 4 &&
+                      std::is_same_v<blender_type, comp_op_adaptor_rgba_pre<color_type, order_type>> &&
+                      order_type::R == 0 && order_type::G == 1 && order_type::B == 2 && order_type::A == 3)
+        {
+            if(m_comp_op == comp_op_src_over && len >= 4)
+            {
+                unsigned done = detail::blend_color_hspan_alpha_src_over_simd<order_type::A>(
+                    (int8u*)p, (const int8u*)colors, len, alpha, covers, cover);
+                p += done * 4;
+                colors += done;
+                if(covers) covers += done;
+                len -= done;
+                if(len == 0) return;
+            }
+        }
+#endif
         do
         {
             blender_type::blend_pix(m_comp_op,
@@ -3420,6 +3634,17 @@ public:
                     (const value_type*)pdst + len * 4 <= psrc))
                 {
                     unsigned done = detail::blend_from_src_over_simd<order_type::A>(
+                        (int8u*)pdst, (const int8u*)psrc, len, cover);
+                    psrc += done * 4;
+                    pdst += done * 4;
+                    len -= done;
+                    if(len == 0) return;
+                }
+                else if(m_comp_op == comp_op_darken && incp == 4 && len >= 4 &&
+                        (psrc + len * 4 <= (const value_type*)pdst ||
+                         (const value_type*)pdst + len * 4 <= psrc))
+                {
+                    unsigned done = detail::blend_from_darken_simd<order_type::A>(
                         (int8u*)pdst, (const int8u*)psrc, len, cover);
                     psrc += done * 4;
                     pdst += done * 4;
