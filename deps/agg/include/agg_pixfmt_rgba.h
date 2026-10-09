@@ -58,7 +58,7 @@ namespace detail
         return _mm_and_si128(d, c255);
     }
 
-    // blend_solid_hspan with a covers array; handles a multiple of four
+    // blend_solid_hspan with a covers array; handles a multiple of two
     // pixels and returns how many were done, the caller finishes the tail.
     template<unsigned AlphaIdx>
     inline unsigned blend_solid_hspan_src_over_simd(int8u* p,
@@ -101,6 +101,27 @@ namespace detail
             __m128i outhi = src_over_pair_u16<AlphaIdx>(_mm_unpackhi_epi8(d8, zero), shi);
             _mm_storeu_si128((__m128i*)q, _mm_packus_epi16(outlo, outhi));
             done += 4;
+        }
+        if (len - done >= 2)
+        {
+            int16u cw;
+            std::memcpy(&cw, covers + done, 2);
+            int8u* q = p + done * 4;
+            if (opaque && cw == 0xFFFFu)
+            {
+                _mm_storel_epi64((__m128i*)q, s8);
+            }
+            else
+            {
+                __m128i c16 = _mm_unpacklo_epi8(_mm_cvtsi32_si128((int)cw), zero);
+                c16 = _mm_unpacklo_epi16(c16, c16);
+                __m128i cov = _mm_unpacklo_epi32(c16, c16); // c0 x4, c1 x4
+                __m128i sc = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(s16, cov), c255), 8);
+                __m128i d8 = _mm_loadl_epi64((const __m128i*)q);
+                __m128i out = src_over_pair_u16<AlphaIdx>(_mm_unpacklo_epi8(d8, zero), sc);
+                _mm_storel_epi64((__m128i*)q, _mm_packus_epi16(out, out));
+            }
+            done += 2;
         }
         return done;
     }
@@ -352,6 +373,22 @@ namespace detail
             uint16x8_t outhi = src_over_pair_u16<AlphaIdx>(vmovl_u8(vget_high_u8(d8)), shi);
             vst1q_u8(q, pack_rgba8(outlo, outhi));
             done += 4;
+        }
+        if (len - done >= 2)
+        {
+            int8u* q = p + done * 4;
+            if (opaque && covers[done] == 255 && covers[done + 1] == 255)
+            {
+                vst1_u8(q, vget_low_u8(s8));
+            }
+            else
+            {
+                uint16x8_t cov = vcombine_u16(vdup_n_u16(covers[done]), vdup_n_u16(covers[done + 1]));
+                uint16x8_t sc = apply_cover(s16, cov);
+                uint16x8_t out = src_over_pair_u16<AlphaIdx>(vmovl_u8(vld1_u8(q)), sc);
+                vst1_u8(q, vmovn_u16(out));
+            }
+            done += 2;
         }
         return done;
     }
@@ -3384,7 +3421,7 @@ public:
         if constexpr (sizeof(value_type) == 1 && base_shift == 8 &&
                       std::is_same_v<blender_type, comp_op_adaptor_rgba_pre<color_type, order_type>>)
         {
-            if(m_comp_op == comp_op_src_over && len >= 4)
+            if(m_comp_op == comp_op_src_over && len >= 2)
             {
                 int8u spx[4];
                 spx[order_type::R] = (int8u)c.r;
