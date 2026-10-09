@@ -63,6 +63,11 @@ if(MSVC)
     target_compile_options(mapnik PUBLIC "/bigobj" "/wd4068" "/wd4661" "/wd4910")
 endif()
 
+if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)
+    # calls inside libmapnik to its own exported functions bind directly instead of through the PLT
+    target_link_options(mapnik PRIVATE "LINKER:-Bsymbolic-functions")
+endif()
+
 target_sources(mapnik PRIVATE
     cairo_io.cpp
     color_factory.cpp
