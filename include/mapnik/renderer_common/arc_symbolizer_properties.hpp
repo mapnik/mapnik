@@ -41,7 +41,9 @@ namespace mapnik {
 // The arc-stroke-* and radius-stroke-* attributes fall back to the general
 // stroke-* attributes, so a plain stroke styles both the curved arc line and
 // the radius spokes while either group can be overridden individually. The
-// has_* flags tell whether the respective part should be drawn at all.
+// has_* flags tell whether the respective part should be drawn at all: a
+// stroke width of zero turns that part off (so radius-stroke-width="0" leaves
+// a bare arc with a plain stroke), and a full circle has no radius spokes.
 //
 // Widths and the radius are already multiplied by the renderer's scale factor.
 struct arc_symbolizer_properties
@@ -110,6 +112,9 @@ struct arc_symbolizer_properties
         radius_dash_offset = has_key(sym, keys::radius_stroke_dashoffset)
                                ? get<double>(sym, keys::radius_stroke_dashoffset, feature, vars, 0.0)
                                : stroke_dash_offset;
+
+        has_arc_stroke = has_arc_stroke && arc_stroke_width > 0.0;
+        has_radius_stroke = has_radius_stroke && radius_stroke_width > 0.0 && start_angle != end_angle;
 
         // label attributes -- the text itself and its formatting live in the
         // text_placements_ property, only the radial gap is a plain attribute
