@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/symbolizer_keys.hpp>
@@ -219,14 +220,7 @@ struct render_arc_symbolizer : util::noncopyable
         if (!dashes.empty())
         {
             agg::conv_dash<agg::path_storage> dash(path);
-            for (auto const& d : dashes)
-            {
-                dash.add_dash(d.first * common_.scale_factor_, d.second * common_.scale_factor_);
-            }
-            if (dash_offset != 0.0)
-            {
-                dash.dash_start(dash_offset * common_.scale_factor_);
-            }
+            apply_dash_array(dash, dashes, dash_offset, common_.scale_factor_);
             stroke_and_render(dash, sl, col, width);
         }
         else
