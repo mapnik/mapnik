@@ -191,9 +191,6 @@ struct svg_arc_renderer : util::noncopyable
 
     void render_one(double cx, double cy)
     {
-        if (props_.radius <= 0.0)
-            return;
-
         // Closed pie wedge (center -> arc start, arc, arc end -> center), used for fill.
         if (props_.has_fill)
         {
@@ -250,6 +247,8 @@ template<typename T>
 void svg_renderer<T>::process(arc_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans)
 {
     arc_symbolizer_properties const props(sym, feature, common_.vars_, common_.scale_factor_);
+    if (!props.drawable())
+        return;
 
     // dash lengths in props are unscaled; svg emits final pixel lengths, so
     // apply the scale factor here like the (pre-scaled) stroke widths

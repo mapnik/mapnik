@@ -16,7 +16,14 @@
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/formatting/text.hpp>
 
+#include <mapnik/feature.hpp>
+#include <mapnik/renderer_common/arc_symbolizer_properties.hpp>
+#include <mapnik/util/math.hpp>
+
+#include <limits>
 #include <string>
+#include <tuple>
+#include <vector>
 
 using namespace mapnik;
 
@@ -165,5 +172,68 @@ TEST_CASE("arc_symbolizer")
         Map m2(256, 256);
         REQUIRE_NOTHROW(load_map_string(m2, saved));
         check_arc(first_arc(m2));
+    }
+
+    SECTION("bearings are normalized before computing the sweep")
+    {
+        // {start, end} -> expected sweep in degrees
+        std::vector<std::tuple<double, double, double>> const cases = {
+          {45, 135, 90},
+          {300, 10, 70},  // wrap-around through north
+          {0, 360, 360},  // full circle
+          {90, 90, 360},  // equal bearings are a full circle too
+          {360, 0, 360},  // 360 is the same bearing as 0
+          {40, 20, 340},  // the long way round, clockwise
+          {400, 20, 340}, // 400 is the same bearing as 40
+          {-30, 30, 60},
+          {30, -30, 300},
+          {1e20, 0, 80},    // 1e20 mod 360 = 280
+          {-1e-20, 0, 360}, // -1e-20 + 360 rounds to 360, i.e. 0
+        };
+        context_ptr ctx = std::make_shared<context_type>();
+        feature_impl const feature(ctx, 1);
+        attributes const vars;
+        for (auto const& [start, end, expected] : cases)
+        {
+            arc_symbolizer sym;
+            put<double>(sym, keys::radius, 10.0);
+            put<double>(sym, keys::start_angle, start);
+            put<double>(sym, keys::end_angle, end);
+            arc_symbolizer_properties const props(sym, feature, vars, 1.0);
+            CAPTURE(start, end);
+            REQUIRE(props.drawable());
+            auto const [a0, a1] = props.sweep();
+            REQUIRE(a0 >= 0.0);
+            REQUIRE(a0 < util::tau);
+            REQUIRE(util::degrees(a1 - a0) == Approx(expected));
+        }
+    }
+
+    SECTION("arcs with no radius or non-finite values are not drawn")
+    {
+        double const inf = std::numeric_limits<double>::infinity();
+        double const nan = std::numeric_limits<double>::quiet_NaN();
+        // {radius, start, end}
+        std::vector<std::tuple<double, double, double>> const cases = {
+          {0, 0, 90},
+          {-5, 0, 90},
+          {nan, 0, 90},
+          {inf, 0, 90},
+          {10, inf, 90},
+          {10, 0, -inf},
+          {10, nan, 90},
+        };
+        context_ptr ctx = std::make_shared<context_type>();
+        feature_impl const feature(ctx, 1);
+        attributes const vars;
+        for (auto const& [radius, start, end] : cases)
+        {
+            arc_symbolizer sym;
+            put<double>(sym, keys::radius, radius);
+            put<double>(sym, keys::start_angle, start);
+            put<double>(sym, keys::end_angle, end);
+            CAPTURE(radius, start, end);
+            REQUIRE_FALSE(arc_symbolizer_properties(sym, feature, vars, 1.0).drawable());
+        }
     }
 }

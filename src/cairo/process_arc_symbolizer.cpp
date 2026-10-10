@@ -116,9 +116,6 @@ struct render_arc_symbolizer
 
     void render_one(double cx, double cy) const
     {
-        if (props_.radius <= 0.0)
-            return;
-
         // Fill is always the closed pie wedge.
         if (props_.has_fill)
         {
@@ -183,6 +180,8 @@ void cairo_renderer<T>::process(arc_symbolizer const& sym,
                                 proj_transform const& prj_trans)
 {
     arc_symbolizer_properties const props(sym, feature, common_.vars_, common_.scale_factor_);
+    if (!props.drawable())
+        return;
     composite_mode_e const comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
 
     // Shape the optional label once here; it is placed per arc centre below.
