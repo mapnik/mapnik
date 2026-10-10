@@ -209,6 +209,50 @@ TEST_CASE("arc_symbolizer")
         }
     }
 
+    SECTION("which parts of the arc are drawn")
+    {
+        context_ptr ctx = std::make_shared<context_type>();
+        feature_impl const feature(ctx, 1);
+        attributes const vars;
+        auto make = [](double start, double end) {
+            arc_symbolizer sym;
+            put<double>(sym, keys::radius, 10.0);
+            put<double>(sym, keys::start_angle, start);
+            put<double>(sym, keys::end_angle, end);
+            put(sym, keys::stroke, color(0, 0, 0));
+            return sym;
+        };
+
+        // a plain stroke draws both the arc line and the spokes
+        arc_symbolizer sym = make(0, 90);
+        arc_symbolizer_properties props(sym, feature, vars, 1.0);
+        REQUIRE(props.has_arc_stroke);
+        REQUIRE(props.has_radius_stroke);
+        REQUIRE_FALSE(props.has_fill);
+
+        // a full circle (all-round light) has no spokes
+        for (double end : {0.0, 360.0, 720.0})
+        {
+            sym = make(0, end);
+            CAPTURE(end);
+            REQUIRE(arc_symbolizer_properties(sym, feature, vars, 1.0).has_arc_stroke);
+            REQUIRE_FALSE(arc_symbolizer_properties(sym, feature, vars, 1.0).has_radius_stroke);
+        }
+
+        // a zero (or negative) width turns the respective part off
+        sym = make(0, 90);
+        put<double>(sym, keys::radius_stroke_width, 0.0);
+        props = arc_symbolizer_properties(sym, feature, vars, 1.0);
+        REQUIRE(props.has_arc_stroke);
+        REQUIRE_FALSE(props.has_radius_stroke);
+
+        sym = make(0, 90);
+        put<double>(sym, keys::arc_stroke_width, -1.0);
+        props = arc_symbolizer_properties(sym, feature, vars, 1.0);
+        REQUIRE_FALSE(props.has_arc_stroke);
+        REQUIRE(props.has_radius_stroke);
+    }
+
     SECTION("arcs with no radius or non-finite values are not drawn")
     {
         double const inf = std::numeric_limits<double>::infinity();
