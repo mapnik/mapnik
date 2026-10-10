@@ -75,7 +75,7 @@ struct render_arc_symbolizer : util::noncopyable
                           agg::rgba8 const& fill_col,
                           agg::rgba8 const& arc_stroke_col,
                           agg::rgba8 const& radius_stroke_col,
-                          text_layout const* layout,
+                          arc_text_layout const* label,
                           TextRenderer* text_ren)
         : ras_(ras),
           ren_(ren),
@@ -85,7 +85,7 @@ struct render_arc_symbolizer : util::noncopyable
           fill_col_(fill_col),
           arc_stroke_col_(arc_stroke_col),
           radius_stroke_col_(radius_stroke_col),
-          layout_(layout),
+          label_(label),
           text_ren_(text_ren)
     {}
 
@@ -194,11 +194,18 @@ struct render_arc_symbolizer : util::noncopyable
         // Label bent along the outside of the arc, or running radially outward
         // when the arc is too short for it. Colours and halo come from the
         // glyph formats.
-        if (layout_ && text_ren_)
+        if (label_ && text_ren_)
         {
             auto [a0, a1] = props_.sweep();
-            glyph_positions_ptr glyphs =
-              place_arc_text(*layout_, cx, cy, props_.radius, a0, a1, props_.text_offset, common_.scale_factor_);
+            glyph_positions_ptr glyphs = place_arc_text(*label_,
+                                                        cx,
+                                                        cy,
+                                                        props_.radius,
+                                                        a0,
+                                                        a1,
+                                                        props_.text_offset,
+                                                        common_.scale_factor_,
+                                                        *common_.detector_);
             if (glyphs)
                 text_ren_->render(*glyphs);
         }
@@ -246,7 +253,7 @@ struct render_arc_symbolizer : util::noncopyable
     agg::rgba8 fill_col_;
     agg::rgba8 arc_stroke_col_;
     agg::rgba8 radius_stroke_col_;
-    text_layout const* layout_;
+    arc_text_layout const* label_;
     TextRenderer* text_ren_;
 };
 
@@ -318,7 +325,7 @@ void agg_renderer<T0, T1>::process(arc_symbolizer const& sym,
                                      fill_col,
                                      arc_stroke_col,
                                      radius_stroke_col,
-                                     label ? &label.get() : nullptr,
+                                     label ? &label : nullptr,
                                      text_ren ? &*text_ren : nullptr);
     mapnik::util::apply_visitor(geometry::vertex_processor<render_arc_symbolizer_type>(apply), feature.get_geometry());
 }

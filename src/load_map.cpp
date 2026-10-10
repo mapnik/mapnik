@@ -169,7 +169,7 @@ struct allow_overlap_visitor
     bool operator()(group_symbolizer const&) { return false; }
     bool operator()(debug_symbolizer const&) { return true; } // Requires the quadtree
     bool operator()(dot_symbolizer const&) { return false; }
-    bool operator()(arc_symbolizer const&) { return false; }
+    bool operator()(arc_symbolizer const& sym) { return has_key(sym, keys::text_placements_); } // label
 };
 
 // If all symbolizers declare 'allow_overlap: true' (their placement is independent
@@ -1155,6 +1155,9 @@ void map_parser::parse_arc_symbolizer(rule& rule, xml_node const& node)
             set_property_from_xml<double>(fmt.character_spacing, "text-character-spacing", node);
             set_property_from_xml<text_transform_e>(fmt.text_transform, "text-transform", node);
             set_property_from_xml<font_feature_settings>(fmt.ff_settings, "text-font-feature-settings", node);
+            set_property_from_xml<value_bool>(placements->defaults.expressions.allow_overlap,
+                                              "text-allow-overlap",
+                                              node);
 
             auto const face_name = node.get_opt_attr<std::string>("text-face-name");
             if (face_name)

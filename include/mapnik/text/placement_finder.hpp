@@ -39,6 +39,12 @@ class vertex_cache;
 class text_placement_info;
 struct glyph_info;
 
+// Screen-space bounding box of a glyph placed at pos with rotation rot,
+// relative to the base point of its glyph_positions. Used for collision
+// detection.
+box2d<double>
+  glyph_bbox(text_layout const& layout, glyph_info const& glyph, pixel_position const& pos, rotation const& rot);
+
 class placement_finder : util::noncopyable
 {
   public:

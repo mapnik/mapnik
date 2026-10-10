@@ -37,6 +37,7 @@ namespace mapnik {
 class text_layout;
 class face_manager;
 using face_manager_freetype = face_manager;
+class label_collision_detector4;
 
 class MAPNIK_DECL arc_text_layout : util::noncopyable
 {
@@ -50,20 +51,27 @@ class MAPNIK_DECL arc_text_layout : util::noncopyable
 
     explicit operator bool() const { return static_cast<bool>(layout_); }
     text_layout const& get() const { return *layout_; }
+    bool allow_overlap() const { return allow_overlap_; }
 
   private:
     text_placement_info_ptr info_;
     std::unique_ptr<text_layout> layout_;
+    bool allow_overlap_ = false;
 };
 
-MAPNIK_DECL glyph_positions_ptr place_arc_text(text_layout const& layout,
+// Places the label around the arc centred at (cx, cy). Like other labels it
+// is dropped (null is returned) if it would collide with a label already in
+// the detector, unless text-allow-overlap is set, and otherwise its glyph
+// boxes are added to the detector.
+MAPNIK_DECL glyph_positions_ptr place_arc_text(arc_text_layout const& label,
                                                double cx,
                                                double cy,
                                                double radius,
                                                double a0,
                                                double a1,
                                                double text_offset,
-                                               double scale_factor);
+                                               double scale_factor,
+                                               label_collision_detector4& detector);
 
 } // namespace mapnik
 
