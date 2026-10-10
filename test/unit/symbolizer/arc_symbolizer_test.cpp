@@ -9,6 +9,7 @@
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/color.hpp>
+#include <mapnik/image_compositing.hpp>
 #include <mapnik/value/types.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/expression_string.hpp>
@@ -40,7 +41,7 @@ std::string const arc_xml = R"xml(<?xml version="1.0" encoding="utf-8"?>
                      text-size="12" text-fill="rgb(10,20,30)" text-opacity="0.4"
                      text-halo-fill="rgb(40,50,60)" text-halo-radius="1.5" text-halo-opacity="0.3"
                      text-character-spacing="2" text-transform="uppercase"
-                     text-offset="4"
+                     text-offset="4" comp-op="multiply"
                      />
     </Rule>
   </Style>
@@ -112,6 +113,9 @@ void check_arc(arc_symbolizer const& sym)
     REQUIRE(get<double>(sym, keys::radius_stroke_opacity) == Approx(0.9));
     check_dash(sym, keys::radius_stroke_dasharray, 7.0, 7.0);
     REQUIRE(get<double>(sym, keys::radius_stroke_dashoffset) == Approx(0.7));
+
+    // compositing
+    REQUIRE(get<composite_mode_e>(sym, keys::comp_op) == multiply);
 
     // label test: the text-* attributes are mapped onto the standard text
     // format properties and stored as text placements

@@ -189,6 +189,7 @@ void cairo_renderer<T>::process(arc_symbolizer const& sym,
     arc_text_layout const label(sym, feature, common_.vars_, common_.font_manager_, common_.scale_factor_);
 
     cairo_save_restore guard(context_);
+    context_.set_operator(comp_op);
 
     detail::render_arc_symbolizer
       apply{context_, common_, prj_trans, props, label ? &label.get() : nullptr, face_manager_, comp_op};

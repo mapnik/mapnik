@@ -1137,6 +1137,7 @@ void map_parser::parse_arc_symbolizer(rule& rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base, double>(sym, keys::radius_stroke_opacity, node);
         set_symbolizer_property<symbolizer_base, dash_array>(sym, keys::radius_stroke_dasharray, node);
         set_symbolizer_property<symbolizer_base, double>(sym, keys::radius_stroke_dashoffset, node);
+        set_symbolizer_property<symbolizer_base, composite_mode_e>(sym, keys::comp_op, node);
 
         // optional label text attributes
         // all but text-offset is basically inherited from TextSymbolizer settings
