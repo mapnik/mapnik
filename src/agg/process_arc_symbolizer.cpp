@@ -115,15 +115,14 @@ struct render_arc_symbolizer : util::noncopyable
 
     // The curved part of the arc as an agg::arc vertex generator. agg::arc uses
     // standard math angles (CCW from +x); our bearings are clockwise from north,
-    // which maps to (bearing - pi/2). Its adaptive approximation_scale picks the
-    // segment count from the radius so large arcs stay smooth.
+    // which maps to (bearing - pi/2). It picks the segment count from the
+    // radius so large arcs stay smooth; the radius is already in pixels, so the
+    // default approximation scale of 1 is the right one.
     agg::arc make_arc(double cx, double cy) const
     {
         auto [a0, a1] = props_.sweep();
         double const half_pi = util::tau / 4.0;
-        agg::arc a(cx, cy, props_.radius, props_.radius, a0 - half_pi, a1 - half_pi, true);
-        a.approximation_scale(common_.scale_factor_);
-        return a;
+        return agg::arc(cx, cy, props_.radius, props_.radius, a0 - half_pi, a1 - half_pi, true);
     }
 
     // Closed pie wedge (center -> arc start, arc, arc end -> center), used for fill.
