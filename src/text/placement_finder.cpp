@@ -39,9 +39,8 @@
 
 namespace mapnik {
 
-namespace {
 box2d<double>
-  get_bbox(text_layout const& layout, glyph_info const& glyph, pixel_position const& pos, rotation const& rot)
+  glyph_bbox(text_layout const& layout, glyph_info const& glyph, pixel_position const& pos, rotation const& rot)
 {
     /*
 
@@ -73,7 +72,6 @@ box2d<double>
     bbox.move(pos2.x, -pos2.y);
     return bbox;
 }
-} // anonymous namespace
 
 placement_finder::placement_finder(feature_impl const& feature,
                                    attributes const& attr,
@@ -358,7 +356,7 @@ bool placement_finder::single_line_placement(vertex_cache& pp, text_upright_e or
                 cluster_offset.x += rot.cos * glyph.advance();
                 cluster_offset.y -= rot.sin * glyph.advance();
 
-                box2d<double> bbox = get_bbox(layout, glyph, pos, rot);
+                box2d<double> bbox = glyph_bbox(layout, glyph, pos, rot);
                 if (collision(bbox, layouts_.text(), true))
                     return false;
                 bboxes.push_back(std::move(bbox));

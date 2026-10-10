@@ -134,6 +134,9 @@ void serialize_arc_text(ptree& node, text_placements_ptr const& p, bool explicit
         serialize_property("text-transform", fmt.text_transform, node);
     if (!(fmt.ff_settings == dfl.ff_settings) || explicit_defaults)
         serialize_property("text-font-feature-settings", fmt.ff_settings, node);
+    text_properties_expressions const dfl_expressions;
+    if (!(p->defaults.expressions.allow_overlap == dfl_expressions.allow_overlap) || explicit_defaults)
+        serialize_property("text-allow-overlap", p->defaults.expressions.allow_overlap, node);
 }
 
 void serialize_raster_colorizer(ptree& sym_node, raster_colorizer_ptr const& colorizer, bool explicit_defaults)

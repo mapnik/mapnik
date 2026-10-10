@@ -17,7 +17,11 @@
 #include <mapnik/text/formatting/text.hpp>
 
 #include <mapnik/feature.hpp>
+#include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/renderer_common/arc_symbolizer_properties.hpp>
+#include <mapnik/renderer_common/arc_text_placement.hpp>
+#include <mapnik/text/font_library.hpp>
 #include <mapnik/util/math.hpp>
 
 #include <limits>
@@ -48,7 +52,7 @@ std::string const arc_xml = R"xml(<?xml version="1.0" encoding="utf-8"?>
                      text-size="12" text-fill="rgb(10,20,30)" text-opacity="0.4"
                      text-halo-fill="rgb(40,50,60)" text-halo-radius="1.5" text-halo-opacity="0.3"
                      text-character-spacing="2" text-transform="uppercase"
-                     text-offset="4" comp-op="multiply"
+                     text-offset="4" text-allow-overlap="true" comp-op="multiply"
                      />
     </Rule>
   </Style>
@@ -143,6 +147,7 @@ void check_arc(arc_symbolizer const& sym)
     REQUIRE(util::get<value_double>(fmt.character_spacing) == Approx(2.0));
     REQUIRE(util::get<enumeration_wrapper>(fmt.text_transform).value ==
             static_cast<int>(text_transform_enum::UPPERCASE));
+    REQUIRE(util::get<value_bool>(placements->defaults.expressions.allow_overlap) == true);
 
     color const text_fill = util::get<color>(fmt.fill);
     REQUIRE(text_fill.red() == 10);
@@ -251,6 +256,55 @@ TEST_CASE("arc_symbolizer")
         props = arc_symbolizer_properties(sym, feature, vars, 1.0);
         REQUIRE_FALSE(props.has_arc_stroke);
         REQUIRE(props.has_radius_stroke);
+    }
+
+    SECTION("labels take part in collision detection")
+    {
+        // register the font with a Map rather than globally, which would leak
+        // into the font sets other tests build from all registered faces
+        Map fonts(256, 256);
+        REQUIRE(fonts.register_fonts("fonts/dejavu-fonts-ttf-2.37/ttf"));
+        font_library library;
+        face_manager font_manager(library, fonts.get_font_file_mapping(), fonts.get_font_memory_cache());
+
+        auto load_arc = [](std::string const& allow_overlap) {
+            Map m(256, 256);
+            load_map_string(m,
+                            R"(<Map><Style name="arcs"><Rule><ArcSymbolizer radius="30" start-angle="300" )"
+                            R"(end-angle="60" text="'light'" text-face-name="DejaVu Sans Book" )"
+                            R"(text-allow-overlap=")" +
+                              allow_overlap + R"("/></Rule></Style></Map>)");
+            return first_arc(m);
+        };
+        context_ptr ctx = std::make_shared<context_type>();
+        feature_impl const feature(ctx, 1);
+        attributes const vars;
+        double const a0 = util::radians(300.0);
+        double const a1 = util::radians(420.0);
+        auto place = [&](arc_text_layout const& label, double cx, label_collision_detector4& detector) {
+            return place_arc_text(label, cx, 100.0, 30.0, a0, a1, 3.0, 1.0, detector);
+        };
+
+        arc_symbolizer const sym = load_arc("false");
+        arc_text_layout const label(sym, feature, vars, font_manager, 1.0);
+        REQUIRE(bool(label));
+        REQUIRE_FALSE(label.allow_overlap());
+
+        label_collision_detector4 detector(box2d<double>(0, 0, 256, 256));
+        REQUIRE(place(label, 50.0, detector) != nullptr);
+        // glyph boxes were registered (begin() runs the query end() refers to)
+        auto const registered = detector.begin();
+        REQUIRE(registered != detector.end());
+        // the same label again on top of the first one collides ...
+        REQUIRE(place(label, 50.0, detector) == nullptr);
+        REQUIRE(place(label, 55.0, detector) == nullptr);
+        // ... but not further away
+        REQUIRE(place(label, 200.0, detector) != nullptr);
+
+        arc_symbolizer const overlap_sym = load_arc("true");
+        arc_text_layout const overlap_label(overlap_sym, feature, vars, font_manager, 1.0);
+        REQUIRE(overlap_label.allow_overlap());
+        REQUIRE(place(overlap_label, 50.0, detector) != nullptr);
     }
 
     SECTION("arcs with no radius or non-finite values are not drawn")

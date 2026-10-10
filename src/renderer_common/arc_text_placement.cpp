@@ -21,13 +21,17 @@
  *****************************************************************************/
 
 #include <mapnik/renderer_common/arc_text_placement.hpp>
+#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/symbolizer_keys.hpp>
+#include <mapnik/text/placement_finder.hpp>
 #include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/text_line.hpp>
+#include <mapnik/text/text_properties.hpp>
 #include <mapnik/util/math.hpp>
 
 #include <cmath>
 #include <utility>
+#include <vector>
 
 namespace mapnik {
 
@@ -81,19 +85,22 @@ arc_text_layout::arc_text_layout(arc_symbolizer const& sym,
         return;
     }
     layout_ = std::move(layout);
+    allow_overlap_ = evaluate_text_properties(info_->properties, feature, vars)->allow_overlap;
 }
 
 arc_text_layout::~arc_text_layout() = default;
 
-glyph_positions_ptr place_arc_text(text_layout const& layout,
+glyph_positions_ptr place_arc_text(arc_text_layout const& label,
                                    double cx,
                                    double cy,
                                    double radius,
                                    double a0,
                                    double a1,
                                    double text_offset,
-                                   double scale_factor)
+                                   double scale_factor,
+                                   label_collision_detector4& detector)
 {
+    text_layout const& layout = label.get();
     if (layout.num_lines() == 0)
         return glyph_positions_ptr();
 
@@ -108,6 +115,8 @@ glyph_positions_ptr place_arc_text(text_layout const& layout,
     auto glyphs = std::make_unique<glyph_positions>();
     glyphs->reserve(layout.glyphs_count());
     glyphs->set_base_point(pixel_position(cx, cy));
+    std::vector<box2d<double>> bboxes;
+    bboxes.reserve(layout.glyphs_count());
 
     // On the lower half of the circle text bent along the arc would come out
     // upside down, so it is turned around there and reads counter-clockwise.
@@ -132,7 +141,9 @@ glyph_positions_ptr place_arc_text(text_layout const& layout,
         for (auto const& glyph : line)
         {
             rotation const rot(flip ? util::pi - bearing : -bearing);
-            glyphs->emplace_back(glyph, polar(bearing, baseline_radius), rot);
+            pixel_position const pos = polar(bearing, baseline_radius);
+            bboxes.push_back(glyph_bbox(layout, glyph, pos, rot));
+            glyphs->emplace_back(glyph, pos, rot);
             bearing += dir * pen_advance(glyph, scale_factor) / baseline_radius;
         }
     }
@@ -160,9 +171,23 @@ glyph_positions_ptr place_arc_text(text_layout const& layout,
         // now place the glyphs one at a time, along the determined direction
         for (auto const& glyph : line)
         {
-            glyphs->emplace_back(glyph, polar(mid, r) + centering, rot);
+            pixel_position const pos = polar(mid, r) + centering;
+            bboxes.push_back(glyph_bbox(layout, glyph, pos, rot));
+            glyphs->emplace_back(glyph, pos, rot);
             r += dir * pen_advance(glyph, scale_factor);
         }
+    }
+
+    // glyph boxes are relative to the base point, the detector works in screen space
+    for (auto& box : bboxes)
+    {
+        box.move(cx, cy);
+        if (!label.allow_overlap() && !detector.has_placement(box))
+            return glyph_positions_ptr();
+    }
+    for (auto const& box : bboxes)
+    {
+        detector.insert(box, layout.text());
     }
     return glyphs;
 }
