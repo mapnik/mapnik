@@ -154,9 +154,6 @@ struct render_arc_symbolizer : util::noncopyable
 
     void render_one(double cx, double cy)
     {
-        if (props_.radius <= 0.0)
-            return;
-
         agg::scanline_u8 sl;
 
         if (props_.has_fill)
@@ -261,6 +258,8 @@ void agg_renderer<T0, T1>::process(arc_symbolizer const& sym,
                                    proj_transform const& prj_trans)
 {
     arc_symbolizer_properties const props(sym, feature, common_.vars_, common_.scale_factor_);
+    if (!props.drawable())
+        return;
 
     // Shape the optional label once here; it is placed per arc centre below.
     arc_text_layout const label(sym, feature, common_.vars_, common_.font_manager_, common_.scale_factor_);

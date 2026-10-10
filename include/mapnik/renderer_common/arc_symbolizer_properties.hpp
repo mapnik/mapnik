@@ -29,6 +29,7 @@
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/util/math.hpp>
 
+#include <cmath>
 #include <utility>
 
 namespace mapnik {
@@ -51,8 +52,8 @@ struct arc_symbolizer_properties
                               double scale_factor)
     {
         radius = get<double>(sym, keys::radius, feature, vars, 0.0) * scale_factor;
-        start_angle = get<double>(sym, keys::start_angle, feature, vars, 0.0);
-        end_angle = get<double>(sym, keys::end_angle, feature, vars, 360.0);
+        start_angle = normalize_bearing(get<double>(sym, keys::start_angle, feature, vars, 0.0));
+        end_angle = normalize_bearing(get<double>(sym, keys::end_angle, feature, vars, 360.0));
 
         // fill attributes
         has_fill = has_key(sym, keys::fill);
@@ -115,9 +116,25 @@ struct arc_symbolizer_properties
         text_offset = get<double>(sym, keys::text_offset, feature, vars, 2.0) * scale_factor;
     }
 
+    // Reduce a bearing in degrees to [0, 360), so that e.g. 360 and 0, or 400
+    // and 40, describe the same direction. Non-finite bearings become NaN.
+    static double normalize_bearing(double angle)
+    {
+        angle = std::fmod(angle, 360.0);
+        if (angle < 0.0)
+            angle += 360.0; // may round up to 360 for tiny negative angles
+        return angle >= 360.0 ? 0.0 : angle;
+    }
+
+    // Whether there is anything to draw at all.
+    bool drawable() const
+    {
+        return radius > 0.0 && std::isfinite(radius) && std::isfinite(start_angle) && std::isfinite(end_angle);
+    }
+
     // Sweep angles in radians, clockwise from north, with wrap-around handled
     // (e.g. 350 -> 10 degrees). Equal angles mean a full circle, as charted
-    // for all-round lights. Returns {a0, a1} with a1 > a0.
+    // for all-round lights. Returns {a0, a1} with a0 < a1 <= a0 + tau.
     std::pair<double, double> sweep() const
     {
         double a0 = util::radians(start_angle);
