@@ -424,6 +424,29 @@ agg_text_renderer<T>::agg_text_renderer(pixmap_type& pixmap,
       pixmap_(pixmap)
 {}
 
+namespace {
+
+// Whether an outline glyph grown by margin pixels on every side misses a
+// width x height image, so that drawing it changes no pixel. Labels are
+// placed in the buffer around the image too; their glyphs out there need
+// not be stroked or rasterized. The control box (in FreeType coordinates,
+// y up from the bottom of the image) bounds the outline, and the bitmap
+// made of it covers that box rounded out to whole pixels.
+bool outside_image(FT_Glyph glyph, double margin, unsigned width, unsigned height)
+{
+    if (glyph->format != FT_GLYPH_FORMAT_OUTLINE)
+    {
+        return false;
+    }
+    FT_BBox cbox;
+    FT_Outline_Get_CBox(&reinterpret_cast<FT_OutlineGlyph>(glyph)->outline, &cbox);
+    double const m = margin * 64.0;
+    return cbox.xMax + m < 0.0 || cbox.xMin - m > width * 64.0 || cbox.yMax + m < 0.0 ||
+           cbox.yMin - m > height * 64.0;
+}
+
+} // namespace
+
 template<typename T>
 void agg_text_renderer<T>::render(glyph_positions const& pos)
 {
@@ -475,6 +498,12 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
         if (!error)
         {
             FT_Glyph_Transform(g, &halo_matrix, &start_halo);
+            // the stroke reaches about 1.15 radii past the outline's control box
+            if (outside_image(g, 4.0 * halo_radius + 4.0, pixmap_.width(), height))
+            {
+                FT_Done_Glyph(g);
+                continue;
+            }
             if (rasterizer_ == halo_rasterizer_enum::HALO_RASTERIZER_FULL)
             {
                 get_halo_stroke_cache().stroke(g, *stroker_, halo_radius);
@@ -556,6 +585,11 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
         text_opacity = glyph.properties.text_opacity;
 
         FT_Glyph_Transform(glyph.image, &matrix, &start);
+        if (outside_image(glyph.image, 2.0, pixmap_.width(), height))
+        {
+            FT_Done_Glyph(glyph.image);
+            continue;
+        }
         error = 0;
         if (glyph.image->format != FT_GLYPH_FORMAT_BITMAP)
         {
