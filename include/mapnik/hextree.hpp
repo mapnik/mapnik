@@ -36,7 +36,6 @@
 #include <new>
 #include <type_traits>
 #include <vector>
-#include <set>
 #include <cmath>
 
 namespace mapnik {
@@ -571,13 +570,17 @@ class hextree : private util::noncopyable
         colors_ = 1;
         root_->count = root_->pixel_count;
 
-        std::set<node*, node_rev_cmp> colored_leaves_heap;
-        colored_leaves_heap.insert(root_);
+        // a max-heap on the reverse of node_rev_cmp: its top is the node a set ordered by node_rev_cmp would
+        // have first (a strict total order, and no node enters twice)
+        auto const heap_cmp = [](node const* lhs, node const* rhs) { return node_rev_cmp()(rhs, lhs); };
+        std::vector<node*> colored_leaves_heap;
+        colored_leaves_heap.push_back(root_);
         while ((!colored_leaves_heap.empty() && (colors_ < max_colors_) && (tries < 16)))
         {
             // select worst node to remove it from palette and replace with children
-            node* cur_node = *colored_leaves_heap.begin();
-            colored_leaves_heap.erase(colored_leaves_heap.begin());
+            std::pop_heap(colored_leaves_heap.begin(), colored_leaves_heap.end(), heap_cmp);
+            node* cur_node = colored_leaves_heap.back();
+            colored_leaves_heap.pop_back();
             if (((cur_node->children_count + colors_ - 1) > max_colors_))
             {
                 tries++;
@@ -596,7 +599,8 @@ class hextree : private util::noncopyable
                     {
                         node* n = cur_node->children_[idx];
                         n->count = n->pixel_count;
-                        colored_leaves_heap.insert(n);
+                        colored_leaves_heap.push_back(n);
+                        std::push_heap(colored_leaves_heap.begin(), colored_leaves_heap.end(), heap_cmp);
                         colors_++;
                     }
                 }
