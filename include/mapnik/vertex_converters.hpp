@@ -167,6 +167,12 @@ struct converter_traits<T, mapnik::dash_tag>
                 geom.dash_start(dash_offset * scale_factor);
             }
         }
+        if (args.stroke_culled)
+        {
+            // what cull_line drops need not be dashed
+            box2d<double> const box = stroke_cull_box(args);
+            geom.cull_box(box.minx(), box.miny(), box.maxx(), box.maxy());
+        }
     }
 };
 
