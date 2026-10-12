@@ -602,7 +602,7 @@ struct agg_render_marker_visitor
         ras_ptr_->reset();
         if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
         {
-            ras_ptr_->gamma(agg::gamma_power());
+            ras_ptr_->gamma_power(1.0);
             gamma_method_ = gamma_method_enum::GAMMA_POWER;
             gamma_ = 1.0;
         }
@@ -648,7 +648,7 @@ struct agg_render_marker_visitor
         ras_ptr_->reset();
         if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
         {
-            ras_ptr_->gamma(agg::gamma_power());
+            ras_ptr_->gamma_power(1.0);
             gamma_method_ = gamma_method_enum::GAMMA_POWER;
             gamma_ = 1.0;
         }

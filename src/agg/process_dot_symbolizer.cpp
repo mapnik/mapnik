@@ -124,7 +124,7 @@ void agg_renderer<T0, T1>::process(dot_symbolizer const& sym,
     ras_ptr->reset();
     if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
     {
-        ras_ptr->gamma(agg::gamma_power());
+        ras_ptr->gamma_power(1.0);
         gamma_method_ = gamma_method_enum::GAMMA_POWER;
         gamma_ = 1.0;
     }

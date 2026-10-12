@@ -28,9 +28,11 @@
 
 // stl
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <limits>
+#include <utility>
 #include <vector>
 
 #include <mapnik/warning.hpp>
@@ -44,6 +46,27 @@ namespace mapnik {
 struct rasterizer : agg::rasterizer_scanline_aa<agg::rasterizer_sl_clip_int_sat>,
                     util::noncopyable
 {
+    // gamma(agg::gamma_power(g)), keeping the tables it computed: each takes aa_scale pow calls, and styles
+    // switch between a few gamma values from one symbolizer to the next
+    void gamma_power(double g)
+    {
+        for (auto const& entry : power_tables_)
+        {
+            if (entry.first == g)
+            {
+                gamma_table(entry.second.data());
+                return;
+            }
+        }
+        gamma(agg::gamma_power(g));
+        if (power_tables_.size() < 16)
+        {
+            std::array<int, aa_scale> table;
+            std::copy(gamma_table(), gamma_table() + aa_scale, table.begin());
+            power_tables_.emplace_back(g, table);
+        }
+    }
+
     // Whether rewind_scanlines() and sweep_scanline() note what they find (see rendered()): only
     // the buffers of composited styles need it.
     void track_rendered(bool track) { track_ = track; }
@@ -151,6 +174,7 @@ struct rasterizer : agg::rasterizer_scanline_aa<agg::rasterizer_sl_clip_int_sat>
         row_x2_[y] = std::max(row_x2_[y], x2);
     }
 
+    std::vector<std::pair<double, std::array<int, aa_scale>>> power_tables_;
     bool rendered_ = false;
     int rendered_x1_ = std::numeric_limits<int>::max();
     int rendered_y1_ = std::numeric_limits<int>::max();

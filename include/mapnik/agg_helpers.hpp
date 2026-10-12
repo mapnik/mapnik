@@ -40,7 +40,10 @@ void set_gamma_method(T& ras_ptr, double gamma, gamma_method_enum method)
     switch (method)
     {
         case gamma_method_enum::GAMMA_POWER:
-            ras_ptr->gamma(agg::gamma_power(gamma));
+            if constexpr (requires { ras_ptr->gamma_power(gamma); })
+                ras_ptr->gamma_power(gamma);
+            else
+                ras_ptr->gamma(agg::gamma_power(gamma));
             break;
         case gamma_method_enum::GAMMA_LINEAR:
             ras_ptr->gamma(agg::gamma_linear(0.0, gamma));
@@ -55,7 +58,10 @@ void set_gamma_method(T& ras_ptr, double gamma, gamma_method_enum method)
             ras_ptr->gamma(agg::gamma_multiply(gamma));
             break;
         default:
-            ras_ptr->gamma(agg::gamma_power(gamma));
+            if constexpr (requires { ras_ptr->gamma_power(gamma); })
+                ras_ptr->gamma_power(gamma);
+            else
+                ras_ptr->gamma(agg::gamma_power(gamma));
     }
 }
 
