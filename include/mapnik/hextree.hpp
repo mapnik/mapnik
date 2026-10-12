@@ -501,6 +501,8 @@ class hextree : private util::noncopyable
     {
         if (itr->count != 0)
         {
+            // assign_node_colors colors a node's children only when it splits the node, which uncolors it:
+            // nothing below a colored node is colored
             unsigned count = itr->count;
             std::uint8_t a = std::uint8_t(itr->alphas / float(count));
             if (a > InsertPolicy::MAX_ALPHA)
@@ -511,6 +513,7 @@ class hextree : private util::noncopyable
                                    static_cast<std::uint8_t>(round(gamma(itr->greens / count, gamma_))),
                                    static_cast<std::uint8_t>(round(gamma(itr->blues / count, gamma_))),
                                    a));
+            return;
         }
         for (unsigned idx = 0; idx < 16; ++idx)
         {
