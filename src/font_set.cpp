@@ -60,19 +60,27 @@ void swap(font_set& lhs, font_set& rhs)
 
 bool font_set::operator==(font_set const& rhs) const
 {
-    return name_ == rhs.name_ && face_names_ == rhs.face_names_;
+    return name_ == rhs.name_ && (face_names_ == rhs.face_names_ || get_face_names() == rhs.get_face_names());
 }
 
 font_set::~font_set() {}
 
 std::size_t font_set::size() const
 {
-    return face_names_.size();
+    return get_face_names().size();
 }
 
 void font_set::add_face_name(std::string const& face_name)
 {
-    face_names_.emplace_back(face_name);
+    if (!face_names_)
+    {
+        face_names_ = std::make_shared<std::vector<std::string>>();
+    }
+    else if (face_names_.use_count() > 1)
+    {
+        face_names_ = std::make_shared<std::vector<std::string>>(*face_names_);
+    }
+    face_names_->emplace_back(face_name);
 }
 
 void font_set::set_name(std::string const& name)
@@ -87,6 +95,7 @@ std::string const& font_set::get_name() const
 
 std::vector<std::string> const& font_set::get_face_names() const
 {
-    return face_names_;
+    static std::vector<std::string> const no_face_names;
+    return face_names_ ? *face_names_ : no_face_names;
 }
 } // namespace mapnik
