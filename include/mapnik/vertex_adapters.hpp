@@ -50,6 +50,26 @@ struct line_string_vertex_adapter
     unsigned vertex(coordinate_type* x, coordinate_type* y) const;
     void rewind(unsigned) const;
     geometry_types type() const;
+    // After the SEG_MOVETO: when pass(x, y) holds for each of the vertices
+    // vertex() would return next, in order, passes over all of them and
+    // returns true; otherwise leaves them and returns false.
+    template<typename Pass>
+    bool skip_rest_if(Pass&& pass) const
+    {
+        if (current_index_ == 0 || current_index_ >= end_index_)
+        {
+            return false;
+        }
+        for (std::size_t i = current_index_; i < end_index_; ++i)
+        {
+            if (!pass(line_[i].x, line_[i].y))
+            {
+                return false;
+            }
+        }
+        current_index_ = end_index_;
+        return true;
+    }
     line_string<T> const& line_;
     mutable std::size_t current_index_;
     std::size_t const end_index_;
@@ -63,6 +83,32 @@ struct polygon_vertex_adapter
     void rewind(unsigned) const;
     unsigned vertex(coordinate_type* x, coordinate_type* y) const;
     geometry_types type() const;
+    // After a ring's SEG_MOVETO: when pass(x, y) holds for each of the ring's
+    // vertices that vertex() would return next and then for its first point
+    // (where the SEG_CLOSE closes it to), in order, passes over the rest of
+    // the ring and returns true; otherwise leaves it and returns false.
+    template<typename Pass>
+    bool skip_rest_if(Pass&& pass) const
+    {
+        if (rings_itr_ == rings_end_ || start_loop_ || current_index_ == 0 || current_index_ >= end_index_)
+        {
+            return false;
+        }
+        linear_ring<T> const& ring = poly_[rings_itr_];
+        for (std::size_t i = current_index_; i + 1 < end_index_; ++i)
+        {
+            if (!pass(ring[i].x, ring[i].y))
+            {
+                return false;
+            }
+        }
+        if (!pass(ring[0].x, ring[0].y))
+        {
+            return false;
+        }
+        current_index_ = end_index_;
+        return true;
+    }
 
   private:
     polygon<T> const& poly_;

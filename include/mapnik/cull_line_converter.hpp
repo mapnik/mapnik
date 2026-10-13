@@ -98,6 +98,20 @@ class cull_line
                  std::max(a.y, b.y) < box_.miny() || std::min(a.y, b.y) > box_.maxy());
     }
 
+    // Passes over the rest of the subpath starting at first when none of its
+    // segments touches the box, testing them as they come from the source
+    // without storing them (when the source can, see mapnik's vertex adapters).
+    bool skip_far_rest(vertex_type const& first)
+    {
+        vertex_type prev = first;
+        return geom_.skip_rest_if([&](double x, double y) {
+            vertex_type const cur{x, y, agg::path_cmd_line_to};
+            bool const far = !touches(prev, cur);
+            prev = cur;
+            return far;
+        });
+    }
+
     void read_path()
     {
         out_.clear();
@@ -118,6 +132,15 @@ class cull_line
                 return;
             }
             path_.push_back(v);
+        }
+        if constexpr (requires { geom_.skip_rest_if([](double, double) { return true; }); })
+        {
+            if (agg::is_move_to(path_[0].cmd) && skip_far_rest(path_[0]))
+            {
+                // no segment of the subpath touches the box: culling drops all of it
+                path_.clear();
+                return;
+            }
         }
         for (;;)
         {

@@ -194,7 +194,9 @@ struct offset_converter
     // including the closing segment of each ring, comes within
     // 16 * |offset| + 2 of the box. Anything unusual (non-finite or huge
     // coordinates, other commands) counts as near. The vertices read are kept
-    // for source_vertex().
+    // for source_vertex(), but for the rest of a subpath that starts far, which
+    // a source that can (see mapnik's vertex adapters) passes over in one scan;
+    // when the path comes near after that, it is read again from the start.
     bool far_from_cull_box()
     {
         double const reach = 16.0 * std::abs(offset_) + 2.0;
@@ -208,6 +210,7 @@ struct offset_converter
         };
         bool far = std::abs(offset_) < 1e6;
         bool open = false;
+        bool passed_over = false; // vertices left out of scanned_
         double start_x = 0.0, start_y = 0.0, prev_x = 0.0, prev_y = 0.0;
         while (far)
         {
@@ -228,6 +231,25 @@ struct offset_converter
                 start_x = prev_x = x;
                 start_y = prev_y = y;
                 open = true;
+                if constexpr (requires { geom_.skip_rest_if([](double, double) { return true; }); })
+                {
+                    // the rest of the subpath (and a ring's closing segment) in one scan, not kept: if any
+                    // of it comes near, the source is read again from the start
+                    if (far)
+                    {
+                        far = geom_.skip_rest_if([&](double px, double py) {
+                            if (!(std::abs(px) < 1e15 && std::abs(py) < 1e15) || touches(prev_x, prev_y, px, py))
+                            {
+                                return false;
+                            }
+                            prev_x = px;
+                            prev_y = py;
+                            return true;
+                        });
+                        passed_over = passed_over || far;
+                        open = false;
+                    }
+                }
             }
             else if (cmd == SEG_LINETO && open)
             {
@@ -244,6 +266,12 @@ struct offset_converter
             {
                 far = false;
             }
+        }
+        if (!far && passed_over)
+        {
+            // what was passed over is offset after all: read it all again
+            geom_.rewind(0);
+            scanned_.clear();
         }
         return far;
     }
