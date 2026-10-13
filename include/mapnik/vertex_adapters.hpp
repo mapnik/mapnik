@@ -48,6 +48,27 @@ struct line_string_vertex_adapter
     using coordinate_type = T;
     line_string_vertex_adapter(line_string<T> const& line);
     unsigned vertex(coordinate_type* x, coordinate_type* y) const;
+    // Passes over the vertices that vertex() would return next as SEG_LINETO
+    // for as long as pass(x, y) holds for them; returns how many, the last of
+    // them in *x and *y.
+    template<typename Pass>
+    std::size_t skip_line_to(Pass&& pass, coordinate_type* x, coordinate_type* y) const
+    {
+        std::size_t n = 0;
+        while (current_index_ > 0 && current_index_ < end_index_)
+        {
+            point<T> const& coord = line_[current_index_];
+            if (!pass(coord.x, coord.y))
+            {
+                break;
+            }
+            *x = coord.x;
+            *y = coord.y;
+            ++current_index_;
+            ++n;
+        }
+        return n;
+    }
     void rewind(unsigned) const;
     geometry_types type() const;
     // After the SEG_MOVETO: when pass(x, y) holds for each of the vertices
@@ -82,6 +103,32 @@ struct polygon_vertex_adapter
     polygon_vertex_adapter(polygon<T> const& poly);
     void rewind(unsigned) const;
     unsigned vertex(coordinate_type* x, coordinate_type* y) const;
+    // Passes over the vertices that vertex() would return next as SEG_LINETO
+    // for as long as pass(x, y) holds for them; returns how many, the last of
+    // them in *x and *y. (The last point of a ring is returned as SEG_CLOSE.)
+    template<typename Pass>
+    std::size_t skip_line_to(Pass&& pass, coordinate_type* x, coordinate_type* y) const
+    {
+        std::size_t n = 0;
+        if (rings_itr_ == rings_end_ || start_loop_)
+        {
+            return n;
+        }
+        linear_ring<T> const& ring = poly_[rings_itr_];
+        while (current_index_ > 0 && current_index_ + 1 < end_index_)
+        {
+            point<T> const& coord = ring[current_index_];
+            if (!pass(coord.x, coord.y))
+            {
+                break;
+            }
+            *x = coord.x;
+            *y = coord.y;
+            ++current_index_;
+            ++n;
+        }
+        return n;
+    }
     geometry_types type() const;
     // After a ring's SEG_MOVETO: when pass(x, y) holds for each of the ring's
     // vertices that vertex() would return next and then for its first point

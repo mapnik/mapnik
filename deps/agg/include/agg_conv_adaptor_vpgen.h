@@ -119,6 +119,10 @@ namespace agg
                 {
                     m_vpgen.line_to(tx, ty);
                     ++m_vertices;
+                    if constexpr (requires { m_vpgen.skip_beyond(*m_source); })
+                    {
+                        m_vertices += static_cast<int>(m_vpgen.skip_beyond(*m_source));
+                    }
                 }
             }
             else
