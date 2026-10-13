@@ -294,8 +294,16 @@ class hextree : private util::noncopyable
             int dist, newdist;
 
             // find closest match based on mean of r,g,b,a
-            auto pit = std::lower_bound(sorted_keys_.begin(), sorted_keys_.end(), mean_sort_key(c));
-            ind = pit - sorted_keys_.begin();
+            // std::lower_bound without branches (they mispredict half the time here)
+            std::uint64_t const key = mean_sort_key(c);
+            std::uint64_t const* base = sorted_keys_.data();
+            for (std::size_t n = sorted_keys_.size(); n > 1;)
+            {
+                std::size_t const half = n / 2;
+                base = (base[half] < key) ? base + half : base;
+                n -= half;
+            }
+            ind = static_cast<unsigned>(base - sorted_keys_.data()) + (*base < key);
             if (ind == sorted_pal_.size())
                 ind--;
             dr = sorted_pal_[ind].r - c.r;
