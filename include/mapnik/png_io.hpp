@@ -41,8 +41,10 @@ extern "C" {
 }
 #include <algorithm>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
 MAPNIK_DISABLE_WARNING_POP
 
 #define MAX_OCTREE_LEVELS 4
@@ -262,6 +264,128 @@ void reduce_1(T const&,
 }
 
 template<typename T>
+void write_png_chunk(T& file, char const* type, unsigned char const* data, std::size_t size)
+{
+    unsigned char head[8] = {static_cast<unsigned char>(size >> 24),
+                             static_cast<unsigned char>(size >> 16),
+                             static_cast<unsigned char>(size >> 8),
+                             static_cast<unsigned char>(size)};
+    std::memcpy(head + 4, type, 4);
+    file.write(reinterpret_cast<char const*>(head), 8);
+    if (size > 0)
+    {
+        file.write(reinterpret_cast<char const*>(data), size);
+    }
+    unsigned long crc = crc32(0L, head + 4, 4);
+    if (size > 0)
+    {
+        crc = crc32(crc, data, size);
+    }
+    unsigned char const tail[4] = {static_cast<unsigned char>(crc >> 24),
+                                   static_cast<unsigned char>(crc >> 16),
+                                   static_cast<unsigned char>(crc >> 8),
+                                   static_cast<unsigned char>(crc)};
+    file.write(reinterpret_cast<char const*>(tail), 4);
+}
+
+// The IDAT chunks of an unfiltered 8-bit image, then IEND, as libpng 1.6 writes them after
+// png_write_info(): the rows, each after a filter byte of 0, in one deflate stream with its zlib
+// settings (level and strategy from opts, 32 KB window shrunk for images under 16 KB, memory
+// level 8), cut into 32768-byte chunks, the first with libpng's optimization of the zlib header.
+// libpng feeds deflate one row at a time; this feeds it the whole image, which makes no
+// difference to zlib's output, and lets zlib-ng's medium strategy (levels 4-6) see past the row
+// ends: fewer, longer matches, in much less time.
+template<typename T>
+void write_png_rows(T& file, mapnik::image_gray8 const& image, unsigned width, unsigned height, png_options const& opts)
+{
+    std::size_t const row_size = std::size_t(width) + 1;
+    std::size_t const data_size = row_size * height;
+    std::vector<unsigned char> raw(data_size);
+    for (unsigned y = 0; y < height; ++y)
+    {
+        unsigned char* row = raw.data() + y * row_size;
+        row[0] = 0;
+        std::memcpy(row + 1, image.get_row(y), width);
+    }
+    int window_bits = 15;
+    if (data_size <= 16384)
+    {
+        unsigned half_window_size = 1u << (window_bits - 1);
+        while (data_size + 262 <= half_window_size)
+        {
+            half_window_size >>= 1;
+            --window_bits;
+        }
+    }
+    z_stream z;
+    std::memset(&z, 0, sizeof(z));
+    if (deflateInit2(&z, opts.compression, Z_DEFLATED, window_bits, 8, opts.strategy) != Z_OK)
+    {
+        throw std::runtime_error("deflateInit2 failed");
+    }
+    constexpr std::size_t chunk_size = 32768;
+    std::vector<unsigned char> chunk(chunk_size);
+    z.next_in = raw.data();
+    z.avail_in = static_cast<uInt>(data_size);
+    bool first = true;
+    auto const write_chunk = [&](std::size_t size) {
+        if (first && data_size <= 16384)
+        {
+            // libpng's optimize_cmf: a window no larger than the data in the zlib header
+            unsigned z_cmf = chunk[0];
+            if ((z_cmf & 0x0f) == 8 && (z_cmf & 0xf0) <= 0x70)
+            {
+                unsigned z_cinfo = z_cmf >> 4;
+                unsigned half_z_window_size = 1u << (z_cinfo + 7);
+                if (data_size <= half_z_window_size)
+                {
+                    do
+                    {
+                        half_z_window_size >>= 1;
+                        --z_cinfo;
+                    } while (z_cinfo > 0 && data_size <= half_z_window_size);
+                    z_cmf = (z_cmf & 0x0f) | (z_cinfo << 4);
+                    chunk[0] = static_cast<unsigned char>(z_cmf);
+                    unsigned tmp = chunk[1] & 0xe0;
+                    tmp += 0x1f - ((z_cmf << 8) + tmp) % 0x1f;
+                    chunk[1] = static_cast<unsigned char>(tmp);
+                }
+            }
+        }
+        first = false;
+        if (size > 0)
+        {
+            write_png_chunk(file, "IDAT", chunk.data(), size);
+        }
+    };
+    // the output buffer is kept across calls (like libpng's) until a chunk's worth is written
+    z.next_out = chunk.data();
+    z.avail_out = chunk_size;
+    for (;;)
+    {
+        int const ret = deflate(&z, z.avail_in > 0 ? Z_NO_FLUSH : Z_FINISH);
+        if (ret == Z_STREAM_END)
+        {
+            write_chunk(chunk_size - z.avail_out);
+            break;
+        }
+        if (ret != Z_OK)
+        {
+            deflateEnd(&z);
+            throw std::runtime_error("deflate failed");
+        }
+        if (z.avail_out == 0)
+        {
+            write_chunk(chunk_size);
+            z.next_out = chunk.data();
+            z.avail_out = chunk_size;
+        }
+    }
+    deflateEnd(&z);
+    write_png_chunk(file, "IEND", nullptr, 0);
+}
+
+template<typename T>
 void save_as_png(T& file,
                  std::vector<mapnik::rgb> const& palette,
                  mapnik::image_gray8 const& image,
@@ -338,6 +462,14 @@ void save_as_png(T& file,
     }
 
     png_write_info(png_ptr, info_ptr);
+    if (color_depth == 8 && opts.filters == PNG_FILTER_NONE)
+    {
+        // the rows deflated all at once (see write_png_rows), then IEND: what png_write_row
+        // and png_write_end would write
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        write_png_rows(file, image, width, height, opts);
+        return;
+    }
     for (unsigned i = 0; i < height; ++i)
     {
         png_write_row(png_ptr, const_cast<png_bytep>(image.get_row(i)));
