@@ -891,7 +891,9 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
         if (palette.size() > 16)
         {
             // >16 && <=256 colors -> write 8-bit color depth
-            image_gray8 reduced_image(width, height);
+            // every byte is written below
+            image_gray8 reduced_image(width, height, false);
+            std::uint8_t const* const reduced_end = reduced_image.bytes() + reduced_image.size();
             // the palette index of each color, found once
             std::vector<std::uint8_t> indexes(colors.size());
             for (std::size_t k = 0; k < colors.size(); ++k)
@@ -905,7 +907,19 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
                 unsigned x = 0;
                 while (x < width)
                 {
-                    std::fill(row_out + x, row_out + run->second, indexes[run->first]);
+                    std::uint8_t* const first = row_out + x;
+                    std::uint8_t* const last = row_out + run->second;
+                    std::uint8_t const index = indexes[run->first];
+                    if (last - first <= 8 && reduced_end - first >= 8)
+                    {
+                        // a short run in one store: the bytes past it are written again by the runs after it
+                        std::uint64_t const indices = index * 0x0101010101010101ULL;
+                        std::memcpy(first, &indices, sizeof(indices));
+                    }
+                    else
+                    {
+                        std::fill(first, last, index);
+                    }
                     x = run->second;
                     ++run;
                 }
