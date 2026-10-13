@@ -122,7 +122,9 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
     pixfmt_comp_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_)));
+    composite_mode_e const comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
+    blends_with(comp_op);
+    pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
     renderer_base renb(pixf);
 
     agg::trans_affine tr;

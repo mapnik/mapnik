@@ -265,6 +265,7 @@ void agg_renderer<T0, T1>::process(line_pattern_symbolizer const& sym,
     }
 
     std::shared_ptr<mapnik::marker const> marker = marker_cache::instance().find(filename, true);
+    blends_with(get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_));
     agg_renderer_process_visitor_l<buffer_type> visitor(common_,
                                                         buffers_.top().get(),
                                                         *ras_ptr,

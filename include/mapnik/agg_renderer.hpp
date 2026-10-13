@@ -226,6 +226,27 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0>
     void painted(bool painted);
     bool painted();
 
+    // Notes a compositing mode something is about to blend with: an opaque image stays opaque
+    // under most, and if it does under all of them, there is nothing to demultiply at the end.
+    inline void blends_with(composite_mode_e mode)
+    {
+        switch (mode)
+        {
+            case clear:
+            case src:
+            case src_in:
+            case dst_in:
+            case src_out:
+            case dst_out:
+            case dst_atop:
+            case _xor:
+                opaque_ = false;
+                break;
+            default:
+                break;
+        }
+    }
+
     inline eAttributeCollectionPolicy attribute_collection_policy() const { return DEFAULT; }
 
     inline double scale_factor() const { return common_.scale_factor_; }
@@ -245,6 +266,8 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0>
     std::unique_ptr<rasterizer> const ras_ptr;
     gamma_method_enum gamma_method_;
     double gamma_;
+    // every pixel of the map has been opaque since the background was filled (see blends_with)
+    bool opaque_ = false;
     renderer_common common_;
     // the style being processed draws into a buffer of its own, composited when it ends
     bool composited_ = false;

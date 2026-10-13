@@ -281,12 +281,14 @@ void agg_renderer<T0, T1>::setup(Map const& m, buffer_type& pixmap)
             mapnik::color bg_color = *bg;
             bg_color.set_premultiplied(true);
             mapnik::fill(pixmap, bg_color);
+            opaque_ = true;
         }
     }
 
     auto&& image_filename = m.background_image();
     if (image_filename)
     {
+        opaque_ = false;
         // NOTE: marker_cache returns premultiplied image, if needed
         std::shared_ptr<mapnik::marker const> bg_marker = mapnik::marker_cache::instance().find(*image_filename, true);
         setup_agg_bg_visitor<buffer_type> visitor(pixmap,
@@ -312,7 +314,15 @@ void agg_renderer<T0, T1>::start_map_processing(Map const& map)
 template<typename T0, typename T1>
 void agg_renderer<T0, T1>::end_map_processing(Map const& map)
 {
-    mapnik::demultiply_alpha(buffers_.top().get());
+    if (opaque_)
+    {
+        // demultiplying leaves opaque pixels as they are
+        mapnik::set_premultiplied_alpha(buffers_.top().get(), false);
+    }
+    else
+    {
+        mapnik::demultiply_alpha(buffers_.top().get());
+    }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
 
@@ -360,6 +370,7 @@ void agg_renderer<T0, T1>::end_layer_processing(layer const& lyr)
     if (&current_buffer != &previous_buffer)
     {
         composite_mode_e comp_op = lyr.comp_op() ? *lyr.comp_op() : src_over;
+        blends_with(comp_op);
         composite(previous_buffer, current_buffer, comp_op, lyr.get_opacity(), 0, 0);
         // A parent layer may contain only pixels composited from its children.
         previous_buffer.painted(previous_buffer.painted() || current_buffer.painted());
@@ -463,6 +474,10 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
     buffer_type& previous_buffer = buffers_.top().get();
     if (&current_buffer != &previous_buffer)
     {
+        if (st.comp_op())
+        {
+            blends_with(*st.comp_op());
+        }
         bool const transparent_is_identity = !st.comp_op() || *st.comp_op() == src_over || *st.comp_op() == darken;
         bool const skip_empty = !current_buffer.painted() && st.image_filters().empty() && transparent_is_identity;
         if (!skip_empty)
@@ -538,6 +553,7 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
     if (st.direct_image_filters().size() > 0)
     {
         // apply any 'direct' image filters
+        opaque_ = false;
         mapnik::filter::filter_visitor<buffer_type> visitor(previous_buffer, common_.scale_factor_);
         for (mapnik::filter::filter_type const& filter_tag : st.direct_image_filters())
         {

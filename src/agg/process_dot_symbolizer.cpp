@@ -138,8 +138,9 @@ void agg_renderer<T0, T1>::process(dot_symbolizer const& sym,
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
     using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
     pixfmt_comp_type pixf(buf);
-    pixf.comp_op(
-      static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
+    composite_mode_e const comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+    blends_with(comp_op);
+    pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
     renderer_base renb(pixf);
     renderer_type ren(renb);
 
