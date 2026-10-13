@@ -119,12 +119,6 @@ struct agg_renderer_process_visitor_p
         pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym_, feature_, common_.vars_)));
         pattern_type::renderer_base renb(pixf);
 
-        unsigned w = image.width();
-        unsigned h = image.height();
-        agg::rendering_buffer pattern_rbuf((agg::int8u*)image.bytes(), w, h, w * 4);
-        agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
-        pattern_type::img_source_type img_src(pixf_pattern);
-
         if (prj_trans_.equal() && pattern.clip_)
             pattern.converter_.set<clip_poly_tag>();
         else

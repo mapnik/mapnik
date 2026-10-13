@@ -47,7 +47,55 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_conv_clip_polygon.h"
 MAPNIK_DISABLE_WARNING_POP
 
+// stl
+#include <algorithm>
+#include <cstring>
+
 namespace mapnik {
+
+// What agg::span_pattern_rgba over agg::image_accessor_wrap with agg::wrap_mode_repeat generates, copied from
+// the pattern's rows a run at a time: agg's copies a pixel at a time, a byte per channel, and those stores may
+// alias the accessor, so it reloads and steps the wrap-around state for every pixel. (The pattern's channels
+// are in the order of agg::rgba8's.)
+class span_pattern_rgba_repeat
+{
+    static_assert(sizeof(agg::rgba8) == 4 && agg::pixfmt_rgba32_pre::pix_width == 4);
+
+  public:
+    span_pattern_rgba_repeat(agg::pixfmt_rgba32_pre const& pattern, unsigned offset_x, unsigned offset_y)
+        : pattern_(pattern),
+          wrap_x_(pattern.width()),
+          wrap_y_(pattern.height()),
+          offset_x_(offset_x),
+          offset_y_(offset_y)
+    {}
+
+    void prepare() {}
+
+    void generate(agg::rgba8* span, int x, int y, unsigned len)
+    {
+        x += offset_x_;
+        y += offset_y_;
+        agg::int8u const* row = pattern_.row_ptr(wrap_y_(y));
+        unsigned const width = pattern_.width();
+        unsigned column = wrap_x_(x);
+        while (len > 0)
+        {
+            unsigned const n = std::min(len, width - column);
+            std::memcpy(span, row + column * sizeof(agg::rgba8), n * sizeof(agg::rgba8));
+            span += n;
+            len -= n;
+            column = 0;
+        }
+    }
+
+  private:
+    agg::pixfmt_rgba32_pre const& pattern_;
+    agg::wrap_mode_repeat wrap_x_;
+    agg::wrap_mode_repeat wrap_y_;
+    unsigned const offset_x_;
+    unsigned const offset_y_;
+};
 
 struct agg_pattern_base
 {
@@ -76,10 +124,7 @@ struct agg_polygon_pattern : agg_pattern_base
     using order_type = agg::order_rgba;
     using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>;
     using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
-    using wrap_x_type = agg::wrap_mode_repeat;
-    using wrap_y_type = agg::wrap_mode_repeat;
-    using img_source_type = agg::image_accessor_wrap<agg::pixfmt_rgba32_pre, wrap_x_type, wrap_y_type>;
-    using span_gen_type = agg::span_pattern_rgba<img_source_type>;
+    using span_gen_type = span_pattern_rgba_repeat;
     using renderer_base = agg::renderer_base<pixfmt_type>;
     using renderer_type =
       agg::renderer_scanline_aa_alpha<renderer_base, agg::span_allocator<agg::rgba8>, span_gen_type>;
@@ -114,8 +159,7 @@ struct agg_polygon_pattern : agg_pattern_base
                                            pattern_img_.height(),
                                            pattern_img_.width() * 4);
         agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
-        img_source_type img_src(pixf_pattern);
-        span_gen_type sg(img_src, safe_cast<unsigned>(offset.x), safe_cast<unsigned>(offset.y));
+        span_gen_type sg(pixf_pattern, safe_cast<unsigned>(offset.x), safe_cast<unsigned>(offset.y));
 
         agg::span_allocator<agg::rgba8> sa;
         value_double opacity = get<double, keys::opacity>(sym_, feature_, common_.vars_);
