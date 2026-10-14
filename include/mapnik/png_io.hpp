@@ -750,7 +750,7 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
             std::vector<std::uint8_t> indexes(colors.size());
             for (std::size_t k = 0; k < colors.size(); ++k)
             {
-                indexes[k] = static_cast<std::uint8_t>(tree.quantize(colors[k]));
+                indexes[k] = static_cast<std::uint8_t>(tree.quantize_once(colors[k]));
             }
             auto run = runs.cbegin();
             for (unsigned y = 0; y < height; ++y)

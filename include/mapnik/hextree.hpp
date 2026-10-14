@@ -30,6 +30,9 @@
 
 // stl
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <new>
 #include <type_traits>
 #include <vector>
@@ -54,12 +57,6 @@ struct RGBAPolicy
 template<typename T, typename InsertPolicy = RGBAPolicy>
 class hextree : private util::noncopyable
 {
-#ifdef USE_DENSE_HASH_MAP
-    using color_hash_table = google::dense_hash_map<unsigned int, std::uint16_t>;
-#else
-    using color_hash_table = std::unordered_map<unsigned int, std::uint16_t>;
-#endif
-
     struct node
     {
         node()
@@ -144,13 +141,23 @@ class hextree : private util::noncopyable
     bool has_holes_;
     node_pool node_pool_;
     node* const root_;
+    // leaves (colors at the tree's resolution) when the palette was created
+    std::size_t leaf_colors_ = 0;
     // working palette for quantization, sorted on mean(r,g,b,a) for easier searching NN
     std::vector<rgba> sorted_pal_;
     std::vector<std::uint64_t> sorted_keys_;
     // index remaping of sorted_pal_ indexes to indexes of returned image palette
     std::vector<unsigned> pal_remap_;
-    // rgba hashtable for quantization
-    mutable color_hash_table color_hashmap_;
+    // the colors quantized so far and their indexes in the returned palette (color 0, which is not cached,
+    // marks an empty entry): open addressing, sized for the tree's leaves and grown if more colors come
+    struct qentry
+    {
+        std::uint32_t color;
+        std::uint32_t index;
+    };
+    mutable std::vector<qentry> qcache_;
+    mutable std::size_t qcount_ = 0;
+    mutable unsigned qbits_ = 0;
     // gamma correction to prioritize dark colors (>1.0)
     double gamma_;
     // look up table for gamma correction
@@ -167,15 +174,9 @@ class hextree : private util::noncopyable
           colors_(0),
           has_holes_(false),
           root_(node_pool_.create()),
-#ifdef USE_DENSE_HASH_MAP
-          color_hashmap_(2048),
-#endif
           trans_mode_(FULL_TRANSPARENCY)
     {
         setGamma(g);
-#ifdef USE_DENSE_HASH_MAP
-        color_hashmap_.set_empty_key(0);
-#endif
     }
 
     ~hextree() {}
@@ -253,8 +254,29 @@ class hextree : private util::noncopyable
         }
     }
 
+    // quantize() without the cache, for callers that quantize each color once
+    int quantize_once(unsigned val) const { return quantize_uncached(val, nullptr); }
+
     // return color index in returned earlier palette
     int quantize(unsigned val) const
+    {
+        // the colors quantized before are cached, and most pixels repeat one: that lookup is
+        // what gets inlined into the callers' loops
+        if (val != 0 && colors_ > 1)
+        {
+            qentry& entry = qcache_find(val);
+            if (entry.color == val)
+            {
+                return static_cast<int>(entry.index);
+            }
+            return quantize_uncached(val, &entry);
+        }
+        return quantize_uncached(val, nullptr);
+    }
+
+  private:
+    // quantize() for a color not cached yet: cached, when given, is its entry to fill
+    __attribute__((noinline)) int quantize_uncached(unsigned val, qentry* cached) const
     {
         std::uint8_t a = preprocessAlpha(U2ALPHA(val));
         unsigned ind = 0;
@@ -265,17 +287,6 @@ class hextree : private util::noncopyable
         if (colors_ == 1)
         {
             return pal_remap_[has_holes_ ? 1 : 0];
-        }
-
-        std::uint16_t* cached = nullptr;
-        if (val != 0)
-        {
-            std::uint16_t& entry = color_hashmap_[val];
-            if (entry != 0)
-            {
-                return pal_remap_[entry - 1];
-            }
-            cached = &entry;
         }
         {
             rgba c(val);
@@ -333,13 +344,16 @@ class hextree : private util::noncopyable
             }
             if (cached)
             {
-                *cached = ind + 1;
+                cached->color = val;
+                cached->index = pal_remap_[ind];
+                qcache_added();
             }
         }
 
         return pal_remap_[ind];
     }
 
+  public:
     void create_palette(std::vector<rgba>& palette)
     {
         sorted_pal_.clear();
@@ -348,7 +362,10 @@ class hextree : private util::noncopyable
             max_colors_--;
             sorted_pal_.push_back(rgba(0, 0, 0, 0));
         }
+        leaf_colors_ = colors_;
         assign_node_colors();
+        // sized on the first quantize(): callers that quantize each color once don't need it
+        qcache_.clear();
 
         sorted_pal_.reserve(colors_);
         create_palette_rek(sorted_pal_, root_);
@@ -384,6 +401,52 @@ class hextree : private util::noncopyable
     }
 
   private:
+
+    void qcache_reset(std::size_t colors) const
+    {
+        qbits_ = 4;
+        while ((std::size_t(1) << qbits_) < 2 * colors)
+        {
+            ++qbits_;
+        }
+        qcache_.assign(std::size_t(1) << qbits_, qentry{0, 0});
+        qcount_ = 0;
+    }
+
+    // the entry of val, or the empty one where it goes
+    qentry& qcache_find(unsigned val) const
+    {
+        if (qcache_.empty())
+        {
+            qcache_reset(leaf_colors_);
+        }
+        std::size_t const mask = qcache_.size() - 1;
+        std::size_t i = static_cast<std::size_t>((std::uint64_t(val) * 0x9E3779B97F4A7C15ULL) >> (64 - qbits_));
+        while (qcache_[i].color != val && qcache_[i].color != 0)
+        {
+            i = (i + 1) & mask;
+        }
+        return qcache_[i];
+    }
+
+    void qcache_added() const
+    {
+        if (2 * ++qcount_ > qcache_.size())
+        {
+            std::vector<qentry> old;
+            old.swap(qcache_);
+            std::size_t const count = qcount_;
+            qcache_reset(count);
+            for (qentry const& e : old)
+            {
+                if (e.color != 0)
+                {
+                    qcache_find(e.color) = e;
+                }
+            }
+            qcount_ = count;
+        }
+    }
 
     void print_tree(node* r, int d = 0, int id = 0) const
     {
