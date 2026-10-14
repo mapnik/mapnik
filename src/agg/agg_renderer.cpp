@@ -606,7 +606,7 @@ struct agg_render_marker_visitor
             gamma_method_ = gamma_method_enum::GAMMA_POWER;
             gamma_ = 1.0;
         }
-        agg::scanline_u8 sl;
+        agg::scanline_u8& sl = ras_ptr_->scanline();
         agg::rendering_buffer buf(current_buffer_.bytes(),
                                   current_buffer_.width(),
                                   current_buffer_.height(),
@@ -652,7 +652,7 @@ struct agg_render_marker_visitor
             gamma_method_ = gamma_method_enum::GAMMA_POWER;
             gamma_ = 1.0;
         }
-        agg::scanline_u8 sl;
+        agg::scanline_u8& sl = ras_ptr_->scanline();
         agg::rendering_buffer buf(current_buffer_.bytes(),
                                   current_buffer_.width(),
                                   current_buffer_.height(),

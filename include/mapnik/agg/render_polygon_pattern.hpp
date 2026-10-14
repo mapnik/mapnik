@@ -169,8 +169,7 @@ struct agg_polygon_pattern : agg_pattern_base
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
         apply_vertex_converter_type apply(converter_, ras);
         mapnik::util::apply_visitor(vertex_processor_type(apply), feature_.get_geometry());
-        agg::scanline_u8 sl;
-        agg::render_scanlines(ras, sl, rp);
+        agg::render_scanlines(ras, ras.scanline(), rp);
     }
 
     bool const clip_;

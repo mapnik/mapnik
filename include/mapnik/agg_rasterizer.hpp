@@ -39,6 +39,7 @@
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rasterizer_scanline_aa.h"
+#include "agg_scanline_u.h"
 MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
@@ -125,6 +126,10 @@ struct rasterizer : agg::rasterizer_scanline_aa<agg::rasterizer_sl_clip_int_sat>
     }
     void clear_rows_eagerly() { lazy_clean_ = nullptr; }
 
+    // A scanline to render with, kept from one symbolizer to the next: one made for each would
+    // allocate its spans and covers again (resetting it for a render is all it needs).
+    agg::scanline_u8& scanline() { return scanline_; }
+
     // Whether rewind_scanlines() found cells since the last forget_rendered(), and the pixels
     // (inclusive) all of them lie within.
     bool rendered() const { return rendered_; }
@@ -175,6 +180,7 @@ struct rasterizer : agg::rasterizer_scanline_aa<agg::rasterizer_sl_clip_int_sat>
     }
 
     std::vector<std::pair<double, std::array<int, aa_scale>>> power_tables_;
+    agg::scanline_u8 scanline_;
     bool rendered_ = false;
     int rendered_x1_ = std::numeric_limits<int>::max();
     int rendered_y1_ = std::numeric_limits<int>::max();
