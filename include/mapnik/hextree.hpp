@@ -30,6 +30,7 @@
 
 // stl
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -165,7 +166,7 @@ class hextree : private util::noncopyable
     enum transparency_mode_t { NO_TRANSPARENCY = 0, BINARY_TRANSPARENCY = 1, FULL_TRANSPARENCY = 2 };
     unsigned trans_mode_;
 
-    inline double gamma(double b, double g) const { return 255 * std::pow(b / 255, g); }
+    static double gamma(double b, double g) { return 255 * std::pow(b / 255, g); }
 
   public:
     explicit hextree(unsigned max_colors = 256, double g = 2.0)
@@ -185,6 +186,20 @@ class hextree : private util::noncopyable
     void setGamma(double g)
     {
         gamma_ = g;
+        if (g == 2.0)
+        {
+            // the default: computed once (256 pow calls per tree otherwise)
+            static std::array<double, 256> const default_lut = [] {
+                std::array<double, 256> lut;
+                for (unsigned i = 0; i < 256; i++)
+                {
+                    lut[i] = gamma(i, 1 / 2.0);
+                }
+                return lut;
+            }();
+            std::copy(default_lut.begin(), default_lut.end(), gammaLUT_);
+            return;
+        }
         for (unsigned i = 0; i < 256; i++)
         {
             gammaLUT_[i] = gamma(i, 1 / gamma_);
