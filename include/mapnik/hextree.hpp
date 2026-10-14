@@ -209,6 +209,7 @@ class hextree : private util::noncopyable
         }
     }
 
+    // adds count pixels of a color (callers insert each color once, with all its pixels)
     void insert(T const& data, unsigned count = 1)
     {
         if (count == 0)
@@ -216,22 +217,24 @@ class hextree : private util::noncopyable
             return;
         }
         std::uint8_t a = preprocessAlpha(data.a);
-        unsigned level = 0;
-        node* cur_node = root_;
         if (a < InsertPolicy::MIN_ALPHA)
         {
             has_holes_ = true;
             return;
         }
-        while (true)
+        double const reds = count * gammaLUT_[data.r];
+        double const greens = count * gammaLUT_[data.g];
+        double const blues = count * gammaLUT_[data.b];
+        unsigned const alphas = count * a;
+        node* cur_node = root_;
+        for (unsigned level = 0;; ++level)
         {
             bool const new_color = cur_node->pixel_count == 0;
             cur_node->pixel_count += count;
-            cur_node->reds += count * gammaLUT_[data.r];
-            cur_node->greens += count * gammaLUT_[data.g];
-            cur_node->blues += count * gammaLUT_[data.b];
-            cur_node->alphas += count * a;
-
+            cur_node->reds += reds;
+            cur_node->greens += greens;
+            cur_node->blues += blues;
+            cur_node->alphas += alphas;
             if (level == InsertPolicy::MAX_LEVELS)
             {
                 if (new_color)
@@ -240,7 +243,6 @@ class hextree : private util::noncopyable
                 }
                 break;
             }
-
             unsigned idx = InsertPolicy::index_from_level(level, data);
             if (cur_node->children_[idx] == 0)
             {
@@ -248,7 +250,6 @@ class hextree : private util::noncopyable
                 cur_node->children_[idx] = node_pool_.create();
             }
             cur_node = cur_node->children_[idx];
-            ++level;
         }
     }
 

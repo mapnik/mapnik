@@ -660,8 +660,14 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
             tree.setGamma(opts.gamma);
         }
 
-        // runs of equal pixels, row by row (value, end): inserted into the tree now, quantized below
+        // runs of equal pixels, row by row (color number, end), and the colors in the order they first appear
+        // with their pixel counts: each color goes into the tree once, with all its pixels
         std::vector<std::pair<unsigned, unsigned>> runs;
+        std::vector<unsigned> colors;
+        std::vector<unsigned> counts;
+        // color -> color number + 1 (0: empty), open addressing at most half full
+        std::vector<std::pair<unsigned, unsigned>> table(std::size_t(1) << 12);
+        unsigned table_bits = 12;
         for (unsigned y = 0; y < height; ++y)
         {
             typename T2::pixel_type const* row = image.get_row(y);
@@ -674,10 +680,53 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
                 {
                     ++run_end;
                 }
-                tree.insert(mapnik::rgba(U2RED(val), U2GREEN(val), U2BLUE(val), U2ALPHA(val)), run_end - x);
-                runs.emplace_back(val, run_end);
+                std::size_t const mask = table.size() - 1;
+                std::size_t i = static_cast<std::size_t>((std::uint64_t(val) * 0x9E3779B97F4A7C15ULL) >> (64 - table_bits));
+                while (table[i].second != 0 && table[i].first != val)
+                {
+                    i = (i + 1) & mask;
+                }
+                unsigned number;
+                if (table[i].second == 0)
+                {
+                    number = static_cast<unsigned>(colors.size());
+                    colors.push_back(val);
+                    counts.push_back(0);
+                    table[i] = {val, number + 1};
+                    if (2 * colors.size() > table.size())
+                    {
+                        ++table_bits;
+                        std::vector<std::pair<unsigned, unsigned>> grown(std::size_t(1) << table_bits);
+                        std::size_t const grown_mask = grown.size() - 1;
+                        for (auto const& e : table)
+                        {
+                            if (e.second != 0)
+                            {
+                                std::size_t j = static_cast<std::size_t>(
+                                  (std::uint64_t(e.first) * 0x9E3779B97F4A7C15ULL) >> (64 - table_bits));
+                                while (grown[j].second != 0)
+                                {
+                                    j = (j + 1) & grown_mask;
+                                }
+                                grown[j] = e;
+                            }
+                        }
+                        table.swap(grown);
+                    }
+                }
+                else
+                {
+                    number = table[i].second - 1;
+                }
+                counts[number] += run_end - x;
+                runs.emplace_back(number, run_end);
                 x = run_end;
             }
+        }
+        for (std::size_t k = 0; k < colors.size(); ++k)
+        {
+            unsigned const val = colors[k];
+            tree.insert(mapnik::rgba(U2RED(val), U2GREEN(val), U2BLUE(val), U2ALPHA(val)), counts[k]);
         }
 
         // transparency values per palette index
@@ -697,6 +746,12 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
         {
             // >16 && <=256 colors -> write 8-bit color depth
             image_gray8 reduced_image(width, height);
+            // the palette index of each color, found once
+            std::vector<std::uint8_t> indexes(colors.size());
+            for (std::size_t k = 0; k < colors.size(); ++k)
+            {
+                indexes[k] = static_cast<std::uint8_t>(tree.quantize(colors[k]));
+            }
             auto run = runs.cbegin();
             for (unsigned y = 0; y < height; ++y)
             {
@@ -704,7 +759,7 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
                 unsigned x = 0;
                 while (x < width)
                 {
-                    std::fill(row_out + x, row_out + run->second, tree.quantize(run->first));
+                    std::fill(row_out + x, row_out + run->second, indexes[run->first]);
                     x = run->second;
                     ++run;
                 }
