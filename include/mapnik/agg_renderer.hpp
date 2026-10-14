@@ -213,7 +213,8 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0>
         }
         for (symbolizer const& sym : symbolizers)
         {
-            if (!sym.is<line_symbolizer>() && !sym.is<polygon_symbolizer>())
+            // polygon patterns, too, are drawn only through the rasterizer (their scanlines' spans)
+            if (!sym.is<line_symbolizer>() && !sym.is<polygon_symbolizer>() && !sym.is<polygon_pattern_symbolizer>())
             {
                 drew_otherwise();
                 break;
