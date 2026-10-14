@@ -152,6 +152,7 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
 
     if (rasterizer_e == line_rasterizer_enum::RASTERIZER_FAST)
     {
+        drew_otherwise(); // draws without ras_ptr
         using renderer_type = agg::renderer_outline_aa<renderer_base>;
         using rasterizer_type = agg::rasterizer_outline_aa<renderer_type>;
         agg::line_profile_aa profile(width * common_.scale_factor_, agg::gamma_power(gamma));
