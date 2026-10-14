@@ -34,7 +34,9 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
+#include <limits>
 #include <string>
+#include <utility>
 
 // agg
 // forward declare so that apps using mapnik do not need agg headers
@@ -71,13 +73,30 @@ class MAPNIK_DECL box2d : boost::equality_comparable<
 
   public:
 
-    box2d();
-    box2d(T minx, T miny, T maxx, T maxy);
-    box2d(coord<T, 2> const& c0, coord<T, 2> const& c1);
-    box2d(box2d_type const& rhs);
+    // the small members are defined here so that the collision detector's and the converters'
+    // loops can inline them
+    box2d()
+        : minx_(std::numeric_limits<T>::max()),
+          miny_(std::numeric_limits<T>::max()),
+          maxx_(-std::numeric_limits<T>::max()),
+          maxy_(-std::numeric_limits<T>::max())
+    {}
+    box2d(T minx, T miny, T maxx, T maxy) { init(minx, miny, maxx, maxy); }
+    box2d(coord<T, 2> const& c0, coord<T, 2> const& c1) { init(c0.x, c0.y, c1.x, c1.y); }
+    box2d(box2d_type const& rhs)
+        : minx_(rhs.minx_),
+          miny_(rhs.miny_),
+          maxx_(rhs.maxx_),
+          maxy_(rhs.maxy_)
+    {}
     box2d(box2d_type const& rhs, agg::trans_affine const& tr);
     // move
-    box2d(box2d_type&& rhs);
+    box2d(box2d_type&& rhs)
+        : minx_(std::move(rhs.minx_)),
+          miny_(std::move(rhs.miny_)),
+          maxx_(std::move(rhs.maxx_)),
+          maxy_(std::move(rhs.maxy_))
+    {}
     // converting ctor
     template<typename T1>
     explicit box2d(box2d<T1> other)
@@ -86,40 +105,104 @@ class MAPNIK_DECL box2d : boost::equality_comparable<
           maxx_(static_cast<value_type>(other.maxx())),
           maxy_(static_cast<value_type>(other.maxy()))
     {}
-    box2d_type& operator=(box2d_type other);
-    T minx() const;
-    T miny() const;
-    T maxx() const;
-    T maxy() const;
-    void set_minx(T v);
-    void set_miny(T v);
-    void set_maxx(T v);
-    void set_maxy(T v);
-    T width() const;
-    T height() const;
+    box2d_type& operator=(box2d_type other)
+    {
+        swap(*this, other);
+        return *this;
+    }
+    T minx() const { return minx_; }
+    T miny() const { return miny_; }
+    T maxx() const { return maxx_; }
+    T maxy() const { return maxy_; }
+    void set_minx(T v) { minx_ = v; }
+    void set_miny(T v) { miny_ = v; }
+    void set_maxx(T v) { maxx_ = v; }
+    void set_maxy(T v) { maxy_ = v; }
+    T width() const { return maxx_ - minx_; }
+    T height() const { return maxy_ - miny_; }
     void width(T w);
     void height(T h);
     coord<T, 2> center() const;
-    void expand_to_include(T x, T y);
-    void expand_to_include(coord<T, 2> const& c);
-    void expand_to_include(box2d_type const& other);
-    bool contains(coord<T, 2> const& c) const;
-    bool contains(T x, T y) const;
-    bool contains(box2d_type const& other) const;
-    bool intersects(coord<T, 2> const& c) const;
-    bool intersects(T x, T y) const;
-    bool intersects(box2d_type const& other) const;
+    void expand_to_include(T x, T y)
+    {
+        if (x < minx_)
+            minx_ = x;
+        if (x > maxx_)
+            maxx_ = x;
+        if (y < miny_)
+            miny_ = y;
+        if (y > maxy_)
+            maxy_ = y;
+    }
+    void expand_to_include(coord<T, 2> const& c) { expand_to_include(c.x, c.y); }
+    void expand_to_include(box2d_type const& other)
+    {
+        if (other.minx_ < minx_)
+            minx_ = other.minx_;
+        if (other.maxx_ > maxx_)
+            maxx_ = other.maxx_;
+        if (other.miny_ < miny_)
+            miny_ = other.miny_;
+        if (other.maxy_ > maxy_)
+            maxy_ = other.maxy_;
+    }
+    bool contains(coord<T, 2> const& c) const { return contains(c.x, c.y); }
+    bool contains(T x, T y) const { return x >= minx_ && x <= maxx_ && y >= miny_ && y <= maxy_; }
+    bool contains(box2d_type const& other) const
+    {
+        return other.minx_ >= minx_ && other.maxx_ <= maxx_ && other.miny_ >= miny_ && other.maxy_ <= maxy_;
+    }
+    bool intersects(coord<T, 2> const& c) const { return intersects(c.x, c.y); }
+    bool intersects(T x, T y) const { return !(x > maxx_ || x < minx_ || y > maxy_ || y < miny_); }
+    bool intersects(box2d_type const& other) const
+    {
+        return !(other.minx_ > maxx_ || other.maxx_ < minx_ || other.miny_ > maxy_ || other.maxy_ < miny_);
+    }
     box2d_type intersect(box2d_type const& other) const;
     bool operator==(box2d_type const& other) const;
     void re_center(T cx, T cy);
     void re_center(coord<T, 2> const& c);
-    void init(T x0, T y0, T x1, T y1);
-    void init(T x, T y);
+    void init(T x0, T y0, T x1, T y1)
+    {
+        if (x0 < x1)
+        {
+            minx_ = x0;
+            maxx_ = x1;
+        }
+        else
+        {
+            minx_ = x1;
+            maxx_ = x0;
+        }
+        if (y0 < y1)
+        {
+            miny_ = y0;
+            maxy_ = y1;
+        }
+        else
+        {
+            miny_ = y1;
+            maxy_ = y0;
+        }
+    }
+    void init(T x, T y) { init(x, y, x, y); }
     void clip(box2d_type const& other);
-    void pad(T padding);
+    void pad(T padding)
+    {
+        minx_ -= padding;
+        miny_ -= padding;
+        maxx_ += padding;
+        maxy_ += padding;
+    }
     bool from_string(std::string const& str);
     bool valid() const;
-    void move(T x, T y);
+    void move(T x, T y)
+    {
+        minx_ += x;
+        maxx_ += x;
+        miny_ += y;
+        maxy_ += y;
+    }
     std::string to_string() const;
     T area() const;
 
