@@ -122,6 +122,39 @@ class collision_grid : util::noncopyable
 
     query_iterator query_end() { return query_result_.end(); }
 
+    // whether pred holds for an item query_in_box(box) would return (stops at the first)
+    template<typename Pred>
+    bool any_in_box(box2d<double> const& box, Pred const& pred)
+    {
+        cell_range range;
+        if (!get_cell_range(box, range))
+            return false;
+
+        if (++query_generation_ == 0)
+        {
+            std::fill(seen_.begin(), seen_.end(), 0);
+            query_generation_ = 1;
+        }
+        for (std::size_t y = range.min_y; y <= range.max_y; ++y)
+        {
+            for (std::size_t x = range.min_x; x <= range.max_x; ++x)
+            {
+                for (item_index index : cells_[y * columns_ + x])
+                {
+                    if (seen_[index] != query_generation_)
+                    {
+                        seen_[index] = query_generation_;
+                        if (pred(items_[index]))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     void clear()
     {
         query_result_.clear();
@@ -294,16 +327,7 @@ class label_collision_detector4 : util::noncopyable
 
     bool has_placement(box2d<double> const& box)
     {
-        tree_t::query_iterator tree_itr = tree_.query_in_box(box);
-        tree_t::query_iterator tree_end = tree_.query_end();
-
-        for (; tree_itr != tree_end; ++tree_itr)
-        {
-            if (tree_itr->get().box.intersects(box))
-                return false;
-        }
-
-        return true;
+        return !tree_.any_in_box(box, [&box](label const& l) { return l.box.intersects(box); });
     }
 
     bool has_placement(box2d<double> const& box, double margin)
@@ -313,17 +337,7 @@ class label_collision_detector4 : util::noncopyable
              ? box2d<double>(box.minx() - margin, box.miny() - margin, box.maxx() + margin, box.maxy() + margin)
              : box);
 
-        tree_t::query_iterator tree_itr = tree_.query_in_box(margin_box);
-        tree_t::query_iterator tree_end = tree_.query_end();
-
-        for (; tree_itr != tree_end; ++tree_itr)
-        {
-            if (tree_itr->get().box.intersects(margin_box))
-            {
-                return false;
-            }
-        }
-        return true;
+        return !tree_.any_in_box(margin_box, [&margin_box](label const& l) { return l.box.intersects(margin_box); });
     }
 
     bool has_placement(box2d<double> const& box,
@@ -347,19 +361,9 @@ class label_collision_detector4 : util::noncopyable
              ? box2d<double>(box.minx() - margin, box.miny() - margin, box.maxx() + margin, box.maxy() + margin)
              : box);
 
-        tree_t::query_iterator tree_itr = tree_.query_in_box(repeat_box);
-        tree_t::query_iterator tree_end = tree_.query_end();
-
-        for (; tree_itr != tree_end; ++tree_itr)
-        {
-            if (tree_itr->get().box.intersects(margin_box) ||
-                (text == tree_itr->get().text && tree_itr->get().box.intersects(repeat_box)))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return !tree_.any_in_box(repeat_box, [&](label const& l) {
+            return l.box.intersects(margin_box) || (text == l.text && l.box.intersects(repeat_box));
+        });
     }
 
     void insert(box2d<double> const& box)

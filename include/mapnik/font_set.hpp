@@ -27,6 +27,7 @@
 #include <mapnik/config.hpp>
 
 // stl
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -51,7 +52,8 @@ class MAPNIK_DECL font_set
   private:
     friend void swap(font_set& lhs, font_set& rhs);
     std::string name_;
-    std::vector<std::string> face_names_;
+    // shared by copies (the text properties of every label carry a copy) until one adds a face
+    std::shared_ptr<std::vector<std::string>> face_names_;
 };
 } // namespace mapnik
 

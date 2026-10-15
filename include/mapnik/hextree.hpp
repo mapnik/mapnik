@@ -24,16 +24,20 @@
 #define MAPNIK_HEXTREE_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 // stl
 #include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <new>
 #include <type_traits>
 #include <vector>
-#include <set>
 #include <cmath>
 
 namespace mapnik {
@@ -54,12 +58,6 @@ struct RGBAPolicy
 template<typename T, typename InsertPolicy = RGBAPolicy>
 class hextree : private util::noncopyable
 {
-#ifdef USE_DENSE_HASH_MAP
-    using color_hash_table = google::dense_hash_map<unsigned int, std::uint16_t>;
-#else
-    using color_hash_table = std::unordered_map<unsigned int, std::uint16_t>;
-#endif
-
     struct node
     {
         node()
@@ -144,13 +142,23 @@ class hextree : private util::noncopyable
     bool has_holes_;
     node_pool node_pool_;
     node* const root_;
+    // leaves (colors at the tree's resolution) when the palette was created
+    std::size_t leaf_colors_ = 0;
     // working palette for quantization, sorted on mean(r,g,b,a) for easier searching NN
     std::vector<rgba> sorted_pal_;
     std::vector<std::uint64_t> sorted_keys_;
     // index remaping of sorted_pal_ indexes to indexes of returned image palette
     std::vector<unsigned> pal_remap_;
-    // rgba hashtable for quantization
-    mutable color_hash_table color_hashmap_;
+    // the colors quantized so far and their indexes in the returned palette (color 0, which is not cached,
+    // marks an empty entry): open addressing, sized for the tree's leaves and grown if more colors come
+    struct qentry
+    {
+        std::uint32_t color;
+        std::uint32_t index;
+    };
+    mutable std::vector<qentry> qcache_;
+    mutable std::size_t qcount_ = 0;
+    mutable unsigned qbits_ = 0;
     // gamma correction to prioritize dark colors (>1.0)
     double gamma_;
     // look up table for gamma correction
@@ -159,7 +167,7 @@ class hextree : private util::noncopyable
     enum transparency_mode_t { NO_TRANSPARENCY = 0, BINARY_TRANSPARENCY = 1, FULL_TRANSPARENCY = 2 };
     unsigned trans_mode_;
 
-    inline double gamma(double b, double g) const { return 255 * std::pow(b / 255, g); }
+    static double gamma(double b, double g) { return 255 * std::pow(b / 255, g); }
 
   public:
     explicit hextree(unsigned max_colors = 256, double g = 2.0)
@@ -167,15 +175,9 @@ class hextree : private util::noncopyable
           colors_(0),
           has_holes_(false),
           root_(node_pool_.create()),
-#ifdef USE_DENSE_HASH_MAP
-          color_hashmap_(2048),
-#endif
           trans_mode_(FULL_TRANSPARENCY)
     {
         setGamma(g);
-#ifdef USE_DENSE_HASH_MAP
-        color_hashmap_.set_empty_key(0);
-#endif
     }
 
     ~hextree() {}
@@ -185,6 +187,20 @@ class hextree : private util::noncopyable
     void setGamma(double g)
     {
         gamma_ = g;
+        if (g == 2.0)
+        {
+            // the default: computed once (256 pow calls per tree otherwise)
+            static std::array<double, 256> const default_lut = [] {
+                std::array<double, 256> lut;
+                for (unsigned i = 0; i < 256; i++)
+                {
+                    lut[i] = gamma(i, 1 / 2.0);
+                }
+                return lut;
+            }();
+            std::copy(default_lut.begin(), default_lut.end(), gammaLUT_);
+            return;
+        }
         for (unsigned i = 0; i < 256; i++)
         {
             gammaLUT_[i] = gamma(i, 1 / gamma_);
@@ -209,6 +225,7 @@ class hextree : private util::noncopyable
         }
     }
 
+    // adds count pixels of a color (callers insert each color once, with all its pixels)
     void insert(T const& data, unsigned count = 1)
     {
         if (count == 0)
@@ -216,22 +233,24 @@ class hextree : private util::noncopyable
             return;
         }
         std::uint8_t a = preprocessAlpha(data.a);
-        unsigned level = 0;
-        node* cur_node = root_;
         if (a < InsertPolicy::MIN_ALPHA)
         {
             has_holes_ = true;
             return;
         }
-        while (true)
+        double const reds = count * gammaLUT_[data.r];
+        double const greens = count * gammaLUT_[data.g];
+        double const blues = count * gammaLUT_[data.b];
+        unsigned const alphas = count * a;
+        node* cur_node = root_;
+        for (unsigned level = 0;; ++level)
         {
             bool const new_color = cur_node->pixel_count == 0;
             cur_node->pixel_count += count;
-            cur_node->reds += count * gammaLUT_[data.r];
-            cur_node->greens += count * gammaLUT_[data.g];
-            cur_node->blues += count * gammaLUT_[data.b];
-            cur_node->alphas += count * a;
-
+            cur_node->reds += reds;
+            cur_node->greens += greens;
+            cur_node->blues += blues;
+            cur_node->alphas += alphas;
             if (level == InsertPolicy::MAX_LEVELS)
             {
                 if (new_color)
@@ -240,7 +259,6 @@ class hextree : private util::noncopyable
                 }
                 break;
             }
-
             unsigned idx = InsertPolicy::index_from_level(level, data);
             if (cur_node->children_[idx] == 0)
             {
@@ -248,12 +266,32 @@ class hextree : private util::noncopyable
                 cur_node->children_[idx] = node_pool_.create();
             }
             cur_node = cur_node->children_[idx];
-            ++level;
         }
     }
 
+    // quantize() without the cache, for callers that quantize each color once
+    int quantize_once(unsigned val) const { return quantize_uncached(val, nullptr); }
+
     // return color index in returned earlier palette
     int quantize(unsigned val) const
+    {
+        // the colors quantized before are cached, and most pixels repeat one: that lookup is
+        // what gets inlined into the callers' loops
+        if (val != 0 && colors_ > 1)
+        {
+            qentry& entry = qcache_find(val);
+            if (entry.color == val)
+            {
+                return static_cast<int>(entry.index);
+            }
+            return quantize_uncached(val, &entry);
+        }
+        return quantize_uncached(val, nullptr);
+    }
+
+  private:
+    // quantize() for a color not cached yet: cached, when given, is its entry to fill
+    MAPNIK_NOINLINE int quantize_uncached(unsigned val, qentry* cached) const
     {
         std::uint8_t a = preprocessAlpha(U2ALPHA(val));
         unsigned ind = 0;
@@ -265,25 +303,22 @@ class hextree : private util::noncopyable
         {
             return pal_remap_[has_holes_ ? 1 : 0];
         }
-
-        std::uint16_t* cached = nullptr;
-        if (val != 0)
-        {
-            std::uint16_t& entry = color_hashmap_[val];
-            if (entry != 0)
-            {
-                return pal_remap_[entry - 1];
-            }
-            cached = &entry;
-        }
         {
             rgba c(val);
             int dr, dg, db, da;
             int dist, newdist;
 
             // find closest match based on mean of r,g,b,a
-            auto pit = std::lower_bound(sorted_keys_.begin(), sorted_keys_.end(), mean_sort_key(c));
-            ind = pit - sorted_keys_.begin();
+            // std::lower_bound without branches (they mispredict half the time here)
+            std::uint64_t const key = mean_sort_key(c);
+            std::uint64_t const* base = sorted_keys_.data();
+            for (std::size_t n = sorted_keys_.size(); n > 1;)
+            {
+                std::size_t const half = n / 2;
+                base = (base[half] < key) ? base + half : base;
+                n -= half;
+            }
+            ind = static_cast<unsigned>(base - sorted_keys_.data()) + (*base < key);
             if (ind == sorted_pal_.size())
                 ind--;
             dr = sorted_pal_[ind].r - c.r;
@@ -332,13 +367,16 @@ class hextree : private util::noncopyable
             }
             if (cached)
             {
-                *cached = ind + 1;
+                cached->color = val;
+                cached->index = pal_remap_[ind];
+                qcache_added();
             }
         }
 
         return pal_remap_[ind];
     }
 
+  public:
     void create_palette(std::vector<rgba>& palette)
     {
         sorted_pal_.clear();
@@ -347,7 +385,10 @@ class hextree : private util::noncopyable
             max_colors_--;
             sorted_pal_.push_back(rgba(0, 0, 0, 0));
         }
+        leaf_colors_ = colors_;
         assign_node_colors();
+        // sized on the first quantize(): callers that quantize each color once don't need it
+        qcache_.clear();
 
         sorted_pal_.reserve(colors_);
         create_palette_rek(sorted_pal_, root_);
@@ -383,6 +424,52 @@ class hextree : private util::noncopyable
     }
 
   private:
+
+    void qcache_reset(std::size_t colors) const
+    {
+        qbits_ = 4;
+        while ((std::size_t(1) << qbits_) < 2 * colors)
+        {
+            ++qbits_;
+        }
+        qcache_.assign(std::size_t(1) << qbits_, qentry{0, 0});
+        qcount_ = 0;
+    }
+
+    // the entry of val, or the empty one where it goes
+    qentry& qcache_find(unsigned val) const
+    {
+        if (qcache_.empty())
+        {
+            qcache_reset(leaf_colors_);
+        }
+        std::size_t const mask = qcache_.size() - 1;
+        std::size_t i = static_cast<std::size_t>((std::uint64_t(val) * 0x9E3779B97F4A7C15ULL) >> (64 - qbits_));
+        while (qcache_[i].color != val && qcache_[i].color != 0)
+        {
+            i = (i + 1) & mask;
+        }
+        return qcache_[i];
+    }
+
+    void qcache_added() const
+    {
+        if (2 * ++qcount_ > qcache_.size())
+        {
+            std::vector<qentry> old;
+            old.swap(qcache_);
+            std::size_t const count = qcount_;
+            qcache_reset(count);
+            for (qentry const& e : old)
+            {
+                if (e.color != 0)
+                {
+                    qcache_find(e.color) = e;
+                }
+            }
+            qcount_ = count;
+        }
+    }
 
     void print_tree(node* r, int d = 0, int id = 0) const
     {
@@ -429,6 +516,8 @@ class hextree : private util::noncopyable
     {
         if (itr->count != 0)
         {
+            // assign_node_colors colors a node's children only when it splits the node, which uncolors it:
+            // nothing below a colored node is colored
             unsigned count = itr->count;
             std::uint8_t a = std::uint8_t(itr->alphas / float(count));
             if (a > InsertPolicy::MAX_ALPHA)
@@ -439,6 +528,7 @@ class hextree : private util::noncopyable
                                    static_cast<std::uint8_t>(round(gamma(itr->greens / count, gamma_))),
                                    static_cast<std::uint8_t>(round(gamma(itr->blues / count, gamma_))),
                                    a));
+            return;
         }
         for (unsigned idx = 0; idx < 16; ++idx)
         {
@@ -496,13 +586,19 @@ class hextree : private util::noncopyable
         colors_ = 1;
         root_->count = root_->pixel_count;
 
-        std::set<node*, node_rev_cmp> colored_leaves_heap;
-        colored_leaves_heap.insert(root_);
+        // a max-heap on the reverse of node_rev_cmp: its top is the node a set ordered by node_rev_cmp would
+        // have first (a strict total order, and no node enters twice)
+        auto const heap_cmp = [](node const* lhs, node const* rhs) {
+            return node_rev_cmp()(rhs, lhs);
+        };
+        std::vector<node*> colored_leaves_heap;
+        colored_leaves_heap.push_back(root_);
         while ((!colored_leaves_heap.empty() && (colors_ < max_colors_) && (tries < 16)))
         {
             // select worst node to remove it from palette and replace with children
-            node* cur_node = *colored_leaves_heap.begin();
-            colored_leaves_heap.erase(colored_leaves_heap.begin());
+            std::pop_heap(colored_leaves_heap.begin(), colored_leaves_heap.end(), heap_cmp);
+            node* cur_node = colored_leaves_heap.back();
+            colored_leaves_heap.pop_back();
             if (((cur_node->children_count + colors_ - 1) > max_colors_))
             {
                 tries++;
@@ -521,7 +617,8 @@ class hextree : private util::noncopyable
                     {
                         node* n = cur_node->children_[idx];
                         n->count = n->pixel_count;
-                        colored_leaves_heap.insert(n);
+                        colored_leaves_heap.push_back(n);
+                        std::push_heap(colored_leaves_heap.begin(), colored_leaves_heap.end(), heap_cmp);
                         colors_++;
                     }
                 }

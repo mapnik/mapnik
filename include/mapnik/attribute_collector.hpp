@@ -58,7 +58,8 @@ struct expression_attributes
         : names_(names)
     {}
 
-    void operator()(attribute const& attr) const { names_.emplace(attr.name()); }
+    // insert looks the name up before it makes a node for it (emplace makes one first)
+    void operator()(attribute const& attr) const { names_.insert(attr.name()); }
 
     template<typename Tag>
     void operator()(binary_node<Tag> const& x) const

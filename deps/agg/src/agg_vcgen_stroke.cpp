@@ -23,6 +23,14 @@
 namespace agg
 {
 
+namespace
+{
+    // The vertices before and after vertex i of n, i < n: what vertex_sequence's prev() and
+    // next() return, without their remainder (a division) for every join.
+    inline unsigned prev_index(unsigned i, unsigned n) { return i == 0 ? n - 1 : i - 1; }
+    inline unsigned next_index(unsigned i, unsigned n) { return i + 1 == n ? 0 : i + 1; }
+}
+
 //------------------------------------------------------------------------
 vcgen_stroke::vcgen_stroke() :
     m_stroker(),
@@ -143,12 +151,17 @@ unsigned vcgen_stroke::vertex(double* x, double* y)
                     break;
                 }
             }
-            m_stroker.calc_join(m_out_vertices,
-                                m_src_vertices.prev(m_src_vertex),
-                                m_src_vertices.curr(m_src_vertex),
-                                m_src_vertices.next(m_src_vertex),
-                                m_src_vertices.prev(m_src_vertex).dist,
-                                m_src_vertices.curr(m_src_vertex).dist);
+            {
+                unsigned const n = m_src_vertices.size();
+                const vertex_dist& v0 = m_src_vertices[prev_index(m_src_vertex, n)];
+                const vertex_dist& v1 = m_src_vertices[m_src_vertex];
+                m_stroker.calc_join(m_out_vertices,
+                                    v0,
+                                    v1,
+                                    m_src_vertices[next_index(m_src_vertex, n)],
+                                    v0.dist,
+                                    v1.dist);
+            }
             ++m_src_vertex;
             m_prev_status = m_status;
             m_status = out_vertices;
@@ -168,12 +181,17 @@ unsigned vcgen_stroke::vertex(double* x, double* y)
             }
 
             --m_src_vertex;
-            m_stroker.calc_join(m_out_vertices,
-                                m_src_vertices.next(m_src_vertex),
-                                m_src_vertices.curr(m_src_vertex),
-                                m_src_vertices.prev(m_src_vertex),
-                                m_src_vertices.curr(m_src_vertex).dist,
-                                m_src_vertices.prev(m_src_vertex).dist);
+            {
+                unsigned const n = m_src_vertices.size();
+                const vertex_dist& v1 = m_src_vertices[m_src_vertex];
+                const vertex_dist& v2 = m_src_vertices[prev_index(m_src_vertex, n)];
+                m_stroker.calc_join(m_out_vertices,
+                                    m_src_vertices[next_index(m_src_vertex, n)],
+                                    v1,
+                                    v2,
+                                    v1.dist,
+                                    v2.dist);
+            }
 
             m_prev_status = m_status;
             m_status = out_vertices;

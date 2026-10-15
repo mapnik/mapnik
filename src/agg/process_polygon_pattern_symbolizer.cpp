@@ -110,7 +110,7 @@ struct agg_renderer_process_visitor_p
         }
 
         using vertex_converter_type =
-          vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
+          vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag, cull_poly_tag>;
         using pattern_type = agg_polygon_pattern<vertex_converter_type>;
 
         pattern_type pattern(image, common_, sym_, feature_, prj_trans_);
@@ -119,14 +119,10 @@ struct agg_renderer_process_visitor_p
         pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym_, feature_, common_.vars_)));
         pattern_type::renderer_base renb(pixf);
 
-        unsigned w = image.width();
-        unsigned h = image.height();
-        agg::rendering_buffer pattern_rbuf((agg::int8u*)image.bytes(), w, h, w * 4);
-        agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
-        pattern_type::img_source_type img_src(pixf_pattern);
-
         if (prj_trans_.equal() && pattern.clip_)
             pattern.converter_.set<clip_poly_tag>();
+        else
+            pattern.converter_.set<cull_poly_tag>();
 
         ras_ptr_->filling_rule(agg::fill_even_odd);
 
@@ -152,6 +148,7 @@ void agg_renderer<T0, T1>::process(polygon_pattern_symbolizer const& sym,
     if (filename.empty())
         return;
     std::shared_ptr<mapnik::marker const> marker = marker_cache::instance().find(filename, true);
+    blends_with(get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_));
     agg_renderer_process_visitor_p<buffer_type>
       visitor(common_, buffers_.top().get(), ras_ptr, gamma_method_, gamma_, sym, feature, prj_trans);
     util::apply_visitor(visitor, *marker);

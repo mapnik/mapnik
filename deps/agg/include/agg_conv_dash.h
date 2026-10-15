@@ -53,6 +53,11 @@ namespace agg
             base_type::generator().dash_start(ds); 
         }
 
+        void cull_box(double x1, double y1, double x2, double y2)
+        {
+            base_type::generator().cull_box(x1, y1, x2, y2);
+        }
+
         void shorten(double s) { base_type::generator().shorten(s); }
         double shorten() const { return base_type::generator().shorten(); }
 
