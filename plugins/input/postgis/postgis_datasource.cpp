@@ -44,6 +44,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <cfloat> // FLT_MAX
 #include <memory>
 #include <string>
+#include <string_view>
 #include <algorithm>
 #include <set>
 #include <sstream>
@@ -60,6 +61,11 @@ using mapnik::attribute_descriptor;
 using mapnik::sql_utils::identifier;
 using mapnik::sql_utils::literal;
 using std::shared_ptr;
+
+namespace {
+// the name of \w's class (word characters), one string for lookup_classname to read the range of
+constexpr std::string_view word_class_name = "w";
+} // namespace
 
 postgis_datasource::postgis_datasource(parameters const& params)
     : datasource(params),
@@ -90,7 +96,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       simplify_dp_ratio_(*params_.get<mapnik::value_double>("simplify_dp_ratio", 1.0 / 20.0)),
       simplify_dp_preserve_(false),
       simplify_clip_resolution_(*params_.get<mapnik::value_double>("simplify_clip_resolution", 0.0)),
-      word_class_(word_traits_.lookup_classname("w", "w" + 1)),
+      word_class_(word_traits_.lookup_classname(word_class_name.begin(), word_class_name.end())),
       // params below are for testing purposes only and may be removed at any time
       intersect_min_scale_(*params.get<mapnik::value_integer>("intersect_min_scale", 0)),
       intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0)),
@@ -532,7 +538,9 @@ std::string postgis_datasource::populate_tokens(std::string const& sql,
     // the leftmost match of the regex !(@?\w+)! (!mapnik_var! or !@user_var!),
     // scanned directly: the query text runs to kilobytes and is populated for
     // every layer of every render
-    auto const word = [this](char c) { return word_traits_.isctype(c, word_class_); };
+    auto const word = [this](char c) {
+        return word_traits_.isctype(c, word_class_);
+    };
     auto const next_token = [&](char const*& token, char const*& name_end) {
         for (char const* p = start; p != end; ++p)
         {

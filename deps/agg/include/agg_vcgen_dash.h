@@ -102,7 +102,7 @@ namespace agg
             }
         }
 
-        bool far(const vertex_dist& v1, const vertex_dist& v2) const;
+        bool is_far(const vertex_dist& v1, const vertex_dist& v2) const;
         void skip_periods();
 
         double             m_dashes[max_dashes];

@@ -69,7 +69,7 @@ void vcgen_dash::cull_box(double x1, double y1, double x2, double y2)
 // Whether the segment stays more than a pixel away from the cull box: the
 // points made along it can stray from it by rounding. Anything unusual
 // (non-finite or huge coordinates) counts as near.
-bool vcgen_dash::far(const vertex_dist& v1, const vertex_dist& v2) const
+bool vcgen_dash::is_far(const vertex_dist& v1, const vertex_dist& v2) const
 {
     if(!(std::fabs(v1.x) < 1e12 && std::fabs(v1.y) < 1e12 &&
          std::fabs(v2.x) < 1e12 && std::fabs(v2.y) < 1e12))
@@ -284,7 +284,7 @@ unsigned vcgen_dash::vertex(double* x, double* y)
             if(m_dash_start >= 0.0) calc_dash_start(m_dash_start);
             if(m_cull)
             {
-                m_far = far(*m_v1, *m_v2);
+                m_far = is_far(*m_v1, *m_v2);
                 if(m_far)
                 {
                     m_held.push_back(out_vertex{m_v1, m_v1, 0.0, true, path_cmd_move_to});
@@ -350,7 +350,7 @@ unsigned vcgen_dash::vertex(double* x, double* y)
                         m_v2 = &m_src_vertices[m_src_vertex];
                     }
                 }
-                if(m_cull && m_status != stop) m_far = far(*m_v1, *m_v2);
+                if(m_cull && m_status != stop) m_far = is_far(*m_v1, *m_v2);
             }
             if(m_cull)
             {

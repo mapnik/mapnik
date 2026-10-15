@@ -24,6 +24,7 @@
 #define MAPNIK_HEXTREE_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/util/noncopyable.hpp>
@@ -290,7 +291,7 @@ class hextree : private util::noncopyable
 
   private:
     // quantize() for a color not cached yet: cached, when given, is its entry to fill
-    __attribute__((noinline)) int quantize_uncached(unsigned val, qentry* cached) const
+    MAPNIK_NOINLINE int quantize_uncached(unsigned val, qentry* cached) const
     {
         std::uint8_t a = preprocessAlpha(U2ALPHA(val));
         unsigned ind = 0;
@@ -587,7 +588,9 @@ class hextree : private util::noncopyable
 
         // a max-heap on the reverse of node_rev_cmp: its top is the node a set ordered by node_rev_cmp would
         // have first (a strict total order, and no node enters twice)
-        auto const heap_cmp = [](node const* lhs, node const* rhs) { return node_rev_cmp()(rhs, lhs); };
+        auto const heap_cmp = [](node const* lhs, node const* rhs) {
+            return node_rev_cmp()(rhs, lhs);
+        };
         std::vector<node*> colored_leaves_heap;
         colored_leaves_heap.push_back(root_);
         while ((!colored_leaves_heap.empty() && (colors_ < max_colors_) && (tries < 16)))

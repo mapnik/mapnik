@@ -441,8 +441,7 @@ bool outside_image(FT_Glyph glyph, double margin, unsigned width, unsigned heigh
     FT_BBox cbox;
     FT_Outline_Get_CBox(&reinterpret_cast<FT_OutlineGlyph>(glyph)->outline, &cbox);
     double const m = margin * 64.0;
-    return cbox.xMax + m < 0.0 || cbox.xMin - m > width * 64.0 || cbox.yMax + m < 0.0 ||
-           cbox.yMin - m > height * 64.0;
+    return cbox.xMax + m < 0.0 || cbox.xMin - m > width * 64.0 || cbox.yMax + m < 0.0 || cbox.yMin - m > height * 64.0;
 }
 
 } // namespace

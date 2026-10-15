@@ -208,11 +208,11 @@ struct offset_converter
             return !(std::max(x0, x1) < minx || std::min(x0, x1) > maxx || std::max(y0, y1) < miny ||
                      std::min(y0, y1) > maxy);
         };
-        bool far = std::abs(offset_) < 1e6;
+        bool is_far = std::abs(offset_) < 1e6;
         bool open = false;
         bool passed_over = false; // vertices left out of scanned_
         double start_x = 0.0, start_y = 0.0, prev_x = 0.0, prev_y = 0.0;
-        while (far)
+        while (is_far)
         {
             double x, y;
             unsigned const cmd = geom_.vertex(&x, &y);
@@ -223,11 +223,11 @@ struct offset_converter
             scanned_.emplace_back(x, y, cmd);
             if (!(std::abs(x) < 1e15 && std::abs(y) < 1e15))
             {
-                far = false;
+                is_far = false;
             }
             else if (cmd == SEG_MOVETO)
             {
-                far = !touches(x, y, x, y);
+                is_far = !touches(x, y, x, y);
                 start_x = prev_x = x;
                 start_y = prev_y = y;
                 open = true;
@@ -235,9 +235,9 @@ struct offset_converter
                 {
                     // the rest of the subpath (and a ring's closing segment) in one scan, not kept: if any
                     // of it comes near, the source is read again from the start
-                    if (far)
+                    if (is_far)
                     {
-                        far = geom_.skip_rest_if([&](double px, double py) {
+                        is_far = geom_.skip_rest_if([&](double px, double py) {
                             if (!(std::abs(px) < 1e15 && std::abs(py) < 1e15) || touches(prev_x, prev_y, px, py))
                             {
                                 return false;
@@ -246,34 +246,34 @@ struct offset_converter
                             prev_y = py;
                             return true;
                         });
-                        passed_over = passed_over || far;
+                        passed_over = passed_over || is_far;
                         open = false;
                     }
                 }
             }
             else if (cmd == SEG_LINETO && open)
             {
-                far = !touches(prev_x, prev_y, x, y);
+                is_far = !touches(prev_x, prev_y, x, y);
                 prev_x = x;
                 prev_y = y;
             }
             else if (cmd == SEG_CLOSE && open)
             {
-                far = !touches(prev_x, prev_y, start_x, start_y);
+                is_far = !touches(prev_x, prev_y, start_x, start_y);
                 open = false;
             }
             else
             {
-                far = false;
+                is_far = false;
             }
         }
-        if (!far && passed_over)
+        if (!is_far && passed_over)
         {
             // what was passed over is offset after all: read it all again
             geom_.rewind(0);
             scanned_.clear();
         }
-        return far;
+        return is_far;
     }
 
     // The source, starting with the vertices far_from_cull_box() has read:

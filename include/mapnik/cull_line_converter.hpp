@@ -106,9 +106,9 @@ class cull_line
         vertex_type prev = first;
         return geom_.skip_rest_if([&](double x, double y) {
             vertex_type const cur{x, y, agg::path_cmd_line_to};
-            bool const far = !touches(prev, cur);
+            bool const is_far = !touches(prev, cur);
             prev = cur;
-            return far;
+            return is_far;
         });
     }
 

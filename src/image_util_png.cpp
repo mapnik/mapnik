@@ -378,7 +378,8 @@ void process_rgba8_png(T const& image, std::string const& t, std::ostream& strea
     }
     std::string key = t;
     key.push_back('\0');
-    for (std::uint32_t v : {color, static_cast<std::uint32_t>(image.width()), static_cast<std::uint32_t>(image.height())})
+    for (std::uint32_t v :
+         {color, static_cast<std::uint32_t>(image.width()), static_cast<std::uint32_t>(image.height())})
     {
         key.append(reinterpret_cast<char const*>(&v), sizeof(v));
     }

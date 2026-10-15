@@ -99,8 +99,9 @@ void nonzero_spans(image_rgba8 const& image, std::vector<row_span>& spans, int x
             continue;
         }
         int row_maxx = x1;
-        while (row_maxx - 8 >= x0 && (row[row_maxx - 1] | row[row_maxx - 2] | row[row_maxx - 3] | row[row_maxx - 4] |
-                                      row[row_maxx - 5] | row[row_maxx - 6] | row[row_maxx - 7] | row[row_maxx - 8]) == 0)
+        while (row_maxx - 8 >= x0 &&
+               (row[row_maxx - 1] | row[row_maxx - 2] | row[row_maxx - 3] | row[row_maxx - 4] | row[row_maxx - 5] |
+                row[row_maxx - 6] | row[row_maxx - 7] | row[row_maxx - 8]) == 0)
         {
             row_maxx -= 8;
         }

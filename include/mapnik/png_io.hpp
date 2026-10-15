@@ -831,7 +831,8 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
                     ++run_end;
                 }
                 std::size_t const mask = table.size() - 1;
-                std::size_t i = static_cast<std::size_t>((std::uint64_t(val) * 0x9E3779B97F4A7C15ULL) >> (64 - table_bits));
+                std::size_t i =
+                  static_cast<std::size_t>((std::uint64_t(val) * 0x9E3779B97F4A7C15ULL) >> (64 - table_bits));
                 while (table[i].second != 0 && table[i].first != val)
                 {
                     i = (i + 1) & mask;
