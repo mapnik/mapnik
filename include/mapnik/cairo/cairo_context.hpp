@@ -295,6 +295,7 @@ class cairo_context : private util::noncopyable
     void set_fill_rule(cairo_fill_rule_t fill_rule);
     void move_to(double x, double y);
     void curve_to(double ct1_x, double ct1_y, double ct2_x, double ct2_y, double end_x, double end_y);
+    void arc(double xc, double yc, double radius, double angle1, double angle2);
     void close_path();
     void line_to(double x, double y);
     void rectangle(double x, double y, double w, double h);
