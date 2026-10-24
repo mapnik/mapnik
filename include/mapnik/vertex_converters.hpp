@@ -37,7 +37,9 @@
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/extend_converter.hpp>
+#include <mapnik/cull_line_converter.hpp>
 #include <mapnik/adaptive_smooth.hpp>
+#include <mapnik/cull_poly_converter.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -55,6 +57,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <type_traits>
 #include <stdexcept>
 #include <array>
+#include <algorithm>
 #include <cmath>
 
 namespace mapnik {
@@ -64,6 +67,8 @@ struct transform_tag
 struct clip_line_tag
 {};
 struct clip_poly_tag
+{};
+struct cull_poly_tag
 {};
 struct smooth_tag
 {};
@@ -78,6 +83,8 @@ struct affine_transform_tag
 struct offset_transform_tag
 {};
 struct extend_tag
+{};
+struct cull_line_tag
 {};
 
 namespace detail {
@@ -163,6 +170,12 @@ struct converter_traits<T, mapnik::dash_tag>
                 geom.dash_start(dash_offset * scale_factor);
             }
         }
+        if (args.stroke_culled)
+        {
+            // what cull_line drops need not be dashed
+            box2d<double> const box = stroke_cull_box(args);
+            geom.cull_box(box.minx(), box.miny(), box.maxx(), box.maxy());
+        }
     }
 };
 
@@ -220,6 +233,45 @@ struct converter_traits<T, mapnik::stroke_tag>
     }
 };
 
+// The pixel area agg_renderer clips rasterization to: the view, grown on all
+// sides by twice the style offset while rendering into an inflated buffer.
+inline box2d<double> raster_clip_box(view_transform const& tr)
+{
+    double const inflate = 2.0 * tr.offset();
+    return box2d<double>(-inflate, -inflate, tr.width() + inflate, tr.height() + inflate);
+}
+
+// Everything that can be stroked into the area the rasterizer clips to: the
+// view padded by the furthest a join or cap reaches from its vertex (half
+// width times 1 + miter limit when a miter falls back to its limit), plus some
+// slack.
+template<typename Args>
+box2d<double> stroke_cull_box(Args const& args)
+{
+    auto const& sym = args.sym;
+    auto const& feat = args.feature;
+    auto const& vars = args.vars;
+    double const half_width =
+      0.5 * std::abs(get<value_double, keys::stroke_width>(sym, feat, vars) * args.scale_factor);
+    double const miterlimit = get<value_double, keys::stroke_miterlimit>(sym, feat, vars);
+    box2d<double> box = detail::raster_clip_box(args.tr);
+    box.pad(half_width * (2.0 + std::max(miterlimit, 1.5)) + 8.0);
+    return box;
+}
+
+template<typename T>
+struct converter_traits<T, mapnik::cull_line_tag>
+{
+    using geometry_type = T;
+    using conv_type = cull_line<geometry_type>;
+
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
+    {
+        geom.set_box(stroke_cull_box(args));
+    }
+};
+
 template<typename T>
 struct converter_traits<T, mapnik::clip_poly_tag>
 {
@@ -230,6 +282,25 @@ struct converter_traits<T, mapnik::clip_poly_tag>
     {
         auto const& box = args.bbox;
         geom.clip_box(box.minx(), box.miny(), box.maxx(), box.maxy());
+    }
+};
+
+template<typename T>
+struct converter_traits<T, mapnik::cull_poly_tag>
+{
+    using geometry_type = T;
+    using conv_type = cull_poly<geometry_type>;
+
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
+    {
+        // the pixel area agg_renderer clips rasterization to (the view, grown on
+        // all sides by twice the style offset while rendering into an inflated
+        // buffer); the extra pixels keep vertices that round onto its border
+        double const inflate = 2.0 * args.tr.offset();
+        box2d<double> box(-inflate, -inflate, args.tr.width() + inflate, args.tr.height() + inflate);
+        box.pad(2.0);
+        geom.set_box(box);
     }
 };
 
@@ -280,6 +351,11 @@ struct converter_traits<T, mapnik::offset_transform_tag>
         auto const& vars = args.vars;
         double offset = get<value_double, keys::offset>(sym, feat, vars);
         geom.set_offset(offset * args.scale_factor);
+        if (args.stroke_culled)
+        {
+            // what cull_line drops need not be offset
+            geom.cull_to(stroke_cull_box(args));
+        }
     }
 };
 
@@ -434,6 +510,8 @@ struct arguments : util::noncopyable
     feature_impl const& feature;
     attributes const& vars;
     double scale_factor;
+    // cull_line is set: the path is culled to the stroke's reach before stroking
+    bool stroke_culled = false;
 };
 
 } // namespace detail
@@ -473,12 +551,20 @@ struct vertex_converter : private util::noncopyable
     void set()
     {
         detail::converters_helper<dispatcher_type, ConverterTypes...>::template set<Converter>(disp_, 1);
+        if constexpr (std::is_same_v<Converter, cull_line_tag>)
+        {
+            disp_.args_.stroke_culled = true;
+        }
     }
 
     template<typename Converter>
     void unset()
     {
         detail::converters_helper<dispatcher_type, ConverterTypes...>::template set<Converter>(disp_, 0);
+        if constexpr (std::is_same_v<Converter, cull_line_tag>)
+        {
+            disp_.args_.stroke_culled = false;
+        }
     }
 
     dispatcher_type disp_;

@@ -122,7 +122,9 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
     pixfmt_comp_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_)));
+    composite_mode_e const comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
+    blends_with(comp_op);
+    pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
     renderer_base renb(pixf);
 
     agg::trans_affine tr;
@@ -152,6 +154,7 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
 
     if (rasterizer_e == line_rasterizer_enum::RASTERIZER_FAST)
     {
+        drew_otherwise(); // draws without ras_ptr
         using renderer_type = agg::renderer_outline_aa<renderer_base>;
         using rasterizer_type = agg::rasterizer_outline_aa<renderer_type>;
         agg::line_profile_aa profile(width * common_.scale_factor_, agg::gamma_power(gamma));
@@ -201,6 +204,7 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
                                                        smooth_tag,
                                                        offset_transform_tag,
                                                        dash_tag,
+                                                       cull_line_tag,
                                                        stroke_tag>;
         vertex_converter_type
           converter(clip_box, sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
@@ -222,7 +226,9 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
             converter.set<smooth_tag>(); // optional smooth converter
         if (has_key(sym, keys::stroke_dasharray))
             converter.set<dash_tag>();
-        converter.set<stroke_tag>(); // always stroke
+        if (!clip)
+            converter.set<cull_line_tag>(); // skip stroking what lies far outside
+        converter.set<stroke_tag>();        // always stroke
 
         using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer>;
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
@@ -232,9 +238,8 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
         using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
         renderer_type ren(renb);
         ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
-        agg::scanline_u8 sl;
         ras_ptr->filling_rule(agg::fill_non_zero);
-        agg::render_scanlines(*ras_ptr, sl, ren);
+        agg::render_scanlines(*ras_ptr, ras_ptr->scanline(), ren);
     }
 }
 

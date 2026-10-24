@@ -130,7 +130,9 @@ class postgis_datasource : public datasource
     mapnik::value_double simplify_dp_ratio_;
     bool simplify_dp_preserve_;
     mapnik::value_double simplify_clip_resolution_;
-    std::regex re_tokens_;
+    // what \w matches in a std::regex, for scanning query tokens
+    std::regex_traits<char> word_traits_;
+    std::regex_traits<char>::char_class_type word_class_;
     int intersect_min_scale_;
     int intersect_max_scale_;
     bool key_field_as_attribute_;

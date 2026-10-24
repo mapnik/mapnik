@@ -88,6 +88,7 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
         ras_ptr_->reset();
         buf_type render_buffer(buf_.bytes(), buf_.width(), buf_.height(), buf_.row_size());
         pixfmt_comp_type pixf(render_buffer);
+        ren_.blends_with(thunk.comp_op_);
         pixf.comp_op(static_cast<agg::comp_op_e>(thunk.comp_op_));
         renderer_base renb(pixf);
         svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(thunk.src_->source());
@@ -115,6 +116,7 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
         ras_ptr_->reset();
         buf_type render_buffer(buf_.bytes(), buf_.width(), buf_.height(), buf_.row_size());
         pixfmt_comp_type pixf(render_buffer);
+        ren_.blends_with(thunk.comp_op_);
         pixf.comp_op(static_cast<agg::comp_op_e>(thunk.comp_op_));
         renderer_base renb(pixf);
 
@@ -131,6 +133,7 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
 
     virtual void operator()(text_render_thunk const& thunk)
     {
+        ren_.blends_with(thunk.comp_op_);
         tex_.set_comp_op(thunk.comp_op_);
         tex_.set_halo_comp_op(thunk.comp_op_);
         tex_.set_halo_rasterizer(thunk.halo_rasterizer_);

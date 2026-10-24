@@ -43,8 +43,13 @@ extern "C" {
 #include <mapnik/util/conversions.hpp>
 
 // stl
-#include <string>
+#include <cstdint>
 #include <iostream>
+#include <memory>
+#include <mutex>
+#include <sstream>
+#include <string>
+#include <unordered_map>
 
 namespace mapnik {
 
@@ -262,27 +267,132 @@ void process_rgba8_png_pal(T const& image, std::string const& t, std::ostream& s
 #endif
 }
 
+#if defined(HAVE_PNG)
+namespace {
+
+// Encodings of single-color images: tiles of open water and other uniform
+// areas often are. The encoder only depends on the pixels and on the options
+// given by the type string, so the bytes are the same every time. Shared by
+// all threads; the lock is held only to look up or add an entry.
+class uniform_png_cache
+{
+  public:
+    template<typename T>
+    static bool uniform(T const& image, std::uint32_t& color)
+    {
+        std::size_t const width = image.width();
+        std::size_t const height = image.height();
+        if (width == 0 || height == 0)
+        {
+            return false;
+        }
+        color = image.get_row(0)[0];
+        for (std::size_t y = 0; y < height; ++y)
+        {
+            auto const* row = image.get_row(y);
+            std::uint32_t diff = 0;
+            std::size_t x = 0;
+            for (; x + 8 <= width; x += 8)
+            {
+                diff |= (row[x] ^ color) | (row[x + 1] ^ color) | (row[x + 2] ^ color) | (row[x + 3] ^ color) |
+                        (row[x + 4] ^ color) | (row[x + 5] ^ color) | (row[x + 6] ^ color) | (row[x + 7] ^ color);
+            }
+            for (; x < width; ++x)
+            {
+                diff |= row[x] ^ color;
+            }
+            if (diff != 0)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    std::shared_ptr<std::string const> find(std::string const& key)
+    {
+#ifdef MAPNIK_THREADSAFE
+        std::lock_guard<std::mutex> lock(mutex_);
+#endif
+        auto itr = entries_.find(key);
+        return itr == entries_.end() ? nullptr : itr->second;
+    }
+
+    void add(std::string key, std::shared_ptr<std::string const> png)
+    {
+#ifdef MAPNIK_THREADSAFE
+        std::lock_guard<std::mutex> lock(mutex_);
+#endif
+        if (entries_.size() >= max_entries)
+        {
+            entries_.clear();
+        }
+        entries_.emplace(std::move(key), std::move(png));
+    }
+
+  private:
+    static constexpr std::size_t max_entries = 256;
+#ifdef MAPNIK_THREADSAFE
+    std::mutex mutex_;
+#endif
+    std::unordered_map<std::string, std::shared_ptr<std::string const>> entries_;
+};
+
+uniform_png_cache& get_uniform_png_cache()
+{
+    static uniform_png_cache cache;
+    return cache;
+}
+
+} // namespace
+#endif // HAVE_PNG
+
 template<typename T>
 void process_rgba8_png(T const& image, std::string const& t, std::ostream& stream)
 {
 #if defined(HAVE_PNG)
-    png_options opts;
-    handle_png_options(t, opts);
-    if (opts.paletted)
-    {
-        if (opts.use_hextree)
+    auto encode = [&](std::ostream& out) {
+        png_options opts;
+        handle_png_options(t, opts);
+        if (opts.paletted)
         {
-            save_as_png8_hex(stream, image, opts);
+            if (opts.use_hextree)
+            {
+                save_as_png8_hex(out, image, opts);
+            }
+            else
+            {
+                save_as_png8_oct(out, image, opts);
+            }
         }
         else
         {
-            save_as_png8_oct(stream, image, opts);
+            save_as_png(out, image, opts);
         }
-    }
-    else
+    };
+    std::uint32_t color;
+    if (!uniform_png_cache::uniform(image, color))
     {
-        save_as_png(stream, image, opts);
+        encode(stream);
+        return;
     }
+    std::string key = t;
+    key.push_back('\0');
+    for (std::uint32_t v :
+         {color, static_cast<std::uint32_t>(image.width()), static_cast<std::uint32_t>(image.height())})
+    {
+        key.append(reinterpret_cast<char const*>(&v), sizeof(v));
+    }
+    uniform_png_cache& cache = get_uniform_png_cache();
+    std::shared_ptr<std::string const> png = cache.find(key);
+    if (!png)
+    {
+        std::ostringstream out(std::ios::out | std::ios::binary);
+        encode(out);
+        png = std::make_shared<std::string const>(std::move(out).str());
+        cache.add(std::move(key), png);
+    }
+    stream.write(png->data(), static_cast<std::streamsize>(png->size()));
 #else
     throw image_writer_exception("png output is not enabled in your build of Mapnik");
 #endif

@@ -58,6 +58,14 @@
 #  endif
 #endif
 // clang-format on
+
+// keeps a function out of line (a slow path, so that its callers' fast path is what gets inlined)
+#ifdef _MSC_VER
+#define MAPNIK_NOINLINE __declspec(noinline)
+#else
+#define MAPNIK_NOINLINE __attribute__((noinline))
+#endif
+
 #define PROJ_ENVELOPE_POINTS 20
 
 #endif // MAPNIK_CONFIG_HPP

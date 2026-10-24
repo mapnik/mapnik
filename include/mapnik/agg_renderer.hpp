@@ -37,8 +37,11 @@
 #include <mapnik/renderer_common.hpp>
 #include <mapnik/image_util.hpp>
 // stl
+#include <cstdint>
+#include <cstring>
 #include <memory>
 #include <stack>
+#include <vector>
 
 // fwd declaration to avoid dependence on agg headers
 namespace agg {
@@ -63,6 +66,9 @@ class image;
 
 namespace mapnik {
 
+// Buffers for styles and layers that are composited. A buffer starts out transparent only on the
+// rows that are clean: the others are cleared when a style first draws on them (the rasterizer
+// clears the rows it sweeps), or all at once by clean_top() before anything else reads or draws.
 template<typename T>
 class buffer_stack
 {
@@ -84,13 +90,14 @@ class buffer_stack
         else
         {
             --position_;
-            if (position_->painted())
+            if (position_->image.painted())
             {
-                mapnik::fill(*position_, 0); // fill with transparent colour
+                // cleared again as it is drawn on
+                std::fill(position_->clean.begin(), position_->clean.end(), 0);
             }
         }
-        position_->painted(false);
-        return *position_;
+        position_->image.painted(false);
+        return position_->image;
     }
     bool in_range() const { return (position_ != buffers_.end()); }
 
@@ -101,13 +108,40 @@ class buffer_stack
         ++position_;
     }
 
-    T& top() const { return *position_; }
+    T& top() const { return position_->image; }
+
+    // per row of top(), whether it is transparent
+    std::uint8_t* top_clean() const { return position_->clean.data(); }
+
+    // Makes every row of top() transparent.
+    void clean_top() const
+    {
+        T& image = position_->image;
+        std::uint8_t* clean = position_->clean.data();
+        for (std::size_t y = 0; y < image.height(); ++y)
+        {
+            if (!clean[y])
+            {
+                std::memset(image.bytes() + y * image.row_size(), 0, image.row_size());
+                clean[y] = 1;
+            }
+        }
+    }
 
   private:
+    struct entry
+    {
+        entry(std::size_t width, std::size_t height)
+            : image(width, height, false),
+              clean(height, 0)
+        {}
+        T image;
+        std::vector<std::uint8_t> clean;
+    };
     std::size_t const width_;
     std::size_t const height_;
-    std::deque<T> buffers_;
-    typename std::deque<T>::iterator position_;
+    std::deque<entry> buffers_;
+    typename std::deque<entry>::iterator position_;
 };
 
 template<typename T0, typename T1 = label_collision_detector4>
@@ -168,14 +202,51 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0>
     void process(debug_symbolizer const& sym, feature_impl& feature, proj_transform const& prj_trans);
     void process(dot_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
 
-    inline bool process(rule::symbolizers const&, mapnik::feature_impl&, proj_transform const&)
+    inline bool process(rule::symbolizers const& symbolizers, mapnik::feature_impl&, proj_transform const&)
     {
+        // Line and polygon symbolizers draw only through the rasterizer, which notes whether it
+        // rendered anything; the others may draw into the style's buffer in other ways.
+        if (!composited_ || drew_otherwise_)
+        {
+            // matters only for a composited style's buffer, until one has
+            return false;
+        }
+        for (symbolizer const& sym : symbolizers)
+        {
+            // polygon patterns, too, are drawn only through the rasterizer (their scanlines' spans)
+            if (!sym.is<line_symbolizer>() && !sym.is<polygon_symbolizer>() && !sym.is<polygon_pattern_symbolizer>())
+            {
+                drew_otherwise();
+                break;
+            }
+        }
         // agg renderer doesn't support processing of multiple symbolizers.
         return false;
     }
 
     void painted(bool painted);
     bool painted();
+
+    // Notes a compositing mode something is about to blend with: an opaque image stays opaque
+    // under most, and if it does under all of them, there is nothing to demultiply at the end.
+    inline void blends_with(composite_mode_e mode)
+    {
+        switch (mode)
+        {
+            case clear:
+            case src:
+            case src_in:
+            case dst_in:
+            case src_out:
+            case dst_out:
+            case dst_atop:
+            case _xor:
+                opaque_ = false;
+                break;
+            default:
+                break;
+        }
+    }
 
     inline eAttributeCollectionPolicy attribute_collection_policy() const { return DEFAULT; }
 
@@ -196,7 +267,17 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0>
     std::unique_ptr<rasterizer> const ras_ptr;
     gamma_method_enum gamma_method_;
     double gamma_;
+    // every pixel of the map has been opaque since the background was filled (see blends_with)
+    bool opaque_ = false;
     renderer_common common_;
+    // the style being processed draws into a buffer of its own, composited when it ends
+    bool composited_ = false;
+    // a symbolizer of the style being processed may have drawn other than through ras_ptr
+    bool drew_otherwise_ = false;
+    // the style's buffer is cleared row by row as ras_ptr sweeps it
+    bool lazy_rows_ = false;
+    // Notes that the style's symbolizers draw other than through ras_ptr, before they do.
+    void drew_otherwise();
     void setup(Map const& m, buffer_type& pixmap);
 };
 
