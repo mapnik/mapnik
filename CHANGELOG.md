@@ -6,6 +6,11 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Unreleased
+
+- Add ArcSymbolizer - draws an arc segment around a center point, with optional label text
+
+
 ## Mapnik 4.3.2
 
 Released September 23th, 2026

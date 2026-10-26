@@ -151,7 +151,20 @@ static property_meta_type const key_meta[const_max_key] = {
   property_meta_type{"line-pattern",
                      [](enumeration_wrapper e) { return line_pattern_e(line_pattern_enum(e.value)).as_string(); },
                      property_types::target_line_pattern},
-
+  property_meta_type{"radius", nullptr, property_types::target_double},
+  property_meta_type{"start-angle", nullptr, property_types::target_double},
+  property_meta_type{"end-angle", nullptr, property_types::target_double},
+  property_meta_type{"arc-stroke", nullptr, property_types::target_color},
+  property_meta_type{"arc-stroke-width", nullptr, property_types::target_double},
+  property_meta_type{"arc-stroke-opacity", nullptr, property_types::target_double},
+  property_meta_type{"arc-stroke-dasharray", nullptr, property_types::target_dash_array},
+  property_meta_type{"arc-stroke-dashoffset", nullptr, property_types::target_double},
+  property_meta_type{"radius-stroke", nullptr, property_types::target_color},
+  property_meta_type{"radius-stroke-width", nullptr, property_types::target_double},
+  property_meta_type{"radius-stroke-opacity", nullptr, property_types::target_double},
+  property_meta_type{"radius-stroke-dasharray", nullptr, property_types::target_dash_array},
+  property_meta_type{"radius-stroke-dashoffset", nullptr, property_types::target_double},
+  property_meta_type{"text-offset", nullptr, property_types::target_double},
 };
 
 property_meta_type const& get_meta(mapnik::keys key)

@@ -171,6 +171,7 @@ target_sources(mapnik PRIVATE
 )
 target_sources(mapnik PRIVATE
     agg/agg_renderer.cpp
+    agg/process_arc_symbolizer.cpp
     agg/process_building_symbolizer.cpp
     agg/process_debug_symbolizer.cpp
     agg/process_dot_symbolizer.cpp
@@ -201,6 +202,7 @@ target_sources(mapnik PRIVATE
 )
 
 target_sources(mapnik PRIVATE
+    renderer_common/arc_text_placement.cpp
     renderer_common/pattern_alignment.cpp
     renderer_common/render_group_symbolizer.cpp
     renderer_common/render_markers_symbolizer.cpp
@@ -263,6 +265,7 @@ if(USE_CAIRO)
         cairo/cairo_context.cpp
         cairo/cairo_render_vector.cpp
         cairo/cairo_renderer.cpp
+        cairo/process_arc_symbolizer.cpp
         cairo/process_building_symbolizer.cpp
         cairo/process_debug_symbolizer.cpp
         cairo/process_group_symbolizer.cpp
@@ -320,6 +323,7 @@ endif()
 
 if(USE_SVG_RENDERER)
     target_sources(mapnik PRIVATE
+        svg/output/process_arc_symbolizer.cpp
         svg/output/process_line_symbolizer.cpp
         svg/output/process_polygon_symbolizer.cpp
         svg/output/process_symbolizers.cpp

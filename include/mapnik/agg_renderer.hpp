@@ -167,6 +167,7 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0>
     void process(group_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
     void process(debug_symbolizer const& sym, feature_impl& feature, proj_transform const& prj_trans);
     void process(dot_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(arc_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
 
     inline bool process(rule::symbolizers const&, mapnik::feature_impl&, proj_transform const&)
     {

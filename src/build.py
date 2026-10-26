@@ -284,6 +284,7 @@ source = Split(
     config_error.cpp
     color_factory.cpp
     renderer_common.cpp
+    renderer_common/arc_text_placement.cpp
     renderer_common/render_group_symbolizer.cpp
     renderer_common/render_markers_symbolizer.cpp
     renderer_common/render_pattern.cpp
@@ -360,6 +361,7 @@ if env['HAS_CAIRO']:
     cairo/process_point_symbolizer.cpp
     cairo/process_raster_symbolizer.cpp
     cairo/process_building_symbolizer.cpp
+    cairo/process_arc_symbolizer.cpp
     """)
 
 for cpp in enabled_imaging_libraries:
@@ -369,6 +371,7 @@ for cpp in enabled_imaging_libraries:
 source += Split(
     """
     agg/agg_renderer.cpp
+    agg/process_arc_symbolizer.cpp
     agg/process_dot_symbolizer.cpp
     agg/process_building_symbolizer.cpp
     agg/process_line_symbolizer.cpp
@@ -423,6 +426,7 @@ if env['SVG_RENDERER']: # svg backend
     svg/output/svg_generator.cpp
     svg/output/svg_output_attributes.cpp
     svg/output/process_symbolizers.cpp
+    svg/output/process_arc_symbolizer.cpp
     svg/output/process_line_symbolizer.cpp
     svg/output/process_polygon_symbolizer.cpp
     """)

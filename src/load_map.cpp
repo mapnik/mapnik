@@ -44,6 +44,8 @@
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/text/placements/registry.hpp>
 #include <mapnik/text/placements/dummy.hpp>
+#include <mapnik/text/formatting/text.hpp>
+#include <mapnik/text/properties_util.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
@@ -127,6 +129,7 @@ class map_parser : util::noncopyable
     void parse_group_symbolizer(rule& rule, xml_node const& node);
     void parse_debug_symbolizer(rule& rule, xml_node const& node);
     void parse_dot_symbolizer(rule& rule, xml_node const& node);
+    void parse_arc_symbolizer(rule& rule, xml_node const& node);
     void parse_group_rule(group_symbolizer_properties& prop, xml_node const& node);
     void parse_simple_layout(group_symbolizer_properties& prop, xml_node const& node);
     void parse_pair_layout(group_symbolizer_properties& prop, xml_node const& node);
@@ -166,6 +169,7 @@ struct allow_overlap_visitor
     bool operator()(group_symbolizer const&) { return false; }
     bool operator()(debug_symbolizer const&) { return true; } // Requires the quadtree
     bool operator()(dot_symbolizer const&) { return false; }
+    bool operator()(arc_symbolizer const&) { return false; }
 };
 
 // If all symbolizers declare 'allow_overlap: true' (their placement is independent
@@ -1022,6 +1026,10 @@ void map_parser::parse_symbolizers(rule& rule, xml_node const& node)
                 parse_dot_symbolizer(rule, sym_node);
                 sym_node.set_processed(true);
                 break;
+            case "ArcSymbolizer"_case:
+                parse_arc_symbolizer(rule, sym_node);
+                sym_node.set_processed(true);
+                break;
 
             default:
                 break;
@@ -1090,6 +1098,95 @@ void map_parser::parse_dot_symbolizer(rule& rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base, double>(sym, keys::width, node);
         set_symbolizer_property<symbolizer_base, double>(sym, keys::height, node);
         set_symbolizer_property<symbolizer_base, composite_mode_e>(sym, keys::comp_op, node);
+        rule.append(std::move(sym));
+    }
+    catch (config_error const& ex)
+    {
+        ex.append_context(node);
+        throw;
+    }
+}
+
+void map_parser::parse_arc_symbolizer(rule& rule, xml_node const& node)
+{
+    try
+    {
+        arc_symbolizer sym;
+        // arc geometry
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::radius, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::start_angle, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::end_angle, node);
+        // fill of the arc wedge
+        set_symbolizer_property<symbolizer_base, color>(sym, keys::fill, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::fill_opacity, node);
+        // stroke of the arc wedge outline
+        set_symbolizer_property<symbolizer_base, color>(sym, keys::stroke, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::stroke_width, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::stroke_opacity, node);
+        set_symbolizer_property<symbolizer_base, dash_array>(sym, keys::stroke_dasharray, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::stroke_dashoffset, node);
+        // stroke of the arc line, overrides general wedge outline
+        set_symbolizer_property<symbolizer_base, color>(sym, keys::arc_stroke, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::arc_stroke_width, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::arc_stroke_opacity, node);
+        set_symbolizer_property<symbolizer_base, dash_array>(sym, keys::arc_stroke_dasharray, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::arc_stroke_dashoffset, node);
+        // stroke of the radius lines, overrides general wedge outline
+        set_symbolizer_property<symbolizer_base, color>(sym, keys::radius_stroke, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::radius_stroke_width, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::radius_stroke_opacity, node);
+        set_symbolizer_property<symbolizer_base, dash_array>(sym, keys::radius_stroke_dasharray, node);
+        set_symbolizer_property<symbolizer_base, double>(sym, keys::radius_stroke_dashoffset, node);
+
+        // optional label text attributes
+        // all but text-offset is basically inherited from TextSymbolizer settings
+        auto const text = node.get_opt_attr<expression_ptr>("text");
+        if (text)
+        {
+            auto placements = std::make_shared<text_placements_dummy>();
+            format_properties& fmt = placements->defaults.format_defaults;
+            set_property_from_xml<double>(fmt.text_size, "text-size", node);
+            set_property_from_xml<color>(fmt.fill, "text-fill", node);
+            set_property_from_xml<double>(fmt.text_opacity, "text-opacity", node);
+            set_property_from_xml<color>(fmt.halo_fill, "text-halo-fill", node);
+            set_property_from_xml<double>(fmt.halo_radius, "text-halo-radius", node);
+            set_property_from_xml<double>(fmt.halo_opacity, "text-halo-opacity", node);
+            set_property_from_xml<double>(fmt.character_spacing, "text-character-spacing", node);
+            set_property_from_xml<text_transform_e>(fmt.text_transform, "text-transform", node);
+            set_property_from_xml<font_feature_settings>(fmt.ff_settings, "text-font-feature-settings", node);
+
+            auto const face_name = node.get_opt_attr<std::string>("text-face-name");
+            if (face_name)
+                fmt.face_name = *face_name;
+            auto const fontset_name = node.get_opt_attr<std::string>("text-fontset-name");
+            if (fontset_name)
+            {
+                std::map<std::string, font_set>::const_iterator itr = fontsets_.find(*fontset_name);
+                if (itr == fontsets_.end())
+                {
+                    throw config_error("Unable to find any fontset named '" + *fontset_name + "'", node);
+                }
+                fmt.fontset = itr->second;
+            }
+            if (!fmt.face_name.empty() && fmt.fontset)
+            {
+                throw config_error("Can't have both text-face-name and text-fontset-name", node);
+            }
+            if (fmt.face_name.empty() && !fmt.fontset)
+            {
+                throw config_error("Must have text-face-name or text-fontset-name when text is set", node);
+            }
+            if (strict_ && !fmt.fontset)
+            {
+                ensure_font_face(fmt.face_name);
+            }
+
+            placements->defaults.set_format_tree(std::make_shared<formatting::text_node>(*text));
+            put<text_placements_ptr>(sym, keys::text_placements_, placements);
+            // radial gap between the arc line and the label
+            set_symbolizer_property<symbolizer_base, double>(sym, keys::text_offset, node);
+        }
+
         rule.append(std::move(sym));
     }
     catch (config_error const& ex)
