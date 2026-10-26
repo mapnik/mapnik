@@ -12,6 +12,8 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/value/types.hpp>
 #include <mapnik/util/variant.hpp>
+#include <mapnik/expression.hpp>
+#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/formatting/text.hpp>
