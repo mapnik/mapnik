@@ -257,6 +257,54 @@ void test_s_shaped_curve(double const& offset)
     }
 }
 
+using points = std::vector<std::pair<double, double>>;
+
+// the outlines (moveto and lineto points of each subpath) of a polygon offset by the converter
+std::vector<points> offset_outlines(std::vector<points> const& rings, double offset)
+{
+    fake_path path = {};
+    for (auto const& ring : rings)
+    {
+        path.vertices_.emplace_back(ring[0].first, ring[0].second, mapnik::SEG_MOVETO);
+        for (std::size_t i = 1; i < ring.size(); ++i)
+            path.vertices_.emplace_back(ring[i].first, ring[i].second, mapnik::SEG_LINETO);
+        path.vertices_.emplace_back(ring[0].first, ring[0].second, mapnik::SEG_CLOSE);
+    }
+    path.rewind(0);
+
+    mapnik::offset_converter<fake_path> off_path(path);
+    off_path.set_offset(offset);
+
+    std::vector<points> outlines;
+    unsigned cmd;
+    double x, y;
+    while ((cmd = off_path.vertex(&x, &y)) != mapnik::SEG_END)
+    {
+        if (cmd == mapnik::SEG_MOVETO)
+            outlines.emplace_back();
+        if (cmd == mapnik::SEG_MOVETO || cmd == mapnik::SEG_LINETO)
+            outlines.back().emplace_back(x, y);
+    }
+    return outlines;
+}
+
+void check_outline(points const& outline, points const& expected)
+{
+    REQUIRE(outline.size() == expected.size());
+    for (std::size_t i = 0; i < outline.size(); ++i)
+    {
+        CHECK(outline[i].first == Approx(expected[i].first));
+        CHECK(outline[i].second == Approx(expected[i].second));
+    }
+}
+
+void test_ring_outline(points const& ring, double offset, points const& expected)
+{
+    auto const outlines = offset_outlines({ring}, offset);
+    REQUIRE(outlines.size() == 1);
+    check_outline(outlines[0], expected);
+}
+
 } // namespace offset_test
 
 TEST_CASE("offset converter")
@@ -413,5 +461,60 @@ TEST_CASE("offset converter")
 
         CHECK(move_to_count == 2);
         CHECK(close_count == 2);
+    }
+
+    SECTION("offset converter keeps the outline of a small ring")
+    {
+        // A ring's closing joint is built around the ring's first vertex, where it touches the segments emitted
+        // to and from that vertex. That must not be taken for a curl, which would drop the whole outline.
+        offset_test::test_ring_outline({{0, 0}, {4, 0}, {4, 4}, {0, 4}}, 1, {{1, 1}, {3, 1}, {3, 3}, {1, 3}});
+    }
+
+    SECTION("offset converter keeps the outline of a small ring closing a rounding error away")
+    {
+        // The closing edge runs in the -x direction, so the angle of the first vertex's incoming edge is computed
+        // as -pi for the first vertex and pi for the closing one, which ends up a rounding error away.
+        double const d = 3.5 - 0.5 * std::sqrt(2.0);
+        offset_test::test_ring_outline({{0, 0}, {0, 4}, {4, 0}}, -0.5, {{0.5, 0.5}, {0.5, d}, {d, 0.5}});
+    }
+
+    SECTION("offset converter keeps the outline of a small ring closing with an outside turn")
+    {
+        // A rectangle starting on its long side, within a rounding error of straight: the closing joint is an
+        // outside turn of nearly zero angle, whose first point is a rounding error away from the first vertex.
+        offset_test::test_ring_outline({{163.46596286471714, 11.613331031632043},
+                                        {158.80935995325447, 10.926990668000229},
+                                        {157.85496848465331, 17.402235789599246},
+                                        {169.19064004674553, 19.073009331999771},
+                                        {170.14503151534669, 12.597764210400754}},
+                                       -1.5,
+                                       {{163.2472, 13.0973},
+                                        {160.0746, 12.6297},
+                                        {159.5577, 16.137},
+                                        {167.9254, 17.3703},
+                                        {168.4423, 13.863},
+                                        {163.2472, 13.0973}});
+    }
+
+    SECTION("offset converter keeps the outline of a small hole")
+    {
+        // Outlined outside the polygon, and so inside its hole. The hole is a ring after the first: the vertex
+        // emitted before its first vertex is the outer ring's last, and its own closing joint still touches the
+        // segments emitted to and from its first vertex.
+        auto const outlines =
+          offset_test::offset_outlines({{{0, 0}, {20, 0}, {20, 20}, {0, 20}}, {{6, 6}, {6, 14}, {14, 14}, {14, 6}}},
+                                       -1.5);
+        REQUIRE(outlines.size() == 2);
+        CHECK(outlines[0].size() > 4); // the outer ring's, with rounded corners
+        offset_test::check_outline(outlines[1], {{7.5, 7.5}, {7.5, 12.5}, {12.5, 12.5}, {12.5, 7.5}});
+    }
+
+    SECTION("offset converter cuts a curl that reaches a ring's closing joint")
+    {
+        // The narrow end of this ring, just before it closes, makes a curl that ends in the closing joint. Only the
+        // segments emitted to and from a ring's first vertex must not be tested against that joint.
+        offset_test::test_ring_outline({{10.29, 8.03}, {11.76, 0.7}, {0.2, 0.62}, {0.11, 0.77}},
+                                       -1.5,
+                                       {{9.274809, 5.463626}, {9.931845, 2.187384}, {4.629396, 2.150689}});
     }
 }
