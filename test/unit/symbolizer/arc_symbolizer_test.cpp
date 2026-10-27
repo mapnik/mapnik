@@ -205,15 +205,15 @@ TEST_CASE("arc_symbolizer")
             put<double>(sym, keys::start_angle, start);
             put<double>(sym, keys::end_angle, end);
             arc_symbolizer_properties const props(sym, feature, vars, 1.0);
-            // CAPTURE(start, end);
-            // REQUIRE(props.drawable());
-            // auto const [a0, a1] = props.sweep();
-            // REQUIRE(a0 >= 0.0);
-            // REQUIRE(a0 < util::tau);
-            // REQUIRE(util::degrees(a1 - a0) == Approx(expected));
+            CAPTURE(start, end);
+            REQUIRE(props.drawable());
+            auto const [a0, a1] = props.sweep();
+            REQUIRE(a0 >= 0.0);
+            REQUIRE(a0 < util::tau);
+            REQUIRE(util::degrees(a1 - a0) == Approx(expected));
         }
     }
-#if 0
+
     SECTION("which parts of the arc are drawn")
     {
         context_ptr ctx = std::make_shared<context_type>();
@@ -334,5 +334,4 @@ TEST_CASE("arc_symbolizer")
             REQUIRE_FALSE(arc_symbolizer_properties(sym, feature, vars, 1.0).drawable());
         }
     }
-#endif
 }
