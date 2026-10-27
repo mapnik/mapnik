@@ -204,7 +204,7 @@ TEST_CASE("arc_symbolizer")
             put<double>(sym, keys::radius, 10.0);
             put<double>(sym, keys::start_angle, start);
             put<double>(sym, keys::end_angle, end);
-            // arc_symbolizer_properties const props(sym, feature, vars, 1.0);
+            arc_symbolizer_properties const props(sym, feature, vars, 1.0);
             // CAPTURE(start, end);
             // REQUIRE(props.drawable());
             // auto const [a0, a1] = props.sweep();
