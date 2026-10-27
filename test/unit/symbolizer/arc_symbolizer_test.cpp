@@ -180,7 +180,7 @@ TEST_CASE("arc_symbolizer")
         REQUIRE_NOTHROW(load_map_string(m2, saved));
         check_arc(first_arc(m2));
     }
-#if 0
+
     SECTION("bearings are normalized before computing the sweep")
     {
         // {start, end} -> expected sweep in degrees
@@ -215,7 +215,7 @@ TEST_CASE("arc_symbolizer")
             REQUIRE(util::degrees(a1 - a0) == Approx(expected));
         }
     }
-
+#if 0
     SECTION("which parts of the arc are drawn")
     {
         context_ptr ctx = std::make_shared<context_type>();
