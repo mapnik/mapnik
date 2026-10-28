@@ -179,6 +179,135 @@ mapnik::Map prepare_map()
     return map;
 }
 
+class shared_cache_datasource : public mapnik::memory_datasource
+{
+  public:
+    shared_cache_datasource(std::shared_ptr<std::vector<mapnik::query>> queries)
+        : mapnik::memory_datasource(mapnik::parameters()),
+          queries_(std::move(queries))
+    {
+        params()["type"] = "memory";
+        auto context = std::make_shared<mapnik::context_type>();
+        context->push("icon");
+        context->push("text");
+        auto feature = mapnik::feature_factory::create(context, 1);
+        feature->put("icon", 1);
+        feature->put("text", 1);
+        feature->set_geometry(mapnik::geometry::point<double>(1, 2));
+        push(feature);
+    }
+
+    mapnik::featureset_ptr features(mapnik::query const& q) const override
+    {
+        queries_->push_back(q);
+        return mapnik::memory_datasource::features(q);
+    }
+
+    mapnik::box2d<double> envelope() const override { return {-100, -80, 100, 80}; }
+
+  private:
+    std::shared_ptr<std::vector<mapnik::query>> queries_;
+};
+
+TEST_CASE("shared features across layers")
+{
+    mapnik::Map map(256, 256);
+    auto queries = std::make_shared<std::vector<mapnik::query>>();
+    auto datasource = std::make_shared<shared_cache_datasource>(queries);
+    for (std::string const name : {"icon", "text"})
+    {
+        mapnik::feature_type_style style;
+        mapnik::rule rule;
+        rule.set_filter(mapnik::parse_expression("[" + name + "] = 1"));
+        rule.append(mapnik::line_symbolizer());
+        style.add_rule(std::move(rule));
+        map.insert_style(name, std::move(style));
+        mapnik::layer layer(name);
+        layer.set_datasource(datasource);
+        layer.set_cache_features(true);
+        layer.add_style(name);
+        map.add_layer(layer);
+    }
+    map.zoom_to_box(mapnik::box2d<double>(-10, -10, 10, 10));
+    bool shared = true;
+    SECTION("independent readers and union of attributes") {}
+    SECTION("different effective queries cannot share")
+    {
+        map.get_layer(1).set_buffer_size(32);
+        shared = false;
+    }
+    SECTION("different datasource parameters cannot share")
+    {
+        auto other = std::make_shared<shared_cache_datasource>(queries);
+        other->params()["table"] = "other";
+        map.get_layer(1).set_datasource(other);
+        shared = false;
+    }
+    SECTION("different in-memory sources with identical parameters cannot share")
+    {
+        map.get_layer(1).set_datasource(std::make_shared<shared_cache_datasource>(queries));
+        shared = false;
+    }
+    SECTION("later layer need not enable caching")
+    {
+        map.get_layer(1).set_cache_features(false);
+    }
+    SECTION("later non-caching layer can have multiple styles")
+    {
+        map.get_layer(1).set_cache_features(false);
+        map.get_layer(1).add_style("text");
+    }
+    SECTION("later layer cannot retroactively enable sharing")
+    {
+        map.get_layer(0).set_cache_features(false);
+        shared = false;
+    }
+    SECTION("neither layer enables caching")
+    {
+        map.get_layer(0).set_cache_features(false);
+        map.get_layer(1).set_cache_features(false);
+        shared = false;
+    }
+    SECTION("existing multiple style cache still works")
+    {
+        map.get_layer(0).add_style("icon");
+    }
+    rendering_result result;
+    test_renderer renderer(map, result);
+    for (unsigned pass = 1; pass <= 2; ++pass)
+    {
+        renderer.apply();
+        REQUIRE(queries->size() == pass * (shared ? 1 : 2));
+        REQUIRE(result.geometries.size() ==
+                pass * (map.get_layer(0).styles().size() + map.get_layer(1).styles().size()));
+    }
+    if (shared)
+    {
+        std::set<std::string> const expected{"icon", "text"};
+        REQUIRE(queries->front().property_names() == expected);
+    }
+}
+
+TEST_CASE("shared feature readers release their cache at EOF")
+{
+    auto ds = prepare_datasource();
+    auto cache = std::make_shared<mapnik::shared_featureset>(ds->features(mapnik::query(ds->envelope())));
+    std::weak_ptr<mapnik::shared_featureset> weak = cache;
+    mapnik::shared_featureset_reader first(cache), second(cache);
+    cache.reset();
+    auto a = first.next();
+    auto b = first.next();
+    REQUIRE(a);
+    REQUIRE(b);
+    REQUIRE_FALSE(first.next());
+    REQUIRE_FALSE(weak.expired());
+    REQUIRE(second.next() == a);
+    REQUIRE(second.next() == b);
+    REQUIRE_FALSE(second.next());
+    REQUIRE(weak.expired());
+    REQUIRE_FALSE(second.next());
+}
+
 TEST_CASE("feature_style_processor")
 {
     SECTION("test_renderer")

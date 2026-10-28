@@ -43,6 +43,7 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform_cache.hpp>
 #include <mapnik/util/featureset_buffer.hpp>
+#include <mapnik/util/shared_featureset.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/symbolizer_dispatch.hpp>
 
@@ -64,6 +65,8 @@ struct layer_rendering_material
     std::vector<featureset_ptr> featureset_ptr_list_;
     std::vector<rule_cache> rule_caches_;
     std::vector<layer_rendering_material> materials_;
+    std::optional<query> query_;
+    processor_context_ptr context_;
 
     layer_rendering_material(layer const& lay, projection const& dest)
         : lay_(lay),
@@ -72,6 +75,74 @@ struct layer_rendering_material
 
     layer_rendering_material(layer_rendering_material&& rhs) = default;
 };
+
+namespace detail {
+
+inline void collect_query_materials(layer_rendering_material& mat, std::vector<layer_rendering_material*>& materials)
+{
+    if (mat.query_)
+        materials.push_back(&mat);
+    for (auto& child : mat.materials_)
+        collect_query_materials(child, materials);
+}
+
+inline bool can_share_features(layer_rendering_material const& a, layer_rendering_material const& b)
+{
+    auto const& x = *a.query_;
+    auto const& y = *b.query_;
+    auto const& ds = *a.lay_.datasource();
+    if (!a.lay_.cache_features() || ds.type() != datasource::Vector)
+        return false;
+    bool const same_source = a.lay_.datasource() == b.lay_.datasource() ||
+                             (ds.params().get<std::string>("type", "") == "postgis" && ds == *b.lay_.datasource());
+    return same_source && a.lay_.srs() == b.lay_.srs() && x.get_bbox() == y.get_bbox() &&
+           x.get_unbuffered_bbox() == y.get_unbuffered_bbox() && x.resolution() == y.resolution() &&
+           x.scale_denominator() == y.scale_denominator() && x.get_filter_factor() == y.get_filter_factor() &&
+           x.variables() == y.variables();
+}
+
+inline void query_materials(layer_rendering_material& root)
+{
+    std::vector<layer_rendering_material*> materials;
+    collect_query_materials(root, materials);
+    std::vector<std::vector<layer_rendering_material*>> groups;
+    for (auto* mat : materials)
+    {
+        auto group = std::find_if(groups.begin(), groups.end(), [&](auto const& candidates) {
+            return can_share_features(*candidates.front(), *mat);
+        });
+        if (group == groups.end())
+            groups.push_back({mat});
+        else
+        {
+            for (auto const& name : mat->query_->property_names())
+                group->front()->query_->add_property_name(name);
+            group->push_back(mat);
+        }
+    }
+    for (auto const& group : groups)
+    {
+        auto* first = group.front();
+        auto const& ds = first->lay_.datasource();
+        std::shared_ptr<shared_featureset> cache;
+        if (group.size() > 1)
+            cache = std::make_shared<shared_featureset>(ds->features_with_context(*first->query_, first->context_));
+        for (auto* mat : group)
+        {
+            auto const count =
+              !mat->lay_.group_by().empty() || mat->lay_.cache_features() ? 1 : mat->active_styles_.size();
+            for (std::size_t i = 0; i < count; ++i)
+            {
+                if (cache)
+                    mat->featureset_ptr_list_.push_back(std::make_shared<shared_featureset_reader>(cache));
+                else
+                    mat->featureset_ptr_list_.push_back(ds->features_with_context(*mat->query_, mat->context_));
+            }
+        }
+    }
+}
+
+} // namespace detail
 
 template<typename Processor>
 feature_style_processor<Processor>::feature_style_processor(Map const& m, double scale_factor)
@@ -145,6 +216,8 @@ void feature_style_processor<Processor>::apply(double scale_denom)
         layer_rendering_material root_mat(m_.layers().front(), proj);
         prepare_layers(root_mat, m_.layers(), ctx_map, p, scale_denom);
 
+        detail::query_materials(root_mat);
+
         render_submaterials(root_mat, p);
     }
 
@@ -200,6 +273,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay,
     prepare_layer(mat, ctx_map, p, scale, scale_denom, width, height, extent, buffer_size, names);
 
     prepare_layers(mat, lay.layers(), ctx_map, p, scale_denom);
+
+    detail::query_materials(mat);
 
     if (!mat.active_styles_.empty())
     {
@@ -437,20 +512,8 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
         q.add_property_name((*sort_by).first);
     }
 
-    bool cache_features = lay.cache_features() && active_styles.size() > 1;
-
-    std::vector<featureset_ptr>& featureset_ptr_list = mat.featureset_ptr_list_;
-    if (!group_by.empty() || cache_features)
-    {
-        featureset_ptr_list.push_back(ds->features_with_context(q, current_ctx));
-    }
-    else
-    {
-        for (std::size_t i = 0; i < active_styles.size(); ++i)
-        {
-            featureset_ptr_list.push_back(ds->features_with_context(q, current_ctx));
-        }
-    }
+    mat.query_ = std::move(q);
+    mat.context_ = std::move(current_ctx);
 }
 
 template<typename Processor>
