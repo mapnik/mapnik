@@ -72,7 +72,7 @@ void agg_renderer<T0, T1>::process(shield_symbolizer const& sym,
                               common_.scale_factor_,
                               common_.font_manager_.get_stroker());
 
-    double const opacity = get<double>(sym, keys::opacity, feature, common_.vars_, 1.0);
+    double const opacity = get<value_double>(sym, keys::opacity, feature, common_.vars_, 1.0);
 
     placements_list const& placements = helper.get();
     for (auto const& glyphs : placements)

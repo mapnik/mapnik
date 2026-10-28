@@ -106,20 +106,20 @@ void agg_renderer<T0, T1>::process(dot_symbolizer const& sym,
     bool const has_height = has_key(sym, keys::height);
     if (has_width && has_height)
     {
-        width = get<double>(sym, keys::width, feature, common_.vars_, 0.0);
-        height = get<double>(sym, keys::height, feature, common_.vars_, 0.0);
+        width = get<value_double>(sym, keys::width, feature, common_.vars_, 0.0);
+        height = get<value_double>(sym, keys::height, feature, common_.vars_, 0.0);
     }
     else if (has_width)
     {
-        width = height = get<double>(sym, keys::width, feature, common_.vars_, 0.0);
+        width = height = get<value_double>(sym, keys::width, feature, common_.vars_, 0.0);
     }
     else if (has_height)
     {
-        width = height = get<double>(sym, keys::height, feature, common_.vars_, 0.0);
+        width = height = get<value_double>(sym, keys::height, feature, common_.vars_, 0.0);
     }
     double const rx = width / 2.0 * common_.scale_factor_;
     double const ry = height / 2.0 * common_.scale_factor_;
-    double const opacity = get<double>(sym, keys::opacity, feature, common_.vars_, 1.0);
+    double const opacity = get<value_double>(sym, keys::opacity, feature, common_.vars_, 1.0);
     color const& fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128, 128, 128));
     ras_ptr->reset();
     if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)

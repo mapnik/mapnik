@@ -68,7 +68,7 @@ void grid_renderer<T>::process(shield_symbolizer const& sym,
     bool placement_found = false;
 
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
-    double opacity = get<double>(sym, keys::opacity, feature, common_.vars_, 1.0);
+    double opacity = get<value_double>(sym, keys::opacity, feature, common_.vars_, 1.0);
 
     grid_text_renderer<T> ren(pixmap_, comp_op, common_.scale_factor_);
 

@@ -139,7 +139,7 @@ void render_thunk_extractor::operator()(shield_symbolizer const& sym) const
 void render_thunk_extractor::extract_text_thunk(text_render_thunk::helper_ptr&& helper,
                                                 text_symbolizer const& sym) const
 {
-    double opacity = get<double>(sym, keys::opacity, feature_, common_.vars_, 1.0);
+    double opacity = get<value_double>(sym, keys::opacity, feature_, common_.vars_, 1.0);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature_, common_.vars_, src_over);
     halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym,
                                                                      keys::halo_rasterizer,

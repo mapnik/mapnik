@@ -84,53 +84,53 @@ void check_dash(arc_symbolizer const& sym, keys key, double dash, double gap)
 void check_arc(arc_symbolizer const& sym)
 {
     // basic attribute tests
-    REQUIRE(get<double>(sym, keys::radius) == Approx(20.0));
-    REQUIRE(get<double>(sym, keys::start_angle) == Approx(45.0));
-    REQUIRE(get<double>(sym, keys::end_angle) == Approx(135.0));
+    REQUIRE(get<value_double>(sym, keys::radius) == Approx(20.0));
+    REQUIRE(get<value_double>(sym, keys::start_angle) == Approx(45.0));
+    REQUIRE(get<value_double>(sym, keys::end_angle) == Approx(135.0));
 
     // fill test
     color const fill = get<mapnik::color>(sym, keys::fill);
     REQUIRE(fill.red() == 255);
     REQUIRE(fill.green() == 0);
     REQUIRE(fill.blue() == 0);
-    REQUIRE(get<double>(sym, keys::fill_opacity) == Approx(0.5));
+    REQUIRE(get<value_double>(sym, keys::fill_opacity) == Approx(0.5));
 
     // default stroke test
     color const stroke = get<mapnik::color>(sym, keys::stroke);
     REQUIRE(stroke.red() == 0);
     REQUIRE(stroke.green() == 0);
     REQUIRE(stroke.blue() == 255);
-    REQUIRE(get<double>(sym, keys::stroke_width) == Approx(2.0));
-    REQUIRE(get<double>(sym, keys::stroke_opacity) == Approx(0.7));
+    REQUIRE(get<value_double>(sym, keys::stroke_width) == Approx(2.0));
+    REQUIRE(get<value_double>(sym, keys::stroke_opacity) == Approx(0.7));
     check_dash(sym, keys::stroke_dasharray, 5.0, 5.0);
-    REQUIRE(get<double>(sym, keys::stroke_dashoffset) == Approx(0.5));
+    REQUIRE(get<value_double>(sym, keys::stroke_dashoffset) == Approx(0.5));
 
     // arc stroke test
     color const arc_stroke = get<mapnik::color>(sym, keys::arc_stroke);
     REQUIRE(arc_stroke.red() == 0);
     REQUIRE(arc_stroke.green() == 255);
     REQUIRE(arc_stroke.blue() == 0);
-    REQUIRE(get<double>(sym, keys::arc_stroke_width) == Approx(3.0));
-    REQUIRE(get<double>(sym, keys::arc_stroke_opacity) == Approx(0.8));
+    REQUIRE(get<value_double>(sym, keys::arc_stroke_width) == Approx(3.0));
+    REQUIRE(get<value_double>(sym, keys::arc_stroke_opacity) == Approx(0.8));
     check_dash(sym, keys::arc_stroke_dasharray, 6.0, 6.0);
-    REQUIRE(get<double>(sym, keys::arc_stroke_dashoffset) == Approx(0.6));
+    REQUIRE(get<value_double>(sym, keys::arc_stroke_dashoffset) == Approx(0.6));
 
     // radius stroke test
     color const radius_stroke = get<mapnik::color>(sym, keys::radius_stroke);
     REQUIRE(radius_stroke.red() == 255);
     REQUIRE(radius_stroke.green() == 0);
     REQUIRE(radius_stroke.blue() == 0);
-    REQUIRE(get<double>(sym, keys::radius_stroke_width) == Approx(4.0));
-    REQUIRE(get<double>(sym, keys::radius_stroke_opacity) == Approx(0.9));
+    REQUIRE(get<value_double>(sym, keys::radius_stroke_width) == Approx(4.0));
+    REQUIRE(get<value_double>(sym, keys::radius_stroke_opacity) == Approx(0.9));
     check_dash(sym, keys::radius_stroke_dasharray, 7.0, 7.0);
-    REQUIRE(get<double>(sym, keys::radius_stroke_dashoffset) == Approx(0.7));
+    REQUIRE(get<value_double>(sym, keys::radius_stroke_dashoffset) == Approx(0.7));
 
     // compositing
     REQUIRE(get<composite_mode_e>(sym, keys::comp_op) == multiply);
 
     // label test: the text-* attributes are mapped onto the standard text
     // format properties and stored as text placements
-    REQUIRE(get<double>(sym, keys::text_offset) == Approx(4.0));
+    REQUIRE(get<value_double>(sym, keys::text_offset) == Approx(4.0));
     text_placements_ptr const placements = get<text_placements_ptr>(sym, keys::text_placements_);
     REQUIRE(bool(placements));
 
