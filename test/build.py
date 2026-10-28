@@ -29,6 +29,16 @@ else:
     if test_env['PLATFORM'] == 'Linux':
         test_env['LINKFLAGS'].append('-pthread')
     test_env.AppendUnique(LIBS='boost_program_options%s' % env['BOOST_APPEND'])
+
+    if env['RUNTIME_LINK'] == 'static':
+        # pkg-config is more reliable than pg_config across platforms
+        cmd = 'pkg-config libpq --libs --static'
+        try:
+            test_env.ParseConfig(cmd)
+        except OSError as e:
+            test_env.Append(LIBS='pq')
+    else:
+        test_env.Append(LIBS='pq')
     test_env_local = test_env.Clone()
 
 
@@ -36,10 +46,12 @@ else:
     sources = glob.glob('./unit/*/*.cpp')
     sources.extend(glob.glob('./unit/*.cpp'))
     sources.append('../plugins/input/ogr/ogr_utils.cpp')
+    sources.append('../plugins/input/postgis/postgis_featureset.cpp')
     test_program = test_env_local.Program("./unit/run", source=sources)
     Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
     Depends(test_program, env.subst('../src/json/libmapnik-json${LIBSUFFIX}'))
     Depends(test_program, env.subst('../src/wkt/libmapnik-wkt${LIBSUFFIX}'))
+
     if 'install' in COMMAND_LINE_TARGETS:
         env.Alias('install',test_program)
 
