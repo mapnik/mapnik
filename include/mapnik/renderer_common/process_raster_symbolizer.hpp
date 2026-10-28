@@ -301,7 +301,7 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
             scaling_method_e scaling_method =
               get<scaling_method_e>(sym, keys::scaling, feature, common.vars_, SCALING_NEAR);
             composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common.vars_, src_over);
-            double opacity = get<double>(sym, keys::opacity, feature, common.vars_, 1.0);
+            double opacity = get<value_double>(sym, keys::opacity, feature, common.vars_, 1.0);
             // only premultiply rgba8 images
             if (source->data_.is<image_rgba8>())
             {

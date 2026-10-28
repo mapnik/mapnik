@@ -45,20 +45,20 @@ void build_ellipse(symbolizer_base const& sym,
     double half_stroke_width = 0.0;
     if (has_key(sym, keys::width) && has_key(sym, keys::height))
     {
-        width = get<double>(sym, keys::width, feature, vars, 0.0);
-        height = get<double>(sym, keys::height, feature, vars, 0.0);
+        width = get<value_double>(sym, keys::width, feature, vars, 0.0);
+        height = get<value_double>(sym, keys::height, feature, vars, 0.0);
     }
     else if (has_key(sym, keys::width))
     {
-        width = height = get<double>(sym, keys::width, feature, vars, 0.0);
+        width = height = get<value_double>(sym, keys::width, feature, vars, 0.0);
     }
     else if (has_key(sym, keys::height))
     {
-        width = height = get<double>(sym, keys::height, feature, vars, 0.0);
+        width = height = get<value_double>(sym, keys::height, feature, vars, 0.0);
     }
     if (has_key(sym, keys::stroke_width))
     {
-        half_stroke_width = get<double>(sym, keys::stroke_width, feature, vars, 0.0) / 2.0;
+        half_stroke_width = get<value_double>(sym, keys::stroke_width, feature, vars, 0.0) / 2.0;
     }
     svg::svg_converter_type styled_svg(svg_path, marker_ellipse.svg_group());
     styled_svg.push_attr();
@@ -214,8 +214,8 @@ void setup_transform_scaling(agg::trans_affine& tr,
                              attributes const& vars,
                              symbolizer_base const& sym)
 {
-    double width = get<double>(sym, keys::width, feature, vars, 0.0);
-    double height = get<double>(sym, keys::height, feature, vars, 0.0);
+    double width = get<value_double>(sym, keys::width, feature, vars, 0.0);
+    double height = get<value_double>(sym, keys::height, feature, vars, 0.0);
     if (width > 0 && height > 0)
     {
         double sx = width / svg_width;

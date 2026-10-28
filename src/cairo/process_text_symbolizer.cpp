@@ -61,7 +61,7 @@ void cairo_renderer<T>::process(shield_symbolizer const& sym,
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     composite_mode_e halo_comp_op = get<composite_mode_e>(sym, keys::halo_comp_op, feature, common_.vars_, src_over);
-    double opacity = get<double>(sym, keys::opacity, feature, common_.vars_, 1.0);
+    double opacity = get<value_double>(sym, keys::opacity, feature, common_.vars_, 1.0);
 
     placements_list const& placements = helper.get();
     for (auto const& glyphs : placements)
