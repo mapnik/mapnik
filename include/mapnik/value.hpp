@@ -87,6 +87,18 @@ class MAPNIK_DECL value : public value_base
     value_integer to_int() const;
 };
 
+// The convert() specializations are defined in value.cpp. They need declaring
+// here, with MAPNIK_DECL, because MSVC doesn't apply the class's dllexport to
+// specializations of member templates, so mapnik.dll wouldn't export them.
+template<>
+MAPNIK_DECL value_double value::convert<value_double>() const;
+template<>
+MAPNIK_DECL value_integer value::convert<value_integer>() const;
+template<>
+MAPNIK_DECL value_bool value::convert<value_bool>() const;
+template<>
+MAPNIK_DECL std::string value::convert<std::string>() const;
+
 MAPNIK_DECL value operator+(value const& p1, value const& p2);
 MAPNIK_DECL value operator-(value const& p1, value const& p2);
 MAPNIK_DECL value operator*(value const& p1, value const& p2);
