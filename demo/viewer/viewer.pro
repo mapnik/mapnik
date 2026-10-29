@@ -12,7 +12,7 @@ QMAKE_LFLAGS += $$system(mapnik-config --ldflags)
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-private-field
 # Input
 
-CONFIG += qt debug_and_release
+CONFIG += qt debug_and_release c++20
 FORMS += forms/about.ui \
          forms/info.ui \
          forms/layer_info.ui

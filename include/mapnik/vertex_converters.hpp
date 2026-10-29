@@ -154,6 +154,7 @@ struct converter_traits<T, mapnik::dash_tag>
         {
             double const dash_offset = get<value_double, keys::stroke_dashoffset>(sym, feat, vars);
             apply_dash_array(geom, *dash, dash_offset, scale_factor);
+
         }
         if (args.stroke_culled)
         {

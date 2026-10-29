@@ -188,7 +188,6 @@ struct offset_converter
     {
         geom_.rewind(0);
         vertices_.clear();
-
         scanned_.clear();
         scanned_pos_ = 0;
         closing_joints_.clear();
