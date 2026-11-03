@@ -66,7 +66,8 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-#include <boost/tokenizer.hpp>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/static_assert.hpp>
@@ -80,8 +81,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
 MAPNIK_DISABLE_WARNING_POP
-
-using boost::tokenizer;
 
 namespace mapnik {
 using std::optional;
@@ -363,26 +362,17 @@ void map_parser::parse_map(Map& map, xml_node const& node, std::string const& ba
 
             if (min_version_string)
             {
-                boost::char_separator<char> sep(".", "", boost::keep_empty_tokens);
-                boost::tokenizer<boost::char_separator<char>> tokens(*min_version_string, sep);
-                unsigned i = 0;
-                int n[3] = {0, 0, 0};
-                for (auto const& beg : tokens)
+                using namespace boost::spirit;
+                std::tuple<unsigned,unsigned,unsigned> n = {0u, 0u, 0u};
+                auto cur = min_version_string->begin();
+                auto end = min_version_string->end();
+                if (!x3::parse(cur, end, -x3::uint_ >> -(x3::lit(".") >> x3::uint_) >> -(x3::lit(".") >> x3::uint_), n)
+                    ||
+                    (cur != end))
                 {
-                    if (i > 2)
-                    {
-                        throw config_error(std::string("Version string has more than three components: '") +
-                                           *min_version_string + "'");
-                    }
-                    std::string item = mapnik::util::trim_copy(beg);
-                    if (item.empty() || !mapnik::util::string2int(item, n[i]))
-                    {
-                        throw config_error(std::string("Invalid version string encountered: '") + beg + "' in '" +
-                                           *min_version_string + "'");
-                    }
-                    ++i;
+                    throw config_error(std::string("Invalid version string encountered: '") + *min_version_string + "'");
                 }
-                if (!MAPNIK_VERSION_AT_LEAST(n[0], n[1], n[2]))
+                if (!MAPNIK_VERSION_AT_LEAST(std::get<0>(n), std::get<1>(n), std::get<2>(n)))
                 {
                     throw config_error(std::string("This map uses features only present in Mapnik version ") +
                                        *min_version_string + " and newer");
