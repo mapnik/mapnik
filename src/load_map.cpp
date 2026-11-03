@@ -363,14 +363,17 @@ void map_parser::parse_map(Map& map, xml_node const& node, std::string const& ba
             if (min_version_string)
             {
                 using namespace boost::spirit;
-                std::tuple<unsigned,unsigned,unsigned> n = {0u, 0u, 0u};
+                std::tuple<unsigned, unsigned, unsigned> n = {0u, 0u, 0u};
                 auto cur = min_version_string->begin();
                 auto end = min_version_string->end();
-                if (!x3::parse(cur, end, -x3::uint_ >> -(x3::lit(".") >> x3::uint_) >> -(x3::lit(".") >> x3::uint_), n)
-                    ||
+                if (!x3::parse(cur,
+                               end,
+                               -x3::uint_ >> -(x3::lit(".") >> x3::uint_) >> -(x3::lit(".") >> x3::uint_),
+                               n) ||
                     (cur != end))
                 {
-                    throw config_error(std::string("Invalid version string encountered: '") + *min_version_string + "'");
+                    throw config_error(std::string("Invalid version string encountered: '") + *min_version_string +
+                                       "'");
                 }
                 if (!MAPNIK_VERSION_AT_LEAST(std::get<0>(n), std::get<1>(n), std::get<2>(n)))
                 {
