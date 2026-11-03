@@ -363,33 +363,29 @@ void map_parser::parse_map(Map& map, xml_node const& node, std::string const& ba
 
             if (min_version_string)
             {
-                boost::char_separator<char> sep(".");
+                boost::char_separator<char> sep(".", "", boost::keep_empty_tokens);
                 boost::tokenizer<boost::char_separator<char>> tokens(*min_version_string, sep);
                 unsigned i = 0;
-                bool success = false;
-                int n[3];
+                int n[3] = {0, 0, 0};
                 for (auto const& beg : tokens)
                 {
+                    if (i > 2)
+                    {
+                        throw config_error(std::string("Version string has more than three components: '") +
+                                           *min_version_string + "'");
+                    }
                     std::string item = mapnik::util::trim_copy(beg);
-                    if (!mapnik::util::string2int(item, n[i]))
+                    if (item.empty() || !mapnik::util::string2int(item, n[i]))
                     {
                         throw config_error(std::string("Invalid version string encountered: '") + beg + "' in '" +
                                            *min_version_string + "'");
                     }
-                    if (i == 2)
-                    {
-                        success = true;
-                        break;
-                    }
                     ++i;
                 }
-                if (success)
+                if (!MAPNIK_VERSION_AT_LEAST(n[0], n[1], n[2]))
                 {
-                    if (!MAPNIK_VERSION_AT_LEAST(n[0], n[1], n[2]))
-                    {
-                        throw config_error(std::string("This map uses features only present in Mapnik version ") +
-                                           *min_version_string + " and newer");
-                    }
+                    throw config_error(std::string("This map uses features only present in Mapnik version ") +
+                                       *min_version_string + " and newer");
                 }
             }
         }
