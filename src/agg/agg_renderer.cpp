@@ -60,40 +60,48 @@ MAPNIK_DISABLE_WARNING_POP
 // stl
 #include <algorithm>
 #include <cmath>
+#include <vector>
 
 namespace mapnik {
 
 namespace {
 
-std::optional<box2d<int>> nonzero_extent(image_rgba8 const& image)
+// The columns from the first to the last nonzero pixel of a row.
+struct row_span
 {
-    int const width = safe_cast<int>(image.width());
-    int const height = safe_cast<int>(image.height());
-    int minx = width;
-    int miny = height;
-    int maxx = -1;
-    int maxy = -1;
-    for (int y = 0; y < height; ++y)
+    int y;
+    int x0;
+    int x1;
+};
+
+// Collects the span of every row that has a nonzero pixel.
+// The spans of non-transparent pixels in the columns x0..x1 of the rows y0..y1 (half-open; all
+// pixels outside them must be transparent).
+void nonzero_spans(image_rgba8 const& image, std::vector<row_span>& spans, int x0, int y0, int x1, int y1)
+{
+    spans.clear();
+    for (int y = y0; y < y1; ++y)
     {
         image_rgba8::pixel_type const* row = image.get_row(y);
-        int row_minx = 0;
-        while (row_minx + 8 <= width &&
+        int row_minx = x0;
+        while (row_minx + 8 <= x1 &&
                (row[row_minx] | row[row_minx + 1] | row[row_minx + 2] | row[row_minx + 3] | row[row_minx + 4] |
                 row[row_minx + 5] | row[row_minx + 6] | row[row_minx + 7]) == 0)
         {
             row_minx += 8;
         }
-        while (row_minx < width && row[row_minx] == 0)
+        while (row_minx < x1 && row[row_minx] == 0)
         {
             ++row_minx;
         }
-        if (row_minx == width)
+        if (row_minx == x1)
         {
             continue;
         }
-        int row_maxx = width;
-        while (row_maxx >= 8 && (row[row_maxx - 1] | row[row_maxx - 2] | row[row_maxx - 3] | row[row_maxx - 4] |
-                                 row[row_maxx - 5] | row[row_maxx - 6] | row[row_maxx - 7] | row[row_maxx - 8]) == 0)
+        int row_maxx = x1;
+        while (row_maxx - 8 >= x0 &&
+               (row[row_maxx - 1] | row[row_maxx - 2] | row[row_maxx - 3] | row[row_maxx - 4] | row[row_maxx - 5] |
+                row[row_maxx - 6] | row[row_maxx - 7] | row[row_maxx - 8]) == 0)
         {
             row_maxx -= 8;
         }
@@ -101,24 +109,60 @@ std::optional<box2d<int>> nonzero_extent(image_rgba8 const& image)
         {
             --row_maxx;
         }
-        minx = std::min(minx, row_minx);
-        maxx = std::max(maxx, row_maxx - 1);
-        miny = std::min(miny, y);
-        maxy = y;
+        spans.push_back({y, row_minx, row_maxx - 1});
     }
-    if (maxx < minx)
-    {
-        return std::nullopt;
-    }
-    return box2d<int>(minx, miny, maxx, maxy);
 }
 
-void clear_extent(image_rgba8& image, box2d<int> const& extent)
+// The rows the rasterizer swept since it last forgot, each from its first to its last span,
+// within a width x height buffer: all pixels it rendered lie within them.
+void rendered_spans(rasterizer const& ras, std::vector<row_span>& spans, int width, int height)
 {
-    std::size_t const length = extent.width() + 1;
-    for (int y = extent.miny(); y <= extent.maxy(); ++y)
+    spans.clear();
+    int const y1 = std::min(ras.rendered_y2(), height - 1);
+    for (int y = std::max(ras.rendered_y1(), 0); y <= y1; ++y)
     {
-        std::fill_n(image.get_row(y, extent.minx()), length, 0);
+        int x0, x1;
+        if (ras.rendered_row(y, x0, x1))
+        {
+            x0 = std::max(x0, 0);
+            x1 = std::min(x1, width - 1);
+            if (x0 <= x1)
+            {
+                spans.push_back({y, x0, x1});
+            }
+        }
+    }
+}
+
+// Composites only the given spans of src, merging runs of rows with equal spans.
+// Pixels outside them are transparent, which the callers' modes leave unchanged.
+void composite_spans(image_rgba8& dst,
+                     image_rgba8 const& src,
+                     composite_mode_e mode,
+                     std::vector<row_span> const& spans,
+                     float opacity,
+                     int dx,
+                     int dy)
+{
+    std::size_t i = 0;
+    while (i < spans.size())
+    {
+        std::size_t j = i + 1;
+        while (j < spans.size() && spans[j].y == spans[j - 1].y + 1 && spans[j].x0 == spans[i].x0 &&
+               spans[j].x1 == spans[i].x1)
+        {
+            ++j;
+        }
+        composite(dst, src, mode, box2d<int>(spans[i].x0, spans[i].y, spans[i].x1, spans[j - 1].y), opacity, dx, dy);
+        i = j;
+    }
+}
+
+void clear_spans(image_rgba8& image, std::vector<row_span> const& spans)
+{
+    for (row_span const& span : spans)
+    {
+        std::fill_n(image.get_row(span.y, span.x0), span.x1 - span.x0 + 1, 0);
     }
 }
 
@@ -238,12 +282,14 @@ void agg_renderer<T0, T1>::setup(Map const& m, buffer_type& pixmap)
             mapnik::color bg_color = *bg;
             bg_color.set_premultiplied(true);
             mapnik::fill(pixmap, bg_color);
+            opaque_ = true;
         }
     }
 
     auto&& image_filename = m.background_image();
     if (image_filename)
     {
+        opaque_ = false;
         // NOTE: marker_cache returns premultiplied image, if needed
         std::shared_ptr<mapnik::marker const> bg_marker = mapnik::marker_cache::instance().find(*image_filename, true);
         setup_agg_bg_visitor<buffer_type> visitor(pixmap,
@@ -269,7 +315,15 @@ void agg_renderer<T0, T1>::start_map_processing(Map const& map)
 template<typename T0, typename T1>
 void agg_renderer<T0, T1>::end_map_processing(Map const& map)
 {
-    mapnik::demultiply_alpha(buffers_.top().get());
+    if (opaque_)
+    {
+        // demultiplying leaves opaque pixels as they are
+        mapnik::set_premultiplied_alpha(buffers_.top().get(), false);
+    }
+    else
+    {
+        mapnik::demultiply_alpha(buffers_.top().get());
+    }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
 
@@ -295,6 +349,8 @@ void agg_renderer<T0, T1>::start_layer_processing(layer const& lay, box2d<double
     if (lay.comp_op() || lay.get_opacity() < 1.0)
     {
         buffers_.emplace(internal_buffers_.push());
+        // composited whole
+        internal_buffers_.clean_top();
         set_premultiplied_alpha(buffers_.top().get(), true);
     }
     else
@@ -315,6 +371,7 @@ void agg_renderer<T0, T1>::end_layer_processing(layer const& lyr)
     if (&current_buffer != &previous_buffer)
     {
         composite_mode_e comp_op = lyr.comp_op() ? *lyr.comp_op() : src_over;
+        blends_with(comp_op);
         composite(previous_buffer, current_buffer, comp_op, lyr.get_opacity(), 0, 0);
         // A parent layer may contain only pixels composited from its children.
         previous_buffer.painted(previous_buffer.painted() || current_buffer.painted());
@@ -327,7 +384,13 @@ void agg_renderer<T0, T1>::start_style_processing(feature_type_style const& st)
 {
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start processing style";
 
-    if (st.comp_op() || st.image_filters().size() > 0 || st.get_opacity() < 1)
+    drew_otherwise_ = false;
+    ras_ptr->forget_rendered();
+    composited_ = st.comp_op() || st.image_filters().size() > 0 || st.get_opacity() < 1;
+    // what the rasterizer renders and how the style's symbolizers draw matter only for a buffer
+    // that is composited (see end_style_processing)
+    ras_ptr->track_rendered(composited_);
+    if (composited_)
     {
         if (st.image_filters_inflate())
         {
@@ -363,6 +426,22 @@ void agg_renderer<T0, T1>::start_style_processing(feature_type_style const& st)
             buffers_.emplace(internal_buffers_.push());
             common_.t_.set_offset(0);
             ras_ptr->clip_box(0, 0, common_.width_, common_.height_);
+            if (st.image_filters().empty() && (!st.comp_op() || *st.comp_op() == src_over || *st.comp_op() == darken))
+            {
+                // Only the rows drawn on are composited (see end_style_processing), so the
+                // buffer is cleared row by row as the rasterizer first sweeps each: a style
+                // that draws some other way clears the rest first (drew_otherwise).
+                buffer_type& buffer = buffers_.top().get();
+                ras_ptr->clear_rows_lazily(buffer.bytes(),
+                                           buffer.row_size(),
+                                           internal_buffers_.top_clean(),
+                                           buffer.height());
+                lazy_rows_ = true;
+            }
+            else
+            {
+                internal_buffers_.clean_top();
+            }
         }
         set_premultiplied_alpha(buffers_.top().get(), true);
     }
@@ -375,13 +454,31 @@ void agg_renderer<T0, T1>::start_style_processing(feature_type_style const& st)
 }
 
 template<typename T0, typename T1>
+void agg_renderer<T0, T1>::drew_otherwise()
+{
+    drew_otherwise_ = true;
+    if (lazy_rows_)
+    {
+        lazy_rows_ = false;
+        ras_ptr->clear_rows_eagerly();
+        internal_buffers_.clean_top();
+    }
+}
+
+template<typename T0, typename T1>
 void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
 {
+    lazy_rows_ = false;
+    ras_ptr->clear_rows_eagerly();
     buffer_type& current_buffer = buffers_.top().get();
     buffers_.pop();
     buffer_type& previous_buffer = buffers_.top().get();
     if (&current_buffer != &previous_buffer)
     {
+        if (st.comp_op())
+        {
+            blends_with(*st.comp_op());
+        }
         bool const transparent_is_identity = !st.comp_op() || *st.comp_op() == src_over || *st.comp_op() == darken;
         bool const skip_empty = !current_buffer.painted() && st.image_filters().empty() && transparent_is_identity;
         if (!skip_empty)
@@ -399,30 +496,39 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
                 // Filters can generate pixels even when no rule painted the buffer.
                 current_buffer.painted(true);
             }
-            std::optional<box2d<int>> extent;
-            if (transparent_is_identity)
+            std::vector<row_span> spans;
+            // a buffer is clear when its style starts: spans can only be where something drew
+            int const width = safe_cast<int>(current_buffer.width());
+            int const height = safe_cast<int>(current_buffer.height());
+            if (transparent_is_identity && (blend_from || drew_otherwise_))
             {
-                extent = nonzero_extent(current_buffer);
+                nonzero_spans(current_buffer, spans, 0, 0, width, height);
             }
-            if (extent && st.comp_op())
+            else if (transparent_is_identity && ras_ptr->rendered())
             {
-                composite(previous_buffer,
-                          current_buffer,
-                          *st.comp_op(),
-                          *extent,
-                          st.get_opacity(),
-                          -common_.t_.offset(),
-                          -common_.t_.offset());
+                // only the rasterizer drew: the rows it swept, which may hold transparent pixels
+                // too (the modes above leave the destination as it is under those)
+                rendered_spans(*ras_ptr, spans, width, height);
             }
-            else if (extent && (blend_from || st.get_opacity() < 1.0))
+            if (!spans.empty() && st.comp_op())
             {
-                composite(previous_buffer,
-                          current_buffer,
-                          src_over,
-                          *extent,
-                          st.get_opacity(),
-                          -common_.t_.offset(),
-                          -common_.t_.offset());
+                composite_spans(previous_buffer,
+                                current_buffer,
+                                *st.comp_op(),
+                                spans,
+                                st.get_opacity(),
+                                -common_.t_.offset(),
+                                -common_.t_.offset());
+            }
+            else if (!spans.empty() && (blend_from || st.get_opacity() < 1.0))
+            {
+                composite_spans(previous_buffer,
+                                current_buffer,
+                                src_over,
+                                spans,
+                                st.get_opacity(),
+                                -common_.t_.offset(),
+                                -common_.t_.offset());
             }
             else if (!transparent_is_identity && st.comp_op())
             {
@@ -436,10 +542,7 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
             previous_buffer.painted(previous_buffer.painted() || current_buffer.painted());
             if (transparent_is_identity)
             {
-                if (extent)
-                {
-                    clear_extent(current_buffer, *extent);
-                }
+                clear_spans(current_buffer, spans);
                 current_buffer.painted(false);
             }
         }
@@ -451,6 +554,7 @@ void agg_renderer<T0, T1>::end_style_processing(feature_type_style const& st)
     if (st.direct_image_filters().size() > 0)
     {
         // apply any 'direct' image filters
+        opaque_ = false;
         mapnik::filter::filter_visitor<buffer_type> visitor(previous_buffer, common_.scale_factor_);
         for (mapnik::filter::filter_type const& filter_tag : st.direct_image_filters())
         {
@@ -499,11 +603,11 @@ struct agg_render_marker_visitor
         ras_ptr_->reset();
         if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
         {
-            ras_ptr_->gamma(agg::gamma_power());
+            ras_ptr_->gamma_power(1.0);
             gamma_method_ = gamma_method_enum::GAMMA_POWER;
             gamma_ = 1.0;
         }
-        agg::scanline_u8 sl;
+        agg::scanline_u8& sl = ras_ptr_->scanline();
         agg::rendering_buffer buf(current_buffer_.bytes(),
                                   current_buffer_.width(),
                                   current_buffer_.height(),
@@ -545,11 +649,11 @@ struct agg_render_marker_visitor
         ras_ptr_->reset();
         if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
         {
-            ras_ptr_->gamma(agg::gamma_power());
+            ras_ptr_->gamma_power(1.0);
             gamma_method_ = gamma_method_enum::GAMMA_POWER;
             gamma_ = 1.0;
         }
-        agg::scanline_u8 sl;
+        agg::scanline_u8& sl = ras_ptr_->scanline();
         agg::rendering_buffer buf(current_buffer_.bytes(),
                                   current_buffer_.width(),
                                   current_buffer_.height(),

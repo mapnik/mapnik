@@ -52,7 +52,7 @@ void agg_renderer<T0, T1>::process(polygon_symbolizer const& sym,
                                    proj_transform const& prj_trans)
 {
     using vertex_converter_type =
-      vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
+      vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag, cull_poly_tag>;
 
     ras_ptr->reset();
     double const gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
@@ -91,14 +91,14 @@ void agg_renderer<T0, T1>::process(polygon_symbolizer const& sym,
           using renderer_base = agg::renderer_base<pixfmt_comp_type>;
           using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
           pixfmt_comp_type pixf(buf);
-          pixf.comp_op(
-            static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
+          composite_mode_e const comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+          blends_with(comp_op);
+          pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
           renderer_base renb(pixf);
           renderer_type ren(renb);
           ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
-          agg::scanline_u8 sl;
           ras_ptr->filling_rule(agg::fill_even_odd);
-          agg::render_scanlines(*ras_ptr, sl, ren);
+          agg::render_scanlines(*ras_ptr, ras_ptr->scanline(), ren);
       });
 }
 

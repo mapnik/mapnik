@@ -167,6 +167,14 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
+        // The table gamma() fills (aa_scale entries), to keep and set again.
+        const int* gamma_table() const { return m_gamma; }
+        void gamma_table(const int* table)
+        {
+            for(int i = 0; i < aa_scale; i++) m_gamma[i] = table[i];
+        }
+
+        //--------------------------------------------------------------------
         unsigned apply_gamma(unsigned cover) const
         {
             return m_gamma[cover];

@@ -28,6 +28,8 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/geometry/correct.hpp>
 
+#include <cstddef>
+#include <iterator>
 #include <memory>
 
 namespace mapnik {
@@ -239,38 +241,103 @@ struct wkb_reader : util::noncopyable
         return d;
     }
 
+    // The points of a line string or ring, read as they are put in place: a vector assigned a random access
+    // range allocates once and constructs its elements from it (emplace_back checked the capacity and moved
+    // the end for every point, and the loop kept the read position up to date in the reader)
+    template<bool Swap, std::size_t Stride>
+    struct coord_iterator
+    {
+        using iterator_category = std::random_access_iterator_tag;
+        using value_type = mapnik::geometry::point<double>;
+        using difference_type = std::ptrdiff_t;
+        using pointer = value_type const*;
+        using reference = value_type;
+
+        char const* p;
+
+        value_type operator*() const
+        {
+            double x, y;
+            if (Swap)
+            {
+                read_double_xdr(p, x);
+                read_double_xdr(p + 8, y);
+            }
+            else
+            {
+                read_double_ndr(p, x);
+                read_double_ndr(p + 8, y);
+            }
+            return value_type(x, y);
+        }
+        value_type operator[](difference_type n) const { return *(*this + n); }
+        coord_iterator& operator++()
+        {
+            p += Stride;
+            return *this;
+        }
+        coord_iterator operator++(int)
+        {
+            coord_iterator const before = *this;
+            p += Stride;
+            return before;
+        }
+        coord_iterator& operator--()
+        {
+            p -= Stride;
+            return *this;
+        }
+        coord_iterator operator--(int)
+        {
+            coord_iterator const before = *this;
+            p -= Stride;
+            return before;
+        }
+        coord_iterator& operator+=(difference_type n)
+        {
+            p += n * static_cast<difference_type>(Stride);
+            return *this;
+        }
+        coord_iterator& operator-=(difference_type n)
+        {
+            p -= n * static_cast<difference_type>(Stride);
+            return *this;
+        }
+        coord_iterator operator+(difference_type n) const
+        {
+            return coord_iterator{p + n * static_cast<difference_type>(Stride)};
+        }
+        coord_iterator operator-(difference_type n) const
+        {
+            return coord_iterator{p - n * static_cast<difference_type>(Stride)};
+        }
+        difference_type operator-(coord_iterator const& other) const
+        {
+            return (p - other.p) / static_cast<difference_type>(Stride);
+        }
+        bool operator==(coord_iterator const& other) const { return p == other.p; }
+        bool operator!=(coord_iterator const& other) const { return p != other.p; }
+        bool operator<(coord_iterator const& other) const { return p < other.p; }
+        bool operator>(coord_iterator const& other) const { return p > other.p; }
+        bool operator<=(coord_iterator const& other) const { return p <= other.p; }
+        bool operator>=(coord_iterator const& other) const { return p >= other.p; }
+    };
+
     template<typename Ring, bool Z = false, bool M = false>
     void read_coords(Ring& ring, std::size_t num_points)
     {
-        double x, y;
+        constexpr std::size_t stride = 16 + (Z ? 8 : 0) + (M ? 8 : 0); // XY, then Z and M skipped
+        char const* const first = wkb_ + pos_;
+        char const* const last = first + num_points * stride;
         if (!needSwap_)
         {
-            for (std::size_t i = 0; i < num_points; ++i)
-            {
-                read_double_ndr(wkb_ + pos_, x);
-                read_double_ndr(wkb_ + pos_ + 8, y);
-                ring.emplace_back(x, y);
-                pos_ += 16; // skip XY
-                if (Z)
-                    pos_ += 8;
-                if (M)
-                    pos_ += 8;
-            }
+            ring.assign(coord_iterator<false, stride>{first}, coord_iterator<false, stride>{last});
         }
         else
         {
-            for (std::size_t i = 0; i < num_points; ++i)
-            {
-                read_double_xdr(wkb_ + pos_, x);
-                read_double_xdr(wkb_ + pos_ + 8, y);
-                ring.emplace_back(x, y);
-                pos_ += 16; // skip XY
-                if (Z)
-                    pos_ += 8;
-                if (M)
-                    pos_ += 8;
-            }
+            ring.assign(coord_iterator<true, stride>{first}, coord_iterator<true, stride>{last});
         }
+        pos_ += num_points * stride;
     }
 
     template<bool Z = false, bool M = false>
@@ -306,7 +373,6 @@ struct wkb_reader : util::noncopyable
         int num_points = read_integer();
         if (num_points > 0)
         {
-            line.reserve(num_points);
             read_coords<mapnik::geometry::line_string<double>, M, Z>(line, num_points);
         }
         return line;
@@ -338,7 +404,6 @@ struct wkb_reader : util::noncopyable
             int num_points = read_integer();
             if (num_points > 0)
             {
-                ring.reserve(num_points);
                 read_coords<mapnik::geometry::linear_ring<double>, M, Z>(ring, num_points);
             }
             poly.push_back(std::move(ring));

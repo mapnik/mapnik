@@ -44,6 +44,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <cfloat> // FLT_MAX
 #include <memory>
 #include <string>
+#include <string_view>
 #include <algorithm>
 #include <set>
 #include <sstream>
@@ -60,6 +61,11 @@ using mapnik::attribute_descriptor;
 using mapnik::sql_utils::identifier;
 using mapnik::sql_utils::literal;
 using std::shared_ptr;
+
+namespace {
+// the name of \w's class (word characters), one string for lookup_classname to read the range of
+constexpr std::string_view word_class_name = "w";
+} // namespace
 
 postgis_datasource::postgis_datasource(parameters const& params)
     : datasource(params),
@@ -90,7 +96,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       simplify_dp_ratio_(*params_.get<mapnik::value_double>("simplify_dp_ratio", 1.0 / 20.0)),
       simplify_dp_preserve_(false),
       simplify_clip_resolution_(*params_.get<mapnik::value_double>("simplify_clip_resolution", 0.0)),
-      re_tokens_("!(@?\\w+)!"), // matches  !mapnik_var!  or  !@user_var!
+      word_class_(word_traits_.lookup_classname(word_class_name.begin(), word_class_name.end())),
       // params below are for testing purposes only and may be removed at any time
       intersect_min_scale_(*params.get<mapnik::value_integer>("intersect_min_scale", 0)),
       intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0)),
@@ -523,19 +529,47 @@ std::string postgis_datasource::populate_tokens(std::string const& sql,
                                                 bool intersect) const
 {
     std::ostringstream populated_sql;
-    std::cmatch m;
     char const* start = sql.data();
     char const* end = start + sql.size();
 
     populated_sql.precision(16);
     populated_sql << std::showpoint;
 
-    while (std::regex_search(start, end, m, re_tokens_))
-    {
-        populated_sql.write(start, m[0].first - start);
-        start = m[0].second;
+    // the leftmost match of the regex !(@?\w+)! (!mapnik_var! or !@user_var!),
+    // scanned directly: the query text runs to kilobytes and is populated for
+    // every layer of every render
+    auto const word = [this](char c) {
+        return word_traits_.isctype(c, word_class_);
+    };
+    auto const next_token = [&](char const*& token, char const*& name_end) {
+        for (char const* p = start; p != end; ++p)
+        {
+            if (*p != '!')
+                continue;
+            char const* q = p + 1;
+            if (q != end && *q == '@')
+                ++q;
+            char const* const word_begin = q;
+            while (q != end && word(*q))
+                ++q;
+            if (q != word_begin && q != end && *q == '!')
+            {
+                token = p;
+                name_end = q;
+                return true;
+            }
+        }
+        return false;
+    };
 
-        auto m1 = boost::make_iterator_range(m[1].first, m[1].second);
+    char const* token;
+    char const* name_end;
+    while (next_token(token, name_end))
+    {
+        populated_sql.write(start, token - start);
+        start = name_end + 1;
+
+        auto m1 = boost::make_iterator_range(token + 1, name_end);
         if (m1.front() == '@')
         {
             std::string var_name(m1.begin() + 1, m1.end());

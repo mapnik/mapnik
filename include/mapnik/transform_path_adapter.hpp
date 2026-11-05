@@ -99,6 +99,22 @@ struct transform_path_adapter
         return command;
     }
 
+    // The source's skip_rest_if() with the points transformed as vertex() does, when the
+    // projection leaves them as they are.
+    template<typename Pass>
+    bool skip_rest_if(Pass&& pass) const
+        requires requires(Geometry& g) { g.skip_rest_if([](double, double) { return true; }); }
+    {
+        if (!prj_trans_->equal())
+        {
+            return false;
+        }
+        return geom_.skip_rest_if([&](double x, double y) {
+            t_->forward(&x, &y);
+            return pass(x, y);
+        });
+    }
+
     void rewind(unsigned pos) const { geom_.rewind(pos); }
 
     unsigned type() const { return static_cast<unsigned>(geom_.type()); }

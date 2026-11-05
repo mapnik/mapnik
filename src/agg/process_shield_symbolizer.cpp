@@ -65,6 +65,8 @@ void agg_renderer<T0, T1>::process(shield_symbolizer const& sym,
     composite_mode_e const comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     composite_mode_e const halo_comp_op =
       get<composite_mode_e>(sym, keys::halo_comp_op, feature, common_.vars_, src_over);
+    blends_with(comp_op);
+    blends_with(halo_comp_op);
     agg_text_renderer<T0> ren(buffers_.top().get(),
                               halo_rasterizer,
                               comp_op,

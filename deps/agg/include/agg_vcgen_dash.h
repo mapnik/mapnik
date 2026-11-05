@@ -22,6 +22,7 @@
 #include "agg_basics.h"
 #include "agg_vertex_sequence.h"
 #include <mapnik/config.hpp>
+#include <vector>
 
 namespace agg
 {
@@ -57,6 +58,11 @@ namespace agg
         void shorten(double s) { m_shorten = s; }
         double shorten() const { return m_shorten; }
 
+        // Leaves out the dashes that lie entirely along segments far outside
+        // the box: only for output that is culled to the box afterwards, as
+        // mapnik's cull_line does (see vertex()).
+        void cull_box(double x1, double y1, double x2, double y2);
+
         // Vertex Generator Interface
         void remove_all();
         void add_vertex(double x, double y, unsigned cmd);
@@ -71,7 +77,37 @@ namespace agg
 
         void calc_dash_start(double ds);
 
+        // A vertex of the output: the end of segment v1-v2 or the point rest
+        // before it.
+        struct out_vertex
+        {
+            const vertex_dist* v1;
+            const vertex_dist* v2;
+            double             rest;
+            bool               at_v2;
+            unsigned           cmd;
+        };
+
+        static void point(const out_vertex& v, double* x, double* y)
+        {
+            if(v.at_v2)
+            {
+                *x = v.v2->x;
+                *y = v.v2->y;
+            }
+            else
+            {
+                *x = v.v2->x - (v.v2->x - v.v1->x) * v.rest / v.v1->dist;
+                *y = v.v2->y - (v.v2->y - v.v1->y) * v.rest / v.v1->dist;
+            }
+        }
+
+        bool is_far(const vertex_dist& v1, const vertex_dist& v2) const;
+        void skip_periods();
+
         double             m_dashes[max_dashes];
+        double             m_dash_grain; // the largest power of two all dash lengths are multiples of
+        double             m_skip_limit; // skip_periods() is exact below it (zero: never)
         double             m_total_dash_len;
         unsigned           m_num_dashes;
         double             m_dash_start;
@@ -86,6 +122,17 @@ namespace agg
         unsigned       m_closed;
         status_e       m_status;
         unsigned       m_src_vertex;
+
+        bool                     m_cull;
+        double                   m_cull_x1;
+        double                   m_cull_y1;
+        double                   m_cull_x2;
+        double                   m_cull_y2;
+        bool                     m_far; // the segment m_v1-m_v2 is far from the cull box
+        // the subpath being generated, held back while it lies along far segments
+        std::vector<out_vertex>  m_held;
+        bool                     m_flushing; // outputting m_held
+        unsigned                 m_flush;    // the next of m_held to output
     };
 
 

@@ -63,6 +63,8 @@ void render_polygon_symbolizer(polygon_symbolizer const& sym,
         converter.template set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0)
         converter.template set<smooth_tag>(); // optional smooth converter
+    if (!(prj_trans.equal() && clip))
+        converter.template set<cull_poly_tag>(); // shorten what lies outside, if supported
 
     using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer_type>;
     using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;

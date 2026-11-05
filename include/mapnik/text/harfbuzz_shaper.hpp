@@ -246,7 +246,7 @@ struct harfbuzz_shaper
         bool has_lang;
         std::string lang;
         std::string face_name;
-        std::string fontset;
+        std::optional<font_set> fontset;
         std::string features;
 
         bool operator==(shaping_key const& other) const
@@ -272,7 +272,8 @@ struct harfbuzz_shaper
             mix(static_cast<std::size_t>(k.has_lang));
             mix(std::hash<std::string>()(k.lang));
             mix(std::hash<std::string>()(k.face_name));
-            mix(std::hash<std::string>()(k.fontset));
+            // a fontset's name and size: hashing its (many) face names would take longer than comparing them
+            mix(k.fontset ? std::hash<std::string>()(k.fontset->get_name()) + k.fontset->size() + 1 : 0);
             mix(std::hash<std::string>()(k.features));
             return seed;
         }
@@ -283,28 +284,6 @@ struct harfbuzz_shaper
     static void append_u32(std::string& key, std::uint32_t value)
     {
         key.append(reinterpret_cast<char const*>(&value), sizeof(value));
-    }
-
-    static std::string fontset_key(std::optional<font_set> const& fset)
-    {
-        std::string key;
-        key.push_back(fset ? 1 : 0);
-        if (!fset)
-        {
-            return key;
-        }
-        std::size_t size = 1;
-        for (std::string const& name : fset->get_face_names())
-        {
-            size += sizeof(std::uint32_t) + name.size();
-        }
-        key.reserve(size);
-        for (std::string const& name : fset->get_face_names())
-        {
-            append_u32(key, static_cast<std::uint32_t>(name.size()));
-            key.append(name);
-        }
-        return key;
     }
 
     static std::string feature_key(font_feature_settings const& settings)
@@ -341,8 +320,8 @@ struct harfbuzz_shaper
         auto hb_buffer_deleter = [](hb_buffer_t* buffer) {
             hb_buffer_destroy(buffer);
         };
-        std::unique_ptr<hb_buffer_t, decltype(hb_buffer_deleter)> const buffer(hb_buffer_create(), hb_buffer_deleter);
-        hb_buffer_pre_allocate(buffer.get(), safe_cast<int>(length));
+        // created for the first text item not found in the shaping cache
+        std::unique_ptr<hb_buffer_t, decltype(hb_buffer_deleter)> buffer(nullptr, hb_buffer_deleter);
         mapnik::value_unicode_string const& text = itemizer.text();
         for (auto const& text_item : list)
         {
@@ -389,7 +368,7 @@ struct harfbuzz_shaper
                             lang.has_value(),
                             lang.value_or(std::string()),
                             text_item.format_->face_name,
-                            fontset_key(text_item.format_->fontset),
+                            text_item.format_->fontset,
                             feature_key(ff_settings)};
             auto cache_hit = cache.find(key);
             if (cache_hit != cache.end())
@@ -404,6 +383,11 @@ struct harfbuzz_shaper
             constexpr std::size_t max_cache_entries = 65536;
             bool const do_cache = cache.size() < max_cache_entries;
             std::vector<shaped_glyph> shaped;
+            if (!buffer)
+            {
+                buffer.reset(hb_buffer_create());
+                hb_buffer_pre_allocate(buffer.get(), safe_cast<int>(length));
+            }
 
             face_set_ptr face_set = font_manager.get_face_set(text_item.format_->face_name, text_item.format_->fontset);
             face_set->set_unscaled_character_sizes();

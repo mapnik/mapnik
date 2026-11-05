@@ -49,6 +49,18 @@ namespace agg
             return cmd;
         }
 
+        // The source's skip_rest_if() (see mapnik's vertex adapters) with
+        // the points transformed as vertex() does.
+        template<class Pass>
+        bool skip_rest_if(Pass&& pass) const
+            requires requires(VertexSource& s) { s.skip_rest_if([](double, double) { return true; }); }
+        {
+            return m_source->skip_rest_if([&](double x, double y) {
+                m_trans->transform(&x, &y);
+                return pass(x, y);
+            });
+        }
+
         void transformer(Transformer& tr)
         {
             m_trans = &tr;

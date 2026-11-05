@@ -40,8 +40,13 @@ extern "C" {
 #include <png.h>
 }
 #include <algorithm>
+#include <cstdint>
+#include <cstring>
 #include <set>
+#include <stdexcept>
 #include <string>
+#include <utility>
+#include <vector>
 MAPNIK_DISABLE_WARNING_POP
 
 #define MAX_OCTREE_LEVELS 4
@@ -261,6 +266,128 @@ void reduce_1(T const&,
 }
 
 template<typename T>
+void write_png_chunk(T& file, char const* type, unsigned char const* data, std::size_t size)
+{
+    unsigned char head[8] = {static_cast<unsigned char>(size >> 24),
+                             static_cast<unsigned char>(size >> 16),
+                             static_cast<unsigned char>(size >> 8),
+                             static_cast<unsigned char>(size)};
+    std::memcpy(head + 4, type, 4);
+    file.write(reinterpret_cast<char const*>(head), 8);
+    if (size > 0)
+    {
+        file.write(reinterpret_cast<char const*>(data), size);
+    }
+    unsigned long crc = crc32(0L, head + 4, 4);
+    if (size > 0)
+    {
+        crc = crc32(crc, data, size);
+    }
+    unsigned char const tail[4] = {static_cast<unsigned char>(crc >> 24),
+                                   static_cast<unsigned char>(crc >> 16),
+                                   static_cast<unsigned char>(crc >> 8),
+                                   static_cast<unsigned char>(crc)};
+    file.write(reinterpret_cast<char const*>(tail), 4);
+}
+
+// The IDAT chunks of an unfiltered 8-bit image, then IEND, as libpng 1.6 writes them after
+// png_write_info(): the rows, each after a filter byte of 0, in one deflate stream with its zlib
+// settings (level and strategy from opts, 32 KB window shrunk for images under 16 KB, memory
+// level 8), cut into 32768-byte chunks, the first with libpng's optimization of the zlib header.
+// libpng feeds deflate one row at a time; this feeds it the whole image, which makes no
+// difference to zlib's output, and lets zlib-ng's medium strategy (levels 4-6) see past the row
+// ends: fewer, longer matches, in much less time.
+template<typename T>
+void write_png_rows(T& file, mapnik::image_gray8 const& image, unsigned width, unsigned height, png_options const& opts)
+{
+    std::size_t const row_size = std::size_t(width) + 1;
+    std::size_t const data_size = row_size * height;
+    std::vector<unsigned char> raw(data_size);
+    for (unsigned y = 0; y < height; ++y)
+    {
+        unsigned char* row = raw.data() + y * row_size;
+        row[0] = 0;
+        std::memcpy(row + 1, image.get_row(y), width);
+    }
+    int window_bits = 15;
+    if (data_size <= 16384)
+    {
+        unsigned half_window_size = 1u << (window_bits - 1);
+        while (data_size + 262 <= half_window_size)
+        {
+            half_window_size >>= 1;
+            --window_bits;
+        }
+    }
+    z_stream z;
+    std::memset(&z, 0, sizeof(z));
+    if (deflateInit2(&z, opts.compression, Z_DEFLATED, window_bits, 8, opts.strategy) != Z_OK)
+    {
+        throw std::runtime_error("deflateInit2 failed");
+    }
+    constexpr std::size_t chunk_size = 32768;
+    std::vector<unsigned char> chunk(chunk_size);
+    z.next_in = raw.data();
+    z.avail_in = static_cast<uInt>(data_size);
+    bool first = true;
+    auto const write_chunk = [&](std::size_t size) {
+        if (first && data_size <= 16384)
+        {
+            // libpng's optimize_cmf: a window no larger than the data in the zlib header
+            unsigned z_cmf = chunk[0];
+            if ((z_cmf & 0x0f) == 8 && (z_cmf & 0xf0) <= 0x70)
+            {
+                unsigned z_cinfo = z_cmf >> 4;
+                unsigned half_z_window_size = 1u << (z_cinfo + 7);
+                if (data_size <= half_z_window_size)
+                {
+                    do
+                    {
+                        half_z_window_size >>= 1;
+                        --z_cinfo;
+                    } while (z_cinfo > 0 && data_size <= half_z_window_size);
+                    z_cmf = (z_cmf & 0x0f) | (z_cinfo << 4);
+                    chunk[0] = static_cast<unsigned char>(z_cmf);
+                    unsigned tmp = chunk[1] & 0xe0;
+                    tmp += 0x1f - ((z_cmf << 8) + tmp) % 0x1f;
+                    chunk[1] = static_cast<unsigned char>(tmp);
+                }
+            }
+        }
+        first = false;
+        if (size > 0)
+        {
+            write_png_chunk(file, "IDAT", chunk.data(), size);
+        }
+    };
+    // the output buffer is kept across calls (like libpng's) until a chunk's worth is written
+    z.next_out = chunk.data();
+    z.avail_out = chunk_size;
+    for (;;)
+    {
+        int const ret = deflate(&z, z.avail_in > 0 ? Z_NO_FLUSH : Z_FINISH);
+        if (ret == Z_STREAM_END)
+        {
+            write_chunk(chunk_size - z.avail_out);
+            break;
+        }
+        if (ret != Z_OK)
+        {
+            deflateEnd(&z);
+            throw std::runtime_error("deflate failed");
+        }
+        if (z.avail_out == 0)
+        {
+            write_chunk(chunk_size);
+            z.next_out = chunk.data();
+            z.avail_out = chunk_size;
+        }
+    }
+    deflateEnd(&z);
+    write_png_chunk(file, "IEND", nullptr, 0);
+}
+
+template<typename T>
 void save_as_png(T& file,
                  std::vector<mapnik::rgb> const& palette,
                  mapnik::image_gray8 const& image,
@@ -303,6 +430,10 @@ void save_as_png(T& file,
     png_set_compression_level(png_ptr, opts.compression);
     png_set_compression_strategy(png_ptr, opts.strategy);
     png_set_compression_buffer_size(png_ptr, 32768);
+#ifdef PNG_CHECK_FOR_INVALID_INDEX_SUPPORTED
+    // indexes come from the palette's own quantizer; skip rescanning every row for out of range ones
+    png_set_check_for_invalid_index(png_ptr, 0);
+#endif
 
     png_set_IHDR(png_ptr,
                  info_ptr,
@@ -337,6 +468,14 @@ void save_as_png(T& file,
     }
 
     png_write_info(png_ptr, info_ptr);
+    if (color_depth == 8 && opts.filters == PNG_FILTER_NONE)
+    {
+        // the rows deflated all at once (see write_png_rows), then IEND: what png_write_row
+        // and png_write_end would write
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        write_png_rows(file, image, width, height, opts);
+        return;
+    }
     for (unsigned i = 0; i < height; ++i)
     {
         png_write_row(png_ptr, const_cast<png_bytep>(image.get_row(i)));
@@ -659,6 +798,14 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
             tree.setGamma(opts.gamma);
         }
 
+        // runs of equal pixels, row by row (color number, end), and the colors in the order they first appear
+        // with their pixel counts: each color goes into the tree once, with all its pixels
+        std::vector<std::pair<unsigned, unsigned>> runs;
+        std::vector<unsigned> colors;
+        std::vector<unsigned> counts;
+        // color -> color number + 1 (0: empty), open addressing at most half full
+        std::vector<std::pair<unsigned, unsigned>> table(std::size_t(1) << 12);
+        unsigned table_bits = 12;
         for (unsigned y = 0; y < height; ++y)
         {
             typename T2::pixel_type const* row = image.get_row(y);
@@ -667,13 +814,70 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
             {
                 unsigned val = row[x];
                 unsigned run_end = x + 1;
-                while (run_end < width && row[run_end] == val)
+                // two pixels at a time, then the last one
+                std::uint64_t const two = (std::uint64_t(val) << 32) | val;
+                while (run_end + 1 < width)
+                {
+                    std::uint64_t next_two;
+                    std::memcpy(&next_two, row + run_end, sizeof(next_two));
+                    if (next_two != two)
+                    {
+                        break;
+                    }
+                    run_end += 2;
+                }
+                if (run_end < width && row[run_end] == val)
                 {
                     ++run_end;
                 }
-                tree.insert(mapnik::rgba(U2RED(val), U2GREEN(val), U2BLUE(val), U2ALPHA(val)), run_end - x);
+                std::size_t const mask = table.size() - 1;
+                std::size_t i =
+                  static_cast<std::size_t>((std::uint64_t(val) * 0x9E3779B97F4A7C15ULL) >> (64 - table_bits));
+                while (table[i].second != 0 && table[i].first != val)
+                {
+                    i = (i + 1) & mask;
+                }
+                unsigned number;
+                if (table[i].second == 0)
+                {
+                    number = static_cast<unsigned>(colors.size());
+                    colors.push_back(val);
+                    counts.push_back(0);
+                    table[i] = {val, number + 1};
+                    if (2 * colors.size() > table.size())
+                    {
+                        ++table_bits;
+                        std::vector<std::pair<unsigned, unsigned>> grown(std::size_t(1) << table_bits);
+                        std::size_t const grown_mask = grown.size() - 1;
+                        for (auto const& e : table)
+                        {
+                            if (e.second != 0)
+                            {
+                                std::size_t j = static_cast<std::size_t>(
+                                  (std::uint64_t(e.first) * 0x9E3779B97F4A7C15ULL) >> (64 - table_bits));
+                                while (grown[j].second != 0)
+                                {
+                                    j = (j + 1) & grown_mask;
+                                }
+                                grown[j] = e;
+                            }
+                        }
+                        table.swap(grown);
+                    }
+                }
+                else
+                {
+                    number = table[i].second - 1;
+                }
+                counts[number] += run_end - x;
+                runs.emplace_back(number, run_end);
                 x = run_end;
             }
+        }
+        for (std::size_t k = 0; k < colors.size(); ++k)
+        {
+            unsigned const val = colors[k];
+            tree.insert(mapnik::rgba(U2RED(val), U2GREEN(val), U2BLUE(val), U2ALPHA(val)), counts[k]);
         }
 
         // transparency values per palette index
@@ -689,7 +893,48 @@ void save_as_png8_hex(T1& file, T2 const& image, png_options const& opts)
             palette.emplace_back(c.r, c.g, c.b);
             alpha_table.push_back(c.a);
         }
-        save_as_png8<T1, T2, hextree<mapnik::rgba>>(file, image, tree, palette, alpha_table, opts);
+        if (palette.size() > 16)
+        {
+            // >16 && <=256 colors -> write 8-bit color depth
+            // every byte is written below
+            image_gray8 reduced_image(width, height, false);
+            std::uint8_t const* const reduced_end = reduced_image.bytes() + reduced_image.size();
+            // the palette index of each color, found once
+            std::vector<std::uint8_t> indexes(colors.size());
+            for (std::size_t k = 0; k < colors.size(); ++k)
+            {
+                indexes[k] = static_cast<std::uint8_t>(tree.quantize_once(colors[k]));
+            }
+            auto run = runs.cbegin();
+            for (unsigned y = 0; y < height; ++y)
+            {
+                mapnik::image_gray8::pixel_type* row_out = reduced_image.get_row(y);
+                unsigned x = 0;
+                while (x < width)
+                {
+                    std::uint8_t* const first = row_out + x;
+                    std::uint8_t* const last = row_out + run->second;
+                    std::uint8_t const index = indexes[run->first];
+                    if (last - first <= 8 && reduced_end - first >= 8)
+                    {
+                        // a short run in one store: the bytes past it are written again by the runs after it
+                        std::uint64_t const indices = index * 0x0101010101010101ULL;
+                        std::memcpy(first, &indices, sizeof(indices));
+                    }
+                    else
+                    {
+                        std::fill(first, last, index);
+                    }
+                    x = run->second;
+                    ++run;
+                }
+            }
+            save_as_png(file, palette, reduced_image, width, height, 8, alpha_table, opts);
+        }
+        else
+        {
+            save_as_png8<T1, T2, hextree<mapnik::rgba>>(file, image, tree, palette, alpha_table, opts);
+        }
     }
     else
     {

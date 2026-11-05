@@ -53,6 +53,7 @@ void agg_renderer<T0, T1>::process(point_symbolizer const& sym,
                                    proj_transform const& prj_trans)
 {
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+    blends_with(comp_op);
 
     render_point_symbolizer(
       sym,

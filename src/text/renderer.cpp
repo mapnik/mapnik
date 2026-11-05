@@ -30,9 +30,219 @@
 #include <mapnik/text/face.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_any.hpp>
+#include <mapnik/safe_cast.hpp>
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
+#include <mapnik/warning_ignore_agg.hpp>
+#include "agg_color_rgba.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_rendering_buffer.h"
+MAPNIK_DISABLE_WARNING_POP
+#include <algorithm>
 #include <mapnik/agg_rasterizer.hpp>
 
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
+#include <mapnik/warning_ignore.hpp>
+extern "C" {
+#include <ft2build.h>
+#include FT_GLYPH_H
+#include FT_OUTLINE_H
+}
+MAPNIK_DISABLE_WARNING_POP
+
+// stl
+#include <array>
+#include <cstring>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <type_traits>
+#include <unordered_map>
+#include <vector>
+
 namespace mapnik {
+
+namespace {
+
+// Halo strokes of glyph outlines, reused for later copies of the same outline.
+//
+// FreeType's stroker only adds offsets to point coordinates and takes their
+// differences, except that it halves sums of coordinates, rounding towards
+// zero, where it splits curves. While all coordinates are non-negative that
+// halving rounds the same way wherever the outline is placed, so stroking a
+// translated outline gives exactly the translated stroke. Outlines are kept
+// relative to the corner of their control box and only reused where that
+// corner is not negative.
+//
+// The cache is shared by all threads; its shards are only locked to look up
+// or insert an entry, never while stroking or copying one.
+class halo_stroke_cache
+{
+  public:
+    // Same as s.init(radius) followed by FT_Glyph_Stroke(&glyph, s.get(), 1).
+    void stroke(FT_Glyph& glyph, stroker& s, double radius)
+    {
+        FT_BBox cbox;
+        if (glyph->format == FT_GLYPH_FORMAT_OUTLINE)
+        {
+            FT_Outline_Get_CBox(&reinterpret_cast<FT_OutlineGlyph>(glyph)->outline, &cbox);
+        }
+        if (glyph->format != FT_GLYPH_FORMAT_OUTLINE || cbox.xMin < 0 || cbox.yMin < 0)
+        {
+            s.init(radius);
+            FT_Glyph_Stroke(&glyph, s.get(), 1);
+            return;
+        }
+        // the radius as stroker::init passes it to FreeType
+        key_type key =
+          make_key(reinterpret_cast<FT_OutlineGlyph>(glyph)->outline, static_cast<FT_Fixed>(radius * (1 << 6)), cbox);
+        shard& sh = shards_[key.hash % shard_count];
+        std::shared_ptr<outline_copy const> copy;
+        {
+#ifdef MAPNIK_THREADSAFE
+            std::lock_guard<std::mutex> lock(sh.mutex);
+#endif
+            auto itr = sh.entries.find(key);
+            if (itr != sh.entries.end())
+            {
+                copy = itr->second;
+            }
+        }
+        if (copy)
+        {
+            restore(glyph, *copy, cbox);
+            return;
+        }
+        s.init(radius);
+        if (FT_Glyph_Stroke(&glyph, s.get(), 1) != 0 || glyph->format != FT_GLYPH_FORMAT_OUTLINE)
+        {
+            return;
+        }
+        copy = save(reinterpret_cast<FT_OutlineGlyph>(glyph)->outline, cbox);
+#ifdef MAPNIK_THREADSAFE
+        std::lock_guard<std::mutex> lock(sh.mutex);
+#endif
+        if (sh.entries.size() >= max_entries / shard_count)
+        {
+            sh.entries.clear();
+        }
+        sh.entries.emplace(std::move(key), std::move(copy));
+    }
+
+  private:
+    using contour_type = std::remove_pointer_t<decltype(FT_Outline::contours)>;
+
+    struct key_type
+    {
+        std::size_t hash;
+        std::string bytes;
+        bool operator==(key_type const& other) const { return bytes == other.bytes; }
+    };
+
+    struct key_hash
+    {
+        std::size_t operator()(key_type const& key) const { return key.hash; }
+    };
+
+    struct outline_copy
+    {
+        std::vector<FT_Vector> points; // relative to the control box corner
+        std::string tags;
+        std::vector<contour_type> contours;
+        int flags;
+    };
+
+    struct shard
+    {
+#ifdef MAPNIK_THREADSAFE
+        std::mutex mutex;
+#endif
+        std::unordered_map<key_type, std::shared_ptr<outline_copy const>, key_hash> entries;
+    };
+
+    // a few KB each
+    static constexpr std::size_t max_entries = 65536;
+    static constexpr std::size_t shard_count = 16;
+
+    template<typename T>
+    static void append(std::string& bytes, T const& value)
+    {
+        bytes.append(reinterpret_cast<char const*>(&value), sizeof(value));
+    }
+
+    static key_type make_key(FT_Outline const& outline, FT_Fixed radius, FT_BBox const& cbox)
+    {
+        key_type key;
+        std::string& bytes = key.bytes;
+        bytes.reserve(32 + outline.n_points * (2 * sizeof(FT_Pos) + 1) + outline.n_contours * sizeof(contour_type));
+        append(bytes, radius);
+        append(bytes, outline.n_points);
+        append(bytes, outline.n_contours);
+        append(bytes, outline.flags);
+        for (int i = 0; i < outline.n_points; ++i)
+        {
+            append(bytes, outline.points[i].x - cbox.xMin);
+            append(bytes, outline.points[i].y - cbox.yMin);
+        }
+        bytes.append(reinterpret_cast<char const*>(outline.tags), outline.n_points);
+        bytes.append(reinterpret_cast<char const*>(outline.contours), sizeof(contour_type) * outline.n_contours);
+        key.hash = std::hash<std::string>()(bytes);
+        return key;
+    }
+
+    static std::shared_ptr<outline_copy const> save(FT_Outline const& outline, FT_BBox const& cbox)
+    {
+        auto copy = std::make_shared<outline_copy>();
+        copy->points.reserve(outline.n_points);
+        for (int i = 0; i < outline.n_points; ++i)
+        {
+            copy->points.push_back({outline.points[i].x - cbox.xMin, outline.points[i].y - cbox.yMin});
+        }
+        copy->tags.assign(reinterpret_cast<char const*>(outline.tags), outline.n_points);
+        copy->contours.assign(outline.contours, outline.contours + outline.n_contours);
+        copy->flags = outline.flags;
+        return copy;
+    }
+
+    // Replaces the glyph's outline the way FT_Glyph_Stroke does with its stroke.
+    static void restore(FT_Glyph glyph, outline_copy const& copy, FT_BBox const& cbox)
+    {
+        FT_Outline& outline = reinterpret_cast<FT_OutlineGlyph>(glyph)->outline;
+        FT_Outline_Done(glyph->library, &outline);
+        if (FT_Outline_New(glyph->library,
+                           static_cast<FT_UInt>(copy.points.size()),
+                           static_cast<FT_Int>(copy.contours.size()),
+                           &outline) != 0)
+        {
+            return;
+        }
+        for (std::size_t i = 0; i < copy.points.size(); ++i)
+        {
+            outline.points[i].x = copy.points[i].x + cbox.xMin;
+            outline.points[i].y = copy.points[i].y + cbox.yMin;
+        }
+        if (!copy.tags.empty())
+        {
+            std::memcpy(outline.tags, copy.tags.data(), copy.tags.size());
+        }
+        if (!copy.contours.empty())
+        {
+            std::memcpy(outline.contours, copy.contours.data(), sizeof(contour_type) * copy.contours.size());
+        }
+        outline.flags = copy.flags;
+    }
+
+    std::array<shard, shard_count> shards_;
+};
+
+halo_stroke_cache& get_halo_stroke_cache()
+{
+    static halo_stroke_cache cache;
+    return cache;
+}
+
+} // namespace
 
 text_renderer::text_renderer(halo_rasterizer_e rasterizer,
                              composite_mode_e comp_op,
@@ -134,14 +344,70 @@ void composite_bitmap(T& pixmap,
     int x_max = x + bitmap->width;
     int y_max = y + bitmap->rows;
 
-    for (int i = x, p = 0; i < x_max; ++i, ++p)
+    if constexpr (std::is_same_v<T, image_rgba8>)
     {
-        for (int j = y, q = 0; j < y_max; ++j, ++q)
+        // What composite_pixel() does for each pixel, with the color and the
+        // clipping worked out once per glyph and source-over blended directly.
+        using color_type = agg::rgba8;
+        using value_type = color_type::value_type;
+        using order_type = agg::order_rgba;
+        double const clamped_opacity = opacity < 0.0 ? 0.0 : (opacity > 1.0 ? 1.0 : opacity);
+        unsigned const ca = safe_cast<value_type>(((rgba >> 24u) & 0xff) * clamped_opacity);
+        unsigned const cb = (rgba >> 16u) & 0xff;
+        unsigned const cg = (rgba >> 8u) & 0xff;
+        unsigned const cr = rgba & 0xff;
+        unsigned const pr = (cr * ca + color_type::base_mask) >> color_type::base_shift;
+        unsigned const pg = (cg * ca + color_type::base_mask) >> color_type::base_shift;
+        unsigned const pb = (cb * ca + color_type::base_mask) >> color_type::base_shift;
+        auto const blend = agg::comp_op_table_rgba<color_type, order_type>::g_comp_op_func[comp_op];
+        bool const src_over = comp_op == mapnik::src_over;
+        int const i0 = std::max(x, 0);
+        int const i1 = std::min(x_max, static_cast<int>(pixmap.width()));
+        int const j0 = std::max(y, 0);
+        int const j1 = std::min(y_max, static_cast<int>(pixmap.height()));
+        if (src_over)
         {
-            unsigned gray = bitmap->buffer[q * bitmap->width + p];
-            if (gray)
+            // each row is a span of one color with the glyph's grays as covers (a zero cover leaves the pixel)
+            if (i0 < i1)
             {
-                mapnik::composite_pixel(pixmap, comp_op, i, j, rgba, gray, opacity);
+                agg::rendering_buffer buf(pixmap.bytes(), pixmap.width(), pixmap.height(), pixmap.row_size());
+                agg::pixfmt_custom_blend_rgba<agg::comp_op_adaptor_rgba_pre<color_type, order_type>,
+                                              agg::rendering_buffer>
+                  pixf(buf);
+                pixf.comp_op(agg::comp_op_src_over);
+                color_type const c(pr, pg, pb, ca);
+                for (int j = j0; j < j1; ++j)
+                {
+                    pixf.blend_solid_hspan(i0, j, i1 - i0, c, bitmap->buffer + (j - y) * bitmap->width + (i0 - x));
+                }
+            }
+            return;
+        }
+        for (int j = j0; j < j1; ++j)
+        {
+            unsigned char const* src = bitmap->buffer + (j - y) * bitmap->width;
+            value_type* row = reinterpret_cast<value_type*>(pixmap.get_row(j));
+            for (int i = i0; i < i1; ++i)
+            {
+                unsigned gray = src[i - x];
+                if (gray)
+                {
+                    blend(row + 4 * i, pr, pg, pb, ca, gray);
+                }
+            }
+        }
+    }
+    else
+    {
+        for (int i = x, p = 0; i < x_max; ++i, ++p)
+        {
+            for (int j = y, q = 0; j < y_max; ++j, ++q)
+            {
+                unsigned gray = bitmap->buffer[q * bitmap->width + p];
+                if (gray)
+                {
+                    mapnik::composite_pixel(pixmap, comp_op, i, j, rgba, gray, opacity);
+                }
             }
         }
     }
@@ -157,6 +423,28 @@ agg_text_renderer<T>::agg_text_renderer(pixmap_type& pixmap,
     : text_renderer(rasterizer, comp_op, halo_comp_op, scale_factor, stroker),
       pixmap_(pixmap)
 {}
+
+namespace {
+
+// Whether an outline glyph grown by margin pixels on every side misses a
+// width x height image, so that drawing it changes no pixel. Labels are
+// placed in the buffer around the image too; their glyphs out there need
+// not be stroked or rasterized. The control box (in FreeType coordinates,
+// y up from the bottom of the image) bounds the outline, and the bitmap
+// made of it covers that box rounded out to whole pixels.
+bool outside_image(FT_Glyph glyph, double margin, unsigned width, unsigned height)
+{
+    if (glyph->format != FT_GLYPH_FORMAT_OUTLINE)
+    {
+        return false;
+    }
+    FT_BBox cbox;
+    FT_Outline_Get_CBox(&reinterpret_cast<FT_OutlineGlyph>(glyph)->outline, &cbox);
+    double const m = margin * 64.0;
+    return cbox.xMax + m < 0.0 || cbox.xMin - m > width * 64.0 || cbox.yMax + m < 0.0 || cbox.yMin - m > height * 64.0;
+}
+
+} // namespace
 
 template<typename T>
 void agg_text_renderer<T>::render(glyph_positions const& pos)
@@ -209,10 +497,15 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
         if (!error)
         {
             FT_Glyph_Transform(g, &halo_matrix, &start_halo);
+            // the stroke reaches about 1.15 radii past the outline's control box
+            if (outside_image(g, 4.0 * halo_radius + 4.0, pixmap_.width(), height))
+            {
+                FT_Done_Glyph(g);
+                continue;
+            }
             if (rasterizer_ == halo_rasterizer_enum::HALO_RASTERIZER_FULL)
             {
-                stroker_->init(halo_radius);
-                FT_Glyph_Stroke(&g, stroker_->get(), 1);
+                get_halo_stroke_cache().stroke(g, *stroker_, halo_radius);
                 error = FT_Glyph_To_Bitmap(&g, FT_RENDER_MODE_NORMAL, 0, 1);
                 if (!error)
                 {
@@ -291,6 +584,11 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
         text_opacity = glyph.properties.text_opacity;
 
         FT_Glyph_Transform(glyph.image, &matrix, &start);
+        if (outside_image(glyph.image, 2.0, pixmap_.width(), height))
+        {
+            FT_Done_Glyph(glyph.image);
+            continue;
+        }
         error = 0;
         if (glyph.image->format != FT_GLYPH_FORMAT_BITMAP)
         {
