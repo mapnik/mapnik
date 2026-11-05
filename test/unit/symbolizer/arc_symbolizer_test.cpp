@@ -23,6 +23,12 @@
 #include <mapnik/renderer_common/arc_text_placement.hpp>
 #include <mapnik/text/font_library.hpp>
 #include <mapnik/util/math.hpp>
+#include <mapnik/agg_renderer.hpp>
+#include <mapnik/image.hpp>
+#include <mapnik/layer.hpp>
+#include <mapnik/memory_datasource.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/geometry.hpp>
 
 #include <limits>
 #include <string>
@@ -333,5 +339,38 @@ TEST_CASE("arc_symbolizer")
             CAPTURE(radius, start, end);
             REQUIRE_FALSE(arc_symbolizer_properties(sym, feature, vars, 1.0).drawable());
         }
+    }
+
+    SECTION("a comp-op that lowers the alpha of an opaque map is demultiplied")
+    {
+        // the renderer skips demultiplying a map that stayed opaque, so it must learn of a
+        // blend that can make it translucent
+        Map m(64, 64);
+        load_map_string(m,
+                        R"xml(<Map background-color="rgb(255,0,0)"><Style name="arcs"><Rule>)xml"
+                        R"xml(<ArcSymbolizer radius="30" start-angle="0" end-angle="360" fill="black" )xml"
+                        R"xml(fill-opacity="0.5" comp-op="dst-out"/></Rule></Style></Map>)xml");
+        context_ptr ctx = std::make_shared<context_type>();
+        feature_ptr feature = std::make_shared<feature_impl>(ctx, 1);
+        feature->set_geometry(geometry::point<double>(0, 0));
+        parameters params;
+        params["type"] = "memory";
+        auto ds = std::make_shared<memory_datasource>(params);
+        ds->push(feature);
+        layer lyr("light");
+        lyr.set_datasource(ds);
+        lyr.add_style("arcs");
+        m.add_layer(lyr);
+        m.zoom_to_box(box2d<double>(-1, -1, 1, 1));
+        image_rgba8 im(64, 64);
+        agg_renderer<image_rgba8> ren(m, im);
+        ren.apply();
+        REQUIRE_FALSE(im.get_premultiplied());
+        color const c(im(32, 32), false);
+        // half of the red background is cut out: red at half alpha, not half red
+        REQUIRE(int(c.alpha()) == Approx(128).margin(2));
+        REQUIRE(int(c.red()) >= 253);
+        REQUIRE(int(c.green()) == 0);
+        REQUIRE(int(c.blue()) == 0);
     }
 }

@@ -273,7 +273,7 @@ void agg_renderer<T0, T1>::process(arc_symbolizer const& sym,
     ras_ptr->reset();
     if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
     {
-        ras_ptr->gamma(agg::gamma_power());
+        ras_ptr->gamma_power(1.0);
         gamma_method_ = gamma_method_enum::GAMMA_POWER;
         gamma_ = 1.0;
     }
@@ -288,6 +288,7 @@ void agg_renderer<T0, T1>::process(arc_symbolizer const& sym,
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
     using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
     composite_mode_e const comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+    blends_with(comp_op);
     pixfmt_comp_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
     renderer_base renb(pixf);
