@@ -42,10 +42,11 @@
 #if LIBXML_VERSION >= 20900
 #define DEFAULT_OPTIONS                                                                                                \
     (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA |                \
-     XML_PARSE_HUGE | XML_PARSE_BIG_LINES)
+     XML_PARSE_HUGE | XML_PARSE_BIG_LINES | XML_PARSE_NOBASEFIX)
 #elif LIBXML_VERSION >= 20703
 #define DEFAULT_OPTIONS                                                                                                \
-    (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA | XML_PARSE_HUGE)
+    (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA |                \
+     XML_PARSE_HUGE | XML_PARSE_NOBASEFIX)
 #else
 #define DEFAULT_OPTIONS                                                                                                \
     (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
