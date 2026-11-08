@@ -20,10 +20,8 @@ jobs:
     name: Check Source Code
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
       - uses: pre-commit/action@v3.0.1
 
   buildAndTest:
@@ -60,12 +58,12 @@ jobs:
           fi
 
       - name: Checkout Mapnik
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
       - name: Checkout vcpkg
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           path: vcpkg
           ref: ${{ env.VCPKG_RELEASE }}
