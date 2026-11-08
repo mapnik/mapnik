@@ -12,7 +12,7 @@ on:
       - "no-ci-*"
 
 env:
-  VCPKG_RELEASE: 7e9d43fdadc456cb9ef892bd12d27e32503f41fa
+  VCPKG_RELEASE: 2026.10.16
   VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg-binary-cache,readwrite"
 
 jobs:
