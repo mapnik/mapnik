@@ -99,6 +99,7 @@ add_executable(mapnik-test-unit
     unit/text/text_placements_list.cpp
     unit/text/text_placements_simple.cpp
     unit/util/char_array_buffer.cpp
+    unit/vertex_adapter/agg_stroke_collinear_test.cpp
     unit/vertex_adapter/clipping_test.cpp
     unit/vertex_adapter/extend_converter.cpp
     unit/vertex_adapter/line_offset_test.cpp
