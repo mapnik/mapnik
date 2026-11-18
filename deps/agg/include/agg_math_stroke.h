@@ -476,13 +476,23 @@ namespace agg
                 // the same as in round joins and caps. You can safely comment
                 // out this entire "if".
                 //-------------------
+                //
+                // For almost collinear segments the two offset lines are
+                // almost parallel, so the intersection is numerically
+                // unstable: round-off can place it arbitrarily far from v1,
+                // producing a huge spike (and a crash in the rasterizer).
+                // The true intersection is about m_width_abs from v1, so
+                // reject anything beyond the miter limit.
+                //-------------------
                 if(m_approx_scale * (m_width_abs - dbevel) < m_width_eps)
                 {
                     if(calc_intersection(v0.x + dx1, v0.y - dy1,
                                          v1.x + dx1, v1.y - dy1,
                                          v1.x + dx2, v1.y - dy2,
                                          v2.x + dx2, v2.y - dy2,
-                                         &dx, &dy))
+                                         &dx, &dy) &&
+                       calc_distance(v1.x, v1.y, dx, dy) <=
+                           m_width_abs * m_miter_limit)
                     {
                         add_vertex(vc, dx, dy);
                     }
