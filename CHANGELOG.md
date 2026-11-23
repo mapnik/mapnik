@@ -6,10 +6,28 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
-## Unreleased
 
-- Add ArcSymbolizer - draws an arc segment around a center point, with optional label text
+## Mapnik 4.4.0
 
+Released November 16th, 2026
+
+(Packaged from [xxx](https://github.com/mapnik/mapnik/commit/xxx))
+
+- Also enable C language. by @sebastic in https://github.com/mapnik/mapnik/pull/4588
+- Arc symbolizer by @hholzgra in https://github.com/mapnik/mapnik/pull/4589
+- Keep small ring outlines in the offset converter by @leijurv in https://github.com/mapnik/mapnik/pull/4590
+- Build without implicit fused multiply-add by @leijurv in https://github.com/mapnik/mapnik/pull/4591
+- Fix value::convert for windows by @leijurv in https://github.com/mapnik/mapnik/pull/4594
+- Allow cache-features to store query results across separate layers by @leijurv in https://github.com/mapnik/mapnik/pull/4592
+- Add tiles datasource plugin registration by @SunBlack in https://github.com/mapnik/mapnik/pull/4596
+- process version strings with up to three parts (Issue #4369) by @hholzgra in https://github.com/mapnik/mapnik/pull/4597
+- Performance improvements 3 by @leijurv in https://github.com/mapnik/mapnik/pull/4593
+- Fix an unintentional conflict between #4589 and #4593 by @leijurv in https://github.com/mapnik/mapnik/pull/4599
+- add XML_PARSE_NOBASEFIX to libxml2 default options (issue #4600) by @hholzgra in https://github.com/mapnik/mapnik/pull/4601
+- Update README.md by @mbrickn in https://github.com/mapnik/mapnik/pull/4179
+- agg: reject unstable miter point for nearly collinear joins @marisn @dch0ph https://github.com/mapnik/mapnik/pull/4604
+
+**Full Changelog**: https://github.com/mapnik/mapnik/compare/v4.3.2...v4.4.0
 
 ## Mapnik 4.3.2
 
