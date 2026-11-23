@@ -11,7 +11,7 @@ For a complete change history, see the git log.
 
 Released November 16th, 2026
 
-(Packaged from [xxx](https://github.com/mapnik/mapnik/commit/xxx))
+(Packaged from [ee5859621](https://github.com/mapnik/mapnik/commit/ee5859621))
 
 - Also enable C language. by @sebastic in https://github.com/mapnik/mapnik/pull/4588
 - Arc symbolizer by @hholzgra in https://github.com/mapnik/mapnik/pull/4589
