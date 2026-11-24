@@ -30,6 +30,7 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/renderer_common/process_building_symbolizer.hpp>
+#include <mapnik/image_compositing.hpp>
 
 // stl
 #include <deque>
@@ -55,16 +56,11 @@ void agg_renderer<T0, T1>::process(building_symbolizer const& sym,
                                    mapnik::feature_impl& feature,
                                    proj_transform const& prj_trans)
 {
-    using ren_base = agg::renderer_base<agg::pixfmt_rgba32_pre>;
-    using renderer = agg::renderer_scanline_aa_solid<ren_base>;
-
     buffer_type& current_buffer = buffers_.top().get();
     agg::rendering_buffer buf(current_buffer.bytes(),
                               current_buffer.width(),
                               current_buffer.height(),
                               current_buffer.row_size());
-    agg::pixfmt_rgba32_pre pixf(buf);
-    ren_base renb(pixf);
 
     value_double opacity = get<value_double, keys::fill_opacity>(sym, feature, common_.vars_);
     color const& fill = get<color, keys::fill>(sym, feature, common_.vars_);
@@ -72,7 +68,6 @@ void agg_renderer<T0, T1>::process(building_symbolizer const& sym,
     unsigned g = fill.green();
     unsigned b = fill.blue();
     unsigned a = fill.alpha();
-    renderer ren(renb);
     agg::scanline_u8 sl;
 
     ras_ptr->reset();
@@ -87,33 +82,62 @@ void agg_renderer<T0, T1>::process(building_symbolizer const& sym,
 
     double height = get<double, keys::height>(sym, feature, common_.vars_) * common_.scale_factor_;
 
-    render_building_symbolizer::apply(
-      feature,
-      prj_trans,
-      common_.t_,
-      height,
-      [&, r, g, b, a, opacity](path_type const& faces) {
-          vertex_adapter va(faces);
-          ras_ptr->add_path(va);
-          ren.color(agg::rgba8_pre(int(r * 0.8), int(g * 0.8), int(b * 0.8), int(a * opacity)));
-          agg::render_scanlines(*ras_ptr, sl, ren);
-          this->ras_ptr->reset();
-      },
-      [&, r, g, b, a, opacity](path_type const& frame) {
-          vertex_adapter va(frame);
-          agg::conv_stroke<vertex_adapter> stroke(va);
-          stroke.width(common_.scale_factor_);
-          stroke.miter_limit(common_.scale_factor_ / 2.0);
-          ras_ptr->add_path(stroke);
-          ren.color(agg::rgba8_pre(int(r * 0.8), int(g * 0.8), int(b * 0.8), int(a * opacity)));
-          agg::render_scanlines(*ras_ptr, sl, ren);
-          ras_ptr->reset();
-      },
-      [&, r, g, b, a, opacity](render_building_symbolizer::roof_type& roof) {
-          ras_ptr->add_path(roof);
-          ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
-          agg::render_scanlines(*ras_ptr, sl, ren);
-      });
+    auto draw = [&](auto& ren) {
+        render_building_symbolizer::apply(
+          feature,
+          prj_trans,
+          common_.t_,
+          height,
+          [&, r, g, b, a, opacity](path_type const& faces) {
+              vertex_adapter va(faces);
+              ras_ptr->add_path(va);
+              ren.color(agg::rgba8_pre(int(r * 0.8), int(g * 0.8), int(b * 0.8), int(a * opacity)));
+              agg::render_scanlines(*ras_ptr, sl, ren);
+              this->ras_ptr->reset();
+          },
+          [&, r, g, b, a, opacity](path_type const& frame) {
+              vertex_adapter va(frame);
+              agg::conv_stroke<vertex_adapter> stroke(va);
+              stroke.width(common_.scale_factor_);
+              stroke.miter_limit(common_.scale_factor_ / 2.0);
+              ras_ptr->add_path(stroke);
+              ren.color(agg::rgba8_pre(int(r * 0.8), int(g * 0.8), int(b * 0.8), int(a * opacity)));
+              agg::render_scanlines(*ras_ptr, sl, ren);
+              ras_ptr->reset();
+          },
+          [&, r, g, b, a, opacity](render_building_symbolizer::roof_type& roof) {
+              ras_ptr->add_path(roof);
+              ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
+              agg::render_scanlines(*ras_ptr, sl, ren);
+          });
+    };
+
+    composite_mode_e const comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+    if (comp_op == src_over)
+    {
+        // the plain premultiplied blender, which src-over output has always been drawn with
+        using ren_base = agg::renderer_base<agg::pixfmt_rgba32_pre>;
+        using renderer = agg::renderer_scanline_aa_solid<ren_base>;
+        agg::pixfmt_rgba32_pre pixf(buf);
+        ren_base renb(pixf);
+        renderer ren(renb);
+        draw(ren);
+    }
+    else
+    {
+        using color_type = agg::rgba8;
+        using order_type = agg::order_rgba;
+        using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+        using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+        using ren_base = agg::renderer_base<pixfmt_comp_type>;
+        using renderer = agg::renderer_scanline_aa_solid<ren_base>;
+        blends_with(comp_op);
+        pixfmt_comp_type pixf(buf);
+        pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
+        ren_base renb(pixf);
+        renderer ren(renb);
+        draw(ren);
+    }
 }
 
 template void

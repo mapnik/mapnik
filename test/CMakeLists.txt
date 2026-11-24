@@ -91,6 +91,7 @@ add_executable(mapnik-test-unit
     unit/svg/svg_path_parser_test.cpp
     unit/svg/svg_renderer_test.cpp
     unit/symbolizer/arc_symbolizer_test.cpp
+    unit/symbolizer/building_symbolizer_test.cpp
     unit/symbolizer/marker_placement_vertex_last.cpp
     unit/symbolizer/markers_point_placement.cpp
     unit/symbolizer/symbolizer_test.cpp
