@@ -76,6 +76,7 @@ add_executable(mapnik-test-unit
     unit/numerics/enumeration.cpp
     unit/numerics/safe_cast.cpp
     unit/pixel/agg_blend_src_over_test.cpp
+    unit/pixel/agg_blend_src_over_rounded_test.cpp
     unit/pixel/palette.cpp
     unit/projection/proj_transform.cpp
     unit/renderer/buffer_size_scale_factor.cpp

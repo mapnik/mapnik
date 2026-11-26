@@ -93,6 +93,7 @@ void cairo_context::set_operator(composite_mode_e comp_op)
             cairo_set_operator(cairo_.get(), CAIRO_OPERATOR_DEST);
             break;
         case src_over:
+        case src_over_rounded: // cairo does its own rounding
             cairo_set_operator(cairo_.get(), CAIRO_OPERATOR_OVER);
             break;
         case dst_over:
