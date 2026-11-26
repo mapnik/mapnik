@@ -75,7 +75,8 @@ enum composite_mode_e {
     _value,
     linear_dodge,
     linear_burn,
-    divide
+    divide,
+    src_over_rounded
 };
 
 MAPNIK_DECL std::optional<composite_mode_e> comp_op_from_string(std::string const& name);

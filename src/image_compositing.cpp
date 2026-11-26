@@ -63,7 +63,9 @@ static comp_op_lookup_type const comp_lookup =
     invert_rgb,
     "invert-rgb")(grain_merge, "grain-merge")(grain_extract, "grain-extract")(hue, "hue")(saturation, "saturation")(
     _color,
-    "color")(_value, "value")(linear_dodge, "linear-dodge")(linear_burn, "linear-burn")(divide, "divide");
+    "color")(_value, "value")(linear_dodge, "linear-dodge")(linear_burn, "linear-burn")(divide, "divide")
+  // opt-in, see agg::comp_op_rgba_src_over_rounded
+  (src_over_rounded, "src-over-rounded");
 
 std::optional<composite_mode_e> comp_op_from_string(std::string const& name)
 {

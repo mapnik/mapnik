@@ -2210,6 +2210,71 @@ struct comp_op_rgba_divide
 };
 
 
+// Source Over with unbiased rounding (opt-in, "src-over-rounded")
+//
+//   Dca' = Sca + Dca.(1 - Sa)
+//   Da'  = Sa + Da - Sa.Da
+//
+// comp_op_rgba_src_over scales by the coverage with (x * cover + 255) >> 8 and
+// by (1 - Sa) with (x * s1a + 255) >> 8. That rounds up and divides by 256
+// instead of 255, which adds up to +1 to every channel on every blend. Where
+// many polygons partially cover the same pixel the error accumulates and the
+// result drifts to roughly  Sc + 256/cover  (towards grey) instead of
+// converging to Sc.
+//
+// This variant uses an exact round(x / 255) built from adds and shifts only
+// (see div_mask() below). It is exact for cover == 255 and the result of
+// blending opaque or premultiplied sources never leaves [min(Dc, Sc), max(Dc, Sc)]
+// by more than rounding error, so errors do not accumulate.
+template <typename ColorT, typename Order>
+struct comp_op_rgba_src_over_rounded
+{
+    typedef ColorT color_type;
+    typedef Order order_type;
+    typedef typename color_type::value_type value_type;
+    typedef typename color_type::calc_type calc_type;
+    enum base_scale_e
+    {
+        base_shift = color_type::base_shift,
+        base_mask  = color_type::base_mask
+    };
+
+    // round(x / base_mask) for 0 <= x <= base_mask * base_mask.
+    // 8 bit: (257 * (x + 128)) >> 16 == (t + (t >> 8)) >> 8 with t = x + 128.
+    // Verified for every x in 0..65535. The intermediate value stays below
+    // 65536, so the same expression fits 16 bit SIMD lanes.
+    static AGG_INLINE unsigned div_mask(unsigned x)
+    {
+        if constexpr (base_shift == 8)
+        {
+            x += 128;
+            return (x + (x >> 8)) >> 8;
+        }
+        else
+        {
+            return (x + (base_mask >> 1)) / base_mask;
+        }
+    }
+
+    static AGG_INLINE void blend_pix(value_type* p,
+                                     unsigned sr, unsigned sg, unsigned sb,
+                                     unsigned sa, unsigned cover)
+    {
+        if (cover < base_mask)
+        {
+            sr = div_mask(sr * cover);
+            sg = div_mask(sg * cover);
+            sb = div_mask(sb * cover);
+            sa = div_mask(sa * cover);
+        }
+        calc_type s1a = base_mask - sa;
+        p[Order::R] = (value_type)(sr + div_mask(p[Order::R] * s1a));
+        p[Order::G] = (value_type)(sg + div_mask(p[Order::G] * s1a));
+        p[Order::B] = (value_type)(sb + div_mask(p[Order::B] * s1a));
+        p[Order::A] = (value_type)(sa + div_mask(p[Order::A] * s1a));
+    }
+};
+
 //======================================================comp_op_table_rgba
 template<class ColorT, class Order> struct comp_op_table_rgba
 {
@@ -2265,6 +2330,7 @@ comp_op_table_rgba<ColorT, Order>::g_comp_op_func[] =
     comp_op_rgba_linear_dodge<ColorT,Order>::blend_pix,
     comp_op_rgba_linear_burn<ColorT,Order>::blend_pix,
     comp_op_rgba_divide<ColorT,Order>::blend_pix,
+    comp_op_rgba_src_over_rounded<ColorT,Order>::blend_pix,
     //comp_op_rgba_colorize_alpha<ColorT,Order>::blend_pix,
     0
 };
@@ -2311,6 +2377,7 @@ enum comp_op_e
     comp_op_linear_dodge, // comp_op_linear_dodge
     comp_op_linear_burn, // comp_op_linear_burn
     comp_op_divide, // comp_op_divide
+    comp_op_src_over_rounded, // comp_op_src_over_rounded
     end_of_comp_op_e
 };
 
